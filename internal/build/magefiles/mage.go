@@ -5,6 +5,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
+	"time"
 
 	"github.com/magefile/mage/sh"
 )
@@ -51,8 +53,8 @@ func Build() error {
 		return fmt.Errorf("unable to change to the project's root directory; %w", err)
 	}
 
-	main := "main.go"
-	return sh.Run("go", "build", "-o", binary, main)
+	flags := ldflags()
+	return sh.Run("go", "build", "-ldflags="+flags, "-a", "-o", binary, "./cmd/enbas")
 }
 
 // Clean clean the workspace.
@@ -78,4 +80,32 @@ func changeToProjectRoot() error {
 	}
 
 	return nil
+}
+
+// ldflags returns the build flags.
+func ldflags() string {
+	ldflagsfmt := "-s -w -X main.binaryVersion=%s -X main.gitCommit=%s -X main.goVersion=%s -X main.buildTime=%s"
+	buildTime := time.Now().UTC().Format(time.RFC3339)
+
+	return fmt.Sprintf(ldflagsfmt, version(), gitCommit(), runtime.Version(), buildTime)
+}
+
+// version returns the latest git tag using git describe.
+func version() string {
+	version, err := sh.Output("git", "describe", "--tags")
+	if err != nil {
+		version = "N/A"
+	}
+
+	return version
+}
+
+// gitCommit returns the current git commit
+func gitCommit() string {
+	commit, err := sh.Output("git", "rev-parse", "--short", "HEAD")
+	if err != nil {
+		commit = "N/A"
+	}
+
+	return commit
 }
