@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 type InstanceV2 struct {
 	AccountDomain string                  `json:"account_domain"`
 	Configuration InstanceConfiguration   `json:"configuration"`
@@ -103,4 +105,33 @@ type InstanceV2Usage struct {
 
 type InstanceV2Users struct {
 	ActiveMonth int `json:"active_month"`
+}
+
+func (i InstanceV2) String() string {
+	format := `
+INSTANCE:
+  %s - %s
+
+DOMAIN:
+  %s
+
+VERSION:
+  Running GoToSocial %s
+
+CONTACT:
+  name: %s
+  username: %s
+  email: %s
+`
+
+	return fmt.Sprintf(
+		format,
+		i.Title,
+		i.Description,
+		i.Domain,
+		i.Version,
+		i.Contact.Account.DisplayName,
+		i.Contact.Account.Username,
+		i.Contact.Email,
+	)
 }

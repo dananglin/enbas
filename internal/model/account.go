@@ -1,32 +1,37 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
+)
 
 type Account struct {
 	Acct           string      `json:"acct"`
 	Avatar         string      `json:"avatar"`
 	AvatarStatic   string      `json:"avatar_static"`
-	Bot            bool        `json:"bot"`
-	CreatedAt      time.Time   `json:"created_at"`
 	CustomCSS      string      `json:"custom_css"`
-	Discoverable   bool        `json:"discoverable"`
-	DisplayName    string      `json:"display_name"`
-	Emojis         []Emoji     `json:"emojis"`
-	EnableRSS      bool        `json:"enable_rss"`
-	Fields         []Field     `json:"fields"`
-	FollowersCount int         `json:"followers_count"`
-	FollowingCount int         `json:"following_count"`
 	Header         string      `json:"header"`
 	HeaderStatic   string      `json:"header_static"`
 	ID             string      `json:"id"`
 	LastStatusAt   string      `json:"last_status_at"`
+	DisplayName    string      `json:"display_name"`
+	Emojis         []Emoji     `json:"emojis"`
+	EnableRSS      bool        `json:"enable_rss"`
+	Bot            bool        `json:"bot"`
 	Locked         bool        `json:"locked"`
+	Suspended      bool        `json:"suspended"`
+	Discoverable   bool        `json:"discoverable"`
+	Fields         []Field     `json:"fields"`
+	FollowersCount int         `json:"followers_count"`
+	FollowingCount int         `json:"following_count"`
+	CreatedAt      time.Time   `json:"created_at"`
 	MuteExpiresAt  time.Time   `json:"mute_expires_at"`
 	Note           string      `json:"note"`
 	Role           AccountRole `json:"role"`
 	Source         Source      `json:"source"`
 	StatusCount    int         `json:"statuses_count"`
-	Suspended      bool        `json:"suspended"`
 	URL            string      `json:"url"`
 	Username       string      `json:"username"`
 }
@@ -49,4 +54,52 @@ type Field struct {
 	Name       string `json:"name"`
 	Value      string `json:"value"`
 	VerifiedAt string `json:"verified_at"`
+}
+
+func (a Account) String() string {
+	format := `
+%s (@%s)
+
+ACCOUNT ID:
+  %s
+
+JOINED ON:
+  %s
+
+STATS:
+  Followers: %d
+  Following: %d
+  Statuses: %d
+
+BIOGRAPHY:
+  %s
+
+METADATA: %s
+
+ACCOUNT URL:
+  %s
+`
+	metadata := ""
+
+	for _, field := range a.Fields {
+		metadata += fmt.Sprintf(
+			"\n  %s: %s",
+			field.Name,
+			utilities.StripHTMLTags(field.Value),
+		)
+	}
+
+	return fmt.Sprintf(
+		format,
+		a.DisplayName,
+		a.Username,
+		a.ID,
+		a.CreatedAt.Format("02 Jan 2006"),
+		a.FollowersCount,
+		a.FollowingCount,
+		a.StatusCount,
+		utilities.WrapLine(utilities.StripHTMLTags(a.Note), "\n  ", 80),
+		metadata,
+		a.URL,
+	)
 }

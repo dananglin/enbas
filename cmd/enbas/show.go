@@ -4,75 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strings"
-	"unicode"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"golang.org/x/net/html"
 )
-
-var instanceDetailsFormat = `INSTANCE:
-  %s - %s
-
-DOMAIN:
-  %s
-
-VERSION:
-  Running GoToSocial %s
-
-CONTACT:
-  name: %s
-  username: %s
-  email: %s
-`
-
-var accountDetailsFormat = `
-%s (@%s)
-
-ACCOUNT ID:
-  %s
-
-JOINED ON:
-  %s
-
-STATS:
-  Followers: %d
-  Following: %d
-  Statuses: %d
-
-BIOGRAPHY:
-  %s
-
-METADATA: %s
-
-ACCOUNT URL:
-  %s
-`
-
-var statusDetailsFormat = `
-%s (@%s)
-
-CONTENT:
-  %s
-
-STATUS ID:
-  %s
-
-CREATED AT:
-  %s
-
-STATS:
-  Boosts: %d
-  Likes: %d
-  Replies: %d
-
-VISIBILITY:
-  %s
-
-URL:
-  %s
-`
 
 type showCommand struct {
 	*flag.FlagSet
@@ -126,16 +61,7 @@ func (c *showCommand) showInstance(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the instance details; %w", err)
 	}
 
-	fmt.Printf(
-		instanceDetailsFormat,
-		instance.Title,
-		instance.Description,
-		instance.Domain,
-		instance.Version,
-		instance.Contact.Account.DisplayName,
-		instance.Contact.Account.Username,
-		instance.Contact.Email,
-	)
+	fmt.Println(instance)
 
 	return nil
 }
@@ -163,25 +89,7 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the account details; %w", err)
 	}
 
-	metadata := ""
-
-	for _, field := range account.Fields {
-		metadata += fmt.Sprintf("\n  %s: %s", field.Name, stripHTMLTags(field.Value))
-	}
-
-	fmt.Printf(
-		accountDetailsFormat,
-		account.DisplayName,
-		account.Username,
-		account.ID,
-		account.CreatedAt.Format("02 Jan 2006"),
-		account.FollowersCount,
-		account.FollowingCount,
-		account.StatusCount,
-		wrapLine(stripHTMLTags(account.Note), "\n  ", 80),
-		metadata,
-		account.URL,
-	)
+	fmt.Println(account)
 
 	return nil
 }
@@ -196,58 +104,7 @@ func (c *showCommand) showStatus(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the status; %w", err)
 	}
 
-	fmt.Printf(
-		statusDetailsFormat,
-		status.Account.DisplayName,
-		status.Account.Username,
-		stripHTMLTags(status.Content),
-		status.ID,
-		status.CreatedAt.Format("02 Jan 2006, 03:04"),
-		status.RebloggsCount,
-		status.FavouritesCount,
-		status.RepliesCount,
-		status.Visibility,
-		status.URL,
-	)
+	fmt.Println(status)
 
 	return nil
-}
-
-func stripHTMLTags(text string) string {
-	token := html.NewTokenizer(strings.NewReader(text))
-
-	var builder strings.Builder
-
-	for {
-		tt := token.Next()
-		switch tt {
-		case html.ErrorToken:
-			return builder.String()
-		case html.TextToken:
-			builder.WriteString(token.Token().Data + " ")
-		}
-	}
-}
-
-func wrapLine(line, separator string, charLimit int) string {
-	if len(line) <= charLimit {
-		return line
-	}
-
-	leftcursor, rightcursor := 0, 0
-
-	var builder strings.Builder
-
-	for rightcursor < (len(line) - charLimit) {
-		rightcursor += charLimit
-		for !unicode.IsSpace(rune(line[rightcursor-1])) {
-			rightcursor--
-		}
-		builder.WriteString(line[leftcursor:rightcursor] + separator)
-		leftcursor = rightcursor
-	}
-
-	builder.WriteString(line[rightcursor:])
-
-	return builder.String()
 }

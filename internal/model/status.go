@@ -1,6 +1,11 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
+)
 
 type Status struct {
 	Account            Account         `json:"account"`
@@ -145,4 +150,44 @@ type MediaDimensions struct {
 	Size      string  `json:"size"`
 	Height    int     `json:"height"`
 	Width     int     `json:"width"`
+}
+
+func (s Status) String() string {
+	format := `
+%s (@%s)
+
+CONTENT:
+  %s
+
+STATUS ID:
+  %s
+
+CREATED AT:
+  %s
+
+STATS:
+  Boosts: %d
+  Likes: %d
+  Replies: %d
+
+VISIBILITY:
+  %s
+
+URL:
+  %s
+`
+
+	return fmt.Sprintf(
+		format,
+		s.Account.DisplayName,
+		s.Account.Username,
+		utilities.StripHTMLTags(s.Content),
+		s.ID,
+		s.CreatedAt.Format("02 Jan 2006, 03:04"),
+		s.RebloggsCount,
+		s.FavouritesCount,
+		s.RepliesCount,
+		s.Visibility,
+		s.URL,
+	)
 }
