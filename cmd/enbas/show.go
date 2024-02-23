@@ -50,23 +50,51 @@ ACCOUNT URL:
   %s
 `
 
+var statusDetailsFormat = `
+%s (@%s)
+
+CONTENT:
+  %s
+
+STATUS ID:
+  %s
+
+CREATED AT:
+  %s
+
+STATS:
+  Boosts: %d
+  Likes: %d
+  Replies: %d
+
+VISIBILITY:
+  %s
+
+URL:
+  %s
+`
+
 type showCommand struct {
 	*flag.FlagSet
+	myAccount  bool
 	targetType string
 	account    string
-	myAccount  bool
+	statusID   string
 }
 
 func newShowCommand(name, summary string) *showCommand {
 	command := showCommand{
 		FlagSet:    flag.NewFlagSet(name, flag.ExitOnError),
-		targetType: "",
 		myAccount:  false,
+		targetType: "",
+		account:    "",
+		statusID:   "",
 	}
 
+	command.BoolVar(&command.myAccount, "my-account", false, "set to true to lookup your account")
 	command.StringVar(&command.targetType, "type", "", "specify the type of resource to display")
 	command.StringVar(&command.account, "account", "", "specify the account URI to lookup")
-	command.BoolVar(&command.myAccount, "my-account", false, "set to true to lookup your account")
+	command.StringVar(&command.statusID, "status-id", "", "specify the ID of the status to display")
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
 	return &command
@@ -81,6 +109,7 @@ func (c *showCommand) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
 		"instance": c.showInstance,
 		"account":  c.showAccount,
+		"status":   c.showStatus,
 	}
 
 	doFunc, ok := funcMap[c.targetType]
@@ -152,6 +181,33 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 		wrapLine(stripHTMLTags(account.Note), "\n  ", 80),
 		metadata,
 		account.URL,
+	)
+
+	return nil
+}
+
+func (c *showCommand) showStatus(gts *client.Client) error {
+	if c.statusID == "" {
+		return errors.New("the status-id flag is not set")
+	}
+
+	status, err := gts.GetStatus(c.statusID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the status; %w", err)
+	}
+
+	fmt.Printf(
+		statusDetailsFormat,
+		status.Account.DisplayName,
+		status.Account.Username,
+		stripHTMLTags(status.Content),
+		status.ID,
+		status.CreatedAt.Format("02 Jan 2006, 03:04"),
+		status.RebloggsCount,
+		status.FavouritesCount,
+		status.RepliesCount,
+		status.Visibility,
+		status.URL,
 	)
 
 	return nil

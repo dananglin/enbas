@@ -71,8 +71,8 @@ func (g *Client) GetInstance() (model.InstanceV2, error) {
 }
 
 func (g *Client) GetAccount(accountURI string) (model.Account, error) {
-	path := "/api/v1/accounts/lookup"
-	url := g.Authentication.Instance + path + "?acct=" + accountURI
+	path := "/api/v1/accounts/lookup" + "?acct=" + accountURI
+	url := g.Authentication.Instance + path
 
 	var account model.Account
 
@@ -81,6 +81,19 @@ func (g *Client) GetAccount(accountURI string) (model.Account, error) {
 	}
 
 	return account, nil
+}
+
+func (g *Client) GetStatus(statusID string) (model.Status, error) {
+	path := "/api/v1/statuses/" + statusID
+	url := g.Authentication.Instance + path
+
+	var status model.Status
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &status); err != nil {
+		return model.Status{}, fmt.Errorf("received an error after sending the request to get the status information; %w", err)
+	}
+
+	return status, nil
 }
 
 func (g *Client) sendRequest(method string, url string, requestBody io.Reader, object any) error {
