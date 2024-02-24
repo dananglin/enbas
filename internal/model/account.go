@@ -96,7 +96,7 @@ func (a Account) String() string {
 		utilities.Header("ACCOUNT ID:"),
 		a.ID,
 		utilities.Header("JOINED ON:"),
-		a.CreatedAt.Format("02 Jan 2006"),
+		utilities.FormatDate(a.CreatedAt),
 		utilities.Header("STATS:"),
 		a.FollowersCount,
 		a.FollowingCount,

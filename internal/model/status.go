@@ -186,7 +186,7 @@ func (s Status) String() string {
 		utilities.Header("STATUS ID:"),
 		s.ID,
 		utilities.Header("CREATED AT:"),
-		s.CreatedAt.Format("02 Jan 2006, 03:04"),
+		utilities.FormatTime(s.CreatedAt),
 		utilities.Header("STATS:"),
 		s.RebloggsCount,
 		s.FavouritesCount,

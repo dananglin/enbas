@@ -2,6 +2,7 @@ package utilities
 
 import (
 	"strings"
+	"time"
 	"unicode"
 
 	"golang.org/x/net/html"
@@ -53,4 +54,12 @@ func WrapLine(line, separator string, charLimit int) string {
 
 func Header(text string) string {
 	return boldblue + text + reset
+}
+
+func FormatDate(date time.Time) string {
+	return date.Local().Format("02 Jan 2006")
+}
+
+func FormatTime(date time.Time) string {
+	return date.Local().Format("02 Jan 2006, 15:04 (MST)")
 }
