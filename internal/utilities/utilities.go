@@ -7,6 +7,11 @@ import (
 	"golang.org/x/net/html"
 )
 
+const (
+	reset    = "\033[0m"
+	boldblue = "\033[34;1m"
+)
+
 func StripHTMLTags(text string) string {
 	token := html.NewTokenizer(strings.NewReader(text))
 
@@ -44,4 +49,8 @@ func WrapLine(line, separator string, charLimit int) string {
 	builder.WriteString(line[rightcursor:])
 
 	return builder.String()
+}
+
+func Header(text string) string {
+	return boldblue + text + reset
 }

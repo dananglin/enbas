@@ -156,24 +156,24 @@ func (s Status) String() string {
 	format := `
 %s (@%s)
 
-CONTENT:
+%s
   %s
 
-STATUS ID:
+%s
   %s
 
-CREATED AT:
+%s
   %s
 
-STATS:
+%s
   Boosts: %d
   Likes: %d
   Replies: %d
 
-VISIBILITY:
+%s
   %s
 
-URL:
+%s
   %s
 `
 
@@ -181,13 +181,19 @@ URL:
 		format,
 		s.Account.DisplayName,
 		s.Account.Username,
+		utilities.Header("CONTENT:"),
 		utilities.StripHTMLTags(s.Content),
+		utilities.Header("STATUS ID:"),
 		s.ID,
+		utilities.Header("CREATED AT:"),
 		s.CreatedAt.Format("02 Jan 2006, 03:04"),
+		utilities.Header("STATS:"),
 		s.RebloggsCount,
 		s.FavouritesCount,
 		s.RepliesCount,
+		utilities.Header("VISIBILITY:"),
 		s.Visibility,
+		utilities.Header("URL:"),
 		s.URL,
 	)
 }

@@ -60,23 +60,23 @@ func (a Account) String() string {
 	format := `
 %s (@%s)
 
-ACCOUNT ID:
+%s
   %s
 
-JOINED ON:
+%s
   %s
 
-STATS:
+%s
   Followers: %d
   Following: %d
   Statuses: %d
 
-BIOGRAPHY:
+%s
   %s
 
-METADATA: %s
+%s %s
 
-ACCOUNT URL:
+%s
   %s
 `
 	metadata := ""
@@ -93,13 +93,19 @@ ACCOUNT URL:
 		format,
 		a.DisplayName,
 		a.Username,
+		utilities.Header("ACCOUNT ID:"),
 		a.ID,
+		utilities.Header("JOINED ON:"),
 		a.CreatedAt.Format("02 Jan 2006"),
+		utilities.Header("STATS:"),
 		a.FollowersCount,
 		a.FollowingCount,
 		a.StatusCount,
+		utilities.Header("BIOGRAPHY:"),
 		utilities.WrapLine(utilities.StripHTMLTags(a.Note), "\n  ", 80),
+		utilities.Header("METADATA:"),
 		metadata,
+		utilities.Header("ACCOUNT URL:"),
 		a.URL,
 	)
 }

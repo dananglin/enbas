@@ -1,6 +1,10 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
+)
 
 type InstanceV2 struct {
 	AccountDomain string                  `json:"account_domain"`
@@ -109,16 +113,16 @@ type InstanceV2Users struct {
 
 func (i InstanceV2) String() string {
 	format := `
-INSTANCE:
+%s
   %s - %s
 
-DOMAIN:
+%s
   %s
 
-VERSION:
+%s
   Running GoToSocial %s
 
-CONTACT:
+%s
   name: %s
   username: %s
   email: %s
@@ -126,10 +130,14 @@ CONTACT:
 
 	return fmt.Sprintf(
 		format,
+		utilities.Header("INSTANCE:"),
 		i.Title,
 		i.Description,
+		utilities.Header("DOMAIN:"),
 		i.Domain,
+		utilities.Header("VERSION:"),
 		i.Version,
+		utilities.Header("CONTACT:"),
 		i.Contact.Account.DisplayName,
 		i.Contact.Account.Username,
 		i.Contact.Email,
