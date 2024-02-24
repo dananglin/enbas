@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	reset    = "\033[0m"
-	boldblue = "\033[34;1m"
+	reset       = "\033[0m"
+	boldblue    = "\033[34;1m"
 	boldmagenta = "\033[35;1m"
-	green    = "\033[32m"
+	green       = "\033[32m"
 )
 
 func StripHTMLTags(text string) string {
@@ -32,7 +32,27 @@ func StripHTMLTags(text string) string {
 	}
 }
 
-func WrapLine(line, separator string, charLimit int) string {
+func WrapLines(text, separator string, charLimit int) string {
+	lines := strings.Split(text, "\n")
+
+	if len(lines) == 1 {
+		return wrapLine(lines[0], separator, charLimit)
+	}
+
+	var builder strings.Builder
+
+	for i, line := range lines {
+		builder.WriteString(wrapLine(line, separator, charLimit))
+
+		if i < len(lines)-1 {
+			builder.WriteString(separator)
+		}
+	}
+
+	return builder.String()
+}
+
+func wrapLine(line, separator string, charLimit int) string {
 	if len(line) <= charLimit {
 		return line
 	}

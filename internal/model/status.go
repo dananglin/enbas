@@ -182,7 +182,7 @@ func (s Status) String() string {
 		utilities.DisplayNameFormat(s.Account.DisplayName),
 		s.Account.Username,
 		utilities.HeaderFormat("CONTENT:"),
-		s.Text,
+		utilities.WrapLines(s.Text, "\n  ", 80),
 		utilities.HeaderFormat("STATUS ID:"),
 		s.ID,
 		utilities.HeaderFormat("CREATED AT:"),

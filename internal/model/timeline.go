@@ -20,7 +20,7 @@ func (t Timeline) String() string {
 
 	for _, status := range t.Statuses {
 		builder.WriteString(utilities.DisplayNameFormat(status.Account.DisplayName) + " (@" + status.Account.Username + ")\n\n")
-		builder.WriteString(utilities.WrapLine(status.Text, "\n", 80) + "\n\n")
+		builder.WriteString(utilities.WrapLines(status.Text, "\n", 80) + "\n\n")
 		builder.WriteString(utilities.FieldFormat("ID:") + " " + status.ID + "\t" + utilities.FieldFormat("Created at:") + " " + utilities.FormatTime(status.CreatedAt) + "\n")
 		builder.WriteString(separator + "\n")
 	}

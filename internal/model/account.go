@@ -102,7 +102,7 @@ func (a Account) String() string {
 		utilities.FieldFormat("Following:"), a.FollowingCount,
 		utilities.FieldFormat("Statuses:"), a.StatusCount,
 		utilities.HeaderFormat("BIOGRAPHY:"),
-		utilities.WrapLine(utilities.StripHTMLTags(a.Note), "\n  ", 80),
+		utilities.WrapLines(utilities.StripHTMLTags(a.Note), "\n  ", 80),
 		utilities.HeaderFormat("METADATA:"),
 		metadata,
 		utilities.HeaderFormat("ACCOUNT URL:"),
