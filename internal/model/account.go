@@ -99,7 +99,7 @@ func (a Account) String() string {
 		utilities.FormatDate(a.CreatedAt),
 		utilities.HeaderFormat("STATS:"),
 		utilities.FieldFormat("Followers:"), a.FollowersCount,
-		utilities.FieldFormat("Followeing:"), a.FollowingCount,
+		utilities.FieldFormat("Following:"), a.FollowingCount,
 		utilities.FieldFormat("Statuses:"), a.StatusCount,
 		utilities.HeaderFormat("BIOGRAPHY:"),
 		utilities.WrapLine(utilities.StripHTMLTags(a.Note), "\n  ", 80),
