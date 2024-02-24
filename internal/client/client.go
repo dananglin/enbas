@@ -34,14 +34,14 @@ func NewClientFromConfig() (*Client, error) {
 func NewClient(authentication config.Authentication) *Client {
 	httpClient := http.Client{}
 
-	client := Client{
+	gtsClient := Client{
 		Authentication: authentication,
 		HTTPClient:     httpClient,
 		UserAgent:      internal.UserAgent,
 		Timeout:        5 * time.Second,
 	}
 
-	return &client
+	return &gtsClient
 }
 
 func (g *Client) VerifyCredentials() (model.Account, error) {
@@ -71,7 +71,7 @@ func (g *Client) GetInstance() (model.InstanceV2, error) {
 }
 
 func (g *Client) GetAccount(accountURI string) (model.Account, error) {
-	path := "/api/v1/accounts/lookup" + "?acct=" + accountURI
+	path := "/api/v1/accounts/lookup?acct=" + accountURI
 	url := g.Authentication.Instance + path
 
 	var account model.Account
@@ -94,6 +94,64 @@ func (g *Client) GetStatus(statusID string) (model.Status, error) {
 	}
 
 	return status, nil
+}
+
+func (g *Client) GetHomeTimeline(limit int) (model.Timeline, error) {
+	path := fmt.Sprintf("/api/v1/timelines/home?limit=%d", limit)
+
+	timeline := model.Timeline{
+		Name:     "HOME TIMELINE",
+		Statuses: nil,
+	}
+
+	return g.getTimeline(path, timeline)
+}
+
+func (g *Client) GetPublicTimeline(limit int) (model.Timeline, error) {
+	path := fmt.Sprintf("/api/v1/timelines/public?limit=%d", limit)
+
+	timeline := model.Timeline{
+		Name:     "PUBLIC TIMELINE",
+		Statuses: nil,
+	}
+
+	return g.getTimeline(path, timeline)
+}
+
+func (g *Client) GetListTimeline(listID string, limit int) (model.Timeline, error) {
+	path := fmt.Sprintf("/api/v1/timelines/list/%s?limit=%d", listID, limit)
+
+	timeline := model.Timeline{
+		Name:     "LIST: " + listID,
+		Statuses: nil,
+	}
+
+	return g.getTimeline(path, timeline)
+}
+
+func (g *Client) GetTagTimeline(tag string, limit int) (model.Timeline, error) {
+	path := fmt.Sprintf("/api/v1/timelines/tag/%s?limit=%d", tag, limit)
+
+	timeline := model.Timeline{
+		Name:     "TAG: " + tag,
+		Statuses: nil,
+	}
+
+	return g.getTimeline(path, timeline)
+}
+
+func (g *Client) getTimeline(path string, timeline model.Timeline) (model.Timeline, error) {
+	url := g.Authentication.Instance + path
+
+	var statuses []model.Status
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &statuses); err != nil {
+		return timeline, fmt.Errorf("received an error after sending the request to get the timeline; %w", err)
+	}
+
+	timeline.Statuses = statuses
+
+	return timeline, nil
 }
 
 func (g *Client) sendRequest(method string, url string, requestBody io.Reader, object any) error {

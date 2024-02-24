@@ -1,6 +1,7 @@
 package utilities
 
 import (
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -11,6 +12,8 @@ import (
 const (
 	reset    = "\033[0m"
 	boldblue = "\033[34;1m"
+	boldmagenta = "\033[35;1m"
+	green    = "\033[32m"
 )
 
 func StripHTMLTags(text string) string {
@@ -52,8 +55,19 @@ func WrapLine(line, separator string, charLimit int) string {
 	return builder.String()
 }
 
-func Header(text string) string {
+func HeaderFormat(text string) string {
 	return boldblue + text + reset
+}
+
+func FieldFormat(text string) string {
+	return green + text + reset
+}
+
+func DisplayNameFormat(text string) string {
+	// use this pattern to remove all emoji strings
+	pattern := regexp.MustCompile(`\s:[A-Za-z0-9]*:`)
+
+	return boldmagenta + pattern.ReplaceAllString(text, "") + reset
 }
 
 func FormatDate(date time.Time) string {

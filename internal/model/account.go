@@ -67,9 +67,9 @@ func (a Account) String() string {
   %s
 
 %s
-  Followers: %d
-  Following: %d
-  Statuses: %d
+  %s %d
+  %s %d
+  %s %d
 
 %s
   %s
@@ -84,28 +84,28 @@ func (a Account) String() string {
 	for _, field := range a.Fields {
 		metadata += fmt.Sprintf(
 			"\n  %s: %s",
-			field.Name,
+			utilities.FieldFormat(field.Name),
 			utilities.StripHTMLTags(field.Value),
 		)
 	}
 
 	return fmt.Sprintf(
 		format,
-		a.DisplayName,
+		utilities.DisplayNameFormat(a.DisplayName),
 		a.Username,
-		utilities.Header("ACCOUNT ID:"),
+		utilities.HeaderFormat("ACCOUNT ID:"),
 		a.ID,
-		utilities.Header("JOINED ON:"),
+		utilities.HeaderFormat("JOINED ON:"),
 		utilities.FormatDate(a.CreatedAt),
-		utilities.Header("STATS:"),
-		a.FollowersCount,
-		a.FollowingCount,
-		a.StatusCount,
-		utilities.Header("BIOGRAPHY:"),
+		utilities.HeaderFormat("STATS:"),
+		utilities.FieldFormat("Followers:"), a.FollowersCount,
+		utilities.FieldFormat("Followeing:"), a.FollowingCount,
+		utilities.FieldFormat("Statuses:"), a.StatusCount,
+		utilities.HeaderFormat("BIOGRAPHY:"),
 		utilities.WrapLine(utilities.StripHTMLTags(a.Note), "\n  ", 80),
-		utilities.Header("METADATA:"),
+		utilities.HeaderFormat("METADATA:"),
 		metadata,
-		utilities.Header("ACCOUNT URL:"),
+		utilities.HeaderFormat("ACCOUNT URL:"),
 		a.URL,
 	)
 }

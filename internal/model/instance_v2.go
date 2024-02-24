@@ -123,23 +123,26 @@ func (i InstanceV2) String() string {
   Running GoToSocial %s
 
 %s
-  name: %s
-  username: %s
-  email: %s
+  %s %s
+  %s %s
+  %s %s
 `
 
 	return fmt.Sprintf(
 		format,
-		utilities.Header("INSTANCE:"),
+		utilities.HeaderFormat("INSTANCE:"),
 		i.Title,
 		i.Description,
-		utilities.Header("DOMAIN:"),
+		utilities.HeaderFormat("DOMAIN:"),
 		i.Domain,
-		utilities.Header("VERSION:"),
+		utilities.HeaderFormat("VERSION:"),
 		i.Version,
-		utilities.Header("CONTACT:"),
-		i.Contact.Account.DisplayName,
+		utilities.HeaderFormat("CONTACT:"),
+		utilities.FieldFormat("Name:"),
+		utilities.DisplayNameFormat(i.Contact.Account.DisplayName),
+		utilities.FieldFormat("Username:"),
 		i.Contact.Account.Username,
+		utilities.FieldFormat("Email:"),
 		i.Contact.Email,
 	)
 }

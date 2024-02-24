@@ -22,8 +22,7 @@ func commandUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
 		flagset.VisitAll(func(f *flag.Flag) {
 			fmt.Fprintf(
 				&builder,
-				"\n  -%s, --%s\n        %s",
-				f.Name,
+				"\n  --%s\n        %s",
 				f.Name,
 				f.Usage,
 			)
@@ -63,9 +62,9 @@ func enbasUsageFunc(summaries map[string]string) func() {
 			fmt.Fprintf(&builder, "\n    %s\t%s", cmd, summaries[cmd])
 		}
 
-		builder.WriteString("\n\nFLAGS:\n    -help, --help\n        print the help message\n")
+		builder.WriteString("\n\nFLAGS:\n    --help\n        print the help message\n")
 		flag.VisitAll(func(f *flag.Flag) {
-			fmt.Fprintf(&builder, "\n    -%s, --%s\n        %s\n", f.Name, f.Name, f.Usage)
+			fmt.Fprintf(&builder, "\n    --%s\n        %s\n", f.Name, f.Usage)
 		})
 
 		builder.WriteString("\nUse \"enbas [command] --help\" for more information about a command.\n")
