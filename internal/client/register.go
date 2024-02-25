@@ -10,7 +10,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-type RegisterRequest struct {
+type registerRequest struct {
 	ClientName   string `json:"client_name"`
 	RedirectUris string `json:"redirect_uris"`
 	Scopes       string `json:"scopes"`
@@ -18,7 +18,7 @@ type RegisterRequest struct {
 }
 
 func (g *Client) Register() error {
-	params := RegisterRequest{
+	params := registerRequest{
 		ClientName:   internal.ApplicationName,
 		RedirectUris: internal.RedirectUri,
 		Scopes:       "read write",
@@ -31,9 +31,7 @@ func (g *Client) Register() error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-
-	path := "/api/v1/apps"
-	url := g.Authentication.Instance + path
+	url := g.Authentication.Instance + "/api/v1/apps"
 
 	var app model.Application
 

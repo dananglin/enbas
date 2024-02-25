@@ -1,18 +1,14 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"flag"
 	"fmt"
-	"os/exec"
-	"runtime"
 	"strings"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"golang.org/x/oauth2"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type loginCommand struct {
@@ -20,21 +16,7 @@ type loginCommand struct {
 	instance string
 }
 
-var (
-	errEmptyAccessToken = errors.New("received an empty access token")
-	errInstanceNotSet   = errors.New("the instance flag is not set")
-)
-
-var consentMessageFormat = `
-You'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with
-the application's login process. Your browser may have opened the link to the consent page already. If not, please
-copy and paste the link below to your browser:
-
-%s
-
-Once you have the code please copy and paste it below.
-
-`
+var errInstanceNotSet = errors.New("the instance flag is not set")
 
 func newLoginCommand(name, summary string) *loginCommand {
 	command := loginCommand{
@@ -76,20 +58,20 @@ func (c *loginCommand) Execute() error {
 		return fmt.Errorf("unable to register the application; %w", err)
 	}
 
-	oauth2Conf := oauth2.Config{
-		ClientID:     gtsClient.Authentication.ClientID,
-		ClientSecret: gtsClient.Authentication.ClientSecret,
-		Scopes:       []string{"read"},
-		RedirectURL:  internal.RedirectUri,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  gtsClient.Authentication.Instance + "/oauth/authorize",
-			TokenURL: gtsClient.Authentication.Instance + "/oauth/token",
-		},
-	}
+	consentPageURL := gtsClient.AuthCodeURL()
 
-	consentPageURL := authCodeURL(oauth2Conf)
+	utilities.OpenLink(consentPageURL)
 
-	openLink(consentPageURL)
+	consentMessageFormat := `
+You'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with
+the application's login process. Your browser may have opened the link to the consent page already. If not, please
+copy and paste the link below to your browser:
+
+%s
+
+Once you have the code please copy and paste it below.
+
+`
 
 	fmt.Printf(consentMessageFormat, consentPageURL)
 
@@ -100,9 +82,8 @@ func (c *loginCommand) Execute() error {
 		return fmt.Errorf("failed to read access code; %w", err)
 	}
 
-	gtsClient.Authentication, err = addAccessToken(gtsClient.Authentication, oauth2Conf, code)
-	if err != nil {
-		return fmt.Errorf("unable to get the access token; %w", err)
+	if err := gtsClient.UpdateToken(code); err != nil {
+		return fmt.Errorf("unable to update the client's access token; %w", err)
 	}
 
 	account, err := gtsClient.VerifyCredentials()
@@ -118,42 +99,4 @@ func (c *loginCommand) Execute() error {
 	fmt.Printf("Successfully logged into %s\n", loginName)
 
 	return nil
-}
-
-func authCodeURL(oauth2Conf oauth2.Config) string {
-	url := oauth2Conf.AuthCodeURL(
-		"state",
-		oauth2.AccessTypeOffline,
-	) + "&client_name=" + internal.ApplicationName
-
-	return url
-}
-
-func addAccessToken(authentication config.Authentication, oauth2Conf oauth2.Config, code string) (config.Authentication, error) {
-	token, err := oauth2Conf.Exchange(context.Background(), code)
-	if err != nil {
-		return config.Authentication{}, fmt.Errorf("unable to exchange the code for an access token; %w", err)
-	}
-
-	if token == nil || token.AccessToken == "" {
-		return config.Authentication{}, errEmptyAccessToken
-	}
-
-	authentication.AccessToken = token.AccessToken
-
-	return authentication, nil
-}
-
-func openLink(url string) {
-	var open string
-
-	if runtime.GOOS == "linux" {
-		open = "xdg-open"
-	} else {
-		return
-	}
-
-	command := exec.Command(open, url)
-
-	_ = command.Start()
 }

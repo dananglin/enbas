@@ -1,7 +1,9 @@
 package utilities
 
 import (
+	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 	"unicode"
@@ -15,6 +17,20 @@ const (
 	boldmagenta = "\033[35;1m"
 	green       = "\033[32m"
 )
+
+func OpenLink(url string) {
+	var open string
+
+	if runtime.GOOS == "linux" {
+		open = "xdg-open"
+	} else {
+		return
+	}
+
+	command := exec.Command(open, url)
+
+	_ = command.Start()
+}
 
 func StripHTMLTags(text string) string {
 	token := html.NewTokenizer(strings.NewReader(text))

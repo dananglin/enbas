@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal"
@@ -42,6 +43,18 @@ func NewClient(authentication config.Authentication) *Client {
 	}
 
 	return &gtsClient
+}
+
+func (g *Client) AuthCodeURL() string {
+	format := "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code"
+	escapedRedirectURI := url.QueryEscape(internal.RedirectUri)
+
+	return fmt.Sprintf(
+		format,
+		g.Authentication.Instance,
+		g.Authentication.ClientID,
+		escapedRedirectURI,
+	)
 }
 
 func (g *Client) VerifyCredentials() (model.Account, error) {
