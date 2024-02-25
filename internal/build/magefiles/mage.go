@@ -5,15 +5,23 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
-var Default = Build
+const (
+	binary               = "enbas"
+	defaultInstallPrefix = "/usr/local"
+	envInstallPrefix     = "ENBAS_INSTALL_PREFIX"
+	envTestVerbose       = "ENBAS_TEST_VERBOSE"
+	envTestCover         = "ENBAS_TEST_COVER"
+)
 
-var binary = "enbas"
+var Default = Build
 
 // Test run the go tests.
 // To enable verbose mode set ENBAS_TEST_VERBOSE=1.
@@ -27,11 +35,11 @@ func Test() error {
 
 	args := []string{"./..."}
 
-	if os.Getenv("ENBAS_TEST_VERBOSE") == "1" {
+	if os.Getenv(envTestVerbose) == "1" {
 		args = append(args, "-v")
 	}
 
-	if os.Getenv("ENBAS_TEST_COVER") == "1" {
+	if os.Getenv(envTestCover) == "1" {
 		args = append(args, "-cover")
 	}
 
@@ -55,6 +63,27 @@ func Build() error {
 
 	flags := ldflags()
 	return sh.Run("go", "build", "-ldflags="+flags, "-a", "-o", binary, "./cmd/enbas")
+}
+
+// Install install the executable.
+func Install() error {
+	mg.Deps(Build)
+
+	installPrefix := os.Getenv(envInstallPrefix)
+
+	if installPrefix == "" {
+		installPrefix = defaultInstallPrefix
+	}
+
+	dest := filepath.Join(installPrefix, "bin", binary)
+
+	if err := sh.Copy(dest, binary); err != nil {
+		return fmt.Errorf("unable to install %s; %w", dest, err)
+	}
+
+	fmt.Printf("%s successfully installed to %s\n", binary, dest)
+
+	return nil
 }
 
 // Clean clean the workspace.
