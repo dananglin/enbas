@@ -1,0 +1,235 @@
+= Enbas
+:toc: left
+:toclevels: 3
+:toc-title: Table of Contents
+
+== Overview
+
+Enbas is a https://docs.gotosocial.org/en/latest/[GoToSocial] (GTS) client for your terminal written
+in https://go.dev[Go]. The project is in its experimental stages of development so bugs and breaking
+changes may appear. Enbas has limited functionality at the moment and it is **not** recommended for use
+with your production GoToSocial servers.
+
+This project is licensed under the GNU Public License V3 which you can view link:COPYING[here].
+
+=== Repository mirrors
+
+- **Code Flow:** https://codeflow.dananglin.me.uk/apollo/enbas
+- **Codeberg:** https://codeberg.org/dananglin/enbas
+- **GitHub:** https://github.com/dananglin/enbas
+
+== Installation
+
+=== Download
+
+Pre-built binaries will be available on the release page on both Codeberg and GitHub when the first
+release is made.
+
+=== Build from source
+
+==== Requirements
+
+===== Go
+
+A minimum version of Go 1.22.0 is required for installing spruce.
+Please go https://go.dev/dl/[here] to download the latest version.
+
+===== Mage (Optional)
+
+The project includes mage targets for building and installing the binary.
+The main advantage of using mage over `go install` is that the build information is baked into the binary
+during compilation. You can visit the https://magefile.org/[Mage website] for instructions on how to install Mage.
+
+==== Install with mage
+
+You can install Enbas with Mage using the following commands:
+
+[source,console]
+----
+git clone https://github.com/dananglin/enbas.git
+cd enbas/internal/build/
+mage install
+----
+
+By default Mage will attempt to install Enbas to `/usr/local/bin/enbas` which will most likely fail as you won't
+the permission to write to `/usr/local/bin/`. You will need to either run `sudo mage install`, or you can
+(preferably) change the install prefix to a directory that you have permission to write to using
+the `ENBAS_INSTALL_PREFIX` environment variable. For example:
+
+[source,console]
+----
+ENBAS_INSTALL_PREFIX=${HOME}/.local mage install
+----
+
+This will install Enbas to `~/.local/bin/enbas`.
+
+==== Install with go
+
+If your `GOBIN` directory is included in your `PATH` then you can install Enbas with Go.
+
+[source,console]
+----
+git clone https://github.com/dananglin/enbas.git
+cd enbas
+go install ./cmd/enbas
+----
+
+== Configuration
+
+Enbas uses Go's https://pkg.go.dev/os#UserConfigDir[os.UserConfigDir()] function to determine the
+location of your configuration directory.
+
+If you've set the `XDG_CONFIG_HOME` environment variable, the configuration files will be stored in the `$XDG_CONFIG_HOME/enbas` directory.
+
+If this is not set:
+
+- on Linux the configuration directory will be set to `$HOME/.config/enbas`.
+- on Darwin (MacOS) the configuration directory will be set to `$HOME/Library/Application Support/enbas`.
+- on Windows the configuration directory will be set within the `%AppData%` directory.
+
+If, for whatever reason, any of the above cannot be determined the configuration directory will be set to
+the current working directory.
+
+== Usage
+
+=== Check the build information
+
+You can view the application's version and build information using the `--version` flag.
+The build information is correctly displayed if you've downloaded the binary from Codeberg or GitHub,
+or if you've built it with Mage.
+
+[source,console]
+----
+$ enbas version --full
+Enbas
+  Version: v0.0.0-13-g26a909d
+  Git commit: 26a909d
+  Go version: go1.22.0
+  Build date: 2024-02-25T15:22:55Z
+----
+
+=== Check out the help documentation
+
+You can view the help documentation with the `--help` flag.
+You can also use this flag to view the help documentation for any of the commands.
+
+[source,console]
+----
+$ enbas --help
+SUMMARY:
+    enbas - A GoToSocial client for the terminal.
+
+VERSION:
+  v0.0.0-13-g26a909d
+
+USAGE:
+    enbas [flags]
+    enbas [command]
+
+COMMANDS:
+    login       login to an account on GoToSocial
+    show        print details about a specified resource
+    switch      switch to an account
+    version     print the application's version and build information
+
+FLAGS:
+    --help
+        print the help message
+
+Use "enbas [command] --help" for more information about a command.
+----
+
+=== Log into your GoToSocial account
+
+Enbas uses the Oauth2 authentication flow to log into your account on GTS. This process requires your input to give consent to allow Enbas access to your account.
+
+[WARNING]
+====
+As of writing GoToSocial does not currently support scoped authorization tokens so even if we request read-only
+tokens, the application will be able to perform any actions within the limitations of your account
+(including admin actions if you are an admin).
+You can read more about this https://docs.gotosocial.org/en/latest/api/authentication/[here].
+====
+
+The login flow is completed using the following steps:
+
+1. You start by using the `login` command specifying the instance that you want to log into.
++
+[source,console]
+----
+enbas login --instance gotosocial-01.social.example
+----
+
+2. The application will register itself and the GTS server will create a new client ID and secret that the app needs for authentication.
+
+3. The application will then generate a link to the consent form for you to access in your browser.
+This link will be printed on your terminal screen along with a message explaining that you need to obtain the `out-of-band` token to continue.
+If you're on Linux the link will open in a new browser tab for you to sign into your account.
+If you're using a different OS or the browser tab doesn't open, you can manually open the link in a new browser tab.
+
+4. Once you've signed into GTS on your browser, you will be informed that Enbas would like to perform actions on your behalf.
+If you're happy with this then click on the `Allow` button.
++
+image::assets/images/consent_form.png[A screenshot of the consent form]
+
+5. The `out-of-band` token will be printed for you at this point. Copy it and return to your terminal.
+
+6. Paste the token into the prompt and press `ENTER`.
+Enbas will then exchange the token for an access token which will be used to authentication to the
+GTS server on your behalf.
+Enbas will then verify the access token, save the credentials to a file in your configuration directory,
+and confirm that you have successfully logged into your account.
++
+[source,console]
+----
+$ enbas login --instance gotosocial-01.social.example
+
+You'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with
+the application's login process. Your browser may have opened the link to the consent page already. If not, please
+copy and paste the link below to your browser:
+
+https://gotosocial-01.social.example/oauth/authorize?client_id=01RHK48N1KH9SFNH2VVZR414BJ&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code
+
+Once you have the code please copy and paste it below.
+
+Out-of-band token: ZGJKNDA2YWMTNGEYMS0ZZJLJLWJHNDITM2IZYJJLNJM3YJBK
+Successfully logged into bobby@gotosocial-01.social.example
+----
+
+=== Common actions
+
+* View your account information
++
+[source,console]
+----
+enbas show --type account --my-account
+----
+
+* View a local or remote account
++
+[source,console]
+----
+enbas show --type account --account teddy@gotosocial-01.social.example
+----
+
+* View your home timeline
++
+[source,console]
+----
+enbas show --type timeline
+----
+
+* View the details of a status
++
+[source,console]
+----
+enbas show --type status --status-id 01HQE43KT5YEDN4RGMT7BC63PF
+----
+
+== Inspirations
+
+This project was inspired from the following projects:
+
+* **madonctl:** https://github.com/McKael/madonctl[A Mastodon CLI client written in Go.]
+* **toot:** https://pypi.org/project/toot/[A Mastodon CLI and TUI written in Python.]
+* **tut:** https://github.com/RasmusLindroth/tut[A Mastodon TUI written in Go.]
