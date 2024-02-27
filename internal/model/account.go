@@ -77,8 +77,8 @@ func (a Account) String() string {
 %s %s
 
 %s
-  %s
-`
+  %s`
+
 	metadata := ""
 
 	for _, field := range a.Fields {

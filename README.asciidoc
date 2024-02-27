@@ -177,7 +177,7 @@ image::assets/images/consent_form.png[A screenshot of the consent form]
 6. Paste the token into the prompt and press `ENTER`.
 Enbas will then exchange the token for an access token which will be used to authentication to the
 GTS server on your behalf.
-Enbas will then verify the access token, save the credentials to a file in your configuration directory,
+Enbas will then verify the access token, save the credentials to the `credentials.json` file in your configuration directory,
 and confirm that you have successfully logged into your account.
 +
 [source,console]

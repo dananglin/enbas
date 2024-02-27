@@ -48,11 +48,11 @@ func (c *loginCommand) Execute() error {
 		instance = instance[:len(instance)-1]
 	}
 
-	authentication := config.Authentication{
+	credentials := config.Credentials{
 		Instance: instance,
 	}
 
-	gtsClient := client.NewClient(authentication)
+	gtsClient := client.NewClient(credentials)
 
 	if err := gtsClient.Register(); err != nil {
 		return fmt.Errorf("unable to register the application; %w", err)
@@ -91,7 +91,7 @@ Once you have the code please copy and paste it below.
 		return fmt.Errorf("unable to verify the credentials; %w", err)
 	}
 
-	loginName, err := config.SaveAuthentication(account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details; %w", err)
 	}

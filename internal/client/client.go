@@ -15,7 +15,7 @@ import (
 )
 
 type Client struct {
-	Authentication config.Authentication
+	Authentication config.Credentials
 	HTTPClient     http.Client
 	UserAgent      string
 	Timeout        time.Duration
@@ -27,12 +27,12 @@ func NewClientFromConfig() (*Client, error) {
 		return nil, fmt.Errorf("unable to get the authentication configuration; %w", err)
 	}
 
-	currentAuthentication := config.Authentications[config.CurrentAccount]
+	currentAuthentication := config.Credentials[config.CurrentAccount]
 
 	return NewClient(currentAuthentication), nil
 }
 
-func NewClient(authentication config.Authentication) *Client {
+func NewClient(authentication config.Credentials) *Client {
 	httpClient := http.Client{}
 
 	gtsClient := Client{
