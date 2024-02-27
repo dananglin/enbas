@@ -8,12 +8,13 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type showCommand struct {
 	*flag.FlagSet
 	myAccount       bool
-	targetType      string
+	resourceType    string
 	account         string
 	statusID        string
 	timelineType    string
@@ -28,7 +29,7 @@ func newShowCommand(name, summary string) *showCommand {
 	}
 
 	command.BoolVar(&command.myAccount, "my-account", false, "set to true to lookup your account")
-	command.StringVar(&command.targetType, "type", "", "specify the type of resource to display")
+	command.StringVar(&command.resourceType, "type", "", "specify the type of resource to display")
 	command.StringVar(&command.account, "account", "", "specify the account URI to lookup")
 	command.StringVar(&command.statusID, "status-id", "", "specify the ID of the status to display")
 	command.StringVar(&command.timelineType, "timeline-type", "home", "specify the type of timeline to display (valid values are home, public, list and tag)")
@@ -41,6 +42,10 @@ func newShowCommand(name, summary string) *showCommand {
 }
 
 func (c *showCommand) Execute() error {
+	if c.resourceType == "" {
+		return errors.New("the type field is not set")
+	}
+
 	gtsClient, err := client.NewClientFromConfig()
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
@@ -51,11 +56,12 @@ func (c *showCommand) Execute() error {
 		"account":  c.showAccount,
 		"status":   c.showStatus,
 		"timeline": c.showTimeline,
+		"lists":    c.showLists,
 	}
 
-	doFunc, ok := funcMap[c.targetType]
+	doFunc, ok := funcMap[c.resourceType]
 	if !ok {
-		return fmt.Errorf("unsupported type %q", c.targetType)
+		return fmt.Errorf("unsupported resource type %q", c.resourceType)
 	}
 
 	return doFunc(gtsClient)
@@ -153,6 +159,27 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 	}
 
 	fmt.Println(timeline)
+
+	return nil
+}
+
+func (c *showCommand) showLists(gts *client.Client) error {
+	lists, err := gts.GetAllLists()
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the lists; %w", err)
+	}
+
+	if len(lists) == 0 {
+		fmt.Println("You have no lists.")
+
+		return nil
+	}
+
+	fmt.Println(utilities.HeaderFormat("LISTS"))
+
+	for i := range lists {
+		fmt.Printf("\n%s\n", lists[i])
+	}
 
 	return nil
 }

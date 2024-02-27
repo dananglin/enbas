@@ -198,6 +198,10 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 		)
 	}
 
+	if object == nil {
+		return nil
+	}
+
 	if err := json.NewDecoder(response.Body).Decode(object); err != nil {
 		return fmt.Errorf(
 			"unable to decode the response from the GoToSocial server; %w",

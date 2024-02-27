@@ -8,7 +8,7 @@ import (
 
 type Executor interface {
 	Name() string
-	Parse([]string) error
+	Parse(args []string) error
 	Execute() error
 }
 
@@ -21,17 +21,23 @@ func main() {
 
 func run() error {
 	const (
-		login         string = "login"
-		version       string = "version"
-		show          string = "show"
-		switchAccount string = "switch"
+		login          string = "login"
+		version        string = "version"
+		showResource   string = "show"
+		switchAccount  string = "switch"
+		createResource string = "create"
+		deleteResource string = "delete"
+		updateResource string = "update"
 	)
 
 	summaries := map[string]string{
-		login:         "login to an account on GoToSocial",
-		version:       "print the application's version and build information",
-		show:          "print details about a specified resource",
-		switchAccount: "switch to an account",
+		login:          "login to an account on GoToSocial",
+		version:        "print the application's version and build information",
+		showResource:   "print details about a specified resource",
+		switchAccount:  "switch to an account",
+		createResource: "create a specific resource",
+		deleteResource: "delete a specific resource",
+		updateResource: "update a specific resource",
 	}
 
 	flag.Usage = enbasUsageFunc(summaries)
@@ -54,10 +60,16 @@ func run() error {
 		executor = newLoginCommand(login, summaries[login])
 	case version:
 		executor = newVersionCommand(version, summaries[version])
-	case show:
-		executor = newShowCommand(show, summaries[show])
+	case showResource:
+		executor = newShowCommand(showResource, summaries[showResource])
 	case switchAccount:
 		executor = newSwitchCommand(switchAccount, summaries[switchAccount])
+	case createResource:
+		executor = newCreateCommand(createResource, summaries[createResource])
+	case deleteResource:
+		executor = newDeleteCommand(deleteResource, summaries[deleteResource])
+	case updateResource:
+		executor = newUpdateCommand(updateResource, summaries[updateResource])
 	default:
 		flag.Usage()
 		return fmt.Errorf("unknown subcommand %q", subcommand)
