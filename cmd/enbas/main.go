@@ -28,6 +28,7 @@ func run() error {
 		createResource string = "create"
 		deleteResource string = "delete"
 		updateResource string = "update"
+		whoami         string = "whoami"
 	)
 
 	summaries := map[string]string{
@@ -38,6 +39,7 @@ func run() error {
 		createResource: "create a specific resource",
 		deleteResource: "delete a specific resource",
 		updateResource: "update a specific resource",
+		whoami:         "print the account that you are currently logged in to",
 	}
 
 	flag.Usage = enbasUsageFunc(summaries)
@@ -70,6 +72,8 @@ func run() error {
 		executor = newDeleteCommand(deleteResource, summaries[deleteResource])
 	case updateResource:
 		executor = newUpdateCommand(updateResource, summaries[updateResource])
+	case whoami:
+		executor = newWhoAmICommand(whoami, summaries[whoami])
 	default:
 		flag.Usage()
 		return fmt.Errorf("unknown subcommand %q", subcommand)
