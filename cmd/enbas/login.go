@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -16,15 +15,13 @@ type loginCommand struct {
 	instance string
 }
 
-var errInstanceNotSet = errors.New("the instance flag is not set")
-
 func newLoginCommand(name, summary string) *loginCommand {
 	command := loginCommand{
 		FlagSet:  flag.NewFlagSet(name, flag.ExitOnError),
 		instance: "",
 	}
 
-	command.StringVar(&command.instance, "instance", "", "specify the instance that you want to login to.")
+	command.StringVar(&command.instance, instanceFlag, "", "specify the instance that you want to login to.")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -35,7 +32,7 @@ func (c *loginCommand) Execute() error {
 	var err error
 
 	if c.instance == "" {
-		return errInstanceNotSet
+		return flagNotSetError{flagText: instanceFlag}
 	}
 
 	instance := c.instance

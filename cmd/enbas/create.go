@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
@@ -22,9 +21,9 @@ func newCreateCommand(name, summary string) *createCommand {
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 	}
 
-	command.StringVar(&command.resourceType, "type", "", "specify the type of resource to create")
-	command.StringVar(&command.listTitle, "list-title", "", "specify the title of the list")
-	command.StringVar(&command.listRepliesPolicy, "list-replies-policy", "list", "specify the policy of the replies for this list (valid values are followed, list and none)")
+	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to create")
+	command.StringVar(&command.listTitle, listTitleFlag, "", "specify the title of the list")
+	command.StringVar(&command.listRepliesPolicy, listRepliesPolicyFlag, "list", "specify the policy of the replies for this list (valid values are followed, list and none)")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -33,7 +32,7 @@ func newCreateCommand(name, summary string) *createCommand {
 
 func (c *createCommand) Execute() error {
 	if c.resourceType == "" {
-		return errors.New("the type field is not set")
+		return flagNotSetError{flagText: resourceTypeFlag}
 	}
 
 	gtsClient, err := client.NewClientFromConfig()
@@ -42,20 +41,20 @@ func (c *createCommand) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		"lists": c.createLists,
+		listResource: c.createList,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
 	if !ok {
-		return fmt.Errorf("unsupported type %q", c.resourceType)
+		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
 	return doFunc(gtsClient)
 }
 
-func (c *createCommand) createLists(gtsClient *client.Client) error {
+func (c *createCommand) createList(gtsClient *client.Client) error {
 	if c.listTitle == "" {
-		return errors.New("the list-title flag is not set")
+		return flagNotSetError{flagText: listTitleFlag}
 	}
 
 	repliesPolicy, err := model.ParseListRepliesPolicy(c.listRepliesPolicy)

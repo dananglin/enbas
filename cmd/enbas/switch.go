@@ -18,13 +18,18 @@ func newSwitchCommand(name, summary string) *switchCommand {
 		toAccount: "",
 	}
 
-	command.StringVar(&command.toAccount, "to-account", "", "the account to switch to")
+	command.StringVar(&command.toAccount, toAccountFlag, "", "the account to switch to")
+
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
 	return &command
 }
 
 func (c *switchCommand) Execute() error {
+	if c.toAccount == "" {
+		return flagNotSetError{flagText: toAccountFlag}
+	}
+
 	if err := config.UpdateCurrentAccount(c.toAccount); err != nil {
 		return fmt.Errorf("unable to switch accounts; %w", err)
 	}

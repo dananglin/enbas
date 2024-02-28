@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
@@ -13,14 +12,14 @@ import (
 
 type showCommand struct {
 	*flag.FlagSet
-	myAccount       bool
-	resourceType    string
-	account         string
-	statusID        string
-	timelineType    string
-	timelineListID  string
-	timelineTagName string
-	timelineLimit   int
+	myAccount        bool
+	resourceType     string
+	account          string
+	statusID         string
+	timelineCategory string
+	listID           string
+	tag              string
+	timelineLimit    int
 }
 
 func newShowCommand(name, summary string) *showCommand {
@@ -28,14 +27,15 @@ func newShowCommand(name, summary string) *showCommand {
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 	}
 
-	command.BoolVar(&command.myAccount, "my-account", false, "set to true to lookup your account")
-	command.StringVar(&command.resourceType, "type", "", "specify the type of resource to display")
-	command.StringVar(&command.account, "account", "", "specify the account URI to lookup")
-	command.StringVar(&command.statusID, "status-id", "", "specify the ID of the status to display")
-	command.StringVar(&command.timelineType, "timeline-type", "home", "specify the type of timeline to display (valid values are home, public, list and tag)")
-	command.StringVar(&command.timelineListID, "timeline-list-id", "", "specify the ID of the list timeline to display")
-	command.StringVar(&command.timelineTagName, "timeline-tag-name", "", "specify the name of the tag timeline to display")
-	command.IntVar(&command.timelineLimit, "timeline-limit", 5, "specify the number of statuses to display")
+	command.BoolVar(&command.myAccount, myAccountFlag, false, "set to true to lookup your account")
+	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to display")
+	command.StringVar(&command.account, accountFlag, "", "specify the account URI to lookup")
+	command.StringVar(&command.statusID, statusIDFlag, "", "specify the ID of the status to display")
+	command.StringVar(&command.timelineCategory, timelineCategoryFlag, "home", "specify the type of timeline to display (valid values are home, public, list and tag)")
+	command.StringVar(&command.listID, listIDFlag, "", "specify the ID of the list to display")
+	command.StringVar(&command.tag, tagFlag, "", "specify the name of the tag to use")
+	command.IntVar(&command.timelineLimit, timelineLimitFlag, 5, "specify the number of statuses to display")
+
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
 	return &command
@@ -43,25 +43,25 @@ func newShowCommand(name, summary string) *showCommand {
 
 func (c *showCommand) Execute() error {
 	if c.resourceType == "" {
-		return errors.New("the type field is not set")
+		return flagNotSetError{flagText: resourceTypeFlag}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		instanceResource: c.showInstance,
+		accountResource:  c.showAccount,
+		statusResource:   c.showStatus,
+		timelineResource: c.showTimeline,
+		listResource:     c.showLists,
+	}
+
+	doFunc, ok := funcMap[c.resourceType]
+	if !ok {
+		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
 	gtsClient, err := client.NewClientFromConfig()
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
-	}
-
-	funcMap := map[string]func(*client.Client) error{
-		"instance": c.showInstance,
-		"account":  c.showAccount,
-		"status":   c.showStatus,
-		"timeline": c.showTimeline,
-		"lists":    c.showLists,
-	}
-
-	doFunc, ok := funcMap[c.resourceType]
-	if !ok {
-		return fmt.Errorf("unsupported resource type %q", c.resourceType)
 	}
 
 	return doFunc(gtsClient)
@@ -90,7 +90,7 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 		accountURI = authConfig.CurrentAccount
 	} else {
 		if c.account == "" {
-			return errors.New("the account flag is not set")
+			return flagNotSetError{flagText: accountFlag}
 		}
 
 		accountURI = c.account
@@ -108,7 +108,7 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 
 func (c *showCommand) showStatus(gts *client.Client) error {
 	if c.statusID == "" {
-		return errors.New("the status-id flag is not set")
+		return flagNotSetError{flagText: statusIDFlag}
 	}
 
 	status, err := gts.GetStatus(c.statusID)
@@ -127,29 +127,29 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 		err      error
 	)
 
-	switch c.timelineType {
+	switch c.timelineCategory {
 	case "home":
 		timeline, err = gts.GetHomeTimeline(c.timelineLimit)
 	case "public":
 		timeline, err = gts.GetPublicTimeline(c.timelineLimit)
 	case "list":
-		if c.timelineListID == "" {
-			return errors.New("the timeline-list-id flag is not set")
+		if c.listID == "" {
+			return flagNotSetError{flagText: listIDFlag}
 		}
 
-		timeline, err = gts.GetListTimeline(c.timelineListID, c.timelineLimit)
+		timeline, err = gts.GetListTimeline(c.listID, c.timelineLimit)
 	case "tag":
-		if c.timelineTagName == "" {
-			return errors.New("the timeline-tag-name flag is not set")
+		if c.tag == "" {
+			return flagNotSetError{flagText: tagFlag}
 		}
 
-		timeline, err = gts.GetTagTimeline(c.timelineTagName, c.timelineLimit)
+		timeline, err = gts.GetTagTimeline(c.tag, c.timelineLimit)
 	default:
-		return fmt.Errorf("%q is not a valid type of timeline", c.timelineType)
+		return invalidTimelineCategoryError{category: c.timelineCategory}
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the %s timeline; %w", c.timelineType, err)
+		return fmt.Errorf("unable to retrieve the %s timeline; %w", c.timelineCategory, err)
 	}
 
 	if len(timeline.Statuses) == 0 {

@@ -6,6 +6,29 @@ import (
 	"os"
 )
 
+const (
+	accountFlag           = "account"
+	instanceFlag          = "instance"
+	listIDFlag            = "list-id"
+	listTitleFlag         = "list-title"
+	listRepliesPolicyFlag = "list-replies-policy"
+	myAccountFlag         = "my-account"
+	resourceTypeFlag      = "type"
+	statusIDFlag          = "status-id"
+	tagFlag               = "tag"
+	timelineCategoryFlag  = "timeline-category"
+	timelineLimitFlag     = "timeline-limit"
+	toAccountFlag         = "to-account"
+)
+
+const (
+	accountResource  = "account"
+	instanceResource = "instance"
+	listResource     = "list"
+	statusResource   = "status"
+	timelineResource = "timeline"
+)
+
 type Executor interface {
 	Name() string
 	Parse(args []string) error

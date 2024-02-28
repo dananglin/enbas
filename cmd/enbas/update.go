@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
@@ -23,10 +22,10 @@ func newUpdateCommand(name, summary string) *updateCommand {
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 	}
 
-	command.StringVar(&command.resourceType, "type", "", "specify the type of resource to update")
-	command.StringVar(&command.listID, "list-id", "", "specify the ID of the list to update")
-	command.StringVar(&command.listTitle, "list-title", "", "specify the title of the list")
-	command.StringVar(&command.listRepliesPolicy, "list-replies-policy", "", "specify the policy of the replies for this list (valid values are followed, list and none)")
+	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to update")
+	command.StringVar(&command.listID, listIDFlag, "", "specify the ID of the list to update")
+	command.StringVar(&command.listTitle, listTitleFlag, "", "specify the title of the list")
+	command.StringVar(&command.listRepliesPolicy, listRepliesPolicyFlag, "", "specify the policy of the replies for this list (valid values are followed, list and none)")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -35,7 +34,16 @@ func newUpdateCommand(name, summary string) *updateCommand {
 
 func (c *updateCommand) Execute() error {
 	if c.resourceType == "" {
-		return errors.New("the type field is not set")
+		return flagNotSetError{flagText: resourceTypeFlag}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		listResource: c.updateList,
+	}
+
+	doFunc, ok := funcMap[c.resourceType]
+	if !ok {
+		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
 	gtsClient, err := client.NewClientFromConfig()
@@ -43,21 +51,12 @@ func (c *updateCommand) Execute() error {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
 
-	funcMap := map[string]func(*client.Client) error{
-		"lists": c.updateList,
-	}
-
-	doFunc, ok := funcMap[c.resourceType]
-	if !ok {
-		return fmt.Errorf("unsupported resource type %q", c.resourceType)
-	}
-
 	return doFunc(gtsClient)
 }
 
 func (c *updateCommand) updateList(gtsClient *client.Client) error {
 	if c.listID == "" {
-		return errors.New("the list-id flag is not set")
+		return flagNotSetError{flagText: listIDFlag}
 	}
 
 	list, err := gtsClient.GetList(c.listID)
