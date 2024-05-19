@@ -23,3 +23,17 @@ type invalidTimelineCategoryError struct {
 func (e invalidTimelineCategoryError) Error() string {
 	return "'" + e.category + "' is not a valid timeline category (please choose home, public, tag or list)"
 }
+
+type unknownSubcommandError struct {
+	subcommand string
+}
+
+func (e unknownSubcommandError) Error() string {
+	return "unknown subcommand '" + e.subcommand + "'"
+}
+
+type noAccountIDsSpecifiedError struct{}
+
+func (e noAccountIDsSpecifiedError) Error() string {
+	return "no account IDs specified"
+}

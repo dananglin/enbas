@@ -51,7 +51,7 @@ func (c *showCommand) Execute() error {
 		accountResource:  c.showAccount,
 		statusResource:   c.showStatus,
 		timelineResource: c.showTimeline,
-		listResource:     c.showLists,
+		listResource:     c.showList,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
@@ -163,6 +163,34 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 	return nil
 }
 
+func (c *showCommand) showList(gts *client.Client) error {
+	if c.listID == "" {
+		return c.showLists(gts)
+	}
+
+	list, err := gts.GetList(c.listID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list; %w", err)
+	}
+
+	accounts, err := gts.GetAccountsFromList(c.listID, 0)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the accounts from the list; %w", err)
+	}
+
+	if len(accounts) > 0 {
+		accountMap := make(map[string]string)
+		for i := range accounts {
+			accountMap[accounts[i].ID] = accounts[i].Username
+		}
+		list.Accounts = accountMap
+	}
+
+	fmt.Println(list)
+
+	return nil
+}
+
 func (c *showCommand) showLists(gts *client.Client) error {
 	lists, err := gts.GetAllLists()
 	if err != nil {
@@ -176,10 +204,7 @@ func (c *showCommand) showLists(gts *client.Client) error {
 	}
 
 	fmt.Println(utilities.HeaderFormat("LISTS"))
-
-	for i := range lists {
-		fmt.Printf("\n%s\n", lists[i])
-	}
+	fmt.Println(lists)
 
 	return nil
 }

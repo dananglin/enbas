@@ -83,7 +83,7 @@ func (c *updateCommand) updateList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully updated the list.")
-	fmt.Printf("\n%s\n", updatedList)
+	fmt.Println(updatedList)
 
 	return nil
 }

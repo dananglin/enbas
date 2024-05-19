@@ -8,11 +8,14 @@ import (
 
 const (
 	accountFlag           = "account"
+	accountIDFlag         = "account-id"
+	addToFlag             = "add-to"
 	instanceFlag          = "instance"
 	listIDFlag            = "list-id"
 	listTitleFlag         = "list-title"
 	listRepliesPolicyFlag = "list-replies-policy"
 	myAccountFlag         = "my-account"
+	removeFromFlag        = "remove-from"
 	resourceTypeFlag      = "type"
 	statusIDFlag          = "status-id"
 	tagFlag               = "tag"
@@ -52,6 +55,8 @@ func run() error {
 		deleteResource string = "delete"
 		updateResource string = "update"
 		whoami         string = "whoami"
+		add            string = "add"
+		remove         string = "remove"
 	)
 
 	summaries := map[string]string{
@@ -63,6 +68,8 @@ func run() error {
 		deleteResource: "delete a specific resource",
 		updateResource: "update a specific resource",
 		whoami:         "print the account that you are currently logged in to",
+		add:            "add a resource to another resource",
+		remove:         "remove a resource from another resource",
 	}
 
 	flag.Usage = enbasUsageFunc(summaries)
@@ -97,9 +104,14 @@ func run() error {
 		executor = newUpdateCommand(updateResource, summaries[updateResource])
 	case whoami:
 		executor = newWhoAmICommand(whoami, summaries[whoami])
+	case add:
+		executor = newAddCommand(add, summaries[add])
+	case remove:
+		executor = newRemoveCommand(remove, summaries[remove])
 	default:
 		flag.Usage()
-		return fmt.Errorf("unknown subcommand %q", subcommand)
+
+		return unknownSubcommandError{subcommand}
 	}
 
 	if err := executor.Parse(args); err != nil {

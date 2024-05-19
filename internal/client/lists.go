@@ -13,7 +13,7 @@ const (
 	listPath string = "/api/v1/lists"
 )
 
-func (g *Client) GetAllLists() ([]model.List, error) {
+func (g *Client) GetAllLists() (model.Lists, error) {
 	url := g.Authentication.Instance + listPath
 
 	var lists []model.List
@@ -44,7 +44,7 @@ func (g *Client) GetList(listID string) (model.List, error) {
 }
 
 func (g *Client) CreateList(title string, repliesPolicy model.ListRepliesPolicy) (model.List, error) {
-	params := struct {
+	form := struct {
 		Title         string                  `json:"title"`
 		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
 	}{
@@ -52,9 +52,9 @@ func (g *Client) CreateList(title string, repliesPolicy model.ListRepliesPolicy)
 		RepliesPolicy: repliesPolicy,
 	}
 
-	data, err := json.Marshal(params)
+	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the request body; %w", err)
+		return model.List{}, fmt.Errorf("unable to marshal the form; %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -73,7 +73,7 @@ func (g *Client) CreateList(title string, repliesPolicy model.ListRepliesPolicy)
 }
 
 func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
-	params := struct {
+	form := struct {
 		Title         string                  `json:"title"`
 		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
 	}{
@@ -81,9 +81,9 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 		RepliesPolicy: listToUpdate.RepliesPolicy,
 	}
 
-	data, err := json.Marshal(params)
+	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the request body; %w", err)
+		return model.List{}, fmt.Errorf("unable to marshal the form; %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -105,4 +105,70 @@ func (g *Client) DeleteList(listID string) error {
 	url := g.Authentication.Instance + "/api/v1/lists/" + listID
 
 	return g.sendRequest(http.MethodDelete, url, nil, nil)
+}
+
+func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
+	form := struct {
+		AccountIDs []string `json:"account_ids"`
+	}{
+		AccountIDs: accountIDs,
+	}
+
+	data, err := json.Marshal(form)
+	if err != nil {
+		return fmt.Errorf("unable to marshal the form; %w", err)
+	}
+
+	requestBody := bytes.NewBuffer(data)
+	url := g.Authentication.Instance + listPath + "/" + listID + "/accounts"
+
+	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to add the accounts to the list; %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) error {
+	form := struct {
+		AccountIDs []string `json:"account_ids"`
+	}{
+		AccountIDs: accountIDs,
+	}
+
+	data, err := json.Marshal(form)
+	if err != nil {
+		return fmt.Errorf("unable to marshal the form; %w", err)
+	}
+
+	requestBody := bytes.NewBuffer(data)
+	url := g.Authentication.Instance + listPath + "/" + listID + "/accounts"
+
+	if err := g.sendRequest(http.MethodDelete, url, requestBody, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to remove the accounts from the list; %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) GetAccountsFromList(listID string, limit int) ([]model.Account, error) {
+	path := fmt.Sprintf("%s/%s/accounts?limit=%d", listPath, listID, limit)
+	url := g.Authentication.Instance + path
+
+	var accounts []model.Account
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return nil, fmt.Errorf(
+			"received an error after sending the request to get the accounts from the list; %w",
+			err,
+		)
+	}
+
+	return accounts, nil
 }

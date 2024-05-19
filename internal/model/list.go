@@ -73,17 +73,57 @@ type List struct {
 	ID            string            `json:"id"`
 	RepliesPolicy ListRepliesPolicy `json:"replies_policy"`
 	Title         string            `json:"title"`
+	Accounts      map[string]string
 }
 
 func (l List) String() string {
-	format := `%s %s
-%s %s
-%s %s`
+	format := `
+%s
+  %s
 
-	return fmt.Sprintf(
+%s
+  %s
+
+%s
+  %s
+
+%s`
+
+	output := fmt.Sprintf(
 		format,
-		utilities.FieldFormat("List ID:"), l.ID,
-		utilities.FieldFormat("Title:"), l.Title,
-		utilities.FieldFormat("Replies Policy:"), l.RepliesPolicy,
+		utilities.HeaderFormat("LIST TITLE:"), l.Title,
+		utilities.HeaderFormat("LIST ID:"), l.ID,
+		utilities.HeaderFormat("REPLIES POLICY:"), l.RepliesPolicy,
+		utilities.HeaderFormat("ADDED ACCOUNTS:"),
 	)
+
+	if len(l.Accounts) > 0 {
+		for id, name := range l.Accounts {
+			output += fmt.Sprintf(
+				"\n  • %s (%s)",
+				utilities.DisplayNameFormat(name),
+				id,
+			)
+		}
+	} else {
+		output += "\n  None"
+	}
+
+	return output
+}
+
+type Lists []List
+
+func (l Lists) String() string {
+	output := ""
+
+	for i := range l {
+		output += fmt.Sprintf(
+			"\n%s (%s)",
+			l[i].Title,
+			l[i].ID,
+		)
+	}
+
+	return output
 }
