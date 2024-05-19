@@ -28,7 +28,7 @@ type Status struct {
 	Poll               Poll            `json:"poll"`
 	Reblog             StatusReblogged `json:"reblog"`
 	Reblogged          bool            `json:"reblogged"`
-	RebloggsCount      int             `json:"reblogs_count"`
+	ReblogsCount       int             `json:"reblogs_count"`
 	RepliesCount       int             `json:"replies_count"`
 	Sensitive          bool            `json:"sensitive"`
 	SpolierText        string          `json:"spoiler_text"`
@@ -188,7 +188,7 @@ func (s Status) String() string {
 		utilities.HeaderFormat("CREATED AT:"),
 		utilities.FormatTime(s.CreatedAt),
 		utilities.HeaderFormat("STATS:"),
-		s.RebloggsCount,
+		s.ReblogsCount,
 		s.FavouritesCount,
 		s.RepliesCount,
 		utilities.HeaderFormat("VISIBILITY:"),

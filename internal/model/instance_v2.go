@@ -7,20 +7,22 @@ import (
 )
 
 type InstanceV2 struct {
-	AccountDomain string                  `json:"account_domain"`
-	Configuration InstanceConfiguration   `json:"configuration"`
-	Contact       InstanceV2Contact       `json:"contact"`
-	Description   string                  `json:"description"`
-	Domain        string                  `json:"domain"`
-	Languages     []string                `json:"languages"`
-	Registrations InstanceV2Registrations `json:"registrations"`
-	Rules         []InstanceRule          `json:"rules"`
-	SourceURL     string                  `json:"source_url"`
-	Terms         string                  `json:"terms"`
-	Thumbnail     InstanceV2Thumbnail     `json:"thumbnail"`
-	Title         string                  `json:"title"`
-	Usage         InstanceV2Usage         `json:"usage"`
-	Version       string                  `json:"version"`
+	AccountDomain   string                  `json:"account_domain"`
+	Configuration   InstanceConfiguration   `json:"configuration"`
+	Contact         InstanceV2Contact       `json:"contact"`
+	Description     string                  `json:"description"`
+	DescriptionText string                  `json:"description_text"`
+	Domain          string                  `json:"domain"`
+	Languages       []string                `json:"languages"`
+	Registrations   InstanceV2Registrations `json:"registrations"`
+	Rules           []InstanceRule          `json:"rules"`
+	SourceURL       string                  `json:"source_url"`
+	Terms           string                  `json:"terms"`
+	TermsText       string                  `json:"terms_text"`
+	Thumbnail       InstanceV2Thumbnail     `json:"thumbnail"`
+	Title           string                  `json:"title"`
+	Usage           InstanceV2Usage         `json:"usage"`
+	Version         string                  `json:"version"`
 }
 
 type InstanceConfiguration struct {
@@ -95,7 +97,7 @@ type InstanceV2Thumbnail struct {
 	ThumbnailDescription string                      `json:"thumbnail_description"`
 	ThumbnailType        string                      `json:"thumbnail_type"`
 	URL                  string                      `json:"url"`
-	Version              InstanceV2ThumbnailVersions `json:"versions"`
+	Versions              InstanceV2ThumbnailVersions `json:"versions"`
 }
 
 type InstanceV2ThumbnailVersions struct {
@@ -114,7 +116,13 @@ type InstanceV2Users struct {
 func (i InstanceV2) String() string {
 	format := `
 %s
-  %s - %s
+  %s
+
+%s
+  %s
+
+%s
+  %s
 
 %s
   %s
@@ -130,11 +138,14 @@ func (i InstanceV2) String() string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.HeaderFormat("INSTANCE:"),
+		utilities.HeaderFormat("INSTANCE TITLE:"),
 		i.Title,
-		i.Description,
+		utilities.HeaderFormat("INSTANCE DESCRIPTION:"),
+		utilities.WrapLines(i.DescriptionText, "\n  ", 80),
 		utilities.HeaderFormat("DOMAIN:"),
 		i.Domain,
+		utilities.HeaderFormat("TERMS AND CONDITIONS:"),
+		utilities.WrapLines(i.TermsText, "\n  ", 80),
 		utilities.HeaderFormat("VERSION:"),
 		i.Version,
 		utilities.HeaderFormat("CONTACT:"),

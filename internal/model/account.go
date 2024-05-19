@@ -8,32 +8,34 @@ import (
 )
 
 type Account struct {
-	Acct           string      `json:"acct"`
-	Avatar         string      `json:"avatar"`
-	AvatarStatic   string      `json:"avatar_static"`
-	CustomCSS      string      `json:"custom_css"`
-	Header         string      `json:"header"`
-	HeaderStatic   string      `json:"header_static"`
-	ID             string      `json:"id"`
-	LastStatusAt   string      `json:"last_status_at"`
-	DisplayName    string      `json:"display_name"`
-	Emojis         []Emoji     `json:"emojis"`
-	EnableRSS      bool        `json:"enable_rss"`
-	Bot            bool        `json:"bot"`
-	Locked         bool        `json:"locked"`
-	Suspended      bool        `json:"suspended"`
-	Discoverable   bool        `json:"discoverable"`
-	Fields         []Field     `json:"fields"`
-	FollowersCount int         `json:"followers_count"`
-	FollowingCount int         `json:"following_count"`
-	CreatedAt      time.Time   `json:"created_at"`
-	MuteExpiresAt  time.Time   `json:"mute_expires_at"`
-	Note           string      `json:"note"`
-	Role           AccountRole `json:"role"`
-	Source         Source      `json:"source"`
-	StatusCount    int         `json:"statuses_count"`
-	URL            string      `json:"url"`
-	Username       string      `json:"username"`
+	Acct            string      `json:"acct"`
+	Avatar          string      `json:"avatar"`
+	AvatarStatic    string      `json:"avatar_static"`
+	CustomCSS       string      `json:"custom_css"`
+	Header          string      `json:"header"`
+	HeaderStatic    string      `json:"header_static"`
+	ID              string      `json:"id"`
+	LastStatusAt    string      `json:"last_status_at"`
+	DisplayName     string      `json:"display_name"`
+	Emojis          []Emoji     `json:"emojis"`
+	EnableRSS       bool        `json:"enable_rss"`
+	Bot             bool        `json:"bot"`
+	Locked          bool        `json:"locked"`
+	Suspended       bool        `json:"suspended"`
+	Discoverable    bool        `json:"discoverable"`
+	HideCollections bool        `json:"hide_collections"`
+	Fields          []Field     `json:"fields"`
+	FollowersCount  int         `json:"followers_count"`
+	FollowingCount  int         `json:"following_count"`
+	CreatedAt       time.Time   `json:"created_at"`
+	MuteExpiresAt   time.Time   `json:"mute_expires_at"`
+	Note            string      `json:"note"`
+	Role            AccountRole `json:"role"`
+	Source          Source      `json:"source"`
+	StatusCount     int         `json:"statuses_count"`
+	Theme           string      `json:"theme"`
+	URL             string      `json:"url"`
+	Username        string      `json:"username"`
 }
 
 type AccountRole struct {
@@ -41,13 +43,14 @@ type AccountRole struct {
 }
 
 type Source struct {
-	Fields             []Field `json:"fields"`
-	FollowRequestCount int     `json:"follow_requests_count"`
-	Language           string  `json:"language"`
-	Note               string  `json:"note"`
-	Privacy            string  `json:"string"`
-	Sensitive          bool    `json:"sensitive"`
-	StatusContentType  string  `json:"status_content_type"`
+	Fields             []Field  `json:"fields"`
+	FollowRequestCount int      `json:"follow_requests_count"`
+	Language           string   `json:"language"`
+	Note               string   `json:"note"`
+	Privacy            string   `json:"string"`
+	Sensitive          bool     `json:"sensitive"`
+	StatusContentType  string   `json:"status_content_type"`
+	AlsoKnownAsURIs    []string `json:"also_known_as_uris"`
 }
 
 type Field struct {
