@@ -13,6 +13,7 @@ type showCommand struct {
 	*flag.FlagSet
 	myAccount               bool
 	showAccountRelationship bool
+	showUserPreferences     bool
 	resourceType            string
 	account                 string
 	accountID               string
@@ -29,7 +30,8 @@ func newShowCommand(name, summary string) *showCommand {
 	}
 
 	command.BoolVar(&command.myAccount, myAccountFlag, false, "set to true to lookup your account")
-	command.BoolVar(&command.showAccountRelationship, "show-account-relationship", false, "show your relationship to the specified account")
+	command.BoolVar(&command.showAccountRelationship, showAccountRelationshipFlag, false, "show your relationship to the specified account")
+	command.BoolVar(&command.showUserPreferences, showUserPreferencesFlag, false, "show your preferences")
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to display")
 	command.StringVar(&command.account, accountFlag, "", "specify the account URI to lookup")
 	command.StringVar(&command.accountID, accountIDFlag, "", "specify the account ID")
@@ -109,13 +111,22 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 
 	fmt.Println(account)
 
-	if c.showAccountRelationship {
+	if !c.myAccount && c.showAccountRelationship {
 		relationship, err := gts.GetAccountRelationship(account.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account; %w", err)
 		}
 
 		fmt.Println(relationship)
+	}
+
+	if c.myAccount && c.showUserPreferences {
+		preferences, err := gts.GetUserPreferences()
+		if err != nil {
+			return fmt.Errorf("unable to retrieve the user preferences; %w", err)
+		}
+
+		fmt.Println(preferences)
 	}
 
 	return nil
