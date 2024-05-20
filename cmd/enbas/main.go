@@ -20,16 +20,20 @@ const (
 	statusIDFlag          = "status-id"
 	tagFlag               = "tag"
 	timelineCategoryFlag  = "timeline-category"
-	timelineLimitFlag     = "timeline-limit"
+	limitFlag             = "limit"
 	toAccountFlag         = "to-account"
+	showRepostsFlag       = "show-reposts"
+	notifyFlag            = "notify"
 )
 
 const (
-	accountResource  = "account"
-	instanceResource = "instance"
-	listResource     = "list"
-	statusResource   = "status"
-	timelineResource = "timeline"
+	accountResource   = "account"
+	instanceResource  = "instance"
+	listResource      = "list"
+	statusResource    = "status"
+	timelineResource  = "timeline"
+	followersResource = "followers"
+	followingResource = "following"
 )
 
 type Executor interface {
@@ -57,6 +61,8 @@ func run() error {
 		whoami         string = "whoami"
 		add            string = "add"
 		remove         string = "remove"
+		follow         string = "follow"
+		unfollow       string = "unfollow"
 	)
 
 	summaries := map[string]string{
@@ -70,6 +76,8 @@ func run() error {
 		whoami:         "print the account that you are currently logged in to",
 		add:            "add a resource to another resource",
 		remove:         "remove a resource from another resource",
+		follow:         "follow a resource (e.g. an account)",
+		unfollow:       "unfollow a resource (e.g. an account)",
 	}
 
 	flag.Usage = enbasUsageFunc(summaries)
@@ -108,6 +116,10 @@ func run() error {
 		executor = newAddCommand(add, summaries[add])
 	case remove:
 		executor = newRemoveCommand(remove, summaries[remove])
+	case follow:
+		executor = newFollowCommand(follow, summaries[follow], false)
+	case unfollow:
+		executor = newFollowCommand(unfollow, summaries[unfollow], true)
 	default:
 		flag.Usage()
 

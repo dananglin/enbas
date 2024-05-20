@@ -32,3 +32,20 @@ func (g *Client) GetAccount(accountURI string) (model.Account, error) {
 
 	return account, nil
 }
+
+func (g *Client) GetAccountRelationship(accountID string) (model.AccountRelationship, error) {
+	path := "/api/v1/accounts/relationships?id=" + accountID
+	url := g.Authentication.Instance + path
+
+	var relationships []model.AccountRelationship
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &relationships); err != nil {
+		return model.AccountRelationship{}, fmt.Errorf("received an error after sending the request to get the account relationship; %w", err)
+	}
+
+	if len(relationships) != 1 {
+		return model.AccountRelationship{}, fmt.Errorf("unexpected number of account relationships returned; want 1, got %d", len(relationships))
+	}
+
+	return relationships[0], nil
+}

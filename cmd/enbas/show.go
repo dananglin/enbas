@@ -12,14 +12,16 @@ import (
 
 type showCommand struct {
 	*flag.FlagSet
-	myAccount        bool
-	resourceType     string
-	account          string
-	statusID         string
-	timelineCategory string
-	listID           string
-	tag              string
-	timelineLimit    int
+	myAccount               bool
+	showAccountRelationship bool
+	resourceType            string
+	account                 string
+	accountID               string
+	statusID                string
+	timelineCategory        string
+	listID                  string
+	tag                     string
+	limit                   int
 }
 
 func newShowCommand(name, summary string) *showCommand {
@@ -28,13 +30,15 @@ func newShowCommand(name, summary string) *showCommand {
 	}
 
 	command.BoolVar(&command.myAccount, myAccountFlag, false, "set to true to lookup your account")
+	command.BoolVar(&command.showAccountRelationship, "show-account-relationship", false, "show your relationship to the specified account")
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to display")
 	command.StringVar(&command.account, accountFlag, "", "specify the account URI to lookup")
+	command.StringVar(&command.accountID, accountIDFlag, "", "specify the account ID")
 	command.StringVar(&command.statusID, statusIDFlag, "", "specify the ID of the status to display")
 	command.StringVar(&command.timelineCategory, timelineCategoryFlag, "home", "specify the type of timeline to display (valid values are home, public, list and tag)")
 	command.StringVar(&command.listID, listIDFlag, "", "specify the ID of the list to display")
 	command.StringVar(&command.tag, tagFlag, "", "specify the name of the tag to use")
-	command.IntVar(&command.timelineLimit, timelineLimitFlag, 5, "specify the number of statuses to display")
+	command.IntVar(&command.limit, limitFlag, 20, "specify the limit of items to display")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -47,11 +51,13 @@ func (c *showCommand) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		instanceResource: c.showInstance,
-		accountResource:  c.showAccount,
-		statusResource:   c.showStatus,
-		timelineResource: c.showTimeline,
-		listResource:     c.showList,
+		instanceResource:  c.showInstance,
+		accountResource:   c.showAccount,
+		statusResource:    c.showStatus,
+		timelineResource:  c.showTimeline,
+		listResource:      c.showList,
+		followersResource: c.showFollowers,
+		followingResource: c.showFollowing,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
@@ -103,6 +109,15 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 
 	fmt.Println(account)
 
+	if c.showAccountRelationship {
+		relationship, err := gts.GetAccountRelationship(account.ID)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve the relationship to this account; %w", err)
+		}
+
+		fmt.Println(relationship)
+	}
+
 	return nil
 }
 
@@ -129,21 +144,21 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 
 	switch c.timelineCategory {
 	case "home":
-		timeline, err = gts.GetHomeTimeline(c.timelineLimit)
+		timeline, err = gts.GetHomeTimeline(c.limit)
 	case "public":
-		timeline, err = gts.GetPublicTimeline(c.timelineLimit)
+		timeline, err = gts.GetPublicTimeline(c.limit)
 	case "list":
 		if c.listID == "" {
 			return flagNotSetError{flagText: listIDFlag}
 		}
 
-		timeline, err = gts.GetListTimeline(c.listID, c.timelineLimit)
+		timeline, err = gts.GetListTimeline(c.listID, c.limit)
 	case "tag":
 		if c.tag == "" {
 			return flagNotSetError{flagText: tagFlag}
 		}
 
-		timeline, err = gts.GetTagTimeline(c.tag, c.timelineLimit)
+		timeline, err = gts.GetTagTimeline(c.tag, c.limit)
 	default:
 		return invalidTimelineCategoryError{category: c.timelineCategory}
 	}
@@ -183,6 +198,7 @@ func (c *showCommand) showList(gts *client.Client) error {
 		for i := range accounts {
 			accountMap[accounts[i].ID] = accounts[i].Username
 		}
+
 		list.Accounts = accountMap
 	}
 
@@ -205,6 +221,44 @@ func (c *showCommand) showLists(gts *client.Client) error {
 
 	fmt.Println(utilities.HeaderFormat("LISTS"))
 	fmt.Println(lists)
+
+	return nil
+}
+
+func (c *showCommand) showFollowers(gts *client.Client) error {
+	if c.accountID == "" {
+		return flagNotSetError{flagText: accountIDFlag}
+	}
+
+	followers, err := gts.GetFollowers(c.accountID, c.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of followers; %w", err)
+	}
+
+	if len(followers) > 0 {
+		fmt.Println(followers)
+	} else {
+		fmt.Println("There are no followers for this account or the list is hidden.")
+	}
+
+	return nil
+}
+
+func (c *showCommand) showFollowing(gts *client.Client) error {
+	if c.accountID == "" {
+		return flagNotSetError{flagText: accountIDFlag}
+	}
+
+	following, err := gts.GetFollowing(c.accountID, c.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of followed accounts; %w", err)
+	}
+
+	if len(following) > 0 {
+		fmt.Println(following)
+	} else {
+		fmt.Println("This account is not following anyone or the list is hidden.")
+	}
 
 	return nil
 }
