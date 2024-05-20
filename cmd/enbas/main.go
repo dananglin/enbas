@@ -4,6 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
 const (
@@ -135,4 +139,20 @@ func run() error {
 	}
 
 	return nil
+}
+
+func getMyAccount(gts *client.Client) (model.Account, error) {
+	authConfig, err := config.NewAuthenticationConfigFromFile()
+	if err != nil {
+		return model.Account{}, fmt.Errorf("unable to retrieve the authentication configuration; %w", err)
+	}
+
+	accountURI := authConfig.CurrentAccount
+
+	account, err := gts.GetAccount(accountURI)
+	if err != nil {
+		return model.Account{}, fmt.Errorf("unable to retrieve the account details; %w", err)
+	}
+
+	return account, nil
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -85,26 +84,27 @@ func (c *showCommand) showInstance(gts *client.Client) error {
 }
 
 func (c *showCommand) showAccount(gts *client.Client) error {
-	var accountURI string
+	var (
+		account model.Account
+		err     error
+	)
 
 	if c.myAccount {
-		authConfig, err := config.NewAuthenticationConfigFromFile()
+		account, err = getMyAccount(gts)
 		if err != nil {
-			return fmt.Errorf("unable to retrieve the authentication configuration; %w", err)
+			return fmt.Errorf("received an error while getting account details; %w", err)
 		}
-
-		accountURI = authConfig.CurrentAccount
 	} else {
 		if c.account == "" {
 			return flagNotSetError{flagText: accountFlag}
 		}
 
-		accountURI = c.account
-	}
+		accountURI := c.account
 
-	account, err := gts.GetAccount(accountURI)
-	if err != nil {
-		return fmt.Errorf("unable to retrieve the account details; %w", err)
+		account, err = gts.GetAccount(accountURI)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve the account details; %w", err)
+		}
 	}
 
 	fmt.Println(account)
@@ -226,11 +226,24 @@ func (c *showCommand) showLists(gts *client.Client) error {
 }
 
 func (c *showCommand) showFollowers(gts *client.Client) error {
-	if c.accountID == "" {
-		return flagNotSetError{flagText: accountIDFlag}
+	var accountID string
+
+	if c.myAccount {
+		account, err := getMyAccount(gts)
+		if err != nil {
+			return fmt.Errorf("received an error while getting account details; %w", err)
+		}
+
+		accountID = account.ID
+	} else {
+		if c.accountID == "" {
+			return flagNotSetError{flagText: accountIDFlag}
+		}
+
+		accountID = c.accountID
 	}
 
-	followers, err := gts.GetFollowers(c.accountID, c.limit)
+	followers, err := gts.GetFollowers(accountID, c.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followers; %w", err)
 	}
@@ -245,11 +258,24 @@ func (c *showCommand) showFollowers(gts *client.Client) error {
 }
 
 func (c *showCommand) showFollowing(gts *client.Client) error {
-	if c.accountID == "" {
-		return flagNotSetError{flagText: accountIDFlag}
+	var accountID string
+
+	if c.myAccount {
+		account, err := getMyAccount(gts)
+		if err != nil {
+			return fmt.Errorf("received an error while getting account details; %w", err)
+		}
+
+		accountID = account.ID
+	} else {
+		if c.accountID == "" {
+			return flagNotSetError{flagText: accountIDFlag}
+		}
+
+		accountID = c.accountID
 	}
 
-	following, err := gts.GetFollowing(c.accountID, c.limit)
+	following, err := gts.GetFollowing(accountID, c.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followed accounts; %w", err)
 	}
