@@ -59,6 +59,7 @@ func (c *showCommand) Execute() error {
 		listResource:      c.showList,
 		followersResource: c.showFollowers,
 		followingResource: c.showFollowing,
+		blockedResource:   c.showBlocked,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
@@ -295,6 +296,21 @@ func (c *showCommand) showFollowing(gts *client.Client) error {
 		fmt.Println(following)
 	} else {
 		fmt.Println("This account is not following anyone or the list is hidden.")
+	}
+
+	return nil
+}
+
+func (c *showCommand) showBlocked(gts *client.Client) error {
+	blocked, err := gts.GetBlockedAccounts(c.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of blocked accounts; %w", err)
+	}
+
+	if len(blocked) > 0 {
+		fmt.Println(blocked)
+	} else {
+		fmt.Println("You have no blocked accounts.")
 	}
 
 	return nil

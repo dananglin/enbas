@@ -40,6 +40,7 @@ const (
 	timelineResource  = "timeline"
 	followersResource = "followers"
 	followingResource = "following"
+	blockedResource   = "blocked"
 )
 
 type Executor interface {
@@ -69,6 +70,8 @@ func run() error {
 		remove         string = "remove"
 		follow         string = "follow"
 		unfollow       string = "unfollow"
+		block          string = "block"
+		unblock        string = "unblock"
 	)
 
 	summaries := map[string]string{
@@ -84,6 +87,8 @@ func run() error {
 		remove:         "remove a resource from another resource",
 		follow:         "follow a resource (e.g. an account)",
 		unfollow:       "unfollow a resource (e.g. an account)",
+		block:          "block a resource (e.g. an account)",
+		unblock:        "unblock a resource (e.g. an account)",
 	}
 
 	flag.Usage = enbasUsageFunc(summaries)
@@ -126,6 +131,10 @@ func run() error {
 		executor = newFollowCommand(follow, summaries[follow], false)
 	case unfollow:
 		executor = newFollowCommand(unfollow, summaries[unfollow], true)
+	case block:
+		executor = newBlockCommand(block, summaries[block], false)
+	case unblock:
+		executor = newBlockCommand(unblock, summaries[unblock], true)
 	default:
 		flag.Usage()
 
