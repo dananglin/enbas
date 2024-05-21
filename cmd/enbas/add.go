@@ -10,6 +10,7 @@ import (
 type addCommand struct {
 	*flag.FlagSet
 
+	resourceType   string
 	toResourceType string
 	listID         string
 	accountNames   accountNames
@@ -23,7 +24,8 @@ func newAddCommand(name, summary string) *addCommand {
 		accountNames: accountNames(emptyArr),
 	}
 
-	command.StringVar(&command.toResourceType, addToFlag, "", "specify the type of resource to add to")
+	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the resource type to add (e.g. account, note)")
+	command.StringVar(&command.toResourceType, addToFlag, "", "specify the target resource type to add to (e.g. list, account, etc)")
 	command.StringVar(&command.listID, listIDFlag, "", "the ID of the list to add to")
 	command.Var(&command.accountNames, accountNameFlag, "the name of the account to add to the resource")
 
@@ -38,7 +40,7 @@ func (c *addCommand) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		listResource: c.addAccountsToList,
+		listResource: c.addToList,
 	}
 
 	doFunc, ok := funcMap[c.toResourceType]
@@ -49,6 +51,19 @@ func (c *addCommand) Execute() error {
 	gtsClient, err := client.NewClientFromConfig()
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (c *addCommand) addToList(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		accountResource: c.addAccountsToList,
+	}
+
+	doFunc, ok := funcMap[c.resourceType]
+	if !ok {
+		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
 	return doFunc(gtsClient)
@@ -70,6 +85,7 @@ func (c *addCommand) addAccountsToList(gtsClient *client.Client) error {
 		if err != nil {
 			return fmt.Errorf("unable to get the account ID for %s, %w", c.accountNames[i], err)
 		}
+
 		accountIDs[i] = accountID
 	}
 

@@ -8,13 +8,13 @@ import (
 
 const (
 	accountNameFlag             = "account-name"
-	addToFlag                   = "add-to"
+	addToFlag                   = "to"
 	instanceFlag                = "instance"
 	listIDFlag                  = "list-id"
 	listTitleFlag               = "list-title"
 	listRepliesPolicyFlag       = "list-replies-policy"
 	myAccountFlag               = "my-account"
-	removeFromFlag              = "remove-from"
+	removeFromFlag              = "from"
 	resourceTypeFlag            = "type"
 	statusIDFlag                = "status-id"
 	tagFlag                     = "tag"
