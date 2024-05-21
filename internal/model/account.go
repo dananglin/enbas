@@ -112,3 +112,51 @@ func (a Account) String() string {
 		a.URL,
 	)
 }
+
+type AccountListType int
+
+const (
+	AccountListFollowers AccountListType = iota
+	AccountListFollowing
+	AccountListBlockedAccount
+)
+
+type AccountList struct {
+	Type     AccountListType
+	Accounts []Account
+}
+
+func (a AccountList) String() string {
+	output := "\n"
+
+	switch a.Type {
+	case AccountListFollowers:
+		output += utilities.HeaderFormat("FOLLOWED BY:")
+	case AccountListFollowing:
+		output += utilities.HeaderFormat("FOLLOWING:")
+	case AccountListBlockedAccount:
+		output += utilities.HeaderFormat("BLOCKED ACCOUNTS:")
+	default:
+		output += utilities.HeaderFormat("ACCOUNTS:")
+	}
+
+	if a.Type == AccountListBlockedAccount {
+		for i := range a.Accounts {
+			output += fmt.Sprintf(
+				"\n  • %s (%s)",
+				a.Accounts[i].Acct,
+				a.Accounts[i].ID,
+			)
+		}
+	} else {
+		for i := range a.Accounts {
+			output += fmt.Sprintf(
+				"\n  • %s (%s)",
+				utilities.DisplayNameFormat(a.Accounts[i].DisplayName),
+				a.Accounts[i].Acct,
+			)
+		}
+	}
+
+	return output
+}

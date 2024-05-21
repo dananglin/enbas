@@ -88,25 +88,35 @@ func (g *Client) UnfollowAccount(accountID string) error {
 	return nil
 }
 
-func (g *Client) GetFollowers(accountID string, limit int) (model.Followers, error) {
+func (g *Client) GetFollowers(accountID string, limit int) (model.AccountList, error) {
 	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/followers?limit=%d", accountID, limit)
 
-	var followers model.Followers
+	accounts := make([]model.Account, limit)
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &followers); err != nil {
-		return nil, fmt.Errorf("received an error after sending the request to get the list of followers; %w", err)
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followers; %w", err)
+	}
+
+	followers := model.AccountList{
+		Type:     model.AccountListFollowers,
+		Accounts: accounts,
 	}
 
 	return followers, nil
 }
 
-func (g *Client) GetFollowing(accountID string, limit int) (model.Following, error) {
+func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, error) {
 	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/following?limit=%d", accountID, limit)
 
-	var following model.Following
+	accounts := make([]model.Account, limit)
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &following); err != nil {
-		return nil, fmt.Errorf("received an error after sending the request to get the list of followed accounts; %w", err)
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followed accounts; %w", err)
+	}
+
+	following := model.AccountList{
+		Type:     model.AccountListFollowing,
+		Accounts: accounts,
 	}
 
 	return following, nil
@@ -132,13 +142,18 @@ func (g *Client) UnblockAccount(accountID string) error {
 	return nil
 }
 
-func (g *Client) GetBlockedAccounts(limit int) (model.BlockedAccounts, error) {
+func (g *Client) GetBlockedAccounts(limit int) (model.AccountList, error) {
 	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/blocks?limit=%d", limit)
 
-	var blocked model.BlockedAccounts
+	accounts := make([]model.Account, limit)
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &blocked); err != nil {
-		return nil, fmt.Errorf("received an error after sending the request to get the list of blocked accounts; %w", err)
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of blocked accounts; %w", err)
+	}
+
+	blocked := model.AccountList{
+		Type:     model.AccountListBlockedAccount,
+		Accounts: accounts,
 	}
 
 	return blocked, nil

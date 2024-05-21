@@ -260,7 +260,7 @@ func (c *showCommand) showFollowers(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the list of followers; %w", err)
 	}
 
-	if len(followers) > 0 {
+	if len(followers.Accounts) > 0 {
 		fmt.Println(followers)
 	} else {
 		fmt.Println("There are no followers for this account or the list is hidden.")
@@ -292,7 +292,7 @@ func (c *showCommand) showFollowing(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the list of followed accounts; %w", err)
 	}
 
-	if len(following) > 0 {
+	if len(following.Accounts) > 0 {
 		fmt.Println(following)
 	} else {
 		fmt.Println("This account is not following anyone or the list is hidden.")
@@ -307,7 +307,7 @@ func (c *showCommand) showBlocked(gts *client.Client) error {
 		return fmt.Errorf("unable to retrieve the list of blocked accounts; %w", err)
 	}
 
-	if len(blocked) > 0 {
+	if len(blocked.Accounts) > 0 {
 		fmt.Println(blocked)
 	} else {
 		fmt.Println("You have no blocked accounts.")
