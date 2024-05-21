@@ -11,7 +11,7 @@ type blockCommand struct {
 	*flag.FlagSet
 
 	resourceType string
-	accountID    string
+	accountName  string
 	unblock      bool
 }
 
@@ -23,7 +23,7 @@ func newBlockCommand(name, summary string, unblock bool) *blockCommand {
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to block or unblock")
-	command.StringVar(&command.accountID, accountIDFlag, "", "specify the ID of the account you want to block or unblock")
+	command.StringVar(&command.accountName, accountNameFlag, "", "specify the account name in full (username@domain)")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -48,16 +48,17 @@ func (c *blockCommand) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *blockCommand) blockAccount(gts *client.Client) error {
-	if c.accountID == "" {
-		return flagNotSetError{flagText: accountIDFlag}
+func (c *blockCommand) blockAccount(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, false, c.accountName)
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
 
 	if c.unblock {
-		return c.unblockAccount(gts)
+		return c.unblockAccount(gtsClient, accountID)
 	}
 
-	if err := gts.BlockAccount(c.accountID); err != nil {
+	if err := gtsClient.BlockAccount(accountID); err != nil {
 		return fmt.Errorf("unable to block the account; %w", err)
 	}
 
@@ -66,8 +67,8 @@ func (c *blockCommand) blockAccount(gts *client.Client) error {
 	return nil
 }
 
-func (c *blockCommand) unblockAccount(gts *client.Client) error {
-	if err := gts.UnblockAccount(c.accountID); err != nil {
+func (c *blockCommand) unblockAccount(gtsClient *client.Client, accountID string) error {
+	if err := gtsClient.UnblockAccount(accountID); err != nil {
 		return fmt.Errorf("unable to unblock the account; %w", err)
 	}
 

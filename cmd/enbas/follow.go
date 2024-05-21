@@ -11,7 +11,7 @@ type followCommand struct {
 	*flag.FlagSet
 
 	resourceType string
-	accountID    string
+	accountName  string
 	showReposts  bool
 	notify       bool
 	unfollow     bool
@@ -25,7 +25,7 @@ func newFollowCommand(name, summary string, unfollow bool) *followCommand {
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to follow")
-	command.StringVar(&command.accountID, accountIDFlag, "", "specify the ID of the account you want to follow")
+	command.StringVar(&command.accountName, accountNameFlag, "", "specify the account name in full (username@domain)")
 	command.BoolVar(&command.showReposts, showRepostsFlag, true, "show reposts from the account you want to follow")
 	command.BoolVar(&command.notify, notifyFlag, false, "get notifications when the account you want to follow posts a status")
 
@@ -52,16 +52,17 @@ func (c *followCommand) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *followCommand) followAccount(gts *client.Client) error {
-	if c.accountID == "" {
-		return flagNotSetError{flagText: accountIDFlag}
+func (c *followCommand) followAccount(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, false, c.accountName)
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
 
 	if c.unfollow {
-		return c.unfollowAccount(gts)
+		return c.unfollowAccount(gtsClient, accountID)
 	}
 
-	if err := gts.FollowAccount(c.accountID, c.showReposts, c.notify); err != nil {
+	if err := gtsClient.FollowAccount(accountID, c.showReposts, c.notify); err != nil {
 		return fmt.Errorf("unable to follow the account; %w", err)
 	}
 
@@ -70,8 +71,8 @@ func (c *followCommand) followAccount(gts *client.Client) error {
 	return nil
 }
 
-func (c *followCommand) unfollowAccount(gts *client.Client) error {
-	if err := gts.UnfollowAccount(c.accountID); err != nil {
+func (c *followCommand) unfollowAccount(gtsClient *client.Client, accountID string) error {
+	if err := gtsClient.UnfollowAccount(accountID); err != nil {
 		return fmt.Errorf("unable to unfollow the account; %w", err)
 	}
 

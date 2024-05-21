@@ -2,13 +2,13 @@ package main
 
 import "strings"
 
-type accountIDs []string
+type accountNames []string
 
-func (a *accountIDs) String() string {
+func (a *accountNames) String() string {
 	return strings.Join(*a, ", ")
 }
 
-func (a *accountIDs) Set(value string) error {
+func (a *accountNames) Set(value string) error {
 	if len(value) > 0 {
 		*a = append(*a, value)
 	}

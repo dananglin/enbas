@@ -12,20 +12,20 @@ type addCommand struct {
 
 	toResourceType string
 	listID         string
-	accountIDs     accountIDs
+	accountNames   accountNames
 }
 
 func newAddCommand(name, summary string) *addCommand {
 	emptyArr := make([]string, 0, 3)
 
 	command := addCommand{
-		FlagSet:    flag.NewFlagSet(name, flag.ExitOnError),
-		accountIDs: accountIDs(emptyArr),
+		FlagSet:      flag.NewFlagSet(name, flag.ExitOnError),
+		accountNames: accountNames(emptyArr),
 	}
 
 	command.StringVar(&command.toResourceType, addToFlag, "", "specify the type of resource to add to")
 	command.StringVar(&command.listID, listIDFlag, "", "the ID of the list to add to")
-	command.Var(&command.accountIDs, accountIDFlag, "the ID of the account to add to the list")
+	command.Var(&command.accountNames, accountNameFlag, "the name of the account to add to the resource")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -34,7 +34,7 @@ func newAddCommand(name, summary string) *addCommand {
 
 func (c *addCommand) Execute() error {
 	if c.toResourceType == "" {
-		return flagNotSetError{flagText: "add-to"}
+		return flagNotSetError{flagText: addToFlag}
 	}
 
 	funcMap := map[string]func(*client.Client) error{
@@ -59,11 +59,21 @@ func (c *addCommand) addAccountsToList(gtsClient *client.Client) error {
 		return flagNotSetError{flagText: listIDFlag}
 	}
 
-	if len(c.accountIDs) == 0 {
-		return noAccountIDsSpecifiedError{}
+	if len(c.accountNames) == 0 {
+		return noAccountSpecifiedError{}
 	}
 
-	if err := gtsClient.AddAccountsToList(c.listID, []string(c.accountIDs)); err != nil {
+	accountIDs := make([]string, len(c.accountNames))
+
+	for i := range c.accountNames {
+		accountID, err := getTheirAccountID(gtsClient, c.accountNames[i])
+		if err != nil {
+			return fmt.Errorf("unable to get the account ID for %s, %w", c.accountNames[i], err)
+		}
+		accountIDs[i] = accountID
+	}
+
+	if err := gtsClient.AddAccountsToList(c.listID, accountIDs); err != nil {
 		return fmt.Errorf("unable to add the accounts to the list; %w", err)
 	}
 

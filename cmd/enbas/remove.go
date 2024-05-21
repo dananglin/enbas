@@ -12,20 +12,20 @@ type removeCommand struct {
 
 	fromResourceType string
 	listID           string
-	accountIDs       accountIDs
+	accountNames     accountNames
 }
 
 func newRemoveCommand(name, summary string) *removeCommand {
 	emptyArr := make([]string, 0, 3)
 
 	command := removeCommand{
-		FlagSet:    flag.NewFlagSet(name, flag.ExitOnError),
-		accountIDs: accountIDs(emptyArr),
+		FlagSet:      flag.NewFlagSet(name, flag.ExitOnError),
+		accountNames: accountNames(emptyArr),
 	}
 
 	command.StringVar(&command.fromResourceType, removeFromFlag, "", "specify the type of resource to remove from")
 	command.StringVar(&command.listID, listIDFlag, "", "the ID of the list to remove from")
-	command.Var(&command.accountIDs, accountIDFlag, "the ID of the account to remove from the list")
+	command.Var(&command.accountNames, accountNameFlag, "the name of the account to remove from the resource")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -34,7 +34,7 @@ func newRemoveCommand(name, summary string) *removeCommand {
 
 func (c *removeCommand) Execute() error {
 	if c.fromResourceType == "" {
-		return flagNotSetError{flagText: "remove-from"}
+		return flagNotSetError{flagText: removeFromFlag}
 	}
 
 	funcMap := map[string]func(*client.Client) error{
@@ -59,11 +59,21 @@ func (c *removeCommand) removeAccountsFromList(gtsClient *client.Client) error {
 		return flagNotSetError{flagText: listIDFlag}
 	}
 
-	if len(c.accountIDs) == 0 {
-		return noAccountIDsSpecifiedError{}
+	if len(c.accountNames) == 0 {
+		return noAccountSpecifiedError{}
 	}
 
-	if err := gtsClient.RemoveAccountsFromList(c.listID, []string(c.accountIDs)); err != nil {
+	accountIDs := make([]string, len(c.accountNames))
+
+	for i := range c.accountNames {
+		accountID, err := getTheirAccountID(gtsClient, c.accountNames[i])
+		if err != nil {
+			return fmt.Errorf("unable to get the account ID for %s, %w", c.accountNames[i], err)
+		}
+		accountIDs[i] = accountID
+	}
+
+	if err := gtsClient.RemoveAccountsFromList(c.listID, accountIDs); err != nil {
 		return fmt.Errorf("unable to remove the accounts from the list; %w", err)
 	}
 

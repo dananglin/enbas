@@ -15,8 +15,7 @@ type showCommand struct {
 	showAccountRelationship bool
 	showUserPreferences     bool
 	resourceType            string
-	account                 string
-	accountID               string
+	accountName             string
 	statusID                string
 	timelineCategory        string
 	listID                  string
@@ -33,8 +32,7 @@ func newShowCommand(name, summary string) *showCommand {
 	command.BoolVar(&command.showAccountRelationship, showAccountRelationshipFlag, false, "show your relationship to the specified account")
 	command.BoolVar(&command.showUserPreferences, showUserPreferencesFlag, false, "show your preferences")
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to display")
-	command.StringVar(&command.account, accountFlag, "", "specify the account URI to lookup")
-	command.StringVar(&command.accountID, accountIDFlag, "", "specify the account ID")
+	command.StringVar(&command.accountName, accountNameFlag, "", "specify the account name in full (username@domain)")
 	command.StringVar(&command.statusID, statusIDFlag, "", "specify the ID of the status to display")
 	command.StringVar(&command.timelineCategory, timelineCategoryFlag, "home", "specify the type of timeline to display (valid values are home, public, list and tag)")
 	command.StringVar(&command.listID, listIDFlag, "", "specify the ID of the list to display")
@@ -75,8 +73,8 @@ func (c *showCommand) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *showCommand) showInstance(gts *client.Client) error {
-	instance, err := gts.GetInstance()
+func (c *showCommand) showInstance(gtsClient *client.Client) error {
+	instance, err := gtsClient.GetInstance()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the instance details; %w", err)
 	}
@@ -86,34 +84,32 @@ func (c *showCommand) showInstance(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showAccount(gts *client.Client) error {
+func (c *showCommand) showAccount(gtsClient *client.Client) error {
 	var (
 		account model.Account
 		err     error
 	)
 
 	if c.myAccount {
-		account, err = getMyAccount(gts)
+		account, err = getMyAccount(gtsClient)
 		if err != nil {
-			return fmt.Errorf("received an error while getting account details; %w", err)
+			return fmt.Errorf("received an error while getting the account details; %w", err)
 		}
 	} else {
-		if c.account == "" {
-			return flagNotSetError{flagText: accountFlag}
+		if c.accountName == "" {
+			return flagNotSetError{flagText: accountNameFlag}
 		}
 
-		accountURI := c.account
-
-		account, err = gts.GetAccount(accountURI)
+		account, err = getAccount(gtsClient, c.accountName)
 		if err != nil {
-			return fmt.Errorf("unable to retrieve the account details; %w", err)
+			return fmt.Errorf("received an error while getting the account details; %w", err)
 		}
 	}
 
 	fmt.Println(account)
 
 	if !c.myAccount && c.showAccountRelationship {
-		relationship, err := gts.GetAccountRelationship(account.ID)
+		relationship, err := gtsClient.GetAccountRelationship(account.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account; %w", err)
 		}
@@ -122,7 +118,7 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 	}
 
 	if c.myAccount && c.showUserPreferences {
-		preferences, err := gts.GetUserPreferences()
+		preferences, err := gtsClient.GetUserPreferences()
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the user preferences; %w", err)
 		}
@@ -133,12 +129,12 @@ func (c *showCommand) showAccount(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showStatus(gts *client.Client) error {
+func (c *showCommand) showStatus(gtsClient *client.Client) error {
 	if c.statusID == "" {
 		return flagNotSetError{flagText: statusIDFlag}
 	}
 
-	status, err := gts.GetStatus(c.statusID)
+	status, err := gtsClient.GetStatus(c.statusID)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the status; %w", err)
 	}
@@ -148,7 +144,7 @@ func (c *showCommand) showStatus(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showTimeline(gts *client.Client) error {
+func (c *showCommand) showTimeline(gtsClient *client.Client) error {
 	var (
 		timeline model.Timeline
 		err      error
@@ -156,21 +152,21 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 
 	switch c.timelineCategory {
 	case "home":
-		timeline, err = gts.GetHomeTimeline(c.limit)
+		timeline, err = gtsClient.GetHomeTimeline(c.limit)
 	case "public":
-		timeline, err = gts.GetPublicTimeline(c.limit)
+		timeline, err = gtsClient.GetPublicTimeline(c.limit)
 	case "list":
 		if c.listID == "" {
 			return flagNotSetError{flagText: listIDFlag}
 		}
 
-		timeline, err = gts.GetListTimeline(c.listID, c.limit)
+		timeline, err = gtsClient.GetListTimeline(c.listID, c.limit)
 	case "tag":
 		if c.tag == "" {
 			return flagNotSetError{flagText: tagFlag}
 		}
 
-		timeline, err = gts.GetTagTimeline(c.tag, c.limit)
+		timeline, err = gtsClient.GetTagTimeline(c.tag, c.limit)
 	default:
 		return invalidTimelineCategoryError{category: c.timelineCategory}
 	}
@@ -190,17 +186,17 @@ func (c *showCommand) showTimeline(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showList(gts *client.Client) error {
+func (c *showCommand) showList(gtsClient *client.Client) error {
 	if c.listID == "" {
-		return c.showLists(gts)
+		return c.showLists(gtsClient)
 	}
 
-	list, err := gts.GetList(c.listID)
+	list, err := gtsClient.GetList(c.listID)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list; %w", err)
 	}
 
-	accounts, err := gts.GetAccountsFromList(c.listID, 0)
+	accounts, err := gtsClient.GetAccountsFromList(c.listID, 0)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the accounts from the list; %w", err)
 	}
@@ -219,8 +215,8 @@ func (c *showCommand) showList(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showLists(gts *client.Client) error {
-	lists, err := gts.GetAllLists()
+func (c *showCommand) showLists(gtsClient *client.Client) error {
+	lists, err := gtsClient.GetAllLists()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the lists; %w", err)
 	}
@@ -237,25 +233,13 @@ func (c *showCommand) showLists(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showFollowers(gts *client.Client) error {
-	var accountID string
-
-	if c.myAccount {
-		account, err := getMyAccount(gts)
-		if err != nil {
-			return fmt.Errorf("received an error while getting account details; %w", err)
-		}
-
-		accountID = account.ID
-	} else {
-		if c.accountID == "" {
-			return flagNotSetError{flagText: accountIDFlag}
-		}
-
-		accountID = c.accountID
+func (c *showCommand) showFollowers(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName)
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
 
-	followers, err := gts.GetFollowers(accountID, c.limit)
+	followers, err := gtsClient.GetFollowers(accountID, c.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followers; %w", err)
 	}
@@ -269,25 +253,13 @@ func (c *showCommand) showFollowers(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showFollowing(gts *client.Client) error {
-	var accountID string
-
-	if c.myAccount {
-		account, err := getMyAccount(gts)
-		if err != nil {
-			return fmt.Errorf("received an error while getting account details; %w", err)
-		}
-
-		accountID = account.ID
-	} else {
-		if c.accountID == "" {
-			return flagNotSetError{flagText: accountIDFlag}
-		}
-
-		accountID = c.accountID
+func (c *showCommand) showFollowing(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName)
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
 
-	following, err := gts.GetFollowing(accountID, c.limit)
+	following, err := gtsClient.GetFollowing(accountID, c.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followed accounts; %w", err)
 	}
@@ -301,8 +273,8 @@ func (c *showCommand) showFollowing(gts *client.Client) error {
 	return nil
 }
 
-func (c *showCommand) showBlocked(gts *client.Client) error {
-	blocked, err := gts.GetBlockedAccounts(c.limit)
+func (c *showCommand) showBlocked(gtsClient *client.Client) error {
+	blocked, err := gtsClient.GetBlockedAccounts(c.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of blocked accounts; %w", err)
 	}

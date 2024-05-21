@@ -32,8 +32,8 @@ func (e unknownSubcommandError) Error() string {
 	return "unknown subcommand '" + e.subcommand + "'"
 }
 
-type noAccountIDsSpecifiedError struct{}
+type noAccountSpecifiedError struct{}
 
-func (e noAccountIDsSpecifiedError) Error() string {
-	return "no account IDs specified"
+func (e noAccountSpecifiedError) Error() string {
+	return "no account specified in this request"
 }
