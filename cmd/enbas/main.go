@@ -88,6 +88,10 @@ func run() error {
 		unblock:        "unblock a resource (e.g. an account)",
 	}
 
+	tlf := topLevelFlags{}
+
+	flag.StringVar(&tlf.configDir, "config-dir", "", "specify your config directory")
+
 	flag.Usage = enbasUsageFunc(summaries)
 
 	flag.Parse()
@@ -105,33 +109,33 @@ func run() error {
 
 	switch subcommand {
 	case login:
-		executor = newLoginCommand(login, summaries[login])
+		executor = newLoginCommand(tlf, login, summaries[login])
 	case version:
 		executor = newVersionCommand(version, summaries[version])
 	case showResource:
-		executor = newShowCommand(showResource, summaries[showResource])
+		executor = newShowCommand(tlf, showResource, summaries[showResource])
 	case switchAccount:
-		executor = newSwitchCommand(switchAccount, summaries[switchAccount])
+		executor = newSwitchCommand(tlf, switchAccount, summaries[switchAccount])
 	case createResource:
-		executor = newCreateCommand(createResource, summaries[createResource])
+		executor = newCreateCommand(tlf, createResource, summaries[createResource])
 	case deleteResource:
-		executor = newDeleteCommand(deleteResource, summaries[deleteResource])
+		executor = newDeleteCommand(tlf, deleteResource, summaries[deleteResource])
 	case updateResource:
-		executor = newUpdateCommand(updateResource, summaries[updateResource])
+		executor = newUpdateCommand(tlf, updateResource, summaries[updateResource])
 	case whoami:
-		executor = newWhoAmICommand(whoami, summaries[whoami])
+		executor = newWhoAmICommand(tlf, whoami, summaries[whoami])
 	case add:
-		executor = newAddCommand(add, summaries[add])
+		executor = newAddCommand(tlf, add, summaries[add])
 	case remove:
-		executor = newRemoveCommand(remove, summaries[remove])
+		executor = newRemoveCommand(tlf, remove, summaries[remove])
 	case follow:
-		executor = newFollowCommand(follow, summaries[follow], false)
+		executor = newFollowCommand(tlf, follow, summaries[follow], false)
 	case unfollow:
-		executor = newFollowCommand(unfollow, summaries[unfollow], true)
+		executor = newFollowCommand(tlf, unfollow, summaries[unfollow], true)
 	case block:
-		executor = newBlockCommand(block, summaries[block], false)
+		executor = newBlockCommand(tlf, block, summaries[block], false)
 	case unblock:
-		executor = newBlockCommand(unblock, summaries[unblock], true)
+		executor = newBlockCommand(tlf, unblock, summaries[unblock], true)
 	default:
 		flag.Usage()
 

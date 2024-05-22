@@ -10,13 +10,16 @@ import (
 type deleteCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags topLevelFlags
 	resourceType string
 	listID       string
 }
 
-func newDeleteCommand(name, summary string) *deleteCommand {
+func newDeleteCommand(tlf topLevelFlags, name, summary string) *deleteCommand {
 	command := deleteCommand{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to delete")
@@ -41,7 +44,7 @@ func (c *deleteCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}

@@ -20,8 +20,8 @@ type Client struct {
 	Timeout        time.Duration
 }
 
-func NewClientFromConfig() (*Client, error) {
-	config, err := config.NewAuthenticationConfigFromFile()
+func NewClientFromConfig(configDir string) (*Client, error) {
+	config, err := config.NewCredentialsConfigFromFile(configDir)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get the authentication configuration; %w", err)
 	}
@@ -70,7 +70,7 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 	request.Header.Set("User-Agent", g.UserAgent)
 
 	if len(g.Authentication.AccessToken) > 0 {
-		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.Authentication.AccessToken))
+		request.Header.Set("Authorization", "Bearer "+g.Authentication.AccessToken)
 	}
 
 	response, err := g.HTTPClient.Do(request)

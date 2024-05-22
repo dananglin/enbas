@@ -53,7 +53,7 @@ func enbasUsageFunc(summaries map[string]string) func() {
 		builder.WriteString("SUMMARY:\n    enbas - A GoToSocial client for the terminal.\n\n")
 
 		if binaryVersion != "" {
-			builder.WriteString("VERSION:\n  " + binaryVersion + "\n\n")
+			builder.WriteString("VERSION:\n    " + binaryVersion + "\n\n")
 		}
 
 		builder.WriteString("USAGE:\n    enbas [flags]\n    enbas [command]\n\nCOMMANDS:")

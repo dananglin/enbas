@@ -10,18 +10,20 @@ import (
 type removeCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags topLevelFlags
 	resourceType     string
 	fromResourceType string
 	listID           string
 	accountNames     accountNames
 }
 
-func newRemoveCommand(name, summary string) *removeCommand {
+func newRemoveCommand(tlf topLevelFlags, name, summary string) *removeCommand {
 	emptyArr := make([]string, 0, 3)
 
 	command := removeCommand{
 		FlagSet:      flag.NewFlagSet(name, flag.ExitOnError),
 		accountNames: accountNames(emptyArr),
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the resource type to remove (e.g. account, note)")
@@ -49,7 +51,7 @@ func (c *removeCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.fromResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -123,7 +125,7 @@ func (c *removeCommand) removeNoteFromAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(c.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, c.accountNames[0])
+	accountID, err := getAccountID(gtsClient, false, c.accountNames[0], c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}

@@ -1,2 +1,4 @@
 /environment/
-/enbas
+/*.enbas
+/__build/*
+!__build/.gitkeep

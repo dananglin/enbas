@@ -11,15 +11,17 @@ import (
 type updateCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags topLevelFlags
 	resourceType      string
 	listID            string
 	listTitle         string
 	listRepliesPolicy string
 }
 
-func newUpdateCommand(name, summary string) *updateCommand {
+func newUpdateCommand(tlf topLevelFlags, name, summary string) *updateCommand {
 	command := updateCommand{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to update")
@@ -46,7 +48,7 @@ func (c *updateCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}

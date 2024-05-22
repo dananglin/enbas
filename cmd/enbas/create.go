@@ -11,14 +11,17 @@ import (
 type createCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags topLevelFlags
 	resourceType      string
 	listTitle         string
 	listRepliesPolicy string
 }
 
-func newCreateCommand(name, summary string) *createCommand {
+func newCreateCommand(tlf topLevelFlags, name, summary string) *createCommand {
 	command := createCommand{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to create")
@@ -35,7 +38,7 @@ func (c *createCommand) Execute() error {
 		return flagNotSetError{flagText: resourceTypeFlag}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}

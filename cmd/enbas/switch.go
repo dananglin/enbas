@@ -9,13 +9,15 @@ import (
 
 type switchCommand struct {
 	*flag.FlagSet
+
+	topLevelFlags topLevelFlags
 	toAccount string
 }
 
-func newSwitchCommand(name, summary string) *switchCommand {
+func newSwitchCommand(tlf topLevelFlags, name, summary string) *switchCommand {
 	command := switchCommand{
 		FlagSet:   flag.NewFlagSet(name, flag.ExitOnError),
-		toAccount: "",
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.toAccount, toAccountFlag, "", "the account to switch to")
@@ -30,7 +32,7 @@ func (c *switchCommand) Execute() error {
 		return flagNotSetError{flagText: toAccountFlag}
 	}
 
-	if err := config.UpdateCurrentAccount(c.toAccount); err != nil {
+	if err := config.UpdateCurrentAccount(c.toAccount, c.topLevelFlags.configDir); err != nil {
 		return fmt.Errorf("unable to switch accounts; %w", err)
 	}
 

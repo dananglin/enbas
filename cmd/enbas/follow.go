@@ -10,18 +10,19 @@ import (
 type followCommand struct {
 	*flag.FlagSet
 
-	resourceType string
-	accountName  string
-	showReposts  bool
-	notify       bool
-	unfollow     bool
+	topLevelFlags topLevelFlags
+	resourceType  string
+	accountName   string
+	showReposts   bool
+	notify        bool
+	unfollow      bool
 }
 
-func newFollowCommand(name, summary string, unfollow bool) *followCommand {
+func newFollowCommand(tlf topLevelFlags, name, summary string, unfollow bool) *followCommand {
 	command := followCommand{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		unfollow: unfollow,
+		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
+		unfollow:      unfollow,
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to follow")
@@ -44,7 +45,7 @@ func (c *followCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -53,7 +54,7 @@ func (c *followCommand) Execute() error {
 }
 
 func (c *followCommand) followAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, c.accountName)
+	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}

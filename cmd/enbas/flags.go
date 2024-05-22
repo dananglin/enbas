@@ -15,3 +15,7 @@ func (a *accountNames) Set(value string) error {
 
 	return nil
 }
+
+type topLevelFlags struct {
+	configDir string
+}

@@ -12,12 +12,15 @@ import (
 
 type loginCommand struct {
 	*flag.FlagSet
+
+	topLevelFlags topLevelFlags
 	instance string
 }
 
-func newLoginCommand(name, summary string) *loginCommand {
+func newLoginCommand(tlf topLevelFlags, name, summary string) *loginCommand {
 	command := loginCommand{
 		FlagSet:  flag.NewFlagSet(name, flag.ExitOnError),
+		topLevelFlags: tlf,
 		instance: "",
 	}
 
@@ -88,7 +91,7 @@ Once you have the code please copy and paste it below.
 		return fmt.Errorf("unable to verify the credentials; %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(c.topLevelFlags.configDir, account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details; %w", err)
 	}

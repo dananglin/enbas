@@ -11,6 +11,7 @@ import (
 
 type showCommand struct {
 	*flag.FlagSet
+	topLevelFlags           topLevelFlags
 	myAccount               bool
 	showAccountRelationship bool
 	showUserPreferences     bool
@@ -23,9 +24,10 @@ type showCommand struct {
 	limit                   int
 }
 
-func newShowCommand(name, summary string) *showCommand {
+func newShowCommand(tlf topLevelFlags, name, summary string) *showCommand {
 	command := showCommand{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
+		topLevelFlags: tlf,
 	}
 
 	command.BoolVar(&command.myAccount, myAccountFlag, false, "set to true to lookup your account")
@@ -65,7 +67,7 @@ func (c *showCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -91,7 +93,7 @@ func (c *showCommand) showAccount(gtsClient *client.Client) error {
 	)
 
 	if c.myAccount {
-		account, err = getMyAccount(gtsClient)
+		account, err = getMyAccount(gtsClient, c.topLevelFlags.configDir)
 		if err != nil {
 			return fmt.Errorf("received an error while getting the account details; %w", err)
 		}
@@ -234,7 +236,7 @@ func (c *showCommand) showLists(gtsClient *client.Client) error {
 }
 
 func (c *showCommand) showFollowers(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName)
+	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName, c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
@@ -254,7 +256,7 @@ func (c *showCommand) showFollowers(gtsClient *client.Client) error {
 }
 
 func (c *showCommand) showFollowing(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName)
+	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName, c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}

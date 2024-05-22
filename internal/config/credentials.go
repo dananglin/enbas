@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
 )
 
 const (
@@ -27,14 +25,25 @@ type Credentials struct {
 	AccessToken  string `json:"accessToken"`
 }
 
-func SaveCredentials(username string, credentials Credentials) (string, error) {
-	if err := ensureConfigDir(); err != nil {
+type CredentialsNotFoundError struct {
+	AccountName string
+}
+
+func (e CredentialsNotFoundError) Error() string {
+	return "unable to find the credentials for the account '" + e.AccountName + "'"
+}
+
+// SaveCredentials saves the credentials into the credentials file within the specified configuration
+// directory. If the directory is not specified then the default directory is used. If the directory
+// is not present, it will be created.
+func SaveCredentials(configDir, username string, credentials Credentials) (string, error) {
+	if err := ensureConfigDir(calculateConfigDir(configDir)); err != nil {
 		return "", fmt.Errorf("unable to ensure the configuration directory; %w", err)
 	}
 
 	var authConfig CredentialsConfig
 
-	filepath := credentialsConfigFile()
+	filepath := credentialsConfigFile(configDir)
 
 	if _, err := os.Stat(filepath); err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
@@ -43,7 +52,7 @@ func SaveCredentials(username string, credentials Credentials) (string, error) {
 
 		authConfig.Credentials = make(map[string]Credentials)
 	} else {
-		authConfig, err = NewAuthenticationConfigFromFile()
+		authConfig, err = NewCredentialsConfigFromFile(configDir)
 		if err != nil {
 			return "", fmt.Errorf("unable to retrieve the existing authentication configuration; %w", err)
 		}
@@ -63,15 +72,34 @@ func SaveCredentials(username string, credentials Credentials) (string, error) {
 
 	authConfig.Credentials[authenticationName] = credentials
 
-	if err := saveCredentialsConfigFile(authConfig); err != nil {
+	if err := saveCredentialsConfigFile(authConfig, configDir); err != nil {
 		return "", fmt.Errorf("unable to save the authentication configuration to file; %w", err)
 	}
 
 	return authenticationName, nil
 }
 
-func NewAuthenticationConfigFromFile() (CredentialsConfig, error) {
-	path := credentialsConfigFile()
+func UpdateCurrentAccount(account string, configDir string) error {
+	credentialsConfig, err := NewCredentialsConfigFromFile(configDir)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the existing authentication configuration; %w", err)
+	}
+
+	if _, ok := credentialsConfig.Credentials[account]; !ok {
+		return CredentialsNotFoundError{account}
+	}
+
+	credentialsConfig.CurrentAccount = account
+
+	if err := saveCredentialsConfigFile(credentialsConfig, configDir); err != nil {
+		return fmt.Errorf("unable to save the authentication configuration to file; %w", err)
+	}
+
+	return nil
+}
+
+func NewCredentialsConfigFromFile(configDir string) (CredentialsConfig, error) {
+	path := credentialsConfigFile(configDir)
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -88,58 +116,12 @@ func NewAuthenticationConfigFromFile() (CredentialsConfig, error) {
 	return authConfig, nil
 }
 
-func UpdateCurrentAccount(account string) error {
-	authConfig, err := NewAuthenticationConfigFromFile()
+func saveCredentialsConfigFile(authConfig CredentialsConfig, configDir string) error {
+	path := credentialsConfigFile(configDir)
+
+	file, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the existing authentication configuration; %w", err)
-	}
-
-	if _, ok := authConfig.Credentials[account]; !ok {
-		return fmt.Errorf("account %s is not found", account)
-	}
-
-	authConfig.CurrentAccount = account
-
-	if err := saveCredentialsConfigFile(authConfig); err != nil {
-		return fmt.Errorf("unable to save the authentication configuration to file; %w", err)
-	}
-
-	return nil
-}
-
-func credentialsConfigFile() string {
-	return filepath.Join(configDir(), credentialsFileName)
-}
-
-func configDir() string {
-	rootDir, err := os.UserConfigDir()
-	if err != nil {
-		rootDir = "."
-	}
-
-	return filepath.Join(rootDir, internal.ApplicationName)
-}
-
-func ensureConfigDir() error {
-	dir := configDir()
-
-	if _, err := os.Stat(dir); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			if err := os.MkdirAll(dir, 0o750); err != nil {
-				return fmt.Errorf("unable to create %s; %w", dir, err)
-			}
-		} else {
-			return fmt.Errorf("unknown error received when running stat on %s; %w", dir, err)
-		}
-	}
-
-	return nil
-}
-
-func saveCredentialsConfigFile(authConfig CredentialsConfig) error {
-	file, err := os.Create(credentialsConfigFile())
-	if err != nil {
-		return fmt.Errorf("unable to open the config file; %w", err)
+		return fmt.Errorf("unable to open %s; %w", path, err)
 	}
 
 	defer file.Close()
@@ -152,4 +134,8 @@ func saveCredentialsConfigFile(authConfig CredentialsConfig) error {
 	}
 
 	return nil
+}
+
+func credentialsConfigFile(configDir string) string {
+	return filepath.Join(calculateConfigDir(configDir), credentialsFileName)
 }

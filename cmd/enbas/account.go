@@ -8,7 +8,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func getAccountID(gtsClient *client.Client, myAccount bool, accountName string) (string, error) {
+func getAccountID(gtsClient *client.Client, myAccount bool, accountName, configDir string) (string, error) {
 	var (
 		accountID string
 		err       error
@@ -16,7 +16,7 @@ func getAccountID(gtsClient *client.Client, myAccount bool, accountName string) 
 
 	switch {
 	case myAccount:
-		accountID, err = getMyAccountID(gtsClient)
+		accountID, err = getMyAccountID(gtsClient, configDir)
 		if err != nil {
 			return "", fmt.Errorf("unable to get your account ID; %w", err)
 		}
@@ -41,8 +41,8 @@ func getTheirAccountID(gtsClient *client.Client, accountURI string) (string, err
 	return account.ID, nil
 }
 
-func getMyAccountID(gtsClient *client.Client) (string, error) {
-	account, err := getMyAccount(gtsClient)
+func getMyAccountID(gtsClient *client.Client, configDir string) (string, error) {
+	account, err := getMyAccount(gtsClient, configDir)
 	if err != nil {
 		return "", fmt.Errorf("received an error while getting your account details; %w", err)
 	}
@@ -50,8 +50,8 @@ func getMyAccountID(gtsClient *client.Client) (string, error) {
 	return account.ID, nil
 }
 
-func getMyAccount(gtsClient *client.Client) (model.Account, error) {
-	authConfig, err := config.NewAuthenticationConfigFromFile()
+func getMyAccount(gtsClient *client.Client, configDir string) (model.Account, error) {
+	authConfig, err := config.NewCredentialsConfigFromFile(configDir)
 	if err != nil {
 		return model.Account{}, fmt.Errorf("unable to retrieve the authentication configuration; %w", err)
 	}

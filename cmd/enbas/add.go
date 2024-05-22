@@ -11,6 +11,7 @@ import (
 type addCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags  topLevelFlags
 	resourceType   string
 	toResourceType string
 	listID         string
@@ -18,12 +19,13 @@ type addCommand struct {
 	content        string
 }
 
-func newAddCommand(name, summary string) *addCommand {
+func newAddCommand(tlf topLevelFlags, name, summary string) *addCommand {
 	emptyArr := make([]string, 0, 3)
 
 	command := addCommand{
-		FlagSet:      flag.NewFlagSet(name, flag.ExitOnError),
-		accountNames: accountNames(emptyArr),
+		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
+		accountNames:  accountNames(emptyArr),
+		topLevelFlags: tlf,
 	}
 
 	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the resource type to add (e.g. account, note)")
@@ -52,7 +54,7 @@ func (c *addCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.toResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -126,7 +128,7 @@ func (c *addCommand) addNoteToAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(c.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, c.accountNames[0])
+	accountID, err := getAccountID(gtsClient, false, c.accountNames[0], c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}

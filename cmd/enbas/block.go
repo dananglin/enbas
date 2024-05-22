@@ -10,15 +10,17 @@ import (
 type blockCommand struct {
 	*flag.FlagSet
 
+	topLevelFlags topLevelFlags
 	resourceType string
 	accountName  string
 	unblock      bool
 }
 
-func newBlockCommand(name, summary string, unblock bool) *blockCommand {
+func newBlockCommand(tlf topLevelFlags, name, summary string, unblock bool) *blockCommand {
 	command := blockCommand{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
+		topLevelFlags: tlf,
 		unblock: unblock,
 	}
 
@@ -40,7 +42,7 @@ func (c *blockCommand) Execute() error {
 		return unsupportedResourceTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig()
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -49,7 +51,7 @@ func (c *blockCommand) Execute() error {
 }
 
 func (c *blockCommand) blockAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, c.accountName)
+	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	binary               = "enbas"
+	app                  = "enbas"
 	defaultInstallPrefix = "/usr/local"
 	envInstallPrefix     = "ENBAS_INSTALL_PREFIX"
 	envTestVerbose       = "ENBAS_TEST_VERBOSE"
@@ -65,7 +65,8 @@ func Build() error {
 		return fmt.Errorf("unable to change to the project's root directory; %w", err)
 	}
 
-	main := "./cmd/" + binary
+	main := "./cmd/" + app
+	binary := "./__build/" + app
 	flags := ldflags()
 	build := sh.RunCmd("go", "build")
 	args := []string{"-ldflags=" + flags, "-o", binary}
@@ -93,13 +94,13 @@ func Install() error {
 		installPrefix = defaultInstallPrefix
 	}
 
-	dest := filepath.Join(installPrefix, "bin", binary)
+	dest := filepath.Join(installPrefix, "bin", app)
 
-	if err := sh.Copy(dest, binary); err != nil {
+	if err := sh.Copy(dest, app); err != nil {
 		return fmt.Errorf("unable to install %s; %w", dest, err)
 	}
 
-	fmt.Printf("%s successfully installed to %s\n", binary, dest)
+	fmt.Printf("%s successfully installed to %s\n", app, dest)
 
 	return nil
 }
@@ -110,7 +111,7 @@ func Clean() error {
 		return fmt.Errorf("unable to change to the project's root directory; %w", err)
 	}
 
-	if err := sh.Rm(binary); err != nil {
+	if err := sh.Rm(app); err != nil {
 		return err
 	}
 
