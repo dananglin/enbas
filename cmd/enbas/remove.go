@@ -40,7 +40,8 @@ func (c *removeCommand) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		listResource: c.removeFromList,
+		listResource:    c.removeFromList,
+		accountResource: c.removeFromAccount,
 	}
 
 	doFunc, ok := funcMap[c.fromResourceType]
@@ -63,7 +64,10 @@ func (c *removeCommand) removeFromList(gtsClient *client.Client) error {
 
 	doFunc, ok := funcMap[c.resourceType]
 	if !ok {
-		return unsupportedResourceTypeError{resourceType: c.resourceType}
+		return unsupportedRemoveOperationError{
+			ResourceType:           c.resourceType,
+			RemoveFromResourceType: c.fromResourceType,
+		}
 	}
 
 	return doFunc(gtsClient)
@@ -94,6 +98,41 @@ func (c *removeCommand) removeAccountsFromList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully removed the account(s) from the list.")
+
+	return nil
+}
+
+func (c *removeCommand) removeFromAccount(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		noteResource: c.removeNoteFromAccount,
+	}
+
+	doFunc, ok := funcMap[c.resourceType]
+	if !ok {
+		return unsupportedRemoveOperationError{
+			ResourceType:           c.resourceType,
+			RemoveFromResourceType: c.fromResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (c *removeCommand) removeNoteFromAccount(gtsClient *client.Client) error {
+	if len(c.accountNames) != 1 {
+		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(c.accountNames))
+	}
+
+	accountID, err := getAccountID(gtsClient, false, c.accountNames[0])
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
+	}
+
+	if err := gtsClient.SetPrivateNote(accountID, ""); err != nil {
+		return fmt.Errorf("unable to remove the private note from the account; %w", err)
+	}
+
+	fmt.Println("Successfully removed the private note from the account.")
 
 	return nil
 }

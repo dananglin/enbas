@@ -63,6 +63,23 @@ ENBAS_INSTALL_PREFIX=${HOME}/.local mage install
 
 This will install Enbas to `~/.local/bin/enbas`.
 
+===== Environment variables you can use with Mage
+
+[%header,cols=2*]
+|===
+|Environment Variable
+|Description
+
+|`ENBAS_INSTALL_PREFIX`
+|Set this to your preferred the installation prefix (default: `/usr/local`).
+
+|`ENBAS_BUILD_REBUILD_ALL`
+|Set this to `1` to rebuild all packages even if they are already up-to-date.
+
+|`ENBAS_BUILD_VERBOSE`
+|Set this to `1` to enable verbose logging when building the binary.
+|===
+
 ==== Install with go
 
 If your `GOBIN` directory is included in your `PATH` then you can install Enbas with Go.

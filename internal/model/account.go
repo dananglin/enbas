@@ -166,6 +166,7 @@ func (a AccountRelationship) String() string {
 	)
 
 	if a.PrivateNote != "" {
+		output += "\n"
 		output += fmt.Sprintf(
 			privateNoteFormat,
 			utilities.HeaderFormat("YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:"),

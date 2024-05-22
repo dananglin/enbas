@@ -19,6 +19,8 @@ const (
 	envInstallPrefix     = "ENBAS_INSTALL_PREFIX"
 	envTestVerbose       = "ENBAS_TEST_VERBOSE"
 	envTestCover         = "ENBAS_TEST_COVER"
+	envBuildRebuildAll   = "ENBAS_BUILD_REBUILD_ALL"
+	envBuildVerbose      = "ENBAS_BUILD_VERBOSE"
 )
 
 var Default = Build
@@ -56,13 +58,29 @@ func Lint() error {
 }
 
 // Build build the executable.
+// To rebuild packages that are already up-to-date set ENBAS_BUILD_REBUILD_ALL=1
+// To enable verbose mode set ENBAS_BUILD_VERBOSE=1
 func Build() error {
 	if err := changeToProjectRoot(); err != nil {
 		return fmt.Errorf("unable to change to the project's root directory; %w", err)
 	}
 
+	main := "./cmd/" + binary
 	flags := ldflags()
-	return sh.Run("go", "build", "-ldflags="+flags, "-a", "-o", binary, "./cmd/enbas")
+	build := sh.RunCmd("go", "build")
+	args := []string{"-ldflags=" + flags, "-o", binary}
+
+	if os.Getenv(envBuildRebuildAll) == "1" {
+		args = append(args, "-a")
+	}
+
+	if os.Getenv(envBuildVerbose) == "1" {
+		args = append(args, "-v")
+	}
+
+	args = append(args, main)
+
+	return build(args...)
 }
 
 // Install install the executable.

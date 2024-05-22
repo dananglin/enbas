@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 
@@ -14,6 +15,7 @@ type addCommand struct {
 	toResourceType string
 	listID         string
 	accountNames   accountNames
+	content        string
 }
 
 func newAddCommand(name, summary string) *addCommand {
@@ -28,6 +30,7 @@ func newAddCommand(name, summary string) *addCommand {
 	command.StringVar(&command.toResourceType, addToFlag, "", "specify the target resource type to add to (e.g. list, account, etc)")
 	command.StringVar(&command.listID, listIDFlag, "", "the ID of the list to add to")
 	command.Var(&command.accountNames, accountNameFlag, "the name of the account to add to the resource")
+	command.StringVar(&command.content, contentFlag, "", "the content of the note")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
@@ -40,7 +43,8 @@ func (c *addCommand) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		listResource: c.addToList,
+		listResource:    c.addToList,
+		accountResource: c.addToAccount,
 	}
 
 	doFunc, ok := funcMap[c.toResourceType]
@@ -63,7 +67,10 @@ func (c *addCommand) addToList(gtsClient *client.Client) error {
 
 	doFunc, ok := funcMap[c.resourceType]
 	if !ok {
-		return unsupportedResourceTypeError{resourceType: c.resourceType}
+		return unsupportedAddOperationError{
+			ResourceType:      c.resourceType,
+			AddToResourceType: c.toResourceType,
+		}
 	}
 
 	return doFunc(gtsClient)
@@ -94,6 +101,45 @@ func (c *addCommand) addAccountsToList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully added the account(s) to the list.")
+
+	return nil
+}
+
+func (c *addCommand) addToAccount(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		noteResource: c.addNoteToAccount,
+	}
+
+	doFunc, ok := funcMap[c.resourceType]
+	if !ok {
+		return unsupportedAddOperationError{
+			ResourceType:      c.resourceType,
+			AddToResourceType: c.toResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (c *addCommand) addNoteToAccount(gtsClient *client.Client) error {
+	if len(c.accountNames) != 1 {
+		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(c.accountNames))
+	}
+
+	accountID, err := getAccountID(gtsClient, false, c.accountNames[0])
+	if err != nil {
+		return fmt.Errorf("received an error while getting the account ID; %w", err)
+	}
+
+	if c.content == "" {
+		return errors.New("the note content should not be empty")
+	}
+
+	if err := gtsClient.SetPrivateNote(accountID, c.content); err != nil {
+		return fmt.Errorf("unable to add the private note to the account; %w", err)
+	}
+
+	fmt.Println("Successfully added the private note to the account.")
 
 	return nil
 }

@@ -37,3 +37,21 @@ type noAccountSpecifiedError struct{}
 func (e noAccountSpecifiedError) Error() string {
 	return "no account specified in this request"
 }
+
+type unsupportedAddOperationError struct {
+	ResourceType      string
+	AddToResourceType string
+}
+
+func (e unsupportedAddOperationError) Error() string {
+	return "adding '" + e.ResourceType + "' to '" + e.AddToResourceType + "' is not supported"
+}
+
+type unsupportedRemoveOperationError struct {
+	ResourceType           string
+	RemoveFromResourceType string
+}
+
+func (e unsupportedRemoveOperationError) Error() string {
+	return "removing '" + e.ResourceType + "' from '" + e.RemoveFromResourceType + "' is not supported"
+}

@@ -158,3 +158,25 @@ func (g *Client) GetBlockedAccounts(limit int) (model.AccountList, error) {
 
 	return blocked, nil
 }
+
+func (g *Client) SetPrivateNote(accountID, note string) error {
+	form := struct {
+		Comment string `json:"comment"`
+	}{
+		Comment: note,
+	}
+
+	data, err := json.Marshal(form)
+	if err != nil {
+		return fmt.Errorf("unable to marshal the form; %w", err)
+	}
+
+	requestBody := bytes.NewBuffer(data)
+	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/note", accountID)
+
+	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+		return fmt.Errorf("received an error after sending the request to set the private note; %w", err)
+	}
+
+	return nil
+}
