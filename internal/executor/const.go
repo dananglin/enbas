@@ -12,7 +12,7 @@ const (
 	flagNotify            = "notify"
 	flagFrom              = "from"
 	flagType              = "type"
-	flagShowRelationship  = "show-relationship"
+	flagSkipRelationship  = "skip-relationship"
 	flagShowPreferences   = "show-preferences"
 	flagShowReposts       = "show-reposts"
 	flagStatusID          = "status-id"

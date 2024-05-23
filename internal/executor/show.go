@@ -13,7 +13,7 @@ type ShowExecutor struct {
 	*flag.FlagSet
 	topLevelFlags           TopLevelFlags
 	myAccount               bool
-	showAccountRelationship bool
+	skipAccountRelationship bool
 	showUserPreferences     bool
 	resourceType            string
 	accountName             string
@@ -31,7 +31,7 @@ func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
 	}
 
 	command.BoolVar(&command.myAccount, flagMyAccount, false, "set to true to lookup your account")
-	command.BoolVar(&command.showAccountRelationship, flagShowRelationship, false, "show your relationship to the specified account")
+	command.BoolVar(&command.skipAccountRelationship, flagSkipRelationship, false, "set to true to skip showing your relationship to the specified account")
 	command.BoolVar(&command.showUserPreferences, flagShowPreferences, false, "show your preferences")
 	command.StringVar(&command.resourceType, flagType, "", "specify the type of resource to display")
 	command.StringVar(&command.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
@@ -110,7 +110,7 @@ func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
 
 	fmt.Println(account)
 
-	if !c.myAccount && c.showAccountRelationship {
+	if !c.myAccount && !c.skipAccountRelationship {
 		relationship, err := gtsClient.GetAccountRelationship(account.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account; %w", err)
