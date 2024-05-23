@@ -47,7 +47,6 @@ You can install Enbas with Mage using the following commands:
 [source,console]
 ----
 git clone https://github.com/dananglin/enbas.git
-cd enbas/internal/build/
 mage install
 ----
 
