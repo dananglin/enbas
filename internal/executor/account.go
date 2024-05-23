@@ -1,4 +1,4 @@
-package main
+package executor
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func getAccountID(gtsClient *client.Client, myAccount bool, accountName, configD
 			return "", fmt.Errorf("unable to get their account ID; %w", err)
 		}
 	default:
-		return "", noAccountSpecifiedError{}
+		return "", NoAccountSpecifiedError{}
 	}
 
 	return accountID, nil

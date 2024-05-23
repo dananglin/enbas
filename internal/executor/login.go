@@ -1,4 +1,4 @@
-package main
+package executor
 
 import (
 	"flag"
@@ -10,32 +10,32 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
-type loginCommand struct {
+type LoginExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags topLevelFlags
-	instance string
+	topLevelFlags TopLevelFlags
+	instance      string
 }
 
-func newLoginCommand(tlf topLevelFlags, name, summary string) *loginCommand {
-	command := loginCommand{
-		FlagSet:  flag.NewFlagSet(name, flag.ExitOnError),
+func NewLoginExecutor(tlf TopLevelFlags, name, summary string) *LoginExecutor {
+	command := LoginExecutor{
+		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
 		topLevelFlags: tlf,
-		instance: "",
+		instance:      "",
 	}
 
-	command.StringVar(&command.instance, instanceFlag, "", "specify the instance that you want to login to.")
+	command.StringVar(&command.instance, flagInstance, "", "specify the instance that you want to login to.")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
 	return &command
 }
 
-func (c *loginCommand) Execute() error {
+func (c *LoginExecutor) Execute() error {
 	var err error
 
 	if c.instance == "" {
-		return flagNotSetError{flagText: instanceFlag}
+		return FlagNotSetError{flagText: flagInstance}
 	}
 
 	instance := c.instance
@@ -91,7 +91,7 @@ Once you have the code please copy and paste it below.
 		return fmt.Errorf("unable to verify the credentials; %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(c.topLevelFlags.configDir, account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(c.topLevelFlags.ConfigDir, account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details; %w", err)
 	}

@@ -1,0 +1,32 @@
+package executor
+
+const (
+	flagAccountName       = "account-name"
+	flagContent           = "content"
+	flagInstance          = "instance"
+	flagLimit             = "limit"
+	flagListID            = "list-id"
+	flagListTitle         = "list-title"
+	flagListRepliesPolicy = "list-replies-policy"
+	flagMyAccount         = "my-account"
+	flagNotify            = "notify"
+	flagFrom              = "from"
+	flagType              = "type"
+	flagShowRelationship  = "show-relationship"
+	flagShowPreferences   = "show-preferences"
+	flagShowReposts       = "show-reposts"
+	flagStatusID          = "status-id"
+	flagTag               = "tag"
+	flagTimelineCategory  = "timeline-category"
+	flagTo                = "to"
+
+	resourceAccount   = "account"
+	resourceBlocked   = "blocked"
+	resourceFollowers = "followers"
+	resourceFollowing = "following"
+	resourceInstance  = "instance"
+	resourceList      = "list"
+	resourceNote      = "note"
+	resourceStatus    = "status"
+	resourceTimeline  = "timeline"
+)

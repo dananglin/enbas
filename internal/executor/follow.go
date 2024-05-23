@@ -1,4 +1,4 @@
-package main
+package executor
 
 import (
 	"flag"
@@ -7,10 +7,10 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 )
 
-type followCommand struct {
+type FollowExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags topLevelFlags
+	topLevelFlags TopLevelFlags
 	resourceType  string
 	accountName   string
 	showReposts   bool
@@ -18,34 +18,34 @@ type followCommand struct {
 	unfollow      bool
 }
 
-func newFollowCommand(tlf topLevelFlags, name, summary string, unfollow bool) *followCommand {
-	command := followCommand{
+func NewFollowExecutor(tlf TopLevelFlags, name, summary string, unfollow bool) *FollowExecutor {
+	command := FollowExecutor{
 		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
 		unfollow:      unfollow,
 		topLevelFlags: tlf,
 	}
 
-	command.StringVar(&command.resourceType, resourceTypeFlag, "", "specify the type of resource to follow")
-	command.StringVar(&command.accountName, accountNameFlag, "", "specify the account name in full (username@domain)")
-	command.BoolVar(&command.showReposts, showRepostsFlag, true, "show reposts from the account you want to follow")
-	command.BoolVar(&command.notify, notifyFlag, false, "get notifications when the account you want to follow posts a status")
+	command.StringVar(&command.resourceType, flagType, "", "specify the type of resource to follow")
+	command.StringVar(&command.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
+	command.BoolVar(&command.showReposts, flagShowReposts, true, "show reposts from the account you want to follow")
+	command.BoolVar(&command.notify, flagNotify, false, "get notifications when the account you want to follow posts a status")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 
 	return &command
 }
 
-func (c *followCommand) Execute() error {
+func (c *FollowExecutor) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
-		accountResource: c.followAccount,
+		resourceAccount: c.followAccount,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
 	if !ok {
-		return unsupportedResourceTypeError{resourceType: c.resourceType}
+		return UnsupportedTypeError{resourceType: c.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.configDir)
+	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
 	}
@@ -53,8 +53,8 @@ func (c *followCommand) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *followCommand) followAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.configDir)
+func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID; %w", err)
 	}
@@ -72,7 +72,7 @@ func (c *followCommand) followAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *followCommand) unfollowAccount(gtsClient *client.Client, accountID string) error {
+func (c *FollowExecutor) unfollowAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.UnfollowAccount(accountID); err != nil {
 		return fmt.Errorf("unable to unfollow the account; %w", err)
 	}

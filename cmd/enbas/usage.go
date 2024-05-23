@@ -7,36 +7,7 @@ import (
 	"strings"
 )
 
-func commandUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
-	return func() {
-		var builder strings.Builder
-
-		fmt.Fprintf(
-			&builder,
-			"SUMMARY:\n  %s - %s\n\nUSAGE:\n  enbas %s [flags]\n\nFLAGS:",
-			name,
-			summary,
-			name,
-		)
-
-		flagset.VisitAll(func(f *flag.Flag) {
-			fmt.Fprintf(
-				&builder,
-				"\n  --%s\n        %s",
-				f.Name,
-				f.Usage,
-			)
-		})
-
-		builder.WriteString("\n")
-
-		w := flag.CommandLine.Output()
-
-		fmt.Fprint(w, builder.String())
-	}
-}
-
-func enbasUsageFunc(summaries map[string]string) func() {
+func usageFunc(summaries map[string]string) func() {
 	cmds := make([]string, len(summaries))
 	ind := 0
 

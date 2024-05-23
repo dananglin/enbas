@@ -4,47 +4,33 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/executor"
 )
 
 const (
-	accountNameFlag             = "account-name"
-	addToFlag                   = "to"
-	contentFlag                 = "content"
-	instanceFlag                = "instance"
-	limitFlag                   = "limit"
-	listIDFlag                  = "list-id"
-	listTitleFlag               = "list-title"
-	listRepliesPolicyFlag       = "list-replies-policy"
-	myAccountFlag               = "my-account"
-	notifyFlag                  = "notify"
-	removeFromFlag              = "from"
-	resourceTypeFlag            = "type"
-	showAccountRelationshipFlag = "show-account-relationship"
-	showUserPreferencesFlag     = "show-preferences"
-	showRepostsFlag             = "show-reposts"
-	statusIDFlag                = "status-id"
-	tagFlag                     = "tag"
-	timelineCategoryFlag        = "timeline-category"
-	toAccountFlag               = "to-account"
+	commandLogin    string = "login"
+	commandVersion  string = "version"
+	commandShow     string = "show"
+	commandSwitch   string = "switch"
+	commandCreate   string = "create"
+	commandDelete   string = "delete"
+	commandEdit     string = "edit"
+	commandWhoami   string = "whoami"
+	commandAdd      string = "add"
+	commandRemove   string = "remove"
+	commandFollow   string = "follow"
+	commandUnfollow string = "unfollow"
+	commandBlock    string = "block"
+	commandUnblock  string = "unblock"
 )
 
-const (
-	accountResource   = "account"
-	blockedResource   = "blocked"
-	followersResource = "followers"
-	followingResource = "following"
-	instanceResource  = "instance"
-	listResource      = "list"
-	noteResource      = "note"
-	statusResource    = "status"
-	timelineResource  = "timeline"
+var (
+	binaryVersion string
+	buildTime     string
+	goVersion     string
+	gitCommit     string
 )
-
-type Executor interface {
-	Name() string
-	Parse(args []string) error
-	Execute() error
-}
 
 func main() {
 	if err := run(); err != nil {
@@ -54,45 +40,28 @@ func main() {
 }
 
 func run() error {
-	const (
-		login          string = "login"
-		version        string = "version"
-		showResource   string = "show"
-		switchAccount  string = "switch"
-		createResource string = "create"
-		deleteResource string = "delete"
-		updateResource string = "update"
-		whoami         string = "whoami"
-		add            string = "add"
-		remove         string = "remove"
-		follow         string = "follow"
-		unfollow       string = "unfollow"
-		block          string = "block"
-		unblock        string = "unblock"
-	)
-
-	summaries := map[string]string{
-		login:          "login to an account on GoToSocial",
-		version:        "print the application's version and build information",
-		showResource:   "print details about a specified resource",
-		switchAccount:  "switch to an account",
-		createResource: "create a specific resource",
-		deleteResource: "delete a specific resource",
-		updateResource: "update a specific resource",
-		whoami:         "print the account that you are currently logged in to",
-		add:            "add a resource to another resource",
-		remove:         "remove a resource from another resource",
-		follow:         "follow a resource (e.g. an account)",
-		unfollow:       "unfollow a resource (e.g. an account)",
-		block:          "block a resource (e.g. an account)",
-		unblock:        "unblock a resource (e.g. an account)",
+	commandSummaries := map[string]string{
+		commandLogin:    "login to an account on GoToSocial",
+		commandVersion:  "print the application's version and build information",
+		commandShow:     "print details about a specified resource",
+		commandSwitch:   "perform a switch operation (e.g. switch logged in accounts)",
+		commandCreate:   "create a specific resource",
+		commandDelete:   "delete a specific resource",
+		commandEdit:     "edit a specific resource",
+		commandWhoami:   "print the account that you are currently logged in to",
+		commandAdd:      "add a resource to another resource",
+		commandRemove:   "remove a resource from another resource",
+		commandFollow:   "follow a resource (e.g. an account)",
+		commandUnfollow: "unfollow a resource (e.g. an account)",
+		commandBlock:    "block a resource (e.g. an account)",
+		commandUnblock:  "unblock a resource (e.g. an account)",
 	}
 
-	tlf := topLevelFlags{}
+	topLevelFlags := executor.TopLevelFlags{}
 
-	flag.StringVar(&tlf.configDir, "config-dir", "", "specify your config directory")
+	flag.StringVar(&topLevelFlags.ConfigDir, "config-dir", "", "specify your config directory")
 
-	flag.Usage = enbasUsageFunc(summaries)
+	flag.Usage = usageFunc(commandSummaries)
 
 	flag.Parse()
 
@@ -102,52 +71,107 @@ func run() error {
 		return nil
 	}
 
-	subcommand := flag.Arg(0)
+	command := flag.Arg(0)
 	args := flag.Args()[1:]
 
-	var executor Executor
+	var err error
 
-	switch subcommand {
-	case login:
-		executor = newLoginCommand(tlf, login, summaries[login])
-	case version:
-		executor = newVersionCommand(version, summaries[version])
-	case showResource:
-		executor = newShowCommand(tlf, showResource, summaries[showResource])
-	case switchAccount:
-		executor = newSwitchCommand(tlf, switchAccount, summaries[switchAccount])
-	case createResource:
-		executor = newCreateCommand(tlf, createResource, summaries[createResource])
-	case deleteResource:
-		executor = newDeleteCommand(tlf, deleteResource, summaries[deleteResource])
-	case updateResource:
-		executor = newUpdateCommand(tlf, updateResource, summaries[updateResource])
-	case whoami:
-		executor = newWhoAmICommand(tlf, whoami, summaries[whoami])
-	case add:
-		executor = newAddCommand(tlf, add, summaries[add])
-	case remove:
-		executor = newRemoveCommand(tlf, remove, summaries[remove])
-	case follow:
-		executor = newFollowCommand(tlf, follow, summaries[follow], false)
-	case unfollow:
-		executor = newFollowCommand(tlf, unfollow, summaries[unfollow], true)
-	case block:
-		executor = newBlockCommand(tlf, block, summaries[block], false)
-	case unblock:
-		executor = newBlockCommand(tlf, unblock, summaries[unblock], true)
+	switch command {
+	case commandAdd:
+		exe := executor.NewAddExecutor(
+			topLevelFlags,
+			commandAdd,
+			commandSummaries[commandAdd],
+		)
+		err = executor.Execute(exe, args)
+	case commandBlock:
+		exe := executor.NewBlockExecutor(
+			topLevelFlags,
+			commandBlock,
+			commandSummaries[commandBlock],
+			false,
+		)
+		err = executor.Execute(exe, args)
+	case commandCreate:
+		exe := executor.NewCreateExecutor(
+			topLevelFlags,
+			commandCreate,
+			commandSummaries[commandCreate],
+		)
+		err = executor.Execute(exe, args)
+	case commandDelete:
+		exe := executor.NewDeleteExecutor(
+			topLevelFlags,
+			commandDelete,
+			commandSummaries[commandDelete],
+		)
+		err = executor.Execute(exe, args)
+	case commandEdit:
+		exe := executor.NewEditExecutor(
+			topLevelFlags,
+			commandEdit,
+			commandSummaries[commandEdit],
+		)
+		err = executor.Execute(exe, args)
+	case commandFollow:
+		exe := executor.NewFollowExecutor(
+			topLevelFlags,
+			commandFollow,
+			commandSummaries[commandFollow],
+			false,
+		)
+		err = executor.Execute(exe, args)
+	case commandLogin:
+		exe := executor.NewLoginExecutor(
+			topLevelFlags,
+			commandLogin,
+			commandSummaries[commandLogin],
+		)
+		err = executor.Execute(exe, args)
+	case commandRemove:
+		exe := executor.NewRemoveExecutor(
+			topLevelFlags,
+			commandRemove,
+			commandSummaries[commandRemove],
+		)
+		err = executor.Execute(exe, args)
+	case commandSwitch:
+		exe := executor.NewSwitchExecutor(
+			topLevelFlags,
+			commandSwitch,
+			commandSummaries[commandSwitch],
+		)
+		err = executor.Execute(exe, args)
+	case commandUnfollow:
+		exe := executor.NewFollowExecutor(topLevelFlags, commandUnfollow, commandSummaries[commandUnfollow], true)
+		err = executor.Execute(exe, args)
+	case commandUnblock:
+		exe := executor.NewBlockExecutor(topLevelFlags, commandUnblock, commandSummaries[commandUnblock], true)
+		err = executor.Execute(exe, args)
+	case commandShow:
+		exe := executor.NewShowExecutor(topLevelFlags, commandShow, commandSummaries[commandShow])
+		err = executor.Execute(exe, args)
+	case commandVersion:
+		exe := executor.NewVersionExecutor(
+			commandVersion,
+			commandSummaries[commandVersion],
+			binaryVersion,
+			buildTime,
+			goVersion,
+			gitCommit,
+		)
+		err = executor.Execute(exe, args)
+	case commandWhoami:
+		exe := executor.NewWhoAmIExecutor(topLevelFlags, commandWhoami, commandSummaries[commandWhoami])
+		err = executor.Execute(exe, args)
 	default:
 		flag.Usage()
 
-		return unknownSubcommandError{subcommand}
+		return unknownCommandError{command}
 	}
 
-	if err := executor.Parse(args); err != nil {
-		return fmt.Errorf("unable to parse the command line flags; %w", err)
-	}
-
-	if err := executor.Execute(); err != nil {
-		return fmt.Errorf("received an error after executing %q; %w", executor.Name(), err)
+	if err != nil {
+		return fmt.Errorf("received an error executing the command; %w", err)
 	}
 
 	return nil

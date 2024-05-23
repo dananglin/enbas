@@ -1,4 +1,4 @@
-package main
+package executor
 
 import (
 	"flag"
@@ -7,14 +7,7 @@ import (
 	"strings"
 )
 
-var (
-	binaryVersion string
-	buildTime     string
-	goVersion     string
-	gitCommit     string
-)
-
-type versionCommand struct {
+type VersionExecutor struct {
 	*flag.FlagSet
 	showFullVersion bool
 	binaryVersion   string
@@ -23,8 +16,8 @@ type versionCommand struct {
 	gitCommit       string
 }
 
-func newVersionCommand(name, summary string) *versionCommand {
-	command := versionCommand{
+func NewVersionExecutor(name, summary, binaryVersion, buildTime, goVersion, gitCommit string) *VersionExecutor {
+	command := VersionExecutor{
 		FlagSet:         flag.NewFlagSet(name, flag.ExitOnError),
 		binaryVersion:   binaryVersion,
 		buildTime:       buildTime,
@@ -40,7 +33,7 @@ func newVersionCommand(name, summary string) *versionCommand {
 	return &command
 }
 
-func (c *versionCommand) Execute() error {
+func (c *VersionExecutor) Execute() error {
 	var builder strings.Builder
 
 	if c.showFullVersion {
