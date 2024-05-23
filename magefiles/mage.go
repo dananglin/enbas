@@ -23,7 +23,10 @@ const (
 	envBuildVerbose      = "ENBAS_BUILD_VERBOSE"
 )
 
-var Default = Build
+var (
+	Default = Build
+	binary  = "./__build/" + app
+)
 
 // Test run the go tests.
 // To enable verbose mode set ENBAS_TEST_VERBOSE=1.
@@ -54,7 +57,6 @@ func Lint() error {
 // To enable verbose mode set ENBAS_BUILD_VERBOSE=1
 func Build() error {
 	main := "./cmd/" + app
-	binary := "./__build/" + app
 	flags := ldflags()
 	build := sh.RunCmd("go", "build")
 	args := []string{"-ldflags=" + flags, "-o", binary}
@@ -84,7 +86,7 @@ func Install() error {
 
 	dest := filepath.Join(installPrefix, "bin", app)
 
-	if err := sh.Copy(dest, app); err != nil {
+	if err := sh.Copy(dest, binary); err != nil {
 		return fmt.Errorf("unable to install %s; %w", dest, err)
 	}
 
@@ -95,7 +97,7 @@ func Install() error {
 
 // Clean clean the workspace.
 func Clean() error {
-	if err := sh.Rm(app); err != nil {
+	if err := sh.Rm(binary); err != nil {
 		return err
 	}
 
