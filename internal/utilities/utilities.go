@@ -43,7 +43,13 @@ func StripHTMLTags(text string) string {
 		case html.ErrorToken:
 			return builder.String()
 		case html.TextToken:
-			builder.WriteString(token.Token().Data + " ")
+			text := token.Token().String()
+			builder.WriteString(text)
+		case html.StartTagToken:
+			tag := token.Token().String()
+			if tag == "<br>" {
+				builder.WriteString("\n")
+			}
 		}
 	}
 }
