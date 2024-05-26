@@ -43,15 +43,24 @@ func StripHTMLTags(text string) string {
 		case html.ErrorToken:
 			return builder.String()
 		case html.TextToken:
-			text := token.Token().String()
+			text := token.Token().Data
 			builder.WriteString(text)
-		case html.StartTagToken:
+		case html.StartTagToken, html.EndTagToken:
 			tag := token.Token().String()
-			if tag == "<br>" {
-				builder.WriteString("\n")
-			}
+			builder.WriteString(transformTag(tag))
 		}
 	}
+}
+
+func transformTag(tag string) string {
+	switch tag {
+	case "<br>":
+		return "\n"
+	case "<p>", "</p>":
+		return "\n"
+	}
+
+	return ""
 }
 
 func WrapLines(text, separator string, charLimit int) string {

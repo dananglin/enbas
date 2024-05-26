@@ -158,7 +158,6 @@ func (s Status) String() string {
 
 %s
   %s
-
 %s
   %s
 
@@ -179,10 +178,9 @@ func (s Status) String() string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.DisplayNameFormat(s.Account.DisplayName),
-		s.Account.Username,
+		utilities.DisplayNameFormat(s.Account.DisplayName), s.Account.Username,
 		utilities.HeaderFormat("CONTENT:"),
-		utilities.WrapLines(s.Text, "\n  ", 80),
+		utilities.WrapLines(utilities.StripHTMLTags(s.Content), "\n  ", 80),
 		utilities.HeaderFormat("STATUS ID:"),
 		s.ID,
 		utilities.HeaderFormat("CREATED AT:"),
