@@ -15,6 +15,7 @@ type ShowExecutor struct {
 	myAccount               bool
 	skipAccountRelationship bool
 	showUserPreferences     bool
+	showInBrowser           bool
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -33,6 +34,7 @@ func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
 	command.BoolVar(&command.myAccount, flagMyAccount, false, "set to true to lookup your account")
 	command.BoolVar(&command.skipAccountRelationship, flagSkipRelationship, false, "set to true to skip showing your relationship to the specified account")
 	command.BoolVar(&command.showUserPreferences, flagShowPreferences, false, "show your preferences")
+	command.BoolVar(&command.showInBrowser, flagBrowser, false, "set to true to view in the browser")
 	command.StringVar(&command.resourceType, flagType, "", "specify the type of resource to display")
 	command.StringVar(&command.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
 	command.StringVar(&command.statusID, flagStatusID, "", "specify the ID of the status to display")
@@ -108,6 +110,12 @@ func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		}
 	}
 
+	if c.showInBrowser {
+		utilities.OpenLink(account.URL)
+
+		return nil
+	}
+
 	fmt.Println(account)
 
 	if !c.myAccount && !c.skipAccountRelationship {
@@ -139,6 +147,12 @@ func (c *ShowExecutor) showStatus(gtsClient *client.Client) error {
 	status, err := gtsClient.GetStatus(c.statusID)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the status; %w", err)
+	}
+
+	if c.showInBrowser {
+		utilities.OpenLink(status.URL)
+
+		return nil
 	}
 
 	fmt.Println(status)

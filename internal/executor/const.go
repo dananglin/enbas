@@ -2,6 +2,7 @@ package executor
 
 const (
 	flagAccountName       = "account-name"
+	flagBrowser           = "browser"
 	flagContent           = "content"
 	flagInstance          = "instance"
 	flagLimit             = "limit"

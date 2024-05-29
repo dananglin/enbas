@@ -5,7 +5,7 @@
 
 == Overview
 
-Enbas is a https://docs.gotosocial.org/en/latest/[GoToSocial] (GTS) client for your terminal written
+Enbas is a https://docs.gotosocial.org/en/latest/[GoToSocial] client for your terminal written
 in https://go.dev[Go]. The project is in its experimental stages of development so bugs and breaking
 changes may appear. Enbas has limited functionality at the moment and it is **not** recommended for use
 with your production GoToSocial servers.
@@ -157,7 +157,8 @@ Use "enbas [command] --help" for more information about a command.
 
 === Log into your GoToSocial account
 
-Enbas uses the Oauth2 authentication flow to log into your account on GTS. This process requires your input to give consent to allow Enbas access to your account.
+Enbas uses the Oauth2 authentication flow to log into your account on GoToSocial.
+This process requires your input to give consent to allow Enbas access to your account.
 
 [WARNING]
 ====
@@ -176,14 +177,14 @@ The login flow is completed using the following steps:
 enbas login --instance gotosocial-01.social.example
 ----
 
-2. The application will register itself and the GTS server will create a new client ID and secret that the app needs for authentication.
+2. The application will register itself and the GoToSocial server will create a new client ID and secret that the app needs for authentication.
 
 3. The application will then generate a link to the consent form for you to access in your browser.
 This link will be printed on your terminal screen along with a message explaining that you need to obtain the `out-of-band` token to continue.
-If you're on Linux the link will open in a new browser tab for you to sign into your account.
-If you're using a different OS or the browser tab doesn't open, you can manually open the link in a new browser tab.
+If you have the `BROWSER` environment variable set or if you're using Linux, the link will open in a new browser tab for you to sign into your account.
+If the browser tab doesn't open, you can manually copy and paste the link in your favourite browser.
 
-4. Once you've signed into GTS on your browser, you will be informed that Enbas would like to perform actions on your behalf.
+4. Once you've signed into GoToSocial on your browser, you will be informed that Enbas would like to perform actions on your behalf.
 If you're happy with this then click on the `Allow` button.
 +
 image::assets/images/consent_form.png[A screenshot of the consent form]
@@ -192,7 +193,7 @@ image::assets/images/consent_form.png[A screenshot of the consent form]
 
 6. Paste the token into the prompt and press `ENTER`.
 Enbas will then exchange the token for an access token which will be used to authentication to the
-GTS server on your behalf.
+GoToSocial server on your behalf.
 Enbas will then verify the access token, save the credentials to the `credentials.json` file in your configuration directory,
 and confirm that you have successfully logged into your account.
 +
