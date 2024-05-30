@@ -133,7 +133,10 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	}
 
 	if a.content == "" {
-		return EmptyContentError{}
+		return EmptyContentError{
+			ResourceType: resourceNote,
+			Hint:         "please use --" + flagContent,
+		}
 	}
 
 	if err := gtsClient.SetPrivateNote(accountID, a.content); err != nil {

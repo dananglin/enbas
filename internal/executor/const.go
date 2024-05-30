@@ -10,6 +10,7 @@ const (
 	flagEnableReplies     = "enable-replies"
 	flagEnableReposts     = "enable-reposts"
 	flagFrom              = "from"
+	flagFromFile          = "from-file"
 	flagInstance          = "instance"
 	flagLanguage          = "language"
 	flagLimit             = "limit"

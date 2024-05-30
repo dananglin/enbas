@@ -48,10 +48,19 @@ func (e UnsupportedRemoveOperationError) Error() string {
 	return "removing '" + e.ResourceType + "' from '" + e.RemoveFromResourceType + "' is not supported"
 }
 
-type EmptyContentError struct{}
+type EmptyContentError struct{
+	ResourceType string
+	Hint string
+}
 
 func (e EmptyContentError) Error() string {
-	return "content should not be empty"
+	message := "the content of this " + e.ResourceType + " should not be empty"
+
+	if e.Hint != "" {
+		message += ", " + e.Hint
+	}
+
+	return message
 }
 
 type InvalidStatusVisibilityError struct {

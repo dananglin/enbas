@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type CreateExecutor struct {
@@ -19,6 +20,7 @@ type CreateExecutor struct {
 	sensitive         bool
 	content           string
 	contentType       string
+	fromFile          string
 	language          string
 	spoilerText       string
 	resourceType      string
@@ -41,6 +43,7 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.BoolVar(&createExe.sensitive, flagSensitive, false, "specify if the status should be marked as sensitive")
 	createExe.StringVar(&createExe.content, flagContent, "", "the content of the status to create")
 	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "the type that the contents should be parsed from (valid values are plain and markdown)")
+	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "the file path where to read the contents from")
 	createExe.StringVar(&createExe.language, flagLanguage, "", "the ISO 639 language code for this status")
 	createExe.StringVar(&createExe.spoilerText, flagSpoilerText, "", "the text to display as the status' warning or subject")
 	createExe.StringVar(&createExe.visibility, flagVisibility, "", "the visibility of the posted status")
@@ -103,14 +106,27 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 }
 
 func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
-	if c.content == "" {
-		return FlagNotSetError{flagText: flagContent}
-	}
-
 	var (
+		err        error
+		content    string
 		language   string
 		visibility string
 	)
+
+	switch {
+	case c.content != "":
+		content = c.content
+	case c.fromFile != "":
+		content, err = utilities.ReadFile(c.fromFile)
+		if err != nil {
+			return fmt.Errorf("unable to get the status contents from %q; %w", c.fromFile, err)
+		}
+	default:
+		return EmptyContentError{
+			ResourceType: resourceStatus,
+			Hint:         "please use --" + flagContent + " or --" + flagFromFile,
+		}
+	}
 
 	preferences, err := gtsClient.GetUserPreferences()
 	if err != nil {
@@ -140,7 +156,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	}
 
 	form := client.CreateStatusForm{
-		Content:     c.content,
+		Content:     content,
 		ContentType: parsedContentType,
 		Language:    language,
 		SpoilerText: c.spoilerText,
