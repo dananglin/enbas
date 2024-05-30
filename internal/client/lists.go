@@ -43,15 +43,12 @@ func (g *Client) GetList(listID string) (model.List, error) {
 	return list, nil
 }
 
-func (g *Client) CreateList(title string, repliesPolicy model.ListRepliesPolicy) (model.List, error) {
-	form := struct {
-		Title         string                  `json:"title"`
-		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
-	}{
-		Title:         title,
-		RepliesPolicy: repliesPolicy,
-	}
+type CreateListForm struct {
+	Title         string                  `json:"title"`
+	RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
+}
 
+func (g *Client) CreateList(form CreateListForm) (model.List, error) {
 	data, err := json.Marshal(form)
 	if err != nil {
 		return model.List{}, fmt.Errorf("unable to marshal the form; %w", err)

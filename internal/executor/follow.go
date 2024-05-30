@@ -63,7 +63,13 @@ func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
 		return c.unfollowAccount(gtsClient, accountID)
 	}
 
-	if err := gtsClient.FollowAccount(accountID, c.showReposts, c.notify); err != nil {
+	form := client.FollowAccountForm{
+		AccountID:   accountID,
+		ShowReposts: c.showReposts,
+		Notify:      c.notify,
+	}
+
+	if err := gtsClient.FollowAccount(form); err != nil {
 		return fmt.Errorf("unable to follow the account; %w", err)
 	}
 

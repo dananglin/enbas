@@ -86,7 +86,12 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 		return InvalidListRepliesPolicyError{Policy: c.listRepliesPolicy}
 	}
 
-	list, err := gtsClient.CreateList(c.listTitle, parsedListRepliesPolicy)
+	form := client.CreateListForm{
+		Title:         c.listTitle,
+		RepliesPolicy: parsedListRepliesPolicy,
+	}
+
+	list, err := gtsClient.CreateList(form)
 	if err != nil {
 		return fmt.Errorf("unable to create the list; %w", err)
 	}

@@ -52,24 +52,20 @@ func (g *Client) GetAccountRelationship(accountID string) (model.AccountRelation
 	return relationships[0], nil
 }
 
-func (g *Client) FollowAccount(accountID string, reblogs, notify bool) error {
-	form := struct {
-		ID      string `json:"id"`
-		Reblogs bool   `json:"reblogs"`
-		Notify  bool   `json:"notify"`
-	}{
-		ID:      accountID,
-		Reblogs: reblogs,
-		Notify:  notify,
-	}
+type FollowAccountForm struct {
+	AccountID   string `json:"id"`
+	ShowReposts bool   `json:"reblogs"`
+	Notify      bool   `json:"notify"`
+}
 
+func (g *Client) FollowAccount(form FollowAccountForm) error {
 	data, err := json.Marshal(form)
 	if err != nil {
 		return fmt.Errorf("unable to marshal the form; %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/follow", accountID)
+	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/follow", form.AccountID)
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf("received an error after sending the follow request; %w", err)
