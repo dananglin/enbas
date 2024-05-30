@@ -71,12 +71,12 @@ func (e *EditExecutor) updateList(gtsClient *client.Client) error {
 	}
 
 	if e.listRepliesPolicy != "" {
-		repliesPolicy, err := model.ParseListRepliesPolicy(e.listRepliesPolicy)
-		if err != nil {
-			return fmt.Errorf("unable to parse the list replies policy; %w", err)
+		parsedListRepliesPolicy := model.ParseListRepliesPolicy(e.listRepliesPolicy)
+		if parsedListRepliesPolicy == model.ListRepliesPolicyUnknown {
+			return InvalidListRepliesPolicyError{Policy: e.listRepliesPolicy}
 		}
 
-		list.RepliesPolicy = repliesPolicy
+		list.RepliesPolicy = parsedListRepliesPolicy
 	}
 
 	updatedList, err := gtsClient.UpdateList(list)

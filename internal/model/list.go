@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -14,38 +13,49 @@ const (
 	ListRepliesPolicyFollowed ListRepliesPolicy = iota
 	ListRepliesPolicyList
 	ListRepliesPolicyNone
+	ListRepliesPolicyUnknown
 )
 
-func ParseListRepliesPolicy(policy string) (ListRepliesPolicy, error) {
-	switch policy {
-	case "followed":
-		return ListRepliesPolicyFollowed, nil
-	case "list":
-		return ListRepliesPolicyList, nil
-	case "none":
-		return ListRepliesPolicyNone, nil
-	}
-
-	return ListRepliesPolicy(-1), fmt.Errorf("%q is not a valid list replies policy", policy)
-}
+const (
+	listRepliesPolicyFollowedValue = "followed"
+	listRepliesPolicyListValue     = "list"
+	listRepliesPolicyNoneValue     = "none"
+)
 
 func (l ListRepliesPolicy) String() string {
-	switch l {
-	case ListRepliesPolicyFollowed:
-		return "followed"
-	case ListRepliesPolicyList:
-		return "list"
-	case ListRepliesPolicyNone:
-		return "none"
+	mapped := map[ListRepliesPolicy]string{
+		ListRepliesPolicyFollowed: listRepliesPolicyFollowedValue,
+		ListRepliesPolicyList:     listRepliesPolicyListValue,
+		ListRepliesPolicyNone:     listRepliesPolicyNoneValue,
 	}
 
-	return ""
+	output, ok := mapped[l]
+	if !ok {
+		return unknownValue
+	}
+
+	return output
+}
+
+func ParseListRepliesPolicy(value string) ListRepliesPolicy {
+	mapped := map[string]ListRepliesPolicy{
+		listRepliesPolicyFollowedValue: ListRepliesPolicyFollowed,
+		listRepliesPolicyListValue:     ListRepliesPolicyList,
+		listRepliesPolicyNoneValue:     ListRepliesPolicyNone,
+	}
+
+	output, ok := mapped[value]
+	if !ok {
+		return ListRepliesPolicyUnknown
+	}
+
+	return output
 }
 
 func (l ListRepliesPolicy) MarshalJSON() ([]byte, error) {
 	value := l.String()
-	if value == "" {
-		return nil, errors.New("invalid list replies policy")
+	if value == unknownValue {
+		return nil, fmt.Errorf("%q is not a valid list replies policy")
 	}
 
 	return json.Marshal(value)
@@ -61,10 +71,7 @@ func (l *ListRepliesPolicy) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unable to unmarshal the data; %w", err)
 	}
 
-	*l, err = ParseListRepliesPolicy(value)
-	if err != nil {
-		return fmt.Errorf("unable to parse %s as a list replies policy; %w", value, err)
-	}
+	*l = ParseListRepliesPolicy(value)
 
 	return nil
 }

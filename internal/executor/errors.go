@@ -69,3 +69,11 @@ type InvalidStatusContentTypeError struct {
 func (e InvalidStatusContentTypeError) Error() string {
 	return "'" + e.ContentType + "' is an invalid status content type (valid values are plain and markdown)"
 }
+
+type InvalidListRepliesPolicyError struct {
+	Policy string
+}
+
+func (e InvalidListRepliesPolicyError) Error() string {
+	return "'" + e.Policy + "' is an invalid list replies policy"
+}

@@ -81,12 +81,12 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 		return FlagNotSetError{flagText: flagListTitle}
 	}
 
-	repliesPolicy, err := model.ParseListRepliesPolicy(c.listRepliesPolicy)
-	if err != nil {
-		return fmt.Errorf("unable to parse the list replies policy; %w", err)
+	parsedListRepliesPolicy := model.ParseListRepliesPolicy(c.listRepliesPolicy)
+	if parsedListRepliesPolicy == model.ListRepliesPolicyUnknown {
+		return InvalidListRepliesPolicyError{Policy: c.listRepliesPolicy}
 	}
 
-	list, err := gtsClient.CreateList(c.listTitle, repliesPolicy)
+	list, err := gtsClient.CreateList(c.listTitle, parsedListRepliesPolicy)
 	if err != nil {
 		return fmt.Errorf("unable to create the list; %w", err)
 	}
