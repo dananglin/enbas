@@ -53,3 +53,19 @@ type EmptyContentError struct{}
 func (e EmptyContentError) Error() string {
 	return "content should not be empty"
 }
+
+type InvalidStatusVisibilityError struct {
+	Visibility string
+}
+
+func (e InvalidStatusVisibilityError) Error() string {
+	return "'" + e.Visibility + "' is an invalid status visibility (valid values are public, unlisted, private, mutuals_only and direct)"
+}
+
+type InvalidStatusContentTypeError struct {
+	ContentType string
+}
+
+func (e InvalidStatusContentTypeError) Error() string {
+	return "'" + e.ContentType + "' is an invalid status content type (valid values are plain and markdown)"
+}

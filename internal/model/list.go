@@ -26,7 +26,7 @@ func ParseListRepliesPolicy(policy string) (ListRepliesPolicy, error) {
 		return ListRepliesPolicyNone, nil
 	}
 
-	return ListRepliesPolicy(-1), errors.New("invalid list replies policy")
+	return ListRepliesPolicy(-1), fmt.Errorf("%q is not a valid list replies policy", policy)
 }
 
 func (l ListRepliesPolicy) String() string {
@@ -43,12 +43,12 @@ func (l ListRepliesPolicy) String() string {
 }
 
 func (l ListRepliesPolicy) MarshalJSON() ([]byte, error) {
-	str := l.String()
-	if str == "" {
+	value := l.String()
+	if value == "" {
 		return nil, errors.New("invalid list replies policy")
 	}
 
-	return json.Marshal(str)
+	return json.Marshal(value)
 }
 
 func (l *ListRepliesPolicy) UnmarshalJSON(data []byte) error {

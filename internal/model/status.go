@@ -36,7 +36,7 @@ type Status struct {
 	Text               string           `json:"text"`
 	URI                string           `json:"uri"`
 	URL                string           `json:"url"`
-	Visibility         string           `json:"visibility"`
+	Visibility         StatusVisibility `json:"visibility"`
 }
 
 type Card struct {
@@ -82,34 +82,34 @@ type PollOption struct {
 }
 
 type StatusReblogged struct {
-	Account            Account      `json:"account"`
-	Application        Application  `json:"application"`
-	Bookmarked         bool         `json:"bookmarked"`
-	Card               Card         `json:"card"`
-	Content            string       `json:"content"`
-	CreatedAt          time.Time    `json:"created_at"`
-	Emojis             []Emoji      `json:"emojis"`
-	Favourited         bool         `json:"favourited"`
-	FavouritesCount    int          `json:"favourites_count"`
-	ID                 string       `json:"id"`
-	InReplyToAccountID string       `json:"in_reply_to_account_id"`
-	InReplyToID        string       `json:"in_reply_to_id"`
-	Language           string       `json:"language"`
-	MediaAttachments   []Attachment `json:"media_attachments"`
-	Mentions           []Mention    `json:"mentions"`
-	Muted              bool         `json:"muted"`
-	Pinned             bool         `json:"pinned"`
-	Poll               Poll         `json:"poll"`
-	Reblogged          bool         `json:"reblogged"`
-	RebloggsCount      int          `json:"reblogs_count"`
-	RepliesCount       int          `json:"replies_count"`
-	Sensitive          bool         `json:"sensitive"`
-	SpolierText        string       `json:"spoiler_text"`
-	Tags               []Tag        `json:"tags"`
-	Text               string       `json:"text"`
-	URI                string       `json:"uri"`
-	URL                string       `json:"url"`
-	Visibility         string       `json:"visibility"`
+	Account            Account          `json:"account"`
+	Application        Application      `json:"application"`
+	Bookmarked         bool             `json:"bookmarked"`
+	Card               Card             `json:"card"`
+	Content            string           `json:"content"`
+	CreatedAt          time.Time        `json:"created_at"`
+	Emojis             []Emoji          `json:"emojis"`
+	Favourited         bool             `json:"favourited"`
+	FavouritesCount    int              `json:"favourites_count"`
+	ID                 string           `json:"id"`
+	InReplyToAccountID string           `json:"in_reply_to_account_id"`
+	InReplyToID        string           `json:"in_reply_to_id"`
+	Language           string           `json:"language"`
+	MediaAttachments   []Attachment     `json:"media_attachments"`
+	Mentions           []Mention        `json:"mentions"`
+	Muted              bool             `json:"muted"`
+	Pinned             bool             `json:"pinned"`
+	Poll               Poll             `json:"poll"`
+	Reblogged          bool             `json:"reblogged"`
+	RebloggsCount      int              `json:"reblogs_count"`
+	RepliesCount       int              `json:"replies_count"`
+	Sensitive          bool             `json:"sensitive"`
+	SpolierText        string           `json:"spoiler_text"`
+	Tags               []Tag            `json:"tags"`
+	Text               string           `json:"text"`
+	URI                string           `json:"uri"`
+	URL                string           `json:"url"`
+	Visibility         StatusVisibility `json:"visibility"`
 }
 
 type Tag struct {
