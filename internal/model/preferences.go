@@ -15,7 +15,7 @@ type Preferences struct {
 	ReadingAutoplayGifs      bool   `json:"reading:autoplay:gifs"`
 }
 
-func (p Preferences) String() string {
+func (p Preferences) Display(noColor bool) string {
 	format := `
 %s
   %s: %s
@@ -24,9 +24,9 @@ func (p Preferences) String() string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.HeaderFormat("YOUR PREFERENCES:"),
-		utilities.FieldFormat("Default post language"), p.PostingDefaultLanguage,
-		utilities.FieldFormat("Default post visibility"), p.PostingDefaultVisibility,
-		utilities.FieldFormat("Mark posts as sensitive by default"), p.PostingDefaultSensitive,
+		utilities.HeaderFormat(noColor, "YOUR PREFERENCES:"),
+		utilities.FieldFormat(noColor, "Default post language"), p.PostingDefaultLanguage,
+		utilities.FieldFormat(noColor, "Default post visibility"), p.PostingDefaultVisibility,
+		utilities.FieldFormat(noColor, "Mark posts as sensitive by default"), p.PostingDefaultSensitive,
 	)
 }

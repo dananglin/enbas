@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type EditExecutor struct {
@@ -40,7 +41,7 @@ func (e *EditExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceList: e.updateList,
+		resourceList: e.editList,
 	}
 
 	doFunc, ok := funcMap[e.resourceType]
@@ -56,7 +57,7 @@ func (e *EditExecutor) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (e *EditExecutor) updateList(gtsClient *client.Client) error {
+func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	if e.listID == "" {
 		return FlagNotSetError{flagText: flagListID}
 	}
@@ -85,7 +86,7 @@ func (e *EditExecutor) updateList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully updated the list.")
-	fmt.Println(updatedList)
+	utilities.Display(updatedList, *e.topLevelFlags.NoColor)
 
 	return nil
 }

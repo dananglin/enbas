@@ -83,7 +83,7 @@ type List struct {
 	Accounts      map[string]string
 }
 
-func (l List) String() string {
+func (l List) Display(noColor bool) string {
 	format := `
 %s
   %s
@@ -98,17 +98,17 @@ func (l List) String() string {
 
 	output := fmt.Sprintf(
 		format,
-		utilities.HeaderFormat("LIST TITLE:"), l.Title,
-		utilities.HeaderFormat("LIST ID:"), l.ID,
-		utilities.HeaderFormat("REPLIES POLICY:"), l.RepliesPolicy,
-		utilities.HeaderFormat("ADDED ACCOUNTS:"),
+		utilities.HeaderFormat(noColor, "LIST TITLE:"), l.Title,
+		utilities.HeaderFormat(noColor, "LIST ID:"), l.ID,
+		utilities.HeaderFormat(noColor, "REPLIES POLICY:"), l.RepliesPolicy,
+		utilities.HeaderFormat(noColor, "ADDED ACCOUNTS:"),
 	)
 
 	if len(l.Accounts) > 0 {
 		for id, name := range l.Accounts {
 			output += fmt.Sprintf(
 				"\n  • %s (%s)",
-				utilities.DisplayNameFormat(name),
+				utilities.DisplayNameFormat(noColor, name),
 				id,
 			)
 		}
@@ -121,12 +121,12 @@ func (l List) String() string {
 
 type Lists []List
 
-func (l Lists) String() string {
-	output := ""
+func (l Lists) Display(noColor bool) string {
+	output := "\n" + utilities.HeaderFormat(noColor, "LISTS")
 
 	for i := range l {
 		output += fmt.Sprintf(
-			"\n%s (%s)",
+			"\n  • %s (%s)",
 			l[i].Title,
 			l[i].ID,
 		)

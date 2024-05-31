@@ -83,7 +83,7 @@ func (c *ShowExecutor) showInstance(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to retrieve the instance details; %w", err)
 	}
 
-	fmt.Println(instance)
+	utilities.Display(instance, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -116,7 +116,7 @@ func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		return nil
 	}
 
-	fmt.Println(account)
+	utilities.Display(account, *c.topLevelFlags.NoColor)
 
 	if !c.myAccount && !c.skipAccountRelationship {
 		relationship, err := gtsClient.GetAccountRelationship(account.ID)
@@ -124,7 +124,7 @@ func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
 			return fmt.Errorf("unable to retrieve the relationship to this account; %w", err)
 		}
 
-		fmt.Println(relationship)
+		utilities.Display(relationship, *c.topLevelFlags.NoColor)
 	}
 
 	if c.myAccount && c.showUserPreferences {
@@ -133,7 +133,7 @@ func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
 			return fmt.Errorf("unable to retrieve the user preferences; %w", err)
 		}
 
-		fmt.Println(preferences)
+		utilities.Display(preferences, *c.topLevelFlags.NoColor)
 	}
 
 	return nil
@@ -155,7 +155,7 @@ func (c *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		return nil
 	}
 
-	fmt.Println(status)
+	utilities.Display(status, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -197,7 +197,7 @@ func (c *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		return nil
 	}
 
-	fmt.Println(timeline)
+	utilities.Display(timeline, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -226,7 +226,7 @@ func (c *ShowExecutor) showList(gtsClient *client.Client) error {
 		list.Accounts = accountMap
 	}
 
-	fmt.Println(list)
+	utilities.Display(list, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -243,8 +243,7 @@ func (c *ShowExecutor) showLists(gtsClient *client.Client) error {
 		return nil
 	}
 
-	fmt.Println(utilities.HeaderFormat("LISTS"))
-	fmt.Println(lists)
+	utilities.Display(lists, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -261,7 +260,7 @@ func (c *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 	}
 
 	if len(followers.Accounts) > 0 {
-		fmt.Println(followers)
+		utilities.Display(followers, *c.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("There are no followers for this account or the list is hidden.")
 	}
@@ -281,7 +280,7 @@ func (c *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 	}
 
 	if len(following.Accounts) > 0 {
-		fmt.Println(following)
+		utilities.Display(following, *c.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("This account is not following anyone or the list is hidden.")
 	}
@@ -296,7 +295,7 @@ func (c *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 	}
 
 	if len(blocked.Accounts) > 0 {
-		fmt.Println(blocked)
+		utilities.Display(blocked, *c.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("You have no blocked accounts.")
 	}

@@ -152,7 +152,7 @@ type MediaDimensions struct {
 	Width     int     `json:"width"`
 }
 
-func (s Status) String() string {
+func (s Status) Display(noColor bool) string {
 	format := `
 %s (@%s)
 
@@ -178,20 +178,20 @@ func (s Status) String() string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.DisplayNameFormat(s.Account.DisplayName), s.Account.Username,
-		utilities.HeaderFormat("CONTENT:"),
+		utilities.DisplayNameFormat(noColor, s.Account.DisplayName), s.Account.Username,
+		utilities.HeaderFormat(noColor, "CONTENT:"),
 		utilities.WrapLines(utilities.StripHTMLTags(s.Content), "\n  ", 80),
-		utilities.HeaderFormat("STATUS ID:"),
+		utilities.HeaderFormat(noColor, "STATUS ID:"),
 		s.ID,
-		utilities.HeaderFormat("CREATED AT:"),
+		utilities.HeaderFormat(noColor, "CREATED AT:"),
 		utilities.FormatTime(s.CreatedAt),
-		utilities.HeaderFormat("STATS:"),
+		utilities.HeaderFormat(noColor, "STATS:"),
 		s.ReblogsCount,
 		s.FavouritesCount,
 		s.RepliesCount,
-		utilities.HeaderFormat("VISIBILITY:"),
+		utilities.HeaderFormat(noColor, "VISIBILITY:"),
 		s.Visibility,
-		utilities.HeaderFormat("URL:"),
+		utilities.HeaderFormat(noColor, "URL:"),
 		s.URL,
 	)
 }

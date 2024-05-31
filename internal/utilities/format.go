@@ -12,17 +12,29 @@ const (
 	green       = "\033[32m"
 )
 
-func HeaderFormat(text string) string {
+func HeaderFormat(noColor bool, text string) string {
+	if noColor {
+		return text
+	}
+
 	return boldblue + text + reset
 }
 
-func FieldFormat(text string) string {
+func FieldFormat(noColor bool, text string) string {
+	if noColor {
+		return text
+	}
+
 	return green + text + reset
 }
 
-func DisplayNameFormat(text string) string {
+func DisplayNameFormat(noColor bool, text string) string {
 	// use this pattern to remove all emoji strings
 	pattern := regexp.MustCompile(`\s:[A-Za-z0-9]*:`)
+
+	if noColor {
+		return pattern.ReplaceAllString(text, "")
+	}
 
 	return boldmagenta + pattern.ReplaceAllString(text, "") + reset
 }

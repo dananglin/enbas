@@ -112,7 +112,7 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully created the following list:")
-	fmt.Printf("\n%s\n", list)
+	utilities.Display(list, *c.topLevelFlags.NoColor)
 
 	return nil
 }
@@ -193,7 +193,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully created the following status:")
-	fmt.Println(status)
+	utilities.Display(status, *c.topLevelFlags.NoColor)
 
 	return nil
 }

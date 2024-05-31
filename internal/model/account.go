@@ -59,7 +59,7 @@ type Field struct {
 	VerifiedAt string `json:"verified_at"`
 }
 
-func (a Account) String() string {
+func (a Account) Display(noColor bool) string {
 	format := `
 %s (@%s)
 
@@ -87,28 +87,28 @@ func (a Account) String() string {
 	for _, field := range a.Fields {
 		metadata += fmt.Sprintf(
 			"\n  %s: %s",
-			utilities.FieldFormat(field.Name),
+			utilities.FieldFormat(noColor, field.Name),
 			utilities.StripHTMLTags(field.Value),
 		)
 	}
 
 	return fmt.Sprintf(
 		format,
-		utilities.DisplayNameFormat(a.DisplayName),
+		utilities.DisplayNameFormat(noColor, a.DisplayName),
 		a.Username,
-		utilities.HeaderFormat("ACCOUNT ID:"),
+		utilities.HeaderFormat(noColor, "ACCOUNT ID:"),
 		a.ID,
-		utilities.HeaderFormat("JOINED ON:"),
+		utilities.HeaderFormat(noColor, "JOINED ON:"),
 		utilities.FormatDate(a.CreatedAt),
-		utilities.HeaderFormat("STATS:"),
-		utilities.FieldFormat("Followers:"), a.FollowersCount,
-		utilities.FieldFormat("Following:"), a.FollowingCount,
-		utilities.FieldFormat("Statuses:"), a.StatusCount,
-		utilities.HeaderFormat("BIOGRAPHY:"),
+		utilities.HeaderFormat(noColor, "STATS:"),
+		utilities.FieldFormat(noColor, "Followers:"), a.FollowersCount,
+		utilities.FieldFormat(noColor, "Following:"), a.FollowingCount,
+		utilities.FieldFormat(noColor, "Statuses:"), a.StatusCount,
+		utilities.HeaderFormat(noColor, "BIOGRAPHY:"),
 		utilities.WrapLines(utilities.StripHTMLTags(a.Note), "\n  ", 80),
-		utilities.HeaderFormat("METADATA:"),
+		utilities.HeaderFormat(noColor, "METADATA:"),
 		metadata,
-		utilities.HeaderFormat("ACCOUNT URL:"),
+		utilities.HeaderFormat(noColor, "ACCOUNT URL:"),
 		a.URL,
 	)
 }
@@ -130,7 +130,7 @@ type AccountRelationship struct {
 	ShowingReblogs      bool   `json:"showing_reblogs"`
 }
 
-func (a AccountRelationship) String() string {
+func (a AccountRelationship) Display(noColor bool) string {
 	format := `
 %s
   %s: %t
@@ -151,25 +151,25 @@ func (a AccountRelationship) String() string {
 
 	output := fmt.Sprintf(
 		format,
-		utilities.HeaderFormat("YOUR RELATIONSHIP WITH THIS ACCOUNT:"),
-		utilities.FieldFormat("Following"), a.Following,
-		utilities.FieldFormat("Is following you"), a.FollowedBy,
-		utilities.FieldFormat("A follow request was sent and is pending"), a.FollowRequested,
-		utilities.FieldFormat("Received a pending follow request"), a.FollowRequestedBy,
-		utilities.FieldFormat("Endorsed"), a.Endorsed,
-		utilities.FieldFormat("Showing Reposts (boosts)"), a.ShowingReblogs,
-		utilities.FieldFormat("Muted"), a.Muting,
-		utilities.FieldFormat("Notifications muted"), a.MutingNotifications,
-		utilities.FieldFormat("Blocking"), a.Blocking,
-		utilities.FieldFormat("Is blocking you"), a.BlockedBy,
-		utilities.FieldFormat("Blocking account's domain"), a.DomainBlocking,
+		utilities.HeaderFormat(noColor, "YOUR RELATIONSHIP WITH THIS ACCOUNT:"),
+		utilities.FieldFormat(noColor, "Following"), a.Following,
+		utilities.FieldFormat(noColor, "Is following you"), a.FollowedBy,
+		utilities.FieldFormat(noColor, "A follow request was sent and is pending"), a.FollowRequested,
+		utilities.FieldFormat(noColor, "Received a pending follow request"), a.FollowRequestedBy,
+		utilities.FieldFormat(noColor, "Endorsed"), a.Endorsed,
+		utilities.FieldFormat(noColor, "Showing Reposts (boosts)"), a.ShowingReblogs,
+		utilities.FieldFormat(noColor, "Muted"), a.Muting,
+		utilities.FieldFormat(noColor, "Notifications muted"), a.MutingNotifications,
+		utilities.FieldFormat(noColor, "Blocking"), a.Blocking,
+		utilities.FieldFormat(noColor, "Is blocking you"), a.BlockedBy,
+		utilities.FieldFormat(noColor, "Blocking account's domain"), a.DomainBlocking,
 	)
 
 	if a.PrivateNote != "" {
 		output += "\n"
 		output += fmt.Sprintf(
 			privateNoteFormat,
-			utilities.HeaderFormat("YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:"),
+			utilities.HeaderFormat(noColor, "YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:"),
 			utilities.WrapLines(a.PrivateNote, "\n  ", 80),
 		)
 	}
@@ -190,18 +190,18 @@ type AccountList struct {
 	Accounts []Account
 }
 
-func (a AccountList) String() string {
+func (a AccountList) Display(noColor bool) string {
 	output := "\n"
 
 	switch a.Type {
 	case AccountListFollowers:
-		output += utilities.HeaderFormat("FOLLOWED BY:")
+		output += utilities.HeaderFormat(noColor, "FOLLOWED BY:")
 	case AccountListFollowing:
-		output += utilities.HeaderFormat("FOLLOWING:")
+		output += utilities.HeaderFormat(noColor, "FOLLOWING:")
 	case AccountListBlockedAccount:
-		output += utilities.HeaderFormat("BLOCKED ACCOUNTS:")
+		output += utilities.HeaderFormat(noColor, "BLOCKED ACCOUNTS:")
 	default:
-		output += utilities.HeaderFormat("ACCOUNTS:")
+		output += utilities.HeaderFormat(noColor, "ACCOUNTS:")
 	}
 
 	if a.Type == AccountListBlockedAccount {
@@ -216,7 +216,7 @@ func (a AccountList) String() string {
 		for i := range a.Accounts {
 			output += fmt.Sprintf(
 				"\n  • %s (%s)",
-				utilities.DisplayNameFormat(a.Accounts[i].DisplayName),
+				utilities.DisplayNameFormat(noColor, a.Accounts[i].DisplayName),
 				a.Accounts[i].Acct,
 			)
 		}

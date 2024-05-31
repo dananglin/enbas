@@ -113,7 +113,7 @@ type InstanceV2Users struct {
 	ActiveMonth int `json:"active_month"`
 }
 
-func (i InstanceV2) String() string {
+func (i InstanceV2) Display(noColor bool) string {
 	format := `
 %s
   %s
@@ -138,22 +138,22 @@ func (i InstanceV2) String() string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.HeaderFormat("INSTANCE TITLE:"),
+		utilities.HeaderFormat(noColor, "INSTANCE TITLE:"),
 		i.Title,
-		utilities.HeaderFormat("INSTANCE DESCRIPTION:"),
+		utilities.HeaderFormat(noColor, "INSTANCE DESCRIPTION:"),
 		utilities.WrapLines(i.DescriptionText, "\n  ", 80),
-		utilities.HeaderFormat("DOMAIN:"),
+		utilities.HeaderFormat(noColor, "DOMAIN:"),
 		i.Domain,
-		utilities.HeaderFormat("TERMS AND CONDITIONS:"),
+		utilities.HeaderFormat(noColor, "TERMS AND CONDITIONS:"),
 		utilities.WrapLines(i.TermsText, "\n  ", 80),
-		utilities.HeaderFormat("VERSION:"),
+		utilities.HeaderFormat(noColor, "VERSION:"),
 		i.Version,
-		utilities.HeaderFormat("CONTACT:"),
-		utilities.FieldFormat("Name:"),
-		utilities.DisplayNameFormat(i.Contact.Account.DisplayName),
-		utilities.FieldFormat("Username:"),
+		utilities.HeaderFormat(noColor, "CONTACT:"),
+		utilities.FieldFormat(noColor, "Name:"),
+		utilities.DisplayNameFormat(noColor, i.Contact.Account.DisplayName),
+		utilities.FieldFormat(noColor, "Username:"),
 		i.Contact.Account.Username,
-		utilities.FieldFormat("Email:"),
+		utilities.FieldFormat(noColor, "Email:"),
 		i.Contact.Email,
 	)
 }

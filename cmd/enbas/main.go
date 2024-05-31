@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/executor"
 )
@@ -57,9 +58,23 @@ func run() error {
 		commandUnblock:  "unblock a resource (e.g. an account)",
 	}
 
-	topLevelFlags := executor.TopLevelFlags{}
+	topLevelFlags := executor.TopLevelFlags{
+		ConfigDir: "",
+		NoColor:   nil,
+	}
 
 	flag.StringVar(&topLevelFlags.ConfigDir, "config-dir", "", "specify your config directory")
+	flag.BoolFunc("no-color", "disable ANSI colour output when displaying text on screen", func(value string) error {
+		boolVal, err := strconv.ParseBool(value)
+		if err != nil {
+			return fmt.Errorf("unable to parse %q as a boolean; %w", value, err)
+		}
+
+		topLevelFlags.NoColor = new(bool)
+		*topLevelFlags.NoColor = boolVal
+
+		return nil
+	})
 
 	flag.Usage = usageFunc(commandSummaries)
 
@@ -69,6 +84,16 @@ func run() error {
 		flag.Usage()
 
 		return nil
+	}
+
+	// If NoColor is still unspecified, check to see if the NO_COLOR environment variable is set
+	if topLevelFlags.NoColor == nil {
+		topLevelFlags.NoColor = new(bool)
+		if os.Getenv("NO_COLOR") != "" {
+			*topLevelFlags.NoColor = true
+		} else {
+			*topLevelFlags.NoColor = false
+		}
 	}
 
 	command := flag.Arg(0)
