@@ -220,7 +220,7 @@ func (c *ShowExecutor) showList(gtsClient *client.Client) error {
 	if len(accounts) > 0 {
 		accountMap := make(map[string]string)
 		for i := range accounts {
-			accountMap[accounts[i].ID] = accounts[i].Username
+			accountMap[accounts[i].Acct] = accounts[i].Username
 		}
 
 		list.Accounts = accountMap

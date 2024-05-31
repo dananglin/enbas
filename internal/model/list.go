@@ -105,16 +105,18 @@ func (l List) Display(noColor bool) string {
 	)
 
 	if len(l.Accounts) > 0 {
-		for id, name := range l.Accounts {
+		for acct, name := range l.Accounts {
 			output += fmt.Sprintf(
 				"\n  • %s (%s)",
 				utilities.DisplayNameFormat(noColor, name),
-				id,
+				acct,
 			)
 		}
 	} else {
 		output += "\n  None"
 	}
+
+	output += "\n"
 
 	return output
 }
