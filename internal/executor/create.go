@@ -3,6 +3,7 @@ package executor
 import (
 	"flag"
 	"fmt"
+	"strconv"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
@@ -17,7 +18,7 @@ type CreateExecutor struct {
 	federated         bool
 	likeable          bool
 	replyable         bool
-	sensitive         bool
+	sensitive         *bool
 	content           string
 	contentType       string
 	fromFile          string
@@ -40,7 +41,6 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "specify if the status can be federated beyond the local timelines")
 	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "specify if the status can be liked/favourited")
 	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "specify if the status can be replied to")
-	createExe.BoolVar(&createExe.sensitive, flagSensitive, false, "specify if the status should be marked as sensitive")
 	createExe.StringVar(&createExe.content, flagContent, "", "the content of the status to create")
 	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "the type that the contents should be parsed from (valid values are plain and markdown)")
 	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "the file path where to read the contents from")
@@ -50,6 +50,18 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.StringVar(&createExe.resourceType, flagType, "", "specify the type of resource to create")
 	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "specify the title of the list")
 	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "specify the policy of the replies for this list (valid values are followed, list and none)")
+
+	createExe.BoolFunc(flagSensitive, "specify if the status should be marked as sensitive", func(value string) error {
+		boolVal, err := strconv.ParseBool(value)
+		if err != nil {
+			return fmt.Errorf("unable to parse %q as a boolean value; %w", value, err)
+		}
+
+		createExe.sensitive = new(bool)
+		*createExe.sensitive = boolVal
+
+		return nil
+	})
 
 	createExe.Usage = commandUsageFunc(name, summary, createExe.FlagSet)
 
@@ -111,6 +123,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		content    string
 		language   string
 		visibility string
+		sensitive  bool
 	)
 
 	switch {
@@ -145,6 +158,12 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		visibility = preferences.PostingDefaultVisibility
 	}
 
+	if c.sensitive != nil {
+		sensitive = *c.sensitive
+	} else {
+		sensitive = preferences.PostingDefaultSensitive
+	}
+
 	parsedVisibility := model.ParseStatusVisibility(visibility)
 	if parsedVisibility == model.StatusVisibilityUnknown {
 		return InvalidStatusVisibilityError{Visibility: visibility}
@@ -164,7 +183,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		Federated:   c.federated,
 		Likeable:    c.likeable,
 		Replyable:   c.replyable,
-		Sensitive:   c.sensitive,
+		Sensitive:   sensitive,
 		Visibility:  parsedVisibility,
 	}
 
