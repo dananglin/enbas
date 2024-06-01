@@ -88,7 +88,7 @@ func (a Account) Display(noColor bool) string {
 		metadata += fmt.Sprintf(
 			"\n  %s: %s",
 			utilities.FieldFormat(noColor, field.Name),
-			utilities.StripHTMLTags(field.Value),
+			utilities.ConvertHTMLToText(field.Value),
 		)
 	}
 
@@ -105,7 +105,7 @@ func (a Account) Display(noColor bool) string {
 		utilities.FieldFormat(noColor, "Following:"), a.FollowingCount,
 		utilities.FieldFormat(noColor, "Statuses:"), a.StatusCount,
 		utilities.HeaderFormat(noColor, "BIOGRAPHY:"),
-		utilities.WrapLines(utilities.StripHTMLTags(a.Note), "\n  ", 80),
+		utilities.WrapLines(utilities.ConvertHTMLToText(a.Note), "\n  ", 80),
 		utilities.HeaderFormat(noColor, "METADATA:"),
 		metadata,
 		utilities.HeaderFormat(noColor, "ACCOUNT URL:"),

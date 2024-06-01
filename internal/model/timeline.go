@@ -30,7 +30,7 @@ func (t Timeline) Display(noColor bool) string {
 			createdAt = status.Reblog.CreatedAt
 		}
 
-		builder.WriteString(utilities.WrapLines(utilities.StripHTMLTags(status.Content), "\n", 80) + "\n\n")
+		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", 80) + "\n\n")
 		builder.WriteString(utilities.FieldFormat(noColor, "ID:") + " " + statusID + "\t" + utilities.FieldFormat(noColor, "Created at:") + " " + utilities.FormatTime(createdAt) + "\n")
 		builder.WriteString(separator + "\n")
 	}

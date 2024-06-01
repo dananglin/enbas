@@ -180,7 +180,7 @@ func (s Status) Display(noColor bool) string {
 		format,
 		utilities.DisplayNameFormat(noColor, s.Account.DisplayName), s.Account.Username,
 		utilities.HeaderFormat(noColor, "CONTENT:"),
-		utilities.WrapLines(utilities.StripHTMLTags(s.Content), "\n  ", 80),
+		utilities.WrapLines(utilities.ConvertHTMLToText(s.Content), "\n  ", 80),
 		utilities.HeaderFormat(noColor, "STATUS ID:"),
 		s.ID,
 		utilities.HeaderFormat(noColor, "CREATED AT:"),

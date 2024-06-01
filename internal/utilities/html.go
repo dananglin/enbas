@@ -1,15 +1,33 @@
 package utilities
 
 import (
+	"io"
+	"strconv"
 	"strings"
 
 	"golang.org/x/net/html"
 )
 
-func StripHTMLTags(text string) string {
-	token := html.NewTokenizer(strings.NewReader(text))
+const (
+	htmlNoList int = iota
+	htmlOrderedList
+	htmlUnorderedList
+)
 
+type htmlConvertState struct {
+	htmlListType     int
+	orderedListIndex int
+}
+
+func ConvertHTMLToText(text string) string {
 	var builder strings.Builder
+
+	state := htmlConvertState{
+		htmlListType:     htmlNoList,
+		orderedListIndex: 1,
+	}
+
+	token := html.NewTokenizer(strings.NewReader(text))
 
 	for {
 		tt := token.Next()
@@ -21,18 +39,33 @@ func StripHTMLTags(text string) string {
 			builder.WriteString(text)
 		case html.StartTagToken, html.EndTagToken:
 			tag := token.Token().String()
-			builder.WriteString(transformTag(tag))
+			processTagToken(&state, &builder, tag)
 		}
 	}
 }
 
-func transformTag(tag string) string {
+func processTagToken(state *htmlConvertState, writer io.StringWriter, tag string) {
 	switch tag {
-	case "<br>":
-		return "\n"
-	case "<p>", "</p>":
-		return "\n"
+	case "<br>", "<p>", "</p>", "</li>":
+		_, _ = writer.WriteString("\n")
+	case "<ul>":
+		state.htmlListType = htmlUnorderedList
+		_, _ = writer.WriteString("\n")
+	case "<ol>":
+		state.htmlListType = htmlOrderedList
+		_, _ = writer.WriteString("\n")
+	case "</ul>":
+		state.htmlListType = htmlNoList
+	case "</ol>":
+		state.htmlListType = htmlNoList
+		state.orderedListIndex = 1
+	case "<li>":
+		switch state.htmlListType {
+		case htmlUnorderedList:
+			_, _ = writer.WriteString("• ")
+		case htmlOrderedList:
+			_, _ = writer.WriteString(strconv.Itoa(state.orderedListIndex) + ". ")
+			state.orderedListIndex++
+		}
 	}
-
-	return ""
 }
