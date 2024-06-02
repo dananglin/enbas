@@ -39,9 +39,9 @@ func wrapLine(line, separator string, charLimit int) string {
 	var builder strings.Builder
 
 	for rightcursor < (len(line) - charLimit) {
-		rightcursor += charLimit
+		rightcursor += (charLimit - 1)
 
-		for !unicode.IsSpace(rune(line[rightcursor-1])) && (rightcursor > leftcursor) {
+		for (rightcursor > leftcursor) && !unicode.IsSpace(rune(line[rightcursor-1])) {
 			rightcursor--
 		}
 
