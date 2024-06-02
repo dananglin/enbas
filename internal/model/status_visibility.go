@@ -45,7 +45,7 @@ func (s StatusVisibility) String() string {
 	return output
 }
 
-func ParseStatusVisibility(value string) StatusVisibility {
+func ParseStatusVisibility(value string) (StatusVisibility, error) {
 	mapped := map[string]StatusVisibility{
 		statusVisibilityPublicValue:      StatusVisibilityPublic,
 		statusVisibilityPrivateValue:     StatusVisibilityPrivate,
@@ -56,19 +56,24 @@ func ParseStatusVisibility(value string) StatusVisibility {
 
 	output, ok := mapped[value]
 	if !ok {
-		return StatusVisibilityUnknown
+		return StatusVisibilityUnknown, InvalidStatusVisibilityError{Value: value}
 	}
 
-	return output
+	return output, nil
 }
 
 func (s StatusVisibility) MarshalJSON() ([]byte, error) {
 	value := s.String()
 	if value == unknownValue {
-		return nil, fmt.Errorf("%q is not a valid status visibility", value)
+		return nil, InvalidStatusVisibilityError{Value: value}
 	}
 
-	return json.Marshal(value)
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("unable to encode %s to JSON: %w", value, err)
+	}
+
+	return data, nil
 }
 
 func (s *StatusVisibility) UnmarshalJSON(data []byte) error {
@@ -78,10 +83,25 @@ func (s *StatusVisibility) UnmarshalJSON(data []byte) error {
 	)
 
 	if err = json.Unmarshal(data, &value); err != nil {
-		return fmt.Errorf("unable to unmarshal the data; %w", err)
+		return fmt.Errorf("unable to decode the JSON data: %w", err)
 	}
 
-	*s = ParseStatusVisibility(value)
+	// Ignore the error if the visibility from another service is
+	// not known by enbas. It will be replaced with 'unknown'.
+	*s, _ = ParseStatusVisibility(value)
 
 	return nil
+}
+
+type InvalidStatusVisibilityError struct {
+	Value string
+}
+
+func (e InvalidStatusVisibilityError) Error() string {
+	return "'" + e.Value + "' is not a valid status visibility value: valid values are " +
+		statusVisibilityPublicValue + ", " +
+		statusVisibilityUnlistedValue + ", " +
+		statusVisibilityPrivateValue + ", " +
+		statusVisibilityMutualsOnlyValue + ", " +
+		statusVisibilityDirectValue
 }

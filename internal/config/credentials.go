@@ -42,7 +42,7 @@ func (e CredentialsNotFoundError) Error() string {
 // is not present, it will be created.
 func SaveCredentials(configDir, username string, credentials Credentials) (string, error) {
 	if err := ensureConfigDir(calculateConfigDir(configDir)); err != nil {
-		return "", fmt.Errorf("unable to ensure the configuration directory; %w", err)
+		return "", fmt.Errorf("unable to ensure the configuration directory: %w", err)
 	}
 
 	var authConfig CredentialsConfig
@@ -51,14 +51,14 @@ func SaveCredentials(configDir, username string, credentials Credentials) (strin
 
 	if _, err := os.Stat(filepath); err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
-			return "", fmt.Errorf("unknown error received when running stat on %s; %w", filepath, err)
+			return "", fmt.Errorf("unknown error received when running stat on %s: %w", filepath, err)
 		}
 
 		authConfig.Credentials = make(map[string]Credentials)
 	} else {
 		authConfig, err = NewCredentialsConfigFromFile(configDir)
 		if err != nil {
-			return "", fmt.Errorf("unable to retrieve the existing authentication configuration; %w", err)
+			return "", fmt.Errorf("unable to retrieve the existing authentication configuration: %w", err)
 		}
 	}
 
@@ -77,7 +77,7 @@ func SaveCredentials(configDir, username string, credentials Credentials) (strin
 	authConfig.Credentials[authenticationName] = credentials
 
 	if err := saveCredentialsConfigFile(authConfig, configDir); err != nil {
-		return "", fmt.Errorf("unable to save the authentication configuration to file; %w", err)
+		return "", fmt.Errorf("unable to save the authentication configuration to file: %w", err)
 	}
 
 	return authenticationName, nil
@@ -86,7 +86,7 @@ func SaveCredentials(configDir, username string, credentials Credentials) (strin
 func UpdateCurrentAccount(account string, configDir string) error {
 	credentialsConfig, err := NewCredentialsConfigFromFile(configDir)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the existing authentication configuration; %w", err)
+		return fmt.Errorf("unable to retrieve the existing authentication configuration: %w", err)
 	}
 
 	if _, ok := credentialsConfig.Credentials[account]; !ok {
@@ -96,7 +96,7 @@ func UpdateCurrentAccount(account string, configDir string) error {
 	credentialsConfig.CurrentAccount = account
 
 	if err := saveCredentialsConfigFile(credentialsConfig, configDir); err != nil {
-		return fmt.Errorf("unable to save the authentication configuration to file; %w", err)
+		return fmt.Errorf("unable to save the authentication configuration to file: %w", err)
 	}
 
 	return nil
@@ -114,7 +114,7 @@ func NewCredentialsConfigFromFile(configDir string) (CredentialsConfig, error) {
 	var authConfig CredentialsConfig
 
 	if err := json.NewDecoder(file).Decode(&authConfig); err != nil {
-		return CredentialsConfig{}, fmt.Errorf("unable to decode the JSON data; %w", err)
+		return CredentialsConfig{}, fmt.Errorf("unable to decode the JSON data: %w", err)
 	}
 
 	return authConfig, nil
@@ -125,7 +125,7 @@ func saveCredentialsConfigFile(authConfig CredentialsConfig, configDir string) e
 
 	file, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("unable to open %s; %w", path, err)
+		return fmt.Errorf("unable to open %s: %w", path, err)
 	}
 
 	defer file.Close()
@@ -134,7 +134,7 @@ func saveCredentialsConfigFile(authConfig CredentialsConfig, configDir string) e
 	encoder.SetIndent("", "    ")
 
 	if err := encoder.Encode(authConfig); err != nil {
-		return fmt.Errorf("unable to save the JSON data to the authentication config file; %w", err)
+		return fmt.Errorf("unable to save the JSON data to the authentication config file: %w", err)
 	}
 
 	return nil

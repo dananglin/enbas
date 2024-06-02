@@ -55,7 +55,7 @@ func (e *EditExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(e.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -68,7 +68,7 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 
 	list, err := gtsClient.GetList(e.listID)
 	if err != nil {
-		return fmt.Errorf("unable to get the list; %w", err)
+		return fmt.Errorf("unable to get the list: %w", err)
 	}
 
 	if e.listTitle != "" {
@@ -76,9 +76,9 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	}
 
 	if e.listRepliesPolicy != "" {
-		parsedListRepliesPolicy := model.ParseListRepliesPolicy(e.listRepliesPolicy)
-		if parsedListRepliesPolicy == model.ListRepliesPolicyUnknown {
-			return InvalidListRepliesPolicyError{Policy: e.listRepliesPolicy}
+		parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(e.listRepliesPolicy)
+		if err != nil {
+			return err
 		}
 
 		list.RepliesPolicy = parsedListRepliesPolicy
@@ -86,7 +86,7 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 
 	updatedList, err := gtsClient.UpdateList(list)
 	if err != nil {
-		return fmt.Errorf("unable to update the list; %w", err)
+		return fmt.Errorf("unable to update the list: %w", err)
 	}
 
 	fmt.Println("Successfully updated the list.")

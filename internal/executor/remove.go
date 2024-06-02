@@ -57,7 +57,7 @@ func (r *RemoveExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(r.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -100,7 +100,7 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 	}
 
 	if err := gtsClient.RemoveAccountsFromList(r.listID, accountIDs); err != nil {
-		return fmt.Errorf("unable to remove the accounts from the list; %w", err)
+		return fmt.Errorf("unable to remove the accounts from the list: %w", err)
 	}
 
 	fmt.Println("Successfully removed the account(s) from the list.")
@@ -126,16 +126,16 @@ func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
 
 func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 	if len(r.accountNames) != 1 {
-		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(r.accountNames))
+		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(r.accountNames))
 	}
 
 	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID; %w", err)
+		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
 	if err := gtsClient.SetPrivateNote(accountID, ""); err != nil {
-		return fmt.Errorf("unable to remove the private note from the account; %w", err)
+		return fmt.Errorf("unable to remove the private note from the account: %w", err)
 	}
 
 	fmt.Println("Successfully removed the private note from the account.")

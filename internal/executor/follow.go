@@ -51,7 +51,7 @@ func (c *FollowExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -60,7 +60,7 @@ func (c *FollowExecutor) Execute() error {
 func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
 	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID; %w", err)
+		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
 	if c.unfollow {
@@ -74,7 +74,7 @@ func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
 	}
 
 	if err := gtsClient.FollowAccount(form); err != nil {
-		return fmt.Errorf("unable to follow the account; %w", err)
+		return fmt.Errorf("unable to follow the account: %w", err)
 	}
 
 	fmt.Println("The follow request was sent successfully.")
@@ -84,7 +84,7 @@ func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
 
 func (c *FollowExecutor) unfollowAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.UnfollowAccount(accountID); err != nil {
-		return fmt.Errorf("unable to unfollow the account; %w", err)
+		return fmt.Errorf("unable to unfollow the account: %w", err)
 	}
 
 	fmt.Println("Successfully unfollowed the account.")

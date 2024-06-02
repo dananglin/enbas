@@ -21,7 +21,7 @@ func (g *Client) GetStatus(statusID string) (model.Status, error) {
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &status); err != nil {
 		return model.Status{}, fmt.Errorf(
-			"received an error after sending the request to get the status information; %w",
+			"received an error after sending the request to get the status information: %w",
 			err,
 		)
 	}
@@ -45,7 +45,7 @@ type CreateStatusForm struct {
 func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.Status{}, fmt.Errorf("unable to create the JSON form; %w", err)
+		return model.Status{}, fmt.Errorf("unable to create the JSON form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -55,7 +55,7 @@ func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, &status); err != nil {
 		return model.Status{}, fmt.Errorf(
-			"received an error after sending the request to create the status; %w",
+			"received an error after sending the request to create the status: %w",
 			err,
 		)
 	}

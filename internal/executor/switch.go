@@ -52,7 +52,7 @@ func (s *SwitchExecutor) switchToAccount() error {
 	}
 
 	if err := config.UpdateCurrentAccount(s.accountName, s.topLevelFlags.ConfigDir); err != nil {
-		return fmt.Errorf("unable to switch account to the account; %w", err)
+		return fmt.Errorf("unable to switch account to the account: %w", err)
 	}
 
 	fmt.Printf("The current account is now set to %q.\n", s.accountName)

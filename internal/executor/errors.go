@@ -9,7 +9,7 @@ type FlagNotSetError struct {
 }
 
 func (e FlagNotSetError) Error() string {
-	return "the flag '" + e.flagText + "' is not set"
+	return "please use the required --" + e.flagText + " flag"
 }
 
 type UnsupportedTypeError struct {
@@ -17,15 +17,7 @@ type UnsupportedTypeError struct {
 }
 
 func (e UnsupportedTypeError) Error() string {
-	return "unsupported resource type '" + e.resourceType + "'"
-}
-
-type InvalidTimelineCategoryError struct {
-	category string
-}
-
-func (e InvalidTimelineCategoryError) Error() string {
-	return "'" + e.category + "' is not a valid timeline category (please choose home, public, tag or list)"
+	return "'" + e.resourceType + "' is not supported for this operation"
 }
 
 type NoAccountSpecifiedError struct{}
@@ -52,9 +44,9 @@ func (e UnsupportedRemoveOperationError) Error() string {
 	return "removing '" + e.ResourceType + "' from '" + e.RemoveFromResourceType + "' is not supported"
 }
 
-type EmptyContentError struct{
+type EmptyContentError struct {
 	ResourceType string
-	Hint string
+	Hint         string
 }
 
 func (e EmptyContentError) Error() string {
@@ -65,28 +57,4 @@ func (e EmptyContentError) Error() string {
 	}
 
 	return message
-}
-
-type InvalidStatusVisibilityError struct {
-	Visibility string
-}
-
-func (e InvalidStatusVisibilityError) Error() string {
-	return "'" + e.Visibility + "' is an invalid status visibility (valid values are public, unlisted, private, mutuals_only and direct)"
-}
-
-type InvalidStatusContentTypeError struct {
-	ContentType string
-}
-
-func (e InvalidStatusContentTypeError) Error() string {
-	return "'" + e.ContentType + "' is an invalid status content type (valid values are plain and markdown)"
-}
-
-type InvalidListRepliesPolicyError struct {
-	Policy string
-}
-
-func (e InvalidListRepliesPolicyError) Error() string {
-	return "'" + e.Policy + "' is an invalid list replies policy"
 }

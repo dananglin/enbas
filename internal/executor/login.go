@@ -59,7 +59,7 @@ func (c *LoginExecutor) Execute() error {
 	gtsClient := client.NewClient(credentials)
 
 	if err := gtsClient.Register(); err != nil {
-		return fmt.Errorf("unable to register the application; %w", err)
+		return fmt.Errorf("unable to register the application: %w", err)
 	}
 
 	consentPageURL := gtsClient.AuthCodeURL()
@@ -83,21 +83,21 @@ Once you have the code please copy and paste it below.
 	fmt.Print("Out-of-band token: ")
 
 	if _, err := fmt.Scanln(&code); err != nil {
-		return fmt.Errorf("failed to read access code; %w", err)
+		return fmt.Errorf("failed to read access code: %w", err)
 	}
 
 	if err := gtsClient.UpdateToken(code); err != nil {
-		return fmt.Errorf("unable to update the client's access token; %w", err)
+		return fmt.Errorf("unable to update the client's access token: %w", err)
 	}
 
 	account, err := gtsClient.VerifyCredentials()
 	if err != nil {
-		return fmt.Errorf("unable to verify the credentials; %w", err)
+		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 
 	loginName, err := config.SaveCredentials(c.topLevelFlags.ConfigDir, account.Username, gtsClient.Authentication)
 	if err != nil {
-		return fmt.Errorf("unable to save the authentication details; %w", err)
+		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
 
 	fmt.Printf("Successfully logged into %s\n", loginName)

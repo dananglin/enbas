@@ -24,7 +24,7 @@ func (g *Client) GetAllLists() (model.Lists, error) {
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &lists); err != nil {
 		return nil, fmt.Errorf(
-			"received an error after sending the request to get the list of lists; %w",
+			"received an error after sending the request to get the list of lists: %w",
 			err,
 		)
 	}
@@ -39,7 +39,7 @@ func (g *Client) GetList(listID string) (model.List, error) {
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &list); err != nil {
 		return model.List{}, fmt.Errorf(
-			"received an error after sending the request to get the list; %w",
+			"received an error after sending the request to get the list: %w",
 			err,
 		)
 	}
@@ -55,7 +55,7 @@ type CreateListForm struct {
 func (g *Client) CreateList(form CreateListForm) (model.List, error) {
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the form; %w", err)
+		return model.List{}, fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -65,7 +65,7 @@ func (g *Client) CreateList(form CreateListForm) (model.List, error) {
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, &list); err != nil {
 		return model.List{}, fmt.Errorf(
-			"received an error after sending the request to create the list; %w",
+			"received an error after sending the request to create the list: %w",
 			err,
 		)
 	}
@@ -84,7 +84,7 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the form; %w", err)
+		return model.List{}, fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -94,7 +94,7 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 
 	if err := g.sendRequest(http.MethodPut, url, requestBody, &updatedList); err != nil {
 		return model.List{}, fmt.Errorf(
-			"received an error after sending the request to update the list; %w",
+			"received an error after sending the request to update the list: %w",
 			err,
 		)
 	}
@@ -117,7 +117,7 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 
 	data, err := json.Marshal(form)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the form; %w", err)
+		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -125,7 +125,7 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf(
-			"received an error after sending the request to add the accounts to the list; %w",
+			"received an error after sending the request to add the accounts to the list: %w",
 			err,
 		)
 	}
@@ -142,7 +142,7 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 
 	data, err := json.Marshal(form)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the form; %w", err)
+		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -150,7 +150,7 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 
 	if err := g.sendRequest(http.MethodDelete, url, requestBody, nil); err != nil {
 		return fmt.Errorf(
-			"received an error after sending the request to remove the accounts from the list; %w",
+			"received an error after sending the request to remove the accounts from the list: %w",
 			err,
 		)
 	}
@@ -166,7 +166,7 @@ func (g *Client) GetAccountsFromList(listID string, limit int) ([]model.Account,
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
 		return nil, fmt.Errorf(
-			"received an error after sending the request to get the accounts from the list; %w",
+			"received an error after sending the request to get the accounts from the list: %w",
 			err,
 		)
 	}

@@ -41,7 +41,7 @@ func (l ListRepliesPolicy) String() string {
 	return output
 }
 
-func ParseListRepliesPolicy(value string) ListRepliesPolicy {
+func ParseListRepliesPolicy(value string) (ListRepliesPolicy, error) {
 	mapped := map[string]ListRepliesPolicy{
 		listRepliesPolicyFollowedValue: ListRepliesPolicyFollowed,
 		listRepliesPolicyListValue:     ListRepliesPolicyList,
@@ -50,19 +50,24 @@ func ParseListRepliesPolicy(value string) ListRepliesPolicy {
 
 	output, ok := mapped[value]
 	if !ok {
-		return ListRepliesPolicyUnknown
+		return ListRepliesPolicyUnknown, InvalidListRepliesPolicyError{value}
 	}
 
-	return output
+	return output, nil
 }
 
 func (l ListRepliesPolicy) MarshalJSON() ([]byte, error) {
 	value := l.String()
 	if value == unknownValue {
-		return nil, fmt.Errorf("%q is not a valid list replies policy")
+		return nil, InvalidListRepliesPolicyError{value}
 	}
 
-	return json.Marshal(value)
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("unable to encode %s to JSON: %w", value, err)
+	}
+
+	return data, nil
 }
 
 func (l *ListRepliesPolicy) UnmarshalJSON(data []byte) error {
@@ -72,12 +77,28 @@ func (l *ListRepliesPolicy) UnmarshalJSON(data []byte) error {
 	)
 
 	if err = json.Unmarshal(data, &value); err != nil {
-		return fmt.Errorf("unable to unmarshal the data; %w", err)
+		return fmt.Errorf("unable to decode the JSON data: %w", err)
 	}
 
-	*l = ParseListRepliesPolicy(value)
+	*l, err = ParseListRepliesPolicy(value)
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+type InvalidListRepliesPolicyError struct {
+	Value string
+}
+
+func (e InvalidListRepliesPolicyError) Error() string {
+	return "'" +
+		e.Value +
+		"' is not a valid list replies policy: valid values are " +
+		listRepliesPolicyFollowedValue + ", " +
+		listRepliesPolicyListValue + ", " +
+		listRepliesPolicyNoneValue
 }
 
 type List struct {

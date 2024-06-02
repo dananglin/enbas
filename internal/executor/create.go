@@ -58,7 +58,7 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.BoolFunc(flagSensitive, "specify if the status should be marked as sensitive", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
-			return fmt.Errorf("unable to parse %q as a boolean value; %w", value, err)
+			return fmt.Errorf("unable to parse %q as a boolean value: %w", value, err)
 		}
 
 		createExe.sensitive = new(bool)
@@ -79,7 +79,7 @@ func (c *CreateExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	funcMap := map[string]func(*client.Client) error{
@@ -100,9 +100,9 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 		return FlagNotSetError{flagText: flagListTitle}
 	}
 
-	parsedListRepliesPolicy := model.ParseListRepliesPolicy(c.listRepliesPolicy)
-	if parsedListRepliesPolicy == model.ListRepliesPolicyUnknown {
-		return InvalidListRepliesPolicyError{Policy: c.listRepliesPolicy}
+	parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(c.listRepliesPolicy)
+	if err != nil {
+		return err
 	}
 
 	form := client.CreateListForm{
@@ -112,7 +112,7 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 
 	list, err := gtsClient.CreateList(form)
 	if err != nil {
-		return fmt.Errorf("unable to create the list; %w", err)
+		return fmt.Errorf("unable to create the list: %w", err)
 	}
 
 	fmt.Println("Successfully created the following list:")
@@ -136,7 +136,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	case c.fromFile != "":
 		content, err = utilities.ReadFile(c.fromFile)
 		if err != nil {
-			return fmt.Errorf("unable to get the status contents from %q; %w", c.fromFile, err)
+			return fmt.Errorf("unable to get the status contents from %q: %w", c.fromFile, err)
 		}
 	default:
 		return EmptyContentError{
@@ -147,7 +147,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 	preferences, err := gtsClient.GetUserPreferences()
 	if err != nil {
-		fmt.Println("WARNING: Unable to get your posting preferences; %w", err)
+		fmt.Println("WARNING: Unable to get your posting preferences: %w", err)
 	}
 
 	if c.language != "" {
@@ -168,14 +168,14 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		sensitive = preferences.PostingDefaultSensitive
 	}
 
-	parsedVisibility := model.ParseStatusVisibility(visibility)
-	if parsedVisibility == model.StatusVisibilityUnknown {
-		return InvalidStatusVisibilityError{Visibility: visibility}
+	parsedVisibility, err := model.ParseStatusVisibility(visibility)
+	if err != nil {
+		return err
 	}
 
-	parsedContentType := model.ParseStatusContentType(c.contentType)
-	if parsedContentType == model.StatusContentTypeUnknown {
-		return InvalidStatusContentTypeError{ContentType: c.contentType}
+	parsedContentType, err := model.ParseStatusContentType(c.contentType)
+	if err != nil {
+		return err
 	}
 
 	form := client.CreateStatusForm{
@@ -193,7 +193,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 	status, err := gtsClient.CreateStatus(form)
 	if err != nil {
-		return fmt.Errorf("unable to create the status; %w", err)
+		return fmt.Errorf("unable to create the status: %w", err)
 	}
 
 	fmt.Println("Successfully created the following status:")

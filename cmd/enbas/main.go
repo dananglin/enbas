@@ -39,7 +39,7 @@ var (
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Printf("ERROR: %v.\n", err)
+		fmt.Fprintf(os.Stderr, "ERROR: %v.\n", err)
 		os.Exit(1)
 	}
 }
@@ -71,7 +71,7 @@ func run() error {
 	flag.BoolFunc("no-color", "disable ANSI colour output when displaying text on screen", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
-			return fmt.Errorf("unable to parse %q as a boolean; %w", value, err)
+			return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
 		}
 
 		topLevelFlags.NoColor = new(bool)
@@ -200,7 +200,7 @@ func run() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("received an error executing the command; %w", err)
+		return fmt.Errorf("(%s) %w", command, err)
 	}
 
 	return nil

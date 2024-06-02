@@ -31,7 +31,7 @@ func NewWhoAmIExecutor(tlf TopLevelFlags, name, summary string) *WhoAmIExecutor 
 func (c *WhoAmIExecutor) Execute() error {
 	config, err := config.NewCredentialsConfigFromFile(c.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to load the credential config; %w", err)
+		return fmt.Errorf("unable to load the credential config: %w", err)
 	}
 
 	fmt.Printf("You are logged in as %q.\n", config.CurrentAccount)

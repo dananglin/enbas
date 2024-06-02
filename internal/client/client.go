@@ -27,7 +27,7 @@ type Client struct {
 func NewClientFromConfig(configDir string) (*Client, error) {
 	config, err := config.NewCredentialsConfigFromFile(configDir)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get the authentication configuration; %w", err)
+		return nil, fmt.Errorf("unable to get the authentication configuration: %w", err)
 	}
 
 	currentAuthentication := config.Credentials[config.CurrentAccount]
@@ -79,14 +79,14 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 
 	response, err := g.HTTPClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("received an error after sending the request; %w", err)
+		return fmt.Errorf("received an error after sending the request: %w", err)
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusBadRequest {
 		return fmt.Errorf(
-			"did not receive an OK response from the GoToSocial server; got %d",
+			"did not receive an OK response from the GoToSocial server: got %d",
 			response.StatusCode,
 		)
 	}
@@ -97,7 +97,7 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 
 	if err := json.NewDecoder(response.Body).Decode(object); err != nil {
 		return fmt.Errorf(
-			"unable to decode the response from the GoToSocial server; %w",
+			"unable to decode the response from the GoToSocial server: %w",
 			err,
 		)
 	}

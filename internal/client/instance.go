@@ -18,7 +18,7 @@ func (g *Client) GetInstance() (model.InstanceV2, error) {
 	var instance model.InstanceV2
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &instance); err != nil {
-		return model.InstanceV2{}, fmt.Errorf("received an error after sending the request to get the instance details; %w", err)
+		return model.InstanceV2{}, fmt.Errorf("received an error after sending the request to get the instance details: %w", err)
 	}
 
 	return instance, nil

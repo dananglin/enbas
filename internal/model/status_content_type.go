@@ -38,22 +38,37 @@ func (s StatusContentType) String() string {
 	return output
 }
 
-func ParseStatusContentType(value string) StatusContentType {
+func ParseStatusContentType(value string) (StatusContentType, error) {
 	switch value {
 	case statusContentTypePlainValue, statusContentTypeTextPlainValue:
-		return StatusContentTypePlainText
+		return StatusContentTypePlainText, nil
 	case statusContentTypeMarkdownValue, statusContentTypeTextMarkdownValue:
-		return StatusContentTypeMarkdown
+		return StatusContentTypeMarkdown, nil
 	}
 
-	return StatusContentTypeUnknown
+	return StatusContentTypeUnknown, InvalidStatusContentTypeError{Value: value}
 }
 
 func (s StatusContentType) MarshalJSON() ([]byte, error) {
 	value := s.String()
 	if value == unknownValue {
-		return nil, fmt.Errorf("%q is not a valid status content type", value)
+		return nil, InvalidStatusContentTypeError{Value: value}
 	}
 
-	return json.Marshal(value)
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("unable to encode %s to JSON: %w", value, err)
+	}
+
+	return data, nil
+}
+
+type InvalidStatusContentTypeError struct {
+	Value string
+}
+
+func (e InvalidStatusContentTypeError) Error() string {
+	return "'" + e.Value + "' is an invalid status content type: valid values are " +
+		statusContentTypePlainValue + " or " + statusContentTypeTextPlainValue + " for plain text, or " +
+		statusContentTypeMarkdownValue + " or " + statusContentTypeTextMarkdownValue + " for Markdown"
 }

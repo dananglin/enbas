@@ -31,7 +31,7 @@ func (g *Client) Register() error {
 
 	data, err := json.Marshal(params)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the request body; %w", err)
+		return fmt.Errorf("unable to marshal the request body: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -40,7 +40,7 @@ func (g *Client) Register() error {
 	var app model.Application
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, &app); err != nil {
-		return fmt.Errorf("received an error after sending the registration request; %w", err)
+		return fmt.Errorf("received an error after sending the registration request: %w", err)
 	}
 
 	g.Authentication.ClientID = app.ClientID

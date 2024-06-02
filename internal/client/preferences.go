@@ -17,7 +17,7 @@ func (g *Client) GetUserPreferences() (model.Preferences, error) {
 	var preferences model.Preferences
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &preferences); err != nil {
-		return model.Preferences{}, fmt.Errorf("received an error after sending the request to get the user preferences; %w", err)
+		return model.Preferences{}, fmt.Errorf("received an error after sending the request to get the user preferences: %w", err)
 	}
 
 	return preferences, nil

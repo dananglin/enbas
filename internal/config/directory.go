@@ -30,10 +30,10 @@ func ensureConfigDir(configDir string) error {
 	if _, err := os.Stat(configDir); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if err := os.MkdirAll(configDir, 0o750); err != nil {
-				return fmt.Errorf("unable to create %s; %w", configDir, err)
+				return fmt.Errorf("unable to create %s: %w", configDir, err)
 			}
 		} else {
-			return fmt.Errorf("unknown error received when running stat on %s; %w", configDir, err)
+			return fmt.Errorf("unknown error received after getting the config directory information: %w", err)
 		}
 	}
 

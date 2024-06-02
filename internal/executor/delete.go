@@ -49,7 +49,7 @@ func (d *DeleteExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(d.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -61,7 +61,7 @@ func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 	}
 
 	if err := gtsClient.DeleteList(d.listID); err != nil {
-		return fmt.Errorf("unable to delete the list; %w", err)
+		return fmt.Errorf("unable to delete the list: %w", err)
 	}
 
 	fmt.Println("The list was successfully deleted.")

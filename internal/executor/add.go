@@ -59,7 +59,7 @@ func (a *AddExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(a.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -102,7 +102,7 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 	}
 
 	if err := gtsClient.AddAccountsToList(a.listID, accountIDs); err != nil {
-		return fmt.Errorf("unable to add the accounts to the list; %w", err)
+		return fmt.Errorf("unable to add the accounts to the list: %w", err)
 	}
 
 	fmt.Println("Successfully added the account(s) to the list.")
@@ -128,12 +128,12 @@ func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
 
 func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	if len(a.accountNames) != 1 {
-		return fmt.Errorf("unexpected number of accounts specified; want 1, got %d", len(a.accountNames))
+		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(a.accountNames))
 	}
 
 	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID; %w", err)
+		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
 	if a.content == "" {
@@ -144,7 +144,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	}
 
 	if err := gtsClient.SetPrivateNote(accountID, a.content); err != nil {
-		return fmt.Errorf("unable to add the private note to the account; %w", err)
+		return fmt.Errorf("unable to add the private note to the account: %w", err)
 	}
 
 	fmt.Println("Successfully added the private note to the account.")

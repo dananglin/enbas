@@ -42,7 +42,7 @@ func (g *Client) UpdateToken(code string) error {
 
 	data, err := json.Marshal(params)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the request body; %w", err)
+		return fmt.Errorf("unable to marshal the request body: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
@@ -51,7 +51,7 @@ func (g *Client) UpdateToken(code string) error {
 	var response tokenResponse
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, &response); err != nil {
-		return fmt.Errorf("received an error after sending the token request; %w", err)
+		return fmt.Errorf("received an error after sending the token request: %w", err)
 	}
 
 	if response.AccessToken == "" {

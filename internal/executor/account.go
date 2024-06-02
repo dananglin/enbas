@@ -22,12 +22,12 @@ func getAccountID(gtsClient *client.Client, myAccount bool, accountName, configD
 	case myAccount:
 		accountID, err = getMyAccountID(gtsClient, configDir)
 		if err != nil {
-			return "", fmt.Errorf("unable to get your account ID; %w", err)
+			return "", fmt.Errorf("unable to get your account ID: %w", err)
 		}
 	case accountName != "":
 		accountID, err = getTheirAccountID(gtsClient, accountName)
 		if err != nil {
-			return "", fmt.Errorf("unable to get their account ID; %w", err)
+			return "", fmt.Errorf("unable to get their account ID: %w", err)
 		}
 	default:
 		return "", NoAccountSpecifiedError{}
@@ -39,7 +39,7 @@ func getAccountID(gtsClient *client.Client, myAccount bool, accountName, configD
 func getTheirAccountID(gtsClient *client.Client, accountURI string) (string, error) {
 	account, err := getAccount(gtsClient, accountURI)
 	if err != nil {
-		return "", fmt.Errorf("unable to retrieve your account; %w", err)
+		return "", fmt.Errorf("unable to retrieve your account: %w", err)
 	}
 
 	return account.ID, nil
@@ -48,7 +48,7 @@ func getTheirAccountID(gtsClient *client.Client, accountURI string) (string, err
 func getMyAccountID(gtsClient *client.Client, configDir string) (string, error) {
 	account, err := getMyAccount(gtsClient, configDir)
 	if err != nil {
-		return "", fmt.Errorf("received an error while getting your account details; %w", err)
+		return "", fmt.Errorf("received an error while getting your account details: %w", err)
 	}
 
 	return account.ID, nil
@@ -57,14 +57,14 @@ func getMyAccountID(gtsClient *client.Client, configDir string) (string, error) 
 func getMyAccount(gtsClient *client.Client, configDir string) (model.Account, error) {
 	authConfig, err := config.NewCredentialsConfigFromFile(configDir)
 	if err != nil {
-		return model.Account{}, fmt.Errorf("unable to retrieve the authentication configuration; %w", err)
+		return model.Account{}, fmt.Errorf("unable to retrieve the authentication configuration: %w", err)
 	}
 
 	accountURI := authConfig.CurrentAccount
 
 	account, err := getAccount(gtsClient, accountURI)
 	if err != nil {
-		return model.Account{}, fmt.Errorf("unable to retrieve your account; %w", err)
+		return model.Account{}, fmt.Errorf("unable to retrieve your account: %w", err)
 	}
 
 	return account, nil
@@ -73,7 +73,7 @@ func getMyAccount(gtsClient *client.Client, configDir string) (model.Account, er
 func getAccount(gtsClient *client.Client, accountURI string) (model.Account, error) {
 	account, err := gtsClient.GetAccount(accountURI)
 	if err != nil {
-		return model.Account{}, fmt.Errorf("unable to retrieve the account details; %w", err)
+		return model.Account{}, fmt.Errorf("unable to retrieve the account details: %w", err)
 	}
 
 	return account, nil

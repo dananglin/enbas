@@ -48,7 +48,7 @@ func (b *BlockExecutor) Execute() error {
 
 	gtsClient, err := client.NewClientFromConfig(b.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client; %w", err)
+		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
 
 	return doFunc(gtsClient)
@@ -57,7 +57,7 @@ func (b *BlockExecutor) Execute() error {
 func (b *BlockExecutor) blockAccount(gtsClient *client.Client) error {
 	accountID, err := getAccountID(gtsClient, false, b.accountName, b.topLevelFlags.ConfigDir)
 	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID; %w", err)
+		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
 	if b.unblock {
@@ -65,7 +65,7 @@ func (b *BlockExecutor) blockAccount(gtsClient *client.Client) error {
 	}
 
 	if err := gtsClient.BlockAccount(accountID); err != nil {
-		return fmt.Errorf("unable to block the account; %w", err)
+		return fmt.Errorf("unable to block the account: %w", err)
 	}
 
 	fmt.Println("Successfully blocked the account.")
@@ -75,7 +75,7 @@ func (b *BlockExecutor) blockAccount(gtsClient *client.Client) error {
 
 func (b *BlockExecutor) unblockAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.UnblockAccount(accountID); err != nil {
-		return fmt.Errorf("unable to unblock the account; %w", err)
+		return fmt.Errorf("unable to unblock the account: %w", err)
 	}
 
 	fmt.Println("Successfully unblocked the account.")
