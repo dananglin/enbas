@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: enbas
+Upstream-Contact: Dan Anglin <d.n.i.anglin@gmail.com>
+Source: https://codeflow.dananglin.me.uk/apollo/enbas
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...

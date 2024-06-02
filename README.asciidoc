@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Dan Anglin <d.n.i.anglin@gmail.com>
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 = Enbas
 :toc: left
 :toclevels: 3
@@ -10,7 +14,7 @@ in https://go.dev[Go]. The project is in its experimental stages of development 
 changes may appear. Enbas has limited functionality at the moment and it is **not** recommended for use
 with your production GoToSocial servers.
 
-This project is licensed under the GNU Public License V3 which you can view link:COPYING[here].
+This project is licensed under the GNU General Public License V3 or later which you can view link:LICENSES/GPL-3.0-or-later.txt[here].
 
 === Repository mirrors
 
