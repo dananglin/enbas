@@ -66,6 +66,7 @@ func (c *ShowExecutor) Execute() error {
 		resourceFollowers: c.showFollowers,
 		resourceFollowing: c.showFollowing,
 		resourceBlocked:   c.showBlocked,
+		resourceBookmarks: c.showBookmarks,
 	}
 
 	doFunc, ok := funcMap[c.resourceType]
@@ -309,6 +310,21 @@ func (c *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 		utilities.Display(blocked, *c.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("You have no blocked accounts.")
+	}
+
+	return nil
+}
+
+func (c *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
+	bookmarks, err := gtsClient.GetBookmarks(c.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of bookmarks: %w", err)
+	}
+
+	if len(bookmarks.Statuses) > 0 {
+		utilities.Display(bookmarks, *c.topLevelFlags.NoColor)
+	} else {
+		fmt.Println("You have no bookmarks.")
 	}
 
 	return nil

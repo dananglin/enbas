@@ -44,4 +44,5 @@ const (
 	resourceNote      = "note"
 	resourceStatus    = "status"
 	resourceTimeline  = "timeline"
+	resourceBookmarks = "bookmarks"
 )

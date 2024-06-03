@@ -62,3 +62,51 @@ func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
 
 	return status, nil
 }
+
+func (g *Client) GetBookmarks(limit int) (model.StatusList, error) {
+	path := fmt.Sprintf("/api/v1/bookmarks?limit=%d", limit)
+	url := g.Authentication.Instance + path
+
+	bookmarks := model.StatusList{
+		Type:     model.StatusListBookMarks,
+		Name:     "BOOKMARKS",
+		Statuses: nil,
+	}
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &bookmarks.Statuses); err != nil {
+		return bookmarks, fmt.Errorf(
+			"received an error after sending the request to get the bookmarks: %w",
+			err,
+		)
+	}
+
+	return bookmarks, nil
+}
+
+func (g *Client) AddStatusToBookmarks(statusID string) error {
+	path := fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID)
+	url := g.Authentication.Instance + path
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to add the status to the list of bookmarks: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
+	path := fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID)
+	url := g.Authentication.Instance + path
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to remove the status from the list of bookmarks: %w",
+			err,
+		)
+	}
+
+	return nil
+}

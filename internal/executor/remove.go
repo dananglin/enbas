@@ -18,6 +18,7 @@ type RemoveExecutor struct {
 	resourceType     string
 	fromResourceType string
 	listID           string
+	statusID         string
 	accountNames     AccountNames
 }
 
@@ -33,6 +34,7 @@ func NewRemoveExecutor(tlf TopLevelFlags, name, summary string) *RemoveExecutor 
 	removeExe.StringVar(&removeExe.resourceType, flagType, "", "specify the resource type to remove (e.g. account, note)")
 	removeExe.StringVar(&removeExe.fromResourceType, flagFrom, "", "specify the resource type to remove from (e.g. list, account, etc)")
 	removeExe.StringVar(&removeExe.listID, flagListID, "", "the ID of the list to remove from")
+	removeExe.StringVar(&removeExe.statusID, flagStatusID, "", "the ID of the status")
 	removeExe.Var(&removeExe.accountNames, flagAccountName, "the name of the account to remove from the resource")
 
 	removeExe.Usage = commandUsageFunc(name, summary, removeExe.FlagSet)
@@ -46,8 +48,9 @@ func (r *RemoveExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceList:    r.removeFromList,
-		resourceAccount: r.removeFromAccount,
+		resourceList:      r.removeFromList,
+		resourceAccount:   r.removeFromAccount,
+		resourceBookmarks: r.removeFromBookmarks,
 	}
 
 	doFunc, ok := funcMap[r.fromResourceType]
@@ -90,13 +93,13 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 
 	accountIDs := make([]string, len(r.accountNames))
 
-	for i := range r.accountNames {
-		accountID, err := getTheirAccountID(gtsClient, r.accountNames[i])
+	for ind := range r.accountNames {
+		accountID, err := getTheirAccountID(gtsClient, r.accountNames[ind])
 		if err != nil {
-			return fmt.Errorf("unable to get the account ID for %s, %w", r.accountNames[i], err)
+			return fmt.Errorf("unable to get the account ID for %s, %w", r.accountNames[ind], err)
 		}
 
-		accountIDs[i] = accountID
+		accountIDs[ind] = accountID
 	}
 
 	if err := gtsClient.RemoveAccountsFromList(r.listID, accountIDs); err != nil {
@@ -139,6 +142,36 @@ func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully removed the private note from the account.")
+
+	return nil
+}
+
+func (r *RemoveExecutor) removeFromBookmarks(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		resourceStatus: r.removeStatusFromBookmarks,
+	}
+
+	doFunc, ok := funcMap[r.resourceType]
+	if !ok {
+		return UnsupportedRemoveOperationError{
+			ResourceType:           r.resourceType,
+			RemoveFromResourceType: r.fromResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) error {
+	if r.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	if err := gtsClient.RemoveStatusFromBookmarks(r.statusID); err != nil {
+		return fmt.Errorf("unable to remove the status from your bookmarks: %w", err)
+	}
+
+	fmt.Println("Successfully removed the status from your bookmarks.")
 
 	return nil
 }

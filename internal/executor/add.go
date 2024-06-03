@@ -18,6 +18,7 @@ type AddExecutor struct {
 	resourceType   string
 	toResourceType string
 	listID         string
+	statusID       string
 	accountNames   AccountNames
 	content        string
 }
@@ -34,7 +35,8 @@ func NewAddExecutor(tlf TopLevelFlags, name, summary string) *AddExecutor {
 	addExe.StringVar(&addExe.resourceType, flagType, "", "specify the resource type to add (e.g. account, note)")
 	addExe.StringVar(&addExe.toResourceType, flagTo, "", "specify the target resource type to add to (e.g. list, account, etc)")
 	addExe.StringVar(&addExe.listID, flagListID, "", "the ID of the list to add to")
-	addExe.Var(&addExe.accountNames, flagAccountName, "the name of the account to add to the resource")
+	addExe.StringVar(&addExe.statusID, flagStatusID, "", "the ID of the status")
+	addExe.Var(&addExe.accountNames, flagAccountName, "the name of the account")
 	addExe.StringVar(&addExe.content, flagContent, "", "the content of the note")
 
 	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
@@ -48,8 +50,9 @@ func (a *AddExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceList:    a.addToList,
-		resourceAccount: a.addToAccount,
+		resourceList:      a.addToList,
+		resourceAccount:   a.addToAccount,
+		resourceBookmarks: a.addToBookmarks,
 	}
 
 	doFunc, ok := funcMap[a.toResourceType]
@@ -148,6 +151,36 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully added the private note to the account.")
+
+	return nil
+}
+
+func (a *AddExecutor) addToBookmarks(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		resourceStatus: a.addStatusToBookmarks,
+	}
+
+	doFunc, ok := funcMap[a.resourceType]
+	if !ok {
+		return UnsupportedAddOperationError{
+			ResourceType:      a.resourceType,
+			AddToResourceType: a.toResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
+	if a.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	if err := gtsClient.AddStatusToBookmarks(a.statusID); err != nil {
+		return fmt.Errorf("unable to add the status to your bookmarks: %w", err)
+	}
+
+	fmt.Println("Successfully added the status to your bookmarks.")
 
 	return nil
 }
