@@ -11,51 +11,55 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (g *Client) GetHomeTimeline(limit int) (model.Timeline, error) {
+func (g *Client) GetHomeTimeline(limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/home?limit=%d", limit)
 
-	timeline := model.Timeline{
-		Name:     "HOME TIMELINE",
+	timeline := model.StatusList{
+		Type:     model.StatusListTimeline,
+		Name:     "HOME",
 		Statuses: nil,
 	}
 
 	return g.getTimeline(path, timeline)
 }
 
-func (g *Client) GetPublicTimeline(limit int) (model.Timeline, error) {
+func (g *Client) GetPublicTimeline(limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/public?limit=%d", limit)
 
-	timeline := model.Timeline{
-		Name:     "PUBLIC TIMELINE",
+	timeline := model.StatusList{
+		Type:     model.StatusListTimeline,
+		Name:     "PUBLIC",
 		Statuses: nil,
 	}
 
 	return g.getTimeline(path, timeline)
 }
 
-func (g *Client) GetListTimeline(listID string, limit int) (model.Timeline, error) {
+func (g *Client) GetListTimeline(listID, title string, limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/list/%s?limit=%d", listID, limit)
 
-	timeline := model.Timeline{
-		Name:     "LIST: " + listID,
+	timeline := model.StatusList{
+		Type:     model.StatusListTimeline,
+		Name:     "LIST (" + title + ")",
 		Statuses: nil,
 	}
 
 	return g.getTimeline(path, timeline)
 }
 
-func (g *Client) GetTagTimeline(tag string, limit int) (model.Timeline, error) {
+func (g *Client) GetTagTimeline(tag string, limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/tag/%s?limit=%d", tag, limit)
 
-	timeline := model.Timeline{
-		Name:     "TAG: " + tag,
+	timeline := model.StatusList{
+		Type:     model.StatusListTimeline,
+		Name:     "TAG (" + tag + ")",
 		Statuses: nil,
 	}
 
 	return g.getTimeline(path, timeline)
 }
 
-func (g *Client) getTimeline(path string, timeline model.Timeline) (model.Timeline, error) {
+func (g *Client) getTimeline(path string, timeline model.StatusList) (model.StatusList, error) {
 	url := g.Authentication.Instance + path
 
 	var statuses []model.Status

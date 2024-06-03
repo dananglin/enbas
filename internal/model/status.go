@@ -6,6 +6,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -198,4 +199,51 @@ func (s Status) Display(noColor bool) string {
 		utilities.HeaderFormat(noColor, "URL:"),
 		s.URL,
 	)
+}
+
+type StatusListType int
+
+const (
+	StatusListTimeline StatusListType = iota
+	StatusListBookMarks
+)
+
+type StatusList struct {
+	Type     StatusListType
+	Name     string
+	Statuses []Status
+}
+
+func (s StatusList) Display(noColor bool) string {
+	var builder strings.Builder
+	var name string
+
+	separator := "────────────────────────────────────────────────────────────────────────────────"
+
+	if s.Type == StatusListTimeline {
+		name = "TIMELINE: " + s.Name
+	} else {
+		name = s.Name
+	}
+
+	builder.WriteString(utilities.HeaderFormat(noColor, name) + "\n")
+
+	for _, status := range s.Statuses {
+		builder.WriteString("\n" + utilities.DisplayNameFormat(noColor, status.Account.DisplayName) + " (@" + status.Account.Acct + ")\n")
+
+		statusID := status.ID
+		createdAt := status.CreatedAt
+
+		if status.Reblog != nil {
+			builder.WriteString("reposted this status from " + utilities.DisplayNameFormat(noColor, status.Reblog.Account.DisplayName) + " (@" + status.Reblog.Account.Acct + ")\n")
+			statusID = status.Reblog.ID
+			createdAt = status.Reblog.CreatedAt
+		}
+
+		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", 80) + "\n\n")
+		builder.WriteString(utilities.FieldFormat(noColor, "ID:") + " " + statusID + "\t" + utilities.FieldFormat(noColor, "Created at:") + " " + utilities.FormatTime(createdAt) + "\n")
+		builder.WriteString(separator + "\n")
+	}
+
+	return builder.String()
 }

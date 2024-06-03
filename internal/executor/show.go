@@ -166,7 +166,7 @@ func (c *ShowExecutor) showStatus(gtsClient *client.Client) error {
 
 func (c *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 	var (
-		timeline model.Timeline
+		timeline model.StatusList
 		err      error
 	)
 
@@ -180,7 +180,14 @@ func (c *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 			return FlagNotSetError{flagText: flagListID}
 		}
 
-		timeline, err = gtsClient.GetListTimeline(c.listID, c.limit)
+		var list model.List
+
+		list, err = gtsClient.GetList(c.listID)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve the list: %w", err)
+		}
+
+		timeline, err = gtsClient.GetListTimeline(list.ID, list.Title, c.limit)
 	case model.TimelineCategoryTag:
 		if c.tag == "" {
 			return FlagNotSetError{flagText: flagTag}
