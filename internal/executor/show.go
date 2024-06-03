@@ -30,51 +30,51 @@ type ShowExecutor struct {
 }
 
 func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
-	command := ShowExecutor{
+	showExe := ShowExecutor{
 		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
 		topLevelFlags: tlf,
 	}
 
-	command.BoolVar(&command.myAccount, flagMyAccount, false, "set to true to lookup your account")
-	command.BoolVar(&command.skipAccountRelationship, flagSkipRelationship, false, "set to true to skip showing your relationship to the specified account")
-	command.BoolVar(&command.showUserPreferences, flagShowPreferences, false, "show your preferences")
-	command.BoolVar(&command.showInBrowser, flagBrowser, false, "set to true to view in the browser")
-	command.StringVar(&command.resourceType, flagType, "", "specify the type of resource to display")
-	command.StringVar(&command.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
-	command.StringVar(&command.statusID, flagStatusID, "", "specify the ID of the status to display")
-	command.StringVar(&command.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "specify the timeline category to view")
-	command.StringVar(&command.listID, flagListID, "", "specify the ID of the list to display")
-	command.StringVar(&command.tag, flagTag, "", "specify the name of the tag to use")
-	command.IntVar(&command.limit, flagLimit, 20, "specify the limit of items to display")
+	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "set to true to lookup your account")
+	showExe.BoolVar(&showExe.skipAccountRelationship, flagSkipRelationship, false, "set to true to skip showing your relationship to the specified account")
+	showExe.BoolVar(&showExe.showUserPreferences, flagShowPreferences, false, "show your preferences")
+	showExe.BoolVar(&showExe.showInBrowser, flagBrowser, false, "set to true to view in the browser")
+	showExe.StringVar(&showExe.resourceType, flagType, "", "specify the type of resource to display")
+	showExe.StringVar(&showExe.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
+	showExe.StringVar(&showExe.statusID, flagStatusID, "", "specify the ID of the status to display")
+	showExe.StringVar(&showExe.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "specify the timeline category to view")
+	showExe.StringVar(&showExe.listID, flagListID, "", "specify the ID of the list to display")
+	showExe.StringVar(&showExe.tag, flagTag, "", "specify the name of the tag to use")
+	showExe.IntVar(&showExe.limit, flagLimit, 20, "specify the limit of items to display")
 
-	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
+	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
 
-	return &command
+	return &showExe
 }
 
-func (c *ShowExecutor) Execute() error {
-	if c.resourceType == "" {
+func (s *ShowExecutor) Execute() error {
+	if s.resourceType == "" {
 		return FlagNotSetError{flagText: flagType}
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceInstance:  c.showInstance,
-		resourceAccount:   c.showAccount,
-		resourceStatus:    c.showStatus,
-		resourceTimeline:  c.showTimeline,
-		resourceList:      c.showList,
-		resourceFollowers: c.showFollowers,
-		resourceFollowing: c.showFollowing,
-		resourceBlocked:   c.showBlocked,
-		resourceBookmarks: c.showBookmarks,
+		resourceInstance:  s.showInstance,
+		resourceAccount:   s.showAccount,
+		resourceStatus:    s.showStatus,
+		resourceTimeline:  s.showTimeline,
+		resourceList:      s.showList,
+		resourceFollowers: s.showFollowers,
+		resourceFollowing: s.showFollowing,
+		resourceBlocked:   s.showBlocked,
+		resourceBookmarks: s.showBookmarks,
 	}
 
-	doFunc, ok := funcMap[c.resourceType]
+	doFunc, ok := funcMap[s.resourceType]
 	if !ok {
-		return UnsupportedTypeError{resourceType: c.resourceType}
+		return UnsupportedTypeError{resourceType: s.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(s.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -82,125 +82,125 @@ func (c *ShowExecutor) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *ShowExecutor) showInstance(gtsClient *client.Client) error {
+func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 	instance, err := gtsClient.GetInstance()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the instance details: %w", err)
 	}
 
-	utilities.Display(instance, *c.topLevelFlags.NoColor)
+	utilities.Display(instance, *s.topLevelFlags.NoColor)
 
 	return nil
 }
 
-func (c *ShowExecutor) showAccount(gtsClient *client.Client) error {
+func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	var (
 		account model.Account
 		err     error
 	)
 
-	if c.myAccount {
-		account, err = getMyAccount(gtsClient, c.topLevelFlags.ConfigDir)
+	if s.myAccount {
+		account, err = getMyAccount(gtsClient, s.topLevelFlags.ConfigDir)
 		if err != nil {
 			return fmt.Errorf("received an error while getting the account details: %w", err)
 		}
 	} else {
-		if c.accountName == "" {
+		if s.accountName == "" {
 			return FlagNotSetError{flagText: flagAccountName}
 		}
 
-		account, err = getAccount(gtsClient, c.accountName)
+		account, err = getAccount(gtsClient, s.accountName)
 		if err != nil {
 			return fmt.Errorf("received an error while getting the account details: %w", err)
 		}
 	}
 
-	if c.showInBrowser {
+	if s.showInBrowser {
 		utilities.OpenLink(account.URL)
 
 		return nil
 	}
 
-	utilities.Display(account, *c.topLevelFlags.NoColor)
+	utilities.Display(account, *s.topLevelFlags.NoColor)
 
-	if !c.myAccount && !c.skipAccountRelationship {
+	if !s.myAccount && !s.skipAccountRelationship {
 		relationship, err := gtsClient.GetAccountRelationship(account.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account: %w", err)
 		}
 
-		utilities.Display(relationship, *c.topLevelFlags.NoColor)
+		utilities.Display(relationship, *s.topLevelFlags.NoColor)
 	}
 
-	if c.myAccount && c.showUserPreferences {
+	if s.myAccount && s.showUserPreferences {
 		preferences, err := gtsClient.GetUserPreferences()
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the user preferences: %w", err)
 		}
 
-		utilities.Display(preferences, *c.topLevelFlags.NoColor)
+		utilities.Display(preferences, *s.topLevelFlags.NoColor)
 	}
 
 	return nil
 }
 
-func (c *ShowExecutor) showStatus(gtsClient *client.Client) error {
-	if c.statusID == "" {
+func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
+	if s.statusID == "" {
 		return FlagNotSetError{flagText: flagStatusID}
 	}
 
-	status, err := gtsClient.GetStatus(c.statusID)
+	status, err := gtsClient.GetStatus(s.statusID)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	if c.showInBrowser {
+	if s.showInBrowser {
 		utilities.OpenLink(status.URL)
 
 		return nil
 	}
 
-	utilities.Display(status, *c.topLevelFlags.NoColor)
+	utilities.Display(status, *s.topLevelFlags.NoColor)
 
 	return nil
 }
 
-func (c *ShowExecutor) showTimeline(gtsClient *client.Client) error {
+func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 	var (
 		timeline model.StatusList
 		err      error
 	)
 
-	switch c.timelineCategory {
+	switch s.timelineCategory {
 	case model.TimelineCategoryHome:
-		timeline, err = gtsClient.GetHomeTimeline(c.limit)
+		timeline, err = gtsClient.GetHomeTimeline(s.limit)
 	case model.TimelineCategoryPublic:
-		timeline, err = gtsClient.GetPublicTimeline(c.limit)
+		timeline, err = gtsClient.GetPublicTimeline(s.limit)
 	case model.TimelineCategoryList:
-		if c.listID == "" {
+		if s.listID == "" {
 			return FlagNotSetError{flagText: flagListID}
 		}
 
 		var list model.List
 
-		list, err = gtsClient.GetList(c.listID)
+		list, err = gtsClient.GetList(s.listID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the list: %w", err)
 		}
 
-		timeline, err = gtsClient.GetListTimeline(list.ID, list.Title, c.limit)
+		timeline, err = gtsClient.GetListTimeline(list.ID, list.Title, s.limit)
 	case model.TimelineCategoryTag:
-		if c.tag == "" {
+		if s.tag == "" {
 			return FlagNotSetError{flagText: flagTag}
 		}
 
-		timeline, err = gtsClient.GetTagTimeline(c.tag, c.limit)
+		timeline, err = gtsClient.GetTagTimeline(s.tag, s.limit)
 	default:
-		return model.InvalidTimelineCategoryError{Value: c.timelineCategory}
+		return model.InvalidTimelineCategoryError{Value: s.timelineCategory}
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the %s timeline: %w", c.timelineCategory, err)
+		return fmt.Errorf("unable to retrieve the %s timeline: %w", s.timelineCategory, err)
 	}
 
 	if len(timeline.Statuses) == 0 {
@@ -209,22 +209,22 @@ func (c *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(timeline, *c.topLevelFlags.NoColor)
+	utilities.Display(timeline, *s.topLevelFlags.NoColor)
 
 	return nil
 }
 
-func (c *ShowExecutor) showList(gtsClient *client.Client) error {
-	if c.listID == "" {
-		return c.showLists(gtsClient)
+func (s *ShowExecutor) showList(gtsClient *client.Client) error {
+	if s.listID == "" {
+		return s.showLists(gtsClient)
 	}
 
-	list, err := gtsClient.GetList(c.listID)
+	list, err := gtsClient.GetList(s.listID)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list: %w", err)
 	}
 
-	accounts, err := gtsClient.GetAccountsFromList(c.listID, 0)
+	accounts, err := gtsClient.GetAccountsFromList(s.listID, 0)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the accounts from the list: %w", err)
 	}
@@ -238,12 +238,12 @@ func (c *ShowExecutor) showList(gtsClient *client.Client) error {
 		list.Accounts = accountMap
 	}
 
-	utilities.Display(list, *c.topLevelFlags.NoColor)
+	utilities.Display(list, *s.topLevelFlags.NoColor)
 
 	return nil
 }
 
-func (c *ShowExecutor) showLists(gtsClient *client.Client) error {
+func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 	lists, err := gtsClient.GetAllLists()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the lists: %w", err)
@@ -255,24 +255,24 @@ func (c *ShowExecutor) showLists(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(lists, *c.topLevelFlags.NoColor)
+	utilities.Display(lists, *s.topLevelFlags.NoColor)
 
 	return nil
 }
 
-func (c *ShowExecutor) showFollowers(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName, c.topLevelFlags.ConfigDir)
+func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	followers, err := gtsClient.GetFollowers(accountID, c.limit)
+	followers, err := gtsClient.GetFollowers(accountID, s.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followers: %w", err)
 	}
 
 	if len(followers.Accounts) > 0 {
-		utilities.Display(followers, *c.topLevelFlags.NoColor)
+		utilities.Display(followers, *s.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("There are no followers for this account or the list is hidden.")
 	}
@@ -280,19 +280,19 @@ func (c *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *ShowExecutor) showFollowing(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, c.myAccount, c.accountName, c.topLevelFlags.ConfigDir)
+func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	following, err := gtsClient.GetFollowing(accountID, c.limit)
+	following, err := gtsClient.GetFollowing(accountID, s.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of followed accounts: %w", err)
 	}
 
 	if len(following.Accounts) > 0 {
-		utilities.Display(following, *c.topLevelFlags.NoColor)
+		utilities.Display(following, *s.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("This account is not following anyone or the list is hidden.")
 	}
@@ -300,14 +300,14 @@ func (c *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *ShowExecutor) showBlocked(gtsClient *client.Client) error {
-	blocked, err := gtsClient.GetBlockedAccounts(c.limit)
+func (s *ShowExecutor) showBlocked(gtsClient *client.Client) error {
+	blocked, err := gtsClient.GetBlockedAccounts(s.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of blocked accounts: %w", err)
 	}
 
 	if len(blocked.Accounts) > 0 {
-		utilities.Display(blocked, *c.topLevelFlags.NoColor)
+		utilities.Display(blocked, *s.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("You have no blocked accounts.")
 	}
@@ -315,14 +315,14 @@ func (c *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
-	bookmarks, err := gtsClient.GetBookmarks(c.limit)
+func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
+	bookmarks, err := gtsClient.GetBookmarks(s.limit)
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the list of bookmarks: %w", err)
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		utilities.Display(bookmarks, *c.topLevelFlags.NoColor)
+		utilities.Display(bookmarks, *s.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("You have no bookmarks.")
 	}

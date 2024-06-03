@@ -96,7 +96,7 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 	for ind := range r.accountNames {
 		accountID, err := getTheirAccountID(gtsClient, r.accountNames[ind])
 		if err != nil {
-			return fmt.Errorf("unable to get the account ID for %s, %w", r.accountNames[ind], err)
+			return fmt.Errorf("unable to get the account ID for %s: %w", r.accountNames[ind], err)
 		}
 
 		accountIDs[ind] = accountID
