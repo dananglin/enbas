@@ -83,7 +83,7 @@ type Poll struct {
 
 type PollOption struct {
 	Title      string `json:"title"`
-	VotesCount string `json:"votes_count"`
+	VotesCount int    `json:"votes_count"`
 }
 
 type StatusReblogged struct {
