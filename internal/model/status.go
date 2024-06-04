@@ -201,32 +201,17 @@ func (s Status) Display(noColor bool) string {
 	)
 }
 
-type StatusListType int
-
-const (
-	StatusListTimeline StatusListType = iota
-	StatusListBookMarks
-)
-
 type StatusList struct {
-	Type     StatusListType
 	Name     string
 	Statuses []Status
 }
 
 func (s StatusList) Display(noColor bool) string {
 	var builder strings.Builder
-	var name string
 
 	separator := "────────────────────────────────────────────────────────────────────────────────"
 
-	if s.Type == StatusListTimeline {
-		name = "TIMELINE: " + s.Name
-	} else {
-		name = s.Name
-	}
-
-	builder.WriteString(utilities.HeaderFormat(noColor, name) + "\n")
+	builder.WriteString(utilities.HeaderFormat(noColor, s.Name) + "\n")
 
 	for _, status := range s.Statuses {
 		builder.WriteString("\n" + utilities.DisplayNameFormat(noColor, status.Account.DisplayName) + " (@" + status.Account.Acct + ")\n")

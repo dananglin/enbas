@@ -68,8 +68,7 @@ func (g *Client) GetBookmarks(limit int) (model.StatusList, error) {
 	url := g.Authentication.Instance + path
 
 	bookmarks := model.StatusList{
-		Type:     model.StatusListBookMarks,
-		Name:     "BOOKMARKS",
+		Name:     "Your Bookmarks",
 		Statuses: nil,
 	}
 
@@ -109,4 +108,48 @@ func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
 	}
 
 	return nil
+}
+
+func (g *Client) LikeStatus(statusID string) error {
+	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/favourite"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to like the status: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) UnlikeStatus(statusID string) error {
+	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/unfavourite"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to unlike the status: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusList, error) {
+	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", limit)
+
+	liked := model.StatusList{
+		Name:     "Your " + resourceName + " statuses",
+		Statuses: nil,
+	}
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &liked.Statuses); err != nil {
+		return model.StatusList{}, fmt.Errorf(
+			"received an error after sending the request to get the list of statuses: %w",
+			err,
+		)
+	}
+
+	return liked, nil
 }

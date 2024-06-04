@@ -51,6 +51,7 @@ func (r *RemoveExecutor) Execute() error {
 		resourceList:      r.removeFromList,
 		resourceAccount:   r.removeFromAccount,
 		resourceBookmarks: r.removeFromBookmarks,
+		resourceStatus:    r.removeFromStatus,
 	}
 
 	doFunc, ok := funcMap[r.fromResourceType]
@@ -172,6 +173,37 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 	}
 
 	fmt.Println("Successfully removed the status from your bookmarks.")
+
+	return nil
+}
+
+func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		resourceStar: r.removeStarFromStatus,
+		resourceLike: r.removeStarFromStatus,
+	}
+
+	doFunc, ok := funcMap[r.resourceType]
+	if !ok {
+		return UnsupportedRemoveOperationError{
+			ResourceType:           r.resourceType,
+			RemoveFromResourceType: r.fromResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (r *RemoveExecutor) removeStarFromStatus(gtsClient *client.Client) error {
+	if r.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	if err := gtsClient.UnlikeStatus(r.statusID); err != nil {
+		return fmt.Errorf("unable to remove the %s from the status: %w", r.resourceType, err)
+	}
+
+	fmt.Printf("Successfully removed the %s from the status.\n", r.resourceType)
 
 	return nil
 }

@@ -53,6 +53,7 @@ func (a *AddExecutor) Execute() error {
 		resourceList:      a.addToList,
 		resourceAccount:   a.addToAccount,
 		resourceBookmarks: a.addToBookmarks,
+		resourceStatus:    a.addToStatus,
 	}
 
 	doFunc, ok := funcMap[a.toResourceType]
@@ -181,6 +182,37 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully added the status to your bookmarks.")
+
+	return nil
+}
+
+func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
+	funcMap := map[string]func(*client.Client) error{
+		resourceStar: a.addStarToStatus,
+		resourceLike: a.addStarToStatus,
+	}
+
+	doFunc, ok := funcMap[a.resourceType]
+	if !ok {
+		return UnsupportedAddOperationError{
+			ResourceType:      a.resourceType,
+			AddToResourceType: a.toResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (a *AddExecutor) addStarToStatus(gtsClient *client.Client) error {
+	if a.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	if err := gtsClient.LikeStatus(a.statusID); err != nil {
+		return fmt.Errorf("unable to add the %s to the status: %w", a.resourceType, err)
+	}
+
+	fmt.Printf("Successfully added a %s to the status.\n", a.resourceType)
 
 	return nil
 }

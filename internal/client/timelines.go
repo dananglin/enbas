@@ -15,8 +15,7 @@ func (g *Client) GetHomeTimeline(limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/home?limit=%d", limit)
 
 	timeline := model.StatusList{
-		Type:     model.StatusListTimeline,
-		Name:     "HOME",
+		Name:     "Timeline: Home",
 		Statuses: nil,
 	}
 
@@ -27,8 +26,7 @@ func (g *Client) GetPublicTimeline(limit int) (model.StatusList, error) {
 	path := fmt.Sprintf("/api/v1/timelines/public?limit=%d", limit)
 
 	timeline := model.StatusList{
-		Type:     model.StatusListTimeline,
-		Name:     "PUBLIC",
+		Name:     "Timeline: Public",
 		Statuses: nil,
 	}
 
@@ -39,8 +37,7 @@ func (g *Client) GetListTimeline(listID, title string, limit int) (model.StatusL
 	path := fmt.Sprintf("/api/v1/timelines/list/%s?limit=%d", listID, limit)
 
 	timeline := model.StatusList{
-		Type:     model.StatusListTimeline,
-		Name:     "LIST (" + title + ")",
+		Name:     "Timeline: List (" + title + ")",
 		Statuses: nil,
 	}
 
@@ -51,8 +48,7 @@ func (g *Client) GetTagTimeline(tag string, limit int) (model.StatusList, error)
 	path := fmt.Sprintf("/api/v1/timelines/tag/%s?limit=%d", tag, limit)
 
 	timeline := model.StatusList{
-		Type:     model.StatusListTimeline,
-		Name:     "TAG (" + tag + ")",
+		Name:     "Timeline: Tag (" + tag + ")",
 		Statuses: nil,
 	}
 

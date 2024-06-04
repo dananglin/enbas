@@ -37,12 +37,16 @@ const (
 
 	resourceAccount   = "account"
 	resourceBlocked   = "blocked"
+	resourceBookmarks = "bookmarks"
 	resourceFollowers = "followers"
 	resourceFollowing = "following"
 	resourceInstance  = "instance"
+	resourceLike      = "like"
+	resourceLiked     = "liked"
 	resourceList      = "list"
 	resourceNote      = "note"
 	resourceStatus    = "status"
+	resourceStar      = "star"
+	resourceStarred   = "starred"
 	resourceTimeline  = "timeline"
-	resourceBookmarks = "bookmarks"
 )

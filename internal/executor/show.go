@@ -67,6 +67,8 @@ func (s *ShowExecutor) Execute() error {
 		resourceFollowing: s.showFollowing,
 		resourceBlocked:   s.showBlocked,
 		resourceBookmarks: s.showBookmarks,
+		resourceLiked:     s.showLiked,
+		resourceStarred:   s.showLiked,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -325,6 +327,21 @@ func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
 		utilities.Display(bookmarks, *s.topLevelFlags.NoColor)
 	} else {
 		fmt.Println("You have no bookmarks.")
+	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
+	liked, err := gtsClient.GetLikedStatuses(s.limit, s.resourceType)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of your %s statuses: %w", s.resourceType, err)
+	}
+
+	if len(liked.Statuses) > 0 {
+		utilities.Display(liked, *s.topLevelFlags.NoColor)
+	} else {
+		fmt.Printf("You have no %s statuses.\n", s.resourceType)
 	}
 
 	return nil
