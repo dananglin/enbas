@@ -153,3 +153,29 @@ func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusL
 
 	return liked, nil
 }
+
+func (g *Client) ReblogStatus(statusID string) error {
+	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/reblog"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to reblog the status; %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) UnreblogStatus(statusID string) error {
+	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/unreblog"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to un-reblog the status; %w",
+			err,
+		)
+	}
+
+	return nil
+}

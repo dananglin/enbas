@@ -38,6 +38,7 @@ const (
 	resourceAccount   = "account"
 	resourceBlocked   = "blocked"
 	resourceBookmarks = "bookmarks"
+	resourceBoost     = "boost"
 	resourceFollowers = "followers"
 	resourceFollowing = "following"
 	resourceInstance  = "instance"

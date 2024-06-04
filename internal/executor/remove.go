@@ -178,9 +178,14 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 }
 
 func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
+	if r.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
 	funcMap := map[string]func(*client.Client) error{
-		resourceStar: r.removeStarFromStatus,
-		resourceLike: r.removeStarFromStatus,
+		resourceStar:  r.removeStarFromStatus,
+		resourceLike:  r.removeStarFromStatus,
+		resourceBoost: r.removeBoostFromStatus,
 	}
 
 	doFunc, ok := funcMap[r.resourceType]
@@ -195,15 +200,21 @@ func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
 }
 
 func (r *RemoveExecutor) removeStarFromStatus(gtsClient *client.Client) error {
-	if r.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
-	}
-
 	if err := gtsClient.UnlikeStatus(r.statusID); err != nil {
 		return fmt.Errorf("unable to remove the %s from the status: %w", r.resourceType, err)
 	}
 
 	fmt.Printf("Successfully removed the %s from the status.\n", r.resourceType)
+
+	return nil
+}
+
+func (r *RemoveExecutor) removeBoostFromStatus(gtsClient *client.Client) error {
+	if err := gtsClient.UnreblogStatus(r.statusID); err != nil {
+		return fmt.Errorf("unable to remove the boost from the status: %w", err)
+	}
+
+	fmt.Println("Successfully removed the boost from the status.")
 
 	return nil
 }

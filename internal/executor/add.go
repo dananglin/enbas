@@ -187,9 +187,14 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
+	if a.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
 	funcMap := map[string]func(*client.Client) error{
-		resourceStar: a.addStarToStatus,
-		resourceLike: a.addStarToStatus,
+		resourceStar:  a.addStarToStatus,
+		resourceLike:  a.addStarToStatus,
+		resourceBoost: a.addBoostToStatus,
 	}
 
 	doFunc, ok := funcMap[a.resourceType]
@@ -204,15 +209,21 @@ func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addStarToStatus(gtsClient *client.Client) error {
-	if a.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
-	}
-
 	if err := gtsClient.LikeStatus(a.statusID); err != nil {
 		return fmt.Errorf("unable to add the %s to the status: %w", a.resourceType, err)
 	}
 
 	fmt.Printf("Successfully added a %s to the status.\n", a.resourceType)
+
+	return nil
+}
+
+func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
+	if err := gtsClient.ReblogStatus(a.statusID); err != nil {
+		return fmt.Errorf("unable to add the boost to the status: %w", err)
+	}
+
+	fmt.Println("Successfully added the boost to the status.")
 
 	return nil
 }
