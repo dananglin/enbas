@@ -6,6 +6,7 @@ package utilities
 
 import (
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -32,15 +33,21 @@ func FieldFormat(noColor bool, text string) string {
 	return green + text + reset
 }
 
-func DisplayNameFormat(noColor bool, text string) string {
+func FullDisplayNameFormat(noColor bool, displayName, acct string) string {
 	// use this pattern to remove all emoji strings
 	pattern := regexp.MustCompile(`\s:[A-Za-z0-9]*:`)
 
+	var builder strings.Builder
+
 	if noColor {
-		return pattern.ReplaceAllString(text, "")
+		builder.WriteString(pattern.ReplaceAllString(displayName, ""))
+	} else {
+		builder.WriteString(boldmagenta + pattern.ReplaceAllString(displayName, "") + reset)
 	}
 
-	return boldmagenta + pattern.ReplaceAllString(text, "") + reset
+	builder.WriteString(" (@" + acct + ")")
+
+	return builder.String()
 }
 
 func FormatDate(date time.Time) string {

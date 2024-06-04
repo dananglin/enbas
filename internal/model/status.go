@@ -159,7 +159,7 @@ type MediaDimensions struct {
 
 func (s Status) Display(noColor bool) string {
 	format := `
-%s (@%s)
+%s
 
 %s
   %s
@@ -183,7 +183,7 @@ func (s Status) Display(noColor bool) string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.DisplayNameFormat(noColor, s.Account.DisplayName), s.Account.Username,
+		utilities.FullDisplayNameFormat(noColor, s.Account.DisplayName, s.Account.Acct),
 		utilities.HeaderFormat(noColor, "CONTENT:"),
 		utilities.WrapLines(utilities.ConvertHTMLToText(s.Content), "\n  ", 80),
 		utilities.HeaderFormat(noColor, "STATUS ID:"),
@@ -214,13 +214,13 @@ func (s StatusList) Display(noColor bool) string {
 	builder.WriteString(utilities.HeaderFormat(noColor, s.Name) + "\n")
 
 	for _, status := range s.Statuses {
-		builder.WriteString("\n" + utilities.DisplayNameFormat(noColor, status.Account.DisplayName) + " (@" + status.Account.Acct + ")\n")
+		builder.WriteString("\n" + utilities.FullDisplayNameFormat(noColor, status.Account.DisplayName, status.Account.Acct) + "\n")
 
 		statusID := status.ID
 		createdAt := status.CreatedAt
 
 		if status.Reblog != nil {
-			builder.WriteString("reposted this status from " + utilities.DisplayNameFormat(noColor, status.Reblog.Account.DisplayName) + " (@" + status.Reblog.Account.Acct + ")\n")
+			builder.WriteString("reposted this status from " + utilities.FullDisplayNameFormat(noColor, status.Reblog.Account.DisplayName, status.Reblog.Account.Acct) + "\n")
 			statusID = status.Reblog.ID
 			createdAt = status.Reblog.CreatedAt
 		}

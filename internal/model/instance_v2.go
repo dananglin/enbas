@@ -154,9 +154,9 @@ func (i InstanceV2) Display(noColor bool) string {
 		i.Version,
 		utilities.HeaderFormat(noColor, "CONTACT:"),
 		utilities.FieldFormat(noColor, "Name:"),
-		utilities.DisplayNameFormat(noColor, i.Contact.Account.DisplayName),
+		i.Contact.Account.DisplayName,
 		utilities.FieldFormat(noColor, "Username:"),
-		i.Contact.Account.Username,
+		i.Contact.Account.Acct,
 		utilities.FieldFormat(noColor, "Email:"),
 		i.Contact.Email,
 	)

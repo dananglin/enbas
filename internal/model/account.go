@@ -65,7 +65,7 @@ type Field struct {
 
 func (a Account) Display(noColor bool) string {
 	format := `
-%s (@%s)
+%s
 
 %s
   %s
@@ -98,8 +98,7 @@ func (a Account) Display(noColor bool) string {
 
 	return fmt.Sprintf(
 		format,
-		utilities.DisplayNameFormat(noColor, a.DisplayName),
-		a.Username,
+		utilities.FullDisplayNameFormat(noColor, a.DisplayName, a.Acct),
 		utilities.HeaderFormat(noColor, "ACCOUNT ID:"),
 		a.ID,
 		utilities.HeaderFormat(noColor, "JOINED ON:"),
@@ -218,11 +217,7 @@ func (a AccountList) Display(noColor bool) string {
 		}
 	} else {
 		for i := range a.Accounts {
-			output += fmt.Sprintf(
-				"\n  • %s (%s)",
-				utilities.DisplayNameFormat(noColor, a.Accounts[i].DisplayName),
-				a.Accounts[i].Acct,
-			)
+			output += "\n • " + utilities.FullDisplayNameFormat(noColor, a.Accounts[i].DisplayName, a.Accounts[i].Acct)
 		}
 	}
 
