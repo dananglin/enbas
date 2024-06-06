@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"text/tabwriter"
 )
 
 func usageFunc(summaries map[string]string) func() {
@@ -31,18 +32,22 @@ func usageFunc(summaries map[string]string) func() {
 			builder.WriteString("VERSION:\n    " + binaryVersion + "\n\n")
 		}
 
-		builder.WriteString("USAGE:\n    enbas [flags]\n    enbas [command]\n\nCOMMANDS:")
+		builder.WriteString("USAGE:\n    enbas [flags]\n    enbas [flags] [command]\n\nCOMMANDS:")
+
+		tableWriter := tabwriter.NewWriter(&builder, 0, 8, 0, '\t', 0)
 
 		for _, cmd := range cmds {
-			fmt.Fprintf(&builder, "\n    %s\t%s", cmd, summaries[cmd])
+			fmt.Fprintf(tableWriter, "\n    %s\t%s", cmd, summaries[cmd])
 		}
 
-		builder.WriteString("\n\nFLAGS:\n    --help\n        print the help message\n")
+		tableWriter.Flush()
+
+		builder.WriteString("\n\nFLAGS:\n    --help\n        print the help message")
 		flag.VisitAll(func(f *flag.Flag) {
-			fmt.Fprintf(&builder, "\n    --%s\n        %s\n", f.Name, f.Usage)
+			fmt.Fprintf(&builder, "\n    --%s\n        %s", f.Name, f.Usage)
 		})
 
-		builder.WriteString("\nUse \"enbas [command] --help\" for more information about a command.\n")
+		builder.WriteString("\n\nUse \"enbas [command] --help\" for more information about a command.\n")
 
 		w := flag.CommandLine.Output()
 		fmt.Fprint(w, builder.String())
