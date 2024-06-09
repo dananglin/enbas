@@ -23,4 +23,5 @@ func (a *AccountNames) Set(value string) error {
 type TopLevelFlags struct {
 	ConfigDir string
 	NoColor   *bool
+	Pager     string
 }

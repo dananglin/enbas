@@ -29,10 +29,10 @@ func NewFollowExecutor(tlf TopLevelFlags, name, summary string, unfollow bool) *
 		topLevelFlags: tlf,
 	}
 
-	command.StringVar(&command.resourceType, flagType, "", "specify the type of resource to follow")
-	command.StringVar(&command.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
-	command.BoolVar(&command.showReposts, flagShowReposts, true, "show reposts from the account you want to follow")
-	command.BoolVar(&command.notify, flagNotify, false, "get notifications when the account you want to follow posts a status")
+	command.StringVar(&command.resourceType, flagType, "", "Specify the type of resource to follow")
+	command.StringVar(&command.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
+	command.BoolVar(&command.showReposts, flagShowReposts, true, "Show reposts from the account you want to follow")
+	command.BoolVar(&command.notify, flagNotify, false, "Get notifications when the account you want to follow posts a status")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 

@@ -35,17 +35,17 @@ func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
 		topLevelFlags: tlf,
 	}
 
-	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "set to true to lookup your account")
-	showExe.BoolVar(&showExe.skipAccountRelationship, flagSkipRelationship, false, "set to true to skip showing your relationship to the specified account")
-	showExe.BoolVar(&showExe.showUserPreferences, flagShowPreferences, false, "show your preferences")
-	showExe.BoolVar(&showExe.showInBrowser, flagBrowser, false, "set to true to view in the browser")
-	showExe.StringVar(&showExe.resourceType, flagType, "", "specify the type of resource to display")
-	showExe.StringVar(&showExe.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
-	showExe.StringVar(&showExe.statusID, flagStatusID, "", "specify the ID of the status to display")
-	showExe.StringVar(&showExe.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "specify the timeline category to view")
-	showExe.StringVar(&showExe.listID, flagListID, "", "specify the ID of the list to display")
-	showExe.StringVar(&showExe.tag, flagTag, "", "specify the name of the tag to use")
-	showExe.IntVar(&showExe.limit, flagLimit, 20, "specify the limit of items to display")
+	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "Set to true to lookup your account")
+	showExe.BoolVar(&showExe.skipAccountRelationship, flagSkipRelationship, false, "Set to true to skip showing your relationship to the specified account")
+	showExe.BoolVar(&showExe.showUserPreferences, flagShowPreferences, false, "Show your preferences")
+	showExe.BoolVar(&showExe.showInBrowser, flagBrowser, false, "Set to true to view in the browser")
+	showExe.StringVar(&showExe.resourceType, flagType, "", "Specify the type of resource to display")
+	showExe.StringVar(&showExe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
+	showExe.StringVar(&showExe.statusID, flagStatusID, "", "Specify the ID of the status to display")
+	showExe.StringVar(&showExe.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "Specify the timeline category to view")
+	showExe.StringVar(&showExe.listID, flagListID, "", "Specify the ID of the list to display")
+	showExe.StringVar(&showExe.tag, flagTag, "", "Specify the name of the tag to use")
+	showExe.IntVar(&showExe.limit, flagLimit, 20, "Specify the limit of items to display")
 
 	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
 
@@ -90,7 +90,7 @@ func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to retrieve the instance details: %w", err)
 	}
 
-	utilities.Display(instance, *s.topLevelFlags.NoColor)
+	utilities.Display(instance, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }
@@ -123,7 +123,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(account, *s.topLevelFlags.NoColor)
+	utilities.Display(account, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	if !s.myAccount && !s.skipAccountRelationship {
 		relationship, err := gtsClient.GetAccountRelationship(account.ID)
@@ -131,7 +131,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 			return fmt.Errorf("unable to retrieve the relationship to this account: %w", err)
 		}
 
-		utilities.Display(relationship, *s.topLevelFlags.NoColor)
+		utilities.Display(relationship, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	}
 
 	if s.myAccount && s.showUserPreferences {
@@ -140,7 +140,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 			return fmt.Errorf("unable to retrieve the user preferences: %w", err)
 		}
 
-		utilities.Display(preferences, *s.topLevelFlags.NoColor)
+		utilities.Display(preferences, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	}
 
 	return nil
@@ -162,7 +162,7 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(status, *s.topLevelFlags.NoColor)
+	utilities.Display(status, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }
@@ -211,7 +211,7 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(timeline, *s.topLevelFlags.NoColor)
+	utilities.Display(timeline, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }
@@ -240,7 +240,7 @@ func (s *ShowExecutor) showList(gtsClient *client.Client) error {
 		list.Accounts = accountMap
 	}
 
-	utilities.Display(list, *s.topLevelFlags.NoColor)
+	utilities.Display(list, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }
@@ -257,7 +257,7 @@ func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(lists, *s.topLevelFlags.NoColor)
+	utilities.Display(lists, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }
@@ -274,7 +274,7 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 	}
 
 	if len(followers.Accounts) > 0 {
-		utilities.Display(followers, *s.topLevelFlags.NoColor)
+		utilities.Display(followers, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Println("There are no followers for this account or the list is hidden.")
 	}
@@ -294,7 +294,7 @@ func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 	}
 
 	if len(following.Accounts) > 0 {
-		utilities.Display(following, *s.topLevelFlags.NoColor)
+		utilities.Display(following, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Println("This account is not following anyone or the list is hidden.")
 	}
@@ -309,7 +309,7 @@ func (s *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 	}
 
 	if len(blocked.Accounts) > 0 {
-		utilities.Display(blocked, *s.topLevelFlags.NoColor)
+		utilities.Display(blocked, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Println("You have no blocked accounts.")
 	}
@@ -324,7 +324,7 @@ func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		utilities.Display(bookmarks, *s.topLevelFlags.NoColor)
+		utilities.Display(bookmarks, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Println("You have no bookmarks.")
 	}
@@ -339,7 +339,7 @@ func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
 	}
 
 	if len(liked.Statuses) > 0 {
-		utilities.Display(liked, *s.topLevelFlags.NoColor)
+		utilities.Display(liked, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Printf("You have no %s statuses.\n", s.resourceType)
 	}

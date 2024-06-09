@@ -25,8 +25,8 @@ func NewDeleteExecutor(tlf TopLevelFlags, name, summary string) *DeleteExecutor 
 		topLevelFlags: tlf,
 	}
 
-	deleteExe.StringVar(&deleteExe.resourceType, flagType, "", "specify the type of resource to delete")
-	deleteExe.StringVar(&deleteExe.listID, flagListID, "", "specify the ID of the list to delete")
+	deleteExe.StringVar(&deleteExe.resourceType, flagType, "", "Specify the type of resource to delete")
+	deleteExe.StringVar(&deleteExe.listID, flagListID, "", "Specify the ID of the list to delete")
 
 	deleteExe.Usage = commandUsageFunc(name, summary, deleteExe.FlagSet)
 

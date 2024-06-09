@@ -28,7 +28,7 @@ func NewLoginExecutor(tlf TopLevelFlags, name, summary string) *LoginExecutor {
 		instance:      "",
 	}
 
-	command.StringVar(&command.instance, flagInstance, "", "specify the instance that you want to login to.")
+	command.StringVar(&command.instance, flagInstance, "", "Specify the instance that you want to login to.")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 

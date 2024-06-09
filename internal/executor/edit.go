@@ -29,10 +29,10 @@ func NewEditExecutor(tlf TopLevelFlags, name, summary string) *EditExecutor {
 		topLevelFlags: tlf,
 	}
 
-	editExe.StringVar(&editExe.resourceType, flagType, "", "specify the type of resource to update")
-	editExe.StringVar(&editExe.listID, flagListID, "", "specify the ID of the list to update")
-	editExe.StringVar(&editExe.listTitle, flagListTitle, "", "specify the title of the list")
-	editExe.StringVar(&editExe.listRepliesPolicy, flagListRepliesPolicy, "", "specify the policy of the replies for this list (valid values are followed, list and none)")
+	editExe.StringVar(&editExe.resourceType, flagType, "", "Specify the type of resource to update")
+	editExe.StringVar(&editExe.listID, flagListID, "", "Specify the ID of the list to update")
+	editExe.StringVar(&editExe.listTitle, flagListTitle, "", "Specify the title of the list")
+	editExe.StringVar(&editExe.listRepliesPolicy, flagListRepliesPolicy, "", "Specify the policy of the replies for this list (valid values are followed, list and none)")
 
 	editExe.Usage = commandUsageFunc(name, summary, editExe.FlagSet)
 
@@ -90,7 +90,7 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully updated the list.")
-	utilities.Display(updatedList, *e.topLevelFlags.NoColor)
+	utilities.Display(updatedList, *e.topLevelFlags.NoColor, e.topLevelFlags.Pager)
 
 	return nil
 }

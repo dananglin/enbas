@@ -32,12 +32,12 @@ func NewAddExecutor(tlf TopLevelFlags, name, summary string) *AddExecutor {
 		topLevelFlags: tlf,
 	}
 
-	addExe.StringVar(&addExe.resourceType, flagType, "", "specify the resource type to add (e.g. account, note)")
-	addExe.StringVar(&addExe.toResourceType, flagTo, "", "specify the target resource type to add to (e.g. list, account, etc)")
-	addExe.StringVar(&addExe.listID, flagListID, "", "the ID of the list to add to")
-	addExe.StringVar(&addExe.statusID, flagStatusID, "", "the ID of the status")
-	addExe.Var(&addExe.accountNames, flagAccountName, "the name of the account")
-	addExe.StringVar(&addExe.content, flagContent, "", "the content of the note")
+	addExe.StringVar(&addExe.resourceType, flagType, "", "Specify the resource type to add (e.g. account, note)")
+	addExe.StringVar(&addExe.toResourceType, flagTo, "", "Specify the target resource type to add to (e.g. list, account, etc)")
+	addExe.StringVar(&addExe.listID, flagListID, "", "The ID of the list to add to")
+	addExe.StringVar(&addExe.statusID, flagStatusID, "", "The ID of the status")
+	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
+	addExe.StringVar(&addExe.content, flagContent, "", "The content of the resource")
 
 	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
 

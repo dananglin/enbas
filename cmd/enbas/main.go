@@ -46,29 +46,30 @@ func main() {
 
 func run() error {
 	commandSummaries := map[string]string{
-		commandLogin:    "login to an account on GoToSocial",
-		commandVersion:  "print the application's version and build information",
-		commandShow:     "print details about a specified resource",
-		commandSwitch:   "perform a switch operation (e.g. switch logged in accounts)",
-		commandCreate:   "create a specific resource",
-		commandDelete:   "delete a specific resource",
-		commandEdit:     "edit a specific resource",
-		commandWhoami:   "print the account that you are currently logged in to",
-		commandAdd:      "add a resource to another resource",
-		commandRemove:   "remove a resource from another resource",
-		commandFollow:   "follow a resource (e.g. an account)",
-		commandUnfollow: "unfollow a resource (e.g. an account)",
-		commandBlock:    "block a resource (e.g. an account)",
-		commandUnblock:  "unblock a resource (e.g. an account)",
+		commandLogin:    "Login to an account on GoToSocial",
+		commandVersion:  "Print the application's version and build information",
+		commandShow:     "Print details about a specified resource",
+		commandSwitch:   "Perform a switch operation (e.g. switch logged in accounts)",
+		commandCreate:   "Create a specific resource",
+		commandDelete:   "Delete a specific resource",
+		commandEdit:     "Edit a specific resource",
+		commandWhoami:   "Print the account that you are currently logged in to",
+		commandAdd:      "Add a resource to another resource",
+		commandRemove:   "Remove a resource from another resource",
+		commandFollow:   "Follow a resource (e.g. an account)",
+		commandUnfollow: "Unfollow a resource (e.g. an account)",
+		commandBlock:    "Block a resource (e.g. an account)",
+		commandUnblock:  "Unblock a resource (e.g. an account)",
 	}
 
 	topLevelFlags := executor.TopLevelFlags{
 		ConfigDir: "",
 		NoColor:   nil,
+		Pager:     "",
 	}
 
-	flag.StringVar(&topLevelFlags.ConfigDir, "config-dir", "", "specify your config directory")
-	flag.BoolFunc("no-color", "disable ANSI colour output when displaying text on screen", func(value string) error {
+	flag.StringVar(&topLevelFlags.ConfigDir, "config-dir", "", "Specify your config directory")
+	flag.BoolFunc("no-color", "Disable ANSI colour output when displaying text on screen", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
 			return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
@@ -79,6 +80,7 @@ func run() error {
 
 		return nil
 	})
+	flag.StringVar(&topLevelFlags.Pager, "pager", "", "Specify your preferred pager to page through long outputs. This is disabled by default.")
 
 	flag.Usage = usageFunc(commandSummaries)
 

@@ -41,21 +41,21 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 		topLevelFlags: tlf,
 	}
 
-	createExe.BoolVar(&createExe.boostable, flagEnableReposts, true, "specify if the status can be reposted/boosted by others")
-	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "specify if the status can be federated beyond the local timelines")
-	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "specify if the status can be liked/favourited")
-	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "specify if the status can be replied to")
-	createExe.StringVar(&createExe.content, flagContent, "", "the content of the status to create")
-	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "the type that the contents should be parsed from (valid values are plain and markdown)")
-	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "the file path where to read the contents from")
-	createExe.StringVar(&createExe.language, flagLanguage, "", "the ISO 639 language code for this status")
-	createExe.StringVar(&createExe.spoilerText, flagSpoilerText, "", "the text to display as the status' warning or subject")
-	createExe.StringVar(&createExe.visibility, flagVisibility, "", "the visibility of the posted status")
-	createExe.StringVar(&createExe.resourceType, flagType, "", "specify the type of resource to create")
-	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "specify the title of the list")
-	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "specify the policy of the replies for this list (valid values are followed, list and none)")
+	createExe.BoolVar(&createExe.boostable, flagEnableReposts, true, "Specify if the status can be reposted/boosted by others")
+	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "Specify if the status can be federated beyond the local timelines")
+	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "Specify if the status can be liked/favourited")
+	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "Specify if the status can be replied to")
+	createExe.StringVar(&createExe.content, flagContent, "", "The content of the status to create")
+	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
+	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "The file path where to read the contents from")
+	createExe.StringVar(&createExe.language, flagLanguage, "", "The ISO 639 language code for this status")
+	createExe.StringVar(&createExe.spoilerText, flagSpoilerText, "", "The text to display as the status' warning or subject")
+	createExe.StringVar(&createExe.visibility, flagVisibility, "", "The visibility of the posted status")
+	createExe.StringVar(&createExe.resourceType, flagType, "", "Specify the type of resource to create")
+	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "Specify the title of the list")
+	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "Specify the policy of the replies for this list (valid values are followed, list and none)")
 
-	createExe.BoolFunc(flagSensitive, "specify if the status should be marked as sensitive", func(value string) error {
+	createExe.BoolFunc(flagSensitive, "Specify if the status should be marked as sensitive", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
 			return fmt.Errorf("unable to parse %q as a boolean value: %w", value, err)
@@ -116,7 +116,7 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully created the following list:")
-	utilities.Display(list, *c.topLevelFlags.NoColor)
+	utilities.Display(list, *c.topLevelFlags.NoColor, c.topLevelFlags.Pager)
 
 	return nil
 }
@@ -197,7 +197,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully created the following status:")
-	utilities.Display(status, *c.topLevelFlags.NoColor)
+	utilities.Display(status, *c.topLevelFlags.NoColor, c.topLevelFlags.Pager)
 
 	return nil
 }

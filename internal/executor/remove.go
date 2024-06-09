@@ -31,11 +31,11 @@ func NewRemoveExecutor(tlf TopLevelFlags, name, summary string) *RemoveExecutor 
 		topLevelFlags: tlf,
 	}
 
-	removeExe.StringVar(&removeExe.resourceType, flagType, "", "specify the resource type to remove (e.g. account, note)")
-	removeExe.StringVar(&removeExe.fromResourceType, flagFrom, "", "specify the resource type to remove from (e.g. list, account, etc)")
-	removeExe.StringVar(&removeExe.listID, flagListID, "", "the ID of the list to remove from")
-	removeExe.StringVar(&removeExe.statusID, flagStatusID, "", "the ID of the status")
-	removeExe.Var(&removeExe.accountNames, flagAccountName, "the name of the account to remove from the resource")
+	removeExe.StringVar(&removeExe.resourceType, flagType, "", "Specify the resource type to remove (e.g. account, note)")
+	removeExe.StringVar(&removeExe.fromResourceType, flagFrom, "", "Specify the resource type to remove from (e.g. list, account, etc)")
+	removeExe.StringVar(&removeExe.listID, flagListID, "", "The ID of the list to remove from")
+	removeExe.StringVar(&removeExe.statusID, flagStatusID, "", "The ID of the status")
+	removeExe.Var(&removeExe.accountNames, flagAccountName, "The name of the account to remove from the resource")
 
 	removeExe.Usage = commandUsageFunc(name, summary, removeExe.FlagSet)
 

@@ -209,7 +209,7 @@ type StatusList struct {
 func (s StatusList) Display(noColor bool) string {
 	var builder strings.Builder
 
-	separator := "────────────────────────────────────────────────────────────────────────────────"
+	separator := strings.Repeat("─", 80)
 
 	builder.WriteString(utilities.HeaderFormat(noColor, s.Name) + "\n")
 

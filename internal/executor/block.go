@@ -28,8 +28,8 @@ func NewBlockExecutor(tlf TopLevelFlags, name, summary string, unblock bool) *Bl
 		unblock:       unblock,
 	}
 
-	blockExe.StringVar(&blockExe.resourceType, flagType, "", "specify the type of resource to block or unblock")
-	blockExe.StringVar(&blockExe.accountName, flagAccountName, "", "specify the account name in full (username@domain)")
+	blockExe.StringVar(&blockExe.resourceType, flagType, "", "Specify the type of resource to block or unblock")
+	blockExe.StringVar(&blockExe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
 
 	blockExe.Usage = commandUsageFunc(name, summary, blockExe.FlagSet)
 

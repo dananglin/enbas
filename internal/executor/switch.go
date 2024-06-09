@@ -25,8 +25,8 @@ func NewSwitchExecutor(tlf TopLevelFlags, name, summary string) *SwitchExecutor 
 		topLevelFlags: tlf,
 	}
 
-	switchExe.StringVar(&switchExe.toResourceType, flagTo, "", "the account to switch to")
-	switchExe.StringVar(&switchExe.accountName, flagAccountName, "", "the name of the account to switch to")
+	switchExe.StringVar(&switchExe.toResourceType, flagTo, "", "The account to switch to")
+	switchExe.StringVar(&switchExe.accountName, flagAccountName, "", "The name of the account to switch to")
 
 	switchExe.Usage = commandUsageFunc(name, summary, switchExe.FlagSet)
 
