@@ -35,7 +35,7 @@ func FieldFormat(noColor bool, text string) string {
 
 func FullDisplayNameFormat(noColor bool, displayName, acct string) string {
 	// use this pattern to remove all emoji strings
-	pattern := regexp.MustCompile(`\s:[A-Za-z0-9]*:`)
+	pattern := regexp.MustCompile(`\s:[A-Za-z0-9_]*:`)
 
 	var builder strings.Builder
 
