@@ -199,15 +199,15 @@ func (a AccountList) Display(noColor bool) string {
 
 	switch a.Type {
 	case AccountListFollowers:
-		output += utilities.HeaderFormat(noColor, "FOLLOWED BY:")
+		output += utilities.HeaderFormat(noColor, "Followed by:")
 	case AccountListFollowing:
-		output += utilities.HeaderFormat(noColor, "FOLLOWING:")
+		output += utilities.HeaderFormat(noColor, "Following:")
 	case AccountListBlockedAccount:
-		output += utilities.HeaderFormat(noColor, "BLOCKED ACCOUNTS:")
+		output += utilities.HeaderFormat(noColor, "Blocked accounts:")
 	case AccountListFollowRequests:
-		output += utilities.HeaderFormat(noColor, "ACCOUNTS THAT HAVE REQUESTED TO FOLLOW YOU:")
+		output += utilities.HeaderFormat(noColor, "Accounts that have requested to follow you:")
 	default:
-		output += utilities.HeaderFormat(noColor, "ACCOUNTS:")
+		output += utilities.HeaderFormat(noColor, "Accounts:")
 	}
 
 	if a.Type == AccountListBlockedAccount {
