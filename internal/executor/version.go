@@ -6,9 +6,9 @@ package executor
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strings"
+	"text/tabwriter"
 )
 
 type VersionExecutor struct {
@@ -37,23 +37,25 @@ func NewVersionExecutor(name, summary, binaryVersion, buildTime, goVersion, gitC
 	return &command
 }
 
-func (c *VersionExecutor) Execute() error {
+func (v *VersionExecutor) Execute() error {
 	var builder strings.Builder
 
-	if c.showFullVersion {
-		fmt.Fprintf(
-			&builder,
-			"Enbas\n  Version: %s\n  Git commit: %s\n  Go version: %s\n  Build date: %s\n",
-			c.binaryVersion,
-			c.gitCommit,
-			c.goVersion,
-			c.buildTime,
-		)
+	if v.showFullVersion {
+		builder.WriteString("Enbas\n")
+
+		tableWriter := tabwriter.NewWriter(&builder, 0, 8, 0, '\t', 0)
+
+		tableWriter.Write([]byte("    Version:\t" + v.binaryVersion + "\n"))
+		tableWriter.Write([]byte("    Git commit:\t" + v.gitCommit + "\n"))
+		tableWriter.Write([]byte("    Go version:\t" + v.goVersion + "\n"))
+		tableWriter.Write([]byte("    Build date:\t" + v.buildTime + "\n"))
+
+		tableWriter.Flush()
 	} else {
-		fmt.Fprintln(&builder, c.binaryVersion)
+		builder.WriteString("Enbas " + v.binaryVersion + "\n")
 	}
 
-	fmt.Fprint(os.Stdout, builder.String())
+	os.Stdout.WriteString(builder.String())
 
 	return nil
 }
