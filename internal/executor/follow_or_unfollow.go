@@ -11,7 +11,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 )
 
-type FollowExecutor struct {
+type FollowOrUnfollowExecutor struct {
 	*flag.FlagSet
 
 	topLevelFlags TopLevelFlags
@@ -19,14 +19,15 @@ type FollowExecutor struct {
 	accountName   string
 	showReposts   bool
 	notify        bool
-	unfollow      bool
+	action        string
 }
 
-func NewFollowExecutor(tlf TopLevelFlags, name, summary string, unfollow bool) *FollowExecutor {
-	command := FollowExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		unfollow:      unfollow,
+func NewFollowOrUnfollowExecutor(tlf TopLevelFlags, name, summary string) *FollowOrUnfollowExecutor {
+	command := FollowOrUnfollowExecutor{
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
 		topLevelFlags: tlf,
+		action:        name,
 	}
 
 	command.StringVar(&command.resourceType, flagType, "", "Specify the type of resource to follow")
@@ -39,17 +40,17 @@ func NewFollowExecutor(tlf TopLevelFlags, name, summary string, unfollow bool) *
 	return &command
 }
 
-func (c *FollowExecutor) Execute() error {
+func (f *FollowOrUnfollowExecutor) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
-		resourceAccount: c.followAccount,
+		resourceAccount: f.followOrUnfollowAccount,
 	}
 
-	doFunc, ok := funcMap[c.resourceType]
+	doFunc, ok := funcMap[f.resourceType]
 	if !ok {
-		return UnsupportedTypeError{resourceType: c.resourceType}
+		return UnsupportedTypeError{resourceType: f.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(f.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -57,20 +58,27 @@ func (c *FollowExecutor) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, c.accountName, c.topLevelFlags.ConfigDir)
+func (f *FollowOrUnfollowExecutor) followOrUnfollowAccount(gtsClient *client.Client) error {
+	accountID, err := getAccountID(gtsClient, false, f.accountName, f.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	if c.unfollow {
-		return c.unfollowAccount(gtsClient, accountID)
+	switch f.action {
+	case CommandFollow:
+		return f.followAccount(gtsClient, accountID)
+	case CommandUnfollow:
+		return f.unfollowAccount(gtsClient, accountID)
+	default:
+		return nil
 	}
+}
 
+func (f *FollowOrUnfollowExecutor) followAccount(gtsClient *client.Client, accountID string) error {
 	form := client.FollowAccountForm{
 		AccountID:   accountID,
-		ShowReposts: c.showReposts,
-		Notify:      c.notify,
+		ShowReposts: f.showReposts,
+		Notify:      f.notify,
 	}
 
 	if err := gtsClient.FollowAccount(form); err != nil {
@@ -82,7 +90,7 @@ func (c *FollowExecutor) followAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *FollowExecutor) unfollowAccount(gtsClient *client.Client, accountID string) error {
+func (f *FollowOrUnfollowExecutor) unfollowAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.UnfollowAccount(accountID); err != nil {
 		return fmt.Errorf("unable to unfollow the account: %w", err)
 	}

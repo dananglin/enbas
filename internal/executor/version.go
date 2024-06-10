@@ -30,7 +30,7 @@ func NewVersionExecutor(name, summary, binaryVersion, buildTime, goVersion, gitC
 		showFullVersion: false,
 	}
 
-	command.BoolVar(&command.showFullVersion, "Full", false, "prints the full build information")
+	command.BoolVar(&command.showFullVersion, flagFull, false, "prints the full build information")
 
 	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
 

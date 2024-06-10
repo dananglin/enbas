@@ -58,3 +58,11 @@ func (e EmptyContentError) Error() string {
 
 	return message
 }
+
+type UnknownCommandError struct {
+	Command string
+}
+
+func (e UnknownCommandError) Error() string {
+	return "unknown command '" + e.Command + "'"
+}

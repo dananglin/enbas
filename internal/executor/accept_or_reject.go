@@ -17,7 +17,7 @@ type AcceptOrRejectExecutor struct {
 	topLevelFlags TopLevelFlags
 	resourceType  string
 	accountName   string
-	action        string
+	command       string
 }
 
 func NewAcceptOrRejectExecutor(tlf TopLevelFlags, name, summary string) *AcceptOrRejectExecutor {
@@ -25,7 +25,7 @@ func NewAcceptOrRejectExecutor(tlf TopLevelFlags, name, summary string) *AcceptO
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
 		topLevelFlags: tlf,
-		action:        name,
+		command:       name,
 	}
 
 	acceptExe.StringVar(&acceptExe.resourceType, flagType, "", "Specify the type of resource to accept or reject")
@@ -60,10 +60,10 @@ func (a *AcceptOrRejectExecutor) acceptOrRejectFollowRequest(gtsClient *client.C
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	switch a.action {
-	case "accept":
+	switch a.command {
+	case CommandAccept:
 		return a.acceptFollowRequest(gtsClient, accountID)
-	case "reject":
+	case CommandReject:
 		return a.rejectFollowRequest(gtsClient, accountID)
 	default:
 		return nil

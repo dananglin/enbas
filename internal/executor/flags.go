@@ -6,6 +6,39 @@ package executor
 
 import "strings"
 
+const (
+	flagAccountName       = "account-name"
+	flagBrowser           = "browser"
+	flagContentType       = "content-type"
+	flagContent           = "content"
+	flagEnableFederation  = "enable-federation"
+	flagEnableLikes       = "enable-likes"
+	flagEnableReplies     = "enable-replies"
+	flagEnableReposts     = "enable-reposts"
+	flagFrom              = "from"
+	flagFromFile          = "from-file"
+	flagFull              = "full"
+	flagInstance          = "instance"
+	flagLanguage          = "language"
+	flagLimit             = "limit"
+	flagListID            = "list-id"
+	flagListTitle         = "list-title"
+	flagListRepliesPolicy = "list-replies-policy"
+	flagMyAccount         = "my-account"
+	flagNotify            = "notify"
+	flagSensitive         = "sensitive"
+	flagSkipRelationship  = "skip-relationship"
+	flagShowPreferences   = "show-preferences"
+	flagShowReposts       = "show-reposts"
+	flagSpoilerText       = "spoiler-text"
+	flagStatusID          = "status-id"
+	flagTag               = "tag"
+	flagTimelineCategory  = "timeline-category"
+	flagTo                = "to"
+	flagType              = "type"
+	flagVisibility        = "visibility"
+)
+
 type AccountNames []string
 
 func (a *AccountNames) String() string {

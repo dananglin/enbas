@@ -13,25 +13,6 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/executor"
 )
 
-const (
-	commandLogin    string = "login"
-	commandVersion  string = "version"
-	commandShow     string = "show"
-	commandSwitch   string = "switch"
-	commandCreate   string = "create"
-	commandDelete   string = "delete"
-	commandEdit     string = "edit"
-	commandWhoami   string = "whoami"
-	commandAdd      string = "add"
-	commandRemove   string = "remove"
-	commandFollow   string = "follow"
-	commandUnfollow string = "unfollow"
-	commandBlock    string = "block"
-	commandUnblock  string = "unblock"
-	commandAccept   string = "accept"
-	commandReject   string = "reject"
-)
-
 var (
 	binaryVersion string
 	buildTime     string
@@ -47,46 +28,43 @@ func main() {
 }
 
 func run() error {
-	commandSummaries := map[string]string{
-		commandLogin:    "Login to an account on GoToSocial",
-		commandVersion:  "Print the application's version and build information",
-		commandShow:     "Print details about a specified resource",
-		commandSwitch:   "Perform a switch operation (e.g. switch logged in accounts)",
-		commandCreate:   "Create a specific resource",
-		commandDelete:   "Delete a specific resource",
-		commandEdit:     "Edit a specific resource",
-		commandWhoami:   "Print the account that you are currently logged in to",
-		commandAdd:      "Add a resource to another resource",
-		commandRemove:   "Remove a resource from another resource",
-		commandFollow:   "Follow a resource (e.g. an account)",
-		commandUnfollow: "Unfollow a resource (e.g. an account)",
-		commandBlock:    "Block a resource (e.g. an account)",
-		commandUnblock:  "Unblock a resource (e.g. an account)",
-		commandAccept:   "Accept a request (e.g. a follow request)",
-		commandReject:   "Reject a request (e.g. a follow request)",
-	}
-
 	topLevelFlags := executor.TopLevelFlags{
 		ConfigDir: "",
 		NoColor:   nil,
 		Pager:     "",
 	}
 
-	flag.StringVar(&topLevelFlags.ConfigDir, "config-dir", "", "Specify your config directory")
-	flag.BoolFunc("no-color", "Disable ANSI colour output when displaying text on screen", func(value string) error {
-		boolVal, err := strconv.ParseBool(value)
-		if err != nil {
-			return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
-		}
+	flag.StringVar(
+		&topLevelFlags.ConfigDir,
+		"config-dir",
+		"",
+		"Specify your config directory",
+	)
 
-		topLevelFlags.NoColor = new(bool)
-		*topLevelFlags.NoColor = boolVal
+	flag.BoolFunc(
+		"no-color",
+		"Disable ANSI colour output when displaying text on screen",
+		func(value string) error {
+			boolVal, err := strconv.ParseBool(value)
+			if err != nil {
+				return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
+			}
 
-		return nil
-	})
-	flag.StringVar(&topLevelFlags.Pager, "pager", "", "Specify your preferred pager to page through long outputs. This is disabled by default.")
+			topLevelFlags.NoColor = new(bool)
+			*topLevelFlags.NoColor = boolVal
 
-	flag.Usage = usageFunc(commandSummaries)
+			return nil
+		},
+	)
+
+	flag.StringVar(
+		&topLevelFlags.Pager,
+		"pager",
+		"",
+		"Specify your preferred pager to page through long outputs. This is disabled by default.",
+	)
+
+	flag.Usage = usageFunc(executor.CommandSummaryMap())
 
 	flag.Parse()
 
@@ -109,127 +87,100 @@ func run() error {
 	command := flag.Arg(0)
 	args := flag.Args()[1:]
 
-	var err error
-
-	switch command {
-	case commandAccept:
-		exe := executor.NewAcceptOrRejectExecutor(
+	executorMap := map[string]executor.Executor{
+		executor.CommandAccept: executor.NewAcceptOrRejectExecutor(
 			topLevelFlags,
-			commandAccept,
-			commandSummaries[commandAccept],
-		)
-		err = executor.Execute(exe, args)
-	case commandAdd:
-		exe := executor.NewAddExecutor(
+			executor.CommandAccept,
+			executor.CommandSummaryLookup(executor.CommandAccept),
+		),
+		executor.CommandAdd: executor.NewAddExecutor(
 			topLevelFlags,
-			commandAdd,
-			commandSummaries[commandAdd],
-		)
-		err = executor.Execute(exe, args)
-	case commandBlock:
-		exe := executor.NewBlockExecutor(
+			executor.CommandAdd,
+			executor.CommandSummaryLookup(executor.CommandAdd),
+		),
+		executor.CommandBlock: executor.NewBlockOrUnblockExecutor(
 			topLevelFlags,
-			commandBlock,
-			commandSummaries[commandBlock],
-			false,
-		)
-		err = executor.Execute(exe, args)
-	case commandCreate:
-		exe := executor.NewCreateExecutor(
+			executor.CommandBlock,
+			executor.CommandSummaryLookup(executor.CommandBlock),
+		),
+		executor.CommandCreate: executor.NewCreateExecutor(
 			topLevelFlags,
-			commandCreate,
-			commandSummaries[commandCreate],
-		)
-		err = executor.Execute(exe, args)
-	case commandDelete:
-		exe := executor.NewDeleteExecutor(
+			executor.CommandCreate,
+			executor.CommandSummaryLookup(executor.CommandCreate),
+		),
+		executor.CommandDelete: executor.NewDeleteExecutor(
 			topLevelFlags,
-			commandDelete,
-			commandSummaries[commandDelete],
-		)
-		err = executor.Execute(exe, args)
-	case commandEdit:
-		exe := executor.NewEditExecutor(
+			executor.CommandDelete,
+			executor.CommandSummaryLookup(executor.CommandDelete),
+		),
+		executor.CommandEdit: executor.NewEditExecutor(
 			topLevelFlags,
-			commandEdit,
-			commandSummaries[commandEdit],
-		)
-		err = executor.Execute(exe, args)
-	case commandFollow:
-		exe := executor.NewFollowExecutor(
+			executor.CommandEdit,
+			executor.CommandSummaryLookup(executor.CommandEdit),
+		),
+		executor.CommandFollow: executor.NewFollowOrUnfollowExecutor(
 			topLevelFlags,
-			commandFollow,
-			commandSummaries[commandFollow],
-			false,
-		)
-		err = executor.Execute(exe, args)
-	case commandLogin:
-		exe := executor.NewLoginExecutor(
+			executor.CommandFollow,
+			executor.CommandSummaryLookup(executor.CommandFollow),
+		),
+		executor.CommandLogin: executor.NewLoginExecutor(
 			topLevelFlags,
-			commandLogin,
-			commandSummaries[commandLogin],
-		)
-		err = executor.Execute(exe, args)
-	case commandReject:
-		exe := executor.NewAcceptOrRejectExecutor(
+			executor.CommandLogin,
+			executor.CommandSummaryLookup(executor.CommandLogin),
+		),
+		executor.CommandReject: executor.NewAcceptOrRejectExecutor(
 			topLevelFlags,
-			commandReject,
-			commandSummaries[commandReject],
-		)
-		err = executor.Execute(exe, args)
-	case commandRemove:
-		exe := executor.NewRemoveExecutor(
+			executor.CommandReject,
+			executor.CommandSummaryLookup(executor.CommandReject),
+		),
+		executor.CommandRemove: executor.NewRemoveExecutor(
 			topLevelFlags,
-			commandRemove,
-			commandSummaries[commandRemove],
-		)
-		err = executor.Execute(exe, args)
-	case commandSwitch:
-		exe := executor.NewSwitchExecutor(
+			executor.CommandRemove,
+			executor.CommandSummaryLookup(executor.CommandRemove),
+		),
+		executor.CommandSwitch: executor.NewSwitchExecutor(
 			topLevelFlags,
-			commandSwitch,
-			commandSummaries[commandSwitch],
-		)
-		err = executor.Execute(exe, args)
-	case commandUnfollow:
-		exe := executor.NewFollowExecutor(
+			executor.CommandSwitch,
+			executor.CommandSummaryLookup(executor.CommandSwitch),
+		),
+		executor.CommandUnfollow: executor.NewFollowOrUnfollowExecutor(
 			topLevelFlags,
-			commandUnfollow,
-			commandSummaries[commandUnfollow],
-			true,
-		)
-		err = executor.Execute(exe, args)
-	case commandUnblock:
-		exe := executor.NewBlockExecutor(
+			executor.CommandUnfollow,
+			executor.CommandSummaryLookup(executor.CommandUnfollow),
+		),
+		executor.CommandUnblock: executor.NewBlockOrUnblockExecutor(
 			topLevelFlags,
-			commandUnblock,
-			commandSummaries[commandUnblock],
-			true,
-		)
-		err = executor.Execute(exe, args)
-	case commandShow:
-		exe := executor.NewShowExecutor(topLevelFlags, commandShow, commandSummaries[commandShow])
-		err = executor.Execute(exe, args)
-	case commandVersion:
-		exe := executor.NewVersionExecutor(
-			commandVersion,
-			commandSummaries[commandVersion],
+			executor.CommandUnblock,
+			executor.CommandSummaryLookup(executor.CommandUnblock),
+		),
+		executor.CommandShow: executor.NewShowExecutor(
+			topLevelFlags,
+			executor.CommandShow,
+			executor.CommandSummaryLookup(executor.CommandShow),
+		),
+		executor.CommandVersion: executor.NewVersionExecutor(
+			executor.CommandVersion,
+			executor.CommandSummaryLookup(executor.CommandVersion),
 			binaryVersion,
 			buildTime,
 			goVersion,
 			gitCommit,
-		)
-		err = executor.Execute(exe, args)
-	case commandWhoami:
-		exe := executor.NewWhoAmIExecutor(topLevelFlags, commandWhoami, commandSummaries[commandWhoami])
-		err = executor.Execute(exe, args)
-	default:
-		flag.Usage()
-
-		return unknownCommandError{command}
+		),
+		executor.CommandWhoami: executor.NewWhoAmIExecutor(
+			topLevelFlags,
+			executor.CommandWhoami,
+			executor.CommandSummaryLookup(executor.CommandWhoami),
+		),
 	}
 
-	if err != nil {
+	exe, ok := executorMap[command]
+	if !ok {
+		flag.Usage()
+
+		return executor.UnknownCommandError{Command: command}
+	}
+
+	if err := executor.Execute(exe, args); err != nil {
 		return fmt.Errorf("(%s) %w", command, err)
 	}
 

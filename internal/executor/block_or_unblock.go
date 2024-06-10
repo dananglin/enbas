@@ -11,21 +11,21 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 )
 
-type BlockExecutor struct {
+type BlockOrUnblockExecutor struct {
 	*flag.FlagSet
 
 	topLevelFlags TopLevelFlags
 	resourceType  string
 	accountName   string
-	unblock       bool
+	command       string
 }
 
-func NewBlockExecutor(tlf TopLevelFlags, name, summary string, unblock bool) *BlockExecutor {
-	blockExe := BlockExecutor{
+func NewBlockOrUnblockExecutor(tlf TopLevelFlags, name, summary string) *BlockOrUnblockExecutor {
+	blockExe := BlockOrUnblockExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
 		topLevelFlags: tlf,
-		unblock:       unblock,
+		command:       name,
 	}
 
 	blockExe.StringVar(&blockExe.resourceType, flagType, "", "Specify the type of resource to block or unblock")
@@ -36,9 +36,9 @@ func NewBlockExecutor(tlf TopLevelFlags, name, summary string, unblock bool) *Bl
 	return &blockExe
 }
 
-func (b *BlockExecutor) Execute() error {
+func (b *BlockOrUnblockExecutor) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
-		resourceAccount: b.blockAccount,
+		resourceAccount: b.blockOrUnblockAccount,
 	}
 
 	doFunc, ok := funcMap[b.resourceType]
@@ -54,16 +54,23 @@ func (b *BlockExecutor) Execute() error {
 	return doFunc(gtsClient)
 }
 
-func (b *BlockExecutor) blockAccount(gtsClient *client.Client) error {
+func (b *BlockOrUnblockExecutor) blockOrUnblockAccount(gtsClient *client.Client) error {
 	accountID, err := getAccountID(gtsClient, false, b.accountName, b.topLevelFlags.ConfigDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	if b.unblock {
+	switch b.command {
+	case CommandBlock:
+		return b.blockAccount(gtsClient, accountID)
+	case CommandUnblock:
 		return b.unblockAccount(gtsClient, accountID)
+	default:
+		return nil
 	}
+}
 
+func (b *BlockOrUnblockExecutor) blockAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.BlockAccount(accountID); err != nil {
 		return fmt.Errorf("unable to block the account: %w", err)
 	}
@@ -73,7 +80,7 @@ func (b *BlockExecutor) blockAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (b *BlockExecutor) unblockAccount(gtsClient *client.Client, accountID string) error {
+func (b *BlockOrUnblockExecutor) unblockAccount(gtsClient *client.Client, accountID string) error {
 	if err := gtsClient.UnblockAccount(accountID); err != nil {
 		return fmt.Errorf("unable to unblock the account: %w", err)
 	}
