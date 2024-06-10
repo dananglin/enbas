@@ -145,7 +145,7 @@ func (g *Client) UnblockAccount(accountID string) error {
 func (g *Client) GetBlockedAccounts(limit int) (model.AccountList, error) {
 	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/blocks?limit=%d", limit)
 
-	accounts := make([]model.Account, limit)
+	var accounts []model.Account
 
 	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of blocked accounts: %w", err)
@@ -176,6 +176,43 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to set the private note: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
+	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/follow_requests?limit=%d", limit)
+
+	var accounts []model.Account
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of follow requests: %w", err)
+	}
+
+	requests := model.AccountList{
+		Type:     model.AccountListFollowRequests,
+		Accounts: accounts,
+	}
+
+	return requests, nil
+}
+
+func (g *Client) AcceptFollowRequest(accountID string) error {
+	url := g.Authentication.Instance + "/api/v1/follow_requests/" + accountID + "/authorize"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf("received an error after sending the request to accept the follow request: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Client) RejectFollowRequest(accountID string) error {
+	url := g.Authentication.Instance + "/api/v1/follow_requests/" + accountID + "/reject"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf("received an error after sending the request to reject the follow request: %w", err)
 	}
 
 	return nil

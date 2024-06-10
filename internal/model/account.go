@@ -186,6 +186,7 @@ const (
 	AccountListFollowers AccountListType = iota
 	AccountListFollowing
 	AccountListBlockedAccount
+	AccountListFollowRequests
 )
 
 type AccountList struct {
@@ -203,6 +204,8 @@ func (a AccountList) Display(noColor bool) string {
 		output += utilities.HeaderFormat(noColor, "FOLLOWING:")
 	case AccountListBlockedAccount:
 		output += utilities.HeaderFormat(noColor, "BLOCKED ACCOUNTS:")
+	case AccountListFollowRequests:
+		output += utilities.HeaderFormat(noColor, "ACCOUNTS THAT HAVE REQUESTED TO FOLLOW YOU:")
 	default:
 		output += utilities.HeaderFormat(noColor, "ACCOUNTS:")
 	}

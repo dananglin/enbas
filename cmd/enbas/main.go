@@ -28,6 +28,8 @@ const (
 	commandUnfollow string = "unfollow"
 	commandBlock    string = "block"
 	commandUnblock  string = "unblock"
+	commandAccept   string = "accept"
+	commandReject   string = "reject"
 )
 
 var (
@@ -60,6 +62,8 @@ func run() error {
 		commandUnfollow: "Unfollow a resource (e.g. an account)",
 		commandBlock:    "Block a resource (e.g. an account)",
 		commandUnblock:  "Unblock a resource (e.g. an account)",
+		commandAccept:   "Accept a request (e.g. a follow request)",
+		commandReject:   "Reject a request (e.g. a follow request)",
 	}
 
 	topLevelFlags := executor.TopLevelFlags{
@@ -108,6 +112,13 @@ func run() error {
 	var err error
 
 	switch command {
+	case commandAccept:
+		exe := executor.NewAcceptOrRejectExecutor(
+			topLevelFlags,
+			commandAccept,
+			commandSummaries[commandAccept],
+		)
+		err = executor.Execute(exe, args)
 	case commandAdd:
 		exe := executor.NewAddExecutor(
 			topLevelFlags,
@@ -159,6 +170,13 @@ func run() error {
 			commandSummaries[commandLogin],
 		)
 		err = executor.Execute(exe, args)
+	case commandReject:
+		exe := executor.NewAcceptOrRejectExecutor(
+			topLevelFlags,
+			commandReject,
+			commandSummaries[commandReject],
+		)
+		err = executor.Execute(exe, args)
 	case commandRemove:
 		exe := executor.NewRemoveExecutor(
 			topLevelFlags,
@@ -174,10 +192,20 @@ func run() error {
 		)
 		err = executor.Execute(exe, args)
 	case commandUnfollow:
-		exe := executor.NewFollowExecutor(topLevelFlags, commandUnfollow, commandSummaries[commandUnfollow], true)
+		exe := executor.NewFollowExecutor(
+			topLevelFlags,
+			commandUnfollow,
+			commandSummaries[commandUnfollow],
+			true,
+		)
 		err = executor.Execute(exe, args)
 	case commandUnblock:
-		exe := executor.NewBlockExecutor(topLevelFlags, commandUnblock, commandSummaries[commandUnblock], true)
+		exe := executor.NewBlockExecutor(
+			topLevelFlags,
+			commandUnblock,
+			commandSummaries[commandUnblock],
+			true,
+		)
 		err = executor.Execute(exe, args)
 	case commandShow:
 		exe := executor.NewShowExecutor(topLevelFlags, commandShow, commandSummaries[commandShow])

@@ -58,17 +58,18 @@ func (s *ShowExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceInstance:  s.showInstance,
-		resourceAccount:   s.showAccount,
-		resourceStatus:    s.showStatus,
-		resourceTimeline:  s.showTimeline,
-		resourceList:      s.showList,
-		resourceFollowers: s.showFollowers,
-		resourceFollowing: s.showFollowing,
-		resourceBlocked:   s.showBlocked,
-		resourceBookmarks: s.showBookmarks,
-		resourceLiked:     s.showLiked,
-		resourceStarred:   s.showLiked,
+		resourceInstance:      s.showInstance,
+		resourceAccount:       s.showAccount,
+		resourceStatus:        s.showStatus,
+		resourceTimeline:      s.showTimeline,
+		resourceList:          s.showList,
+		resourceFollowers:     s.showFollowers,
+		resourceFollowing:     s.showFollowing,
+		resourceBlocked:       s.showBlocked,
+		resourceBookmarks:     s.showBookmarks,
+		resourceLiked:         s.showLiked,
+		resourceStarred:       s.showLiked,
+		resourceFollowRequest: s.showFollowRequests,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -342,6 +343,21 @@ func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
 		utilities.Display(liked, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	} else {
 		fmt.Printf("You have no %s statuses.\n", s.resourceType)
+	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
+	accounts, err := gtsClient.GetFollowRequests(s.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of follow requests: %w", err)
+	}
+
+	if len(accounts.Accounts) > 0 {
+		utilities.Display(accounts, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	} else {
+		fmt.Println("You have no follow requests.")
 	}
 
 	return nil
