@@ -5,7 +5,7 @@
 package model
 
 import (
-	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,7 +30,7 @@ type Status struct {
 	Mentions           []Mention        `json:"mentions"`
 	Muted              bool             `json:"muted"`
 	Pinned             bool             `json:"pinned"`
-	Poll               Poll             `json:"poll"`
+	Poll               *Poll            `json:"poll"`
 	Reblog             *StatusReblogged `json:"reblog"`
 	Reblogged          bool             `json:"reblogged"`
 	ReblogsCount       int              `json:"reblogs_count"`
@@ -66,24 +66,6 @@ type Mention struct {
 	ID       string `json:"id"`
 	URL      string `json:"url"`
 	Username string `json:"username"`
-}
-
-type Poll struct {
-	Emojis      []Emoji      `json:"emojis"`
-	Expired     bool         `json:"expired"`
-	Voted       bool         `json:"voted"`
-	Multiple    bool         `json:"multiple"`
-	ExpiredAt   time.Time    `json:"expires_at"`
-	ID          string       `json:"id"`
-	OwnVotes    []int        `json:"own_votes"`
-	VotersCount int          `json:"voters_count"`
-	VotesCount  int          `json:"votes_count"`
-	Options     []PollOption `json:"options"`
-}
-
-type PollOption struct {
-	Title      string `json:"title"`
-	VotesCount int    `json:"votes_count"`
 }
 
 type StatusReblogged struct {
@@ -158,47 +140,44 @@ type MediaDimensions struct {
 }
 
 func (s Status) Display(noColor bool) string {
-	format := `
-%s
+	indent := "  "
 
-%s
-  %s
-%s
-  %s
+	var builder strings.Builder
 
-%s
-  %s
+	// The account information
+	builder.WriteString(utilities.FullDisplayNameFormat(noColor, s.Account.DisplayName, s.Account.Acct) + "\n\n")
 
-%s
-  Boosts: %d
-  Likes: %d
-  Replies: %d
+	// The content of the status.
+	builder.WriteString(utilities.HeaderFormat(noColor, "CONTENT:"))
+	builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(s.Content), "\n  ", 80))
 
-%s
-  %s
+	// If a poll exists in a status, write the contents to the builder.
+	if s.Poll != nil {
+		displayPollContent(&builder, *s.Poll, noColor, indent)
+	}
 
-%s
-  %s
-`
+	// The ID of the status
+	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "STATUS ID:") + "\n" + indent + s.ID)
 
-	return fmt.Sprintf(
-		format,
-		utilities.FullDisplayNameFormat(noColor, s.Account.DisplayName, s.Account.Acct),
-		utilities.HeaderFormat(noColor, "CONTENT:"),
-		utilities.WrapLines(utilities.ConvertHTMLToText(s.Content), "\n  ", 80),
-		utilities.HeaderFormat(noColor, "STATUS ID:"),
-		s.ID,
-		utilities.HeaderFormat(noColor, "CREATED AT:"),
-		utilities.FormatTime(s.CreatedAt),
-		utilities.HeaderFormat(noColor, "STATS:"),
-		s.ReblogsCount,
-		s.FavouritesCount,
-		s.RepliesCount,
-		utilities.HeaderFormat(noColor, "VISIBILITY:"),
-		s.Visibility,
-		utilities.HeaderFormat(noColor, "URL:"),
-		s.URL,
+	// Status creation time
+	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "CREATED AT:") + "\n" + indent + utilities.FormatTime(s.CreatedAt))
+
+	// Status stats
+	builder.WriteString(
+		"\n\n" +
+			utilities.HeaderFormat(noColor, "STATS:") +
+			"\n" + indent + utilities.FieldFormat(noColor, "Boosts: ") + strconv.Itoa(s.ReblogsCount) +
+			"\n" + indent + utilities.FieldFormat(noColor, "Likes: ") + strconv.Itoa(s.FavouritesCount) +
+			"\n" + indent + utilities.FieldFormat(noColor, "Replies: ") + strconv.Itoa(s.RepliesCount),
 	)
+
+	// Status visibility
+	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "VISIBILITY:") + "\n" + indent + s.Visibility.String())
+
+	// Status URL
+	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "URL:") + "\n" + indent + s.URL)
+
+	return builder.String()
 }
 
 type StatusList struct {
@@ -225,8 +204,19 @@ func (s StatusList) Display(noColor bool) string {
 			createdAt = status.Reblog.CreatedAt
 		}
 
-		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", 80) + "\n\n")
-		builder.WriteString(utilities.FieldFormat(noColor, "ID:") + " " + statusID + "\t" + utilities.FieldFormat(noColor, "Created at:") + " " + utilities.FormatTime(createdAt) + "\n")
+		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", 80))
+
+		if status.Poll != nil {
+			displayPollContent(&builder, *status.Poll, noColor, "")
+		}
+
+		builder.WriteString(
+			"\n\n" +
+				utilities.FieldFormat(noColor, "Status ID:") + " " + statusID + "\t" +
+				utilities.FieldFormat(noColor, "Created at:") + " " + utilities.FormatTime(createdAt) +
+				"\n",
+		)
+
 		builder.WriteString(separator + "\n")
 	}
 

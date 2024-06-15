@@ -26,6 +26,7 @@ type ShowExecutor struct {
 	timelineCategory        string
 	listID                  string
 	tag                     string
+	pollID                  string
 	limit                   int
 }
 
@@ -45,6 +46,7 @@ func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
 	showExe.StringVar(&showExe.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "Specify the timeline category to view")
 	showExe.StringVar(&showExe.listID, flagListID, "", "Specify the ID of the list to display")
 	showExe.StringVar(&showExe.tag, flagTag, "", "Specify the name of the tag to use")
+	showExe.StringVar(&showExe.pollID, flagPollID, "", "Specify the ID of the poll to display")
 	showExe.IntVar(&showExe.limit, flagLimit, 20, "Specify the limit of items to display")
 
 	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
@@ -70,6 +72,7 @@ func (s *ShowExecutor) Execute() error {
 		resourceLiked:         s.showLiked,
 		resourceStarred:       s.showLiked,
 		resourceFollowRequest: s.showFollowRequests,
+		resourcePoll:          s.showPoll,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -359,6 +362,21 @@ func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
 	} else {
 		fmt.Println("You have no follow requests.")
 	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showPoll(gtsClient *client.Client) error {
+	if s.pollID == "" {
+		return FlagNotSetError{flagText: flagPollID}
+	}
+
+	poll, err := gtsClient.GetPoll(s.pollID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the poll: %w", err)
+	}
+
+	utilities.Display(poll, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 
 	return nil
 }

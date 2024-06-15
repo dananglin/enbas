@@ -38,8 +38,16 @@ type CreateStatusForm struct {
 	Likeable    bool                    `json:"likeable"`
 	Replyable   bool                    `json:"replyable"`
 	Sensitive   bool                    `json:"sensitive"`
+	Poll        *CreateStatusPollForm   `json:"poll,omitempty"`
 	ContentType model.StatusContentType `json:"content_type"`
 	Visibility  model.StatusVisibility  `json:"visibility"`
+}
+
+type CreateStatusPollForm struct {
+	Options    []string `json:"options"`
+	ExpiresIn  int      `json:"expires_in"`
+	Multiple   bool     `json:"multiple"`
+	HideTotals bool     `json:"hide_totals"`
 }
 
 func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {

@@ -19,7 +19,7 @@ type RemoveExecutor struct {
 	fromResourceType string
 	listID           string
 	statusID         string
-	accountNames     AccountNames
+	accountNames     MultiStringFlagValue
 }
 
 func NewRemoveExecutor(tlf TopLevelFlags, name, summary string) *RemoveExecutor {
@@ -27,7 +27,7 @@ func NewRemoveExecutor(tlf TopLevelFlags, name, summary string) *RemoveExecutor 
 
 	removeExe := RemoveExecutor{
 		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		accountNames:  AccountNames(emptyArr),
+		accountNames:  MultiStringFlagValue(emptyArr),
 		topLevelFlags: tlf,
 	}
 

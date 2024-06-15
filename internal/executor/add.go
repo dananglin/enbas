@@ -5,6 +5,7 @@
 package executor
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 
@@ -19,7 +20,9 @@ type AddExecutor struct {
 	toResourceType string
 	listID         string
 	statusID       string
-	accountNames   AccountNames
+	pollID         string
+	choices        MultiIntFlagValue
+	accountNames   MultiStringFlagValue
 	content        string
 }
 
@@ -28,16 +31,18 @@ func NewAddExecutor(tlf TopLevelFlags, name, summary string) *AddExecutor {
 
 	addExe := AddExecutor{
 		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		accountNames:  AccountNames(emptyArr),
+		accountNames:  MultiStringFlagValue(emptyArr),
 		topLevelFlags: tlf,
 	}
 
 	addExe.StringVar(&addExe.resourceType, flagType, "", "Specify the resource type to add (e.g. account, note)")
 	addExe.StringVar(&addExe.toResourceType, flagTo, "", "Specify the target resource type to add to (e.g. list, account, etc)")
-	addExe.StringVar(&addExe.listID, flagListID, "", "The ID of the list to add to")
+	addExe.StringVar(&addExe.listID, flagListID, "", "The ID of the list")
 	addExe.StringVar(&addExe.statusID, flagStatusID, "", "The ID of the status")
-	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
 	addExe.StringVar(&addExe.content, flagContent, "", "The content of the resource")
+	addExe.StringVar(&addExe.pollID, flagPollID, "", "The ID of the poll")
+	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
+	addExe.Var(&addExe.choices, flagChoose, "Specify your choice ")
 
 	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
 
@@ -54,6 +59,7 @@ func (a *AddExecutor) Execute() error {
 		resourceAccount:   a.addToAccount,
 		resourceBookmarks: a.addToBookmarks,
 		resourceStatus:    a.addToStatus,
+		resourcePoll:      a.addToPoll,
 	}
 
 	doFunc, ok := funcMap[a.toResourceType]
@@ -224,6 +230,53 @@ func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
 	}
 
 	fmt.Println("Successfully added the boost to the status.")
+
+	return nil
+}
+
+func (a *AddExecutor) addToPoll(gtsClient *client.Client) error {
+	if a.pollID == "" {
+		return FlagNotSetError{flagText: flagPollID}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		resourceVote: a.addVoteToPoll,
+	}
+
+	doFunc, ok := funcMap[a.resourceType]
+	if !ok {
+		return UnsupportedAddOperationError{
+			ResourceType:      a.resourceType,
+			AddToResourceType: a.toResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
+	if len(a.choices) == 0 {
+		return errors.New("please use --" + flagChoose + " to make a choice in this poll")
+	}
+
+	poll, err := gtsClient.GetPoll(a.pollID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the poll: %w", err)
+	}
+
+	if poll.Expired {
+		return PollClosedError{}
+	}
+
+	if !poll.Multiple && len(a.choices) > 1 {
+		return MultipleChoiceError{}
+	}
+
+	if err := gtsClient.VoteInPoll(a.pollID, []int(a.choices)); err != nil {
+		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
+	}
+
+	fmt.Println("Successfully added your vote(s) to the poll.")
 
 	return nil
 }

@@ -4,7 +4,7 @@
 
 package executor
 
-const(
+const (
 	resourceAccount       = "account"
 	resourceBlocked       = "blocked"
 	resourceBookmarks     = "bookmarks"
@@ -17,8 +17,10 @@ const(
 	resourceLiked         = "liked"
 	resourceList          = "list"
 	resourceNote          = "note"
+	resourcePoll          = "poll"
 	resourceStatus        = "status"
 	resourceStar          = "star"
 	resourceStarred       = "starred"
 	resourceTimeline      = "timeline"
+	resourceVote          = "vote"
 )

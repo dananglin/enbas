@@ -32,7 +32,11 @@ type UnsupportedAddOperationError struct {
 }
 
 func (e UnsupportedAddOperationError) Error() string {
-	return "adding '" + e.ResourceType + "' to '" + e.AddToResourceType + "' is not supported"
+	return "adding '" +
+		e.ResourceType +
+		"' to '" +
+		e.AddToResourceType +
+		"' is not supported"
 }
 
 type UnsupportedRemoveOperationError struct {
@@ -41,7 +45,11 @@ type UnsupportedRemoveOperationError struct {
 }
 
 func (e UnsupportedRemoveOperationError) Error() string {
-	return "removing '" + e.ResourceType + "' from '" + e.RemoveFromResourceType + "' is not supported"
+	return "removing '" +
+		e.ResourceType +
+		"' from '" +
+		e.RemoveFromResourceType +
+		"' is not supported"
 }
 
 type EmptyContentError struct {
@@ -65,4 +73,24 @@ type UnknownCommandError struct {
 
 func (e UnknownCommandError) Error() string {
 	return "unknown command '" + e.Command + "'"
+}
+
+type PollClosedError struct{}
+
+func (e PollClosedError) Error() string {
+	return "this poll is closed"
+}
+
+type MultipleChoiceError struct{}
+
+func (e MultipleChoiceError) Error() string {
+	return "this poll does not allow multiple choices"
+}
+
+type NoPollOptionError struct{}
+
+func (e NoPollOptionError) Error() string {
+	return "no options were provided for this poll, please use the --" +
+		flagPollOption +
+		" flag to add options to the poll"
 }

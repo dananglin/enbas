@@ -17,21 +17,26 @@ import (
 type CreateExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags     TopLevelFlags
-	boostable         bool
-	federated         bool
-	likeable          bool
-	replyable         bool
-	sensitive         *bool
-	content           string
-	contentType       string
-	fromFile          string
-	language          string
-	spoilerText       string
-	resourceType      string
-	listTitle         string
-	listRepliesPolicy string
-	visibility        string
+	topLevelFlags            TopLevelFlags
+	addPoll                  bool
+	boostable                bool
+	federated                bool
+	likeable                 bool
+	pollAllowsMultipleChoices bool
+	pollHidesVoteCounts       bool
+	replyable                bool
+	sensitive                *bool
+	content                  string
+	contentType              string
+	fromFile                 string
+	language                 string
+	resourceType             string
+	listTitle                string
+	listRepliesPolicy        string
+	spoilerText              string
+	visibility               string
+	pollExpiresIn            TimeDurationFlagValue
+	pollOptions              MultiStringFlagValue
 }
 
 func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor {
@@ -45,6 +50,9 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "Specify if the status can be federated beyond the local timelines")
 	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "Specify if the status can be liked/favourited")
 	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "Specify if the status can be replied to")
+	createExe.BoolVar(&createExe.pollAllowsMultipleChoices, flagPollAllowsMultipleChoices, false, "The poll allows viewers to make multiple choices in the poll")
+	createExe.BoolVar(&createExe.pollHidesVoteCounts, flagPollHidesVoteCounts, false, "The poll will hide the vote count until it is closed")
+	createExe.BoolVar(&createExe.addPoll, flagAddPoll, false, "Add a poll to the status")
 	createExe.StringVar(&createExe.content, flagContent, "", "The content of the status to create")
 	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
 	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "The file path where to read the contents from")
@@ -54,6 +62,8 @@ func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor 
 	createExe.StringVar(&createExe.resourceType, flagType, "", "Specify the type of resource to create")
 	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "Specify the title of the list")
 	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "Specify the policy of the replies for this list (valid values are followed, list and none)")
+	createExe.Var(&createExe.pollOptions, flagPollOption, "A poll option. Use this multiple times to set multiple options")
+	createExe.Var(&createExe.pollExpiresIn, flagPollExpiresIn, "The duration in which the poll is open for")
 
 	createExe.BoolFunc(flagSensitive, "Specify if the status should be marked as sensitive", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
@@ -189,6 +199,22 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		Replyable:   c.replyable,
 		Sensitive:   sensitive,
 		Visibility:  parsedVisibility,
+		Poll:        nil,
+	}
+
+	if c.addPoll {
+		if len(c.pollOptions) == 0 {
+			return NoPollOptionError{}
+		}
+
+		poll := client.CreateStatusPollForm{
+			Options:    c.pollOptions,
+			Multiple:   c.pollAllowsMultipleChoices,
+			HideTotals: c.pollHidesVoteCounts,
+			ExpiresIn:  int(c.pollExpiresIn.Duration.Seconds()),
+		}
+
+		form.Poll = &poll
 	}
 
 	status, err := gtsClient.CreateStatus(form)
