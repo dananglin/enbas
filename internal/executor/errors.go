@@ -94,3 +94,11 @@ func (e NoPollOptionError) Error() string {
 		flagPollOption +
 		" flag to add options to the poll"
 }
+
+type NotFollowingError struct {
+	Account string
+}
+
+func (e NotFollowingError) Error() string {
+	return "you are not following " + e.Account
+}

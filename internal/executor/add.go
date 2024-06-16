@@ -105,7 +105,16 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 	for ind := range a.accountNames {
 		accountID, err := getTheirAccountID(gtsClient, a.accountNames[ind])
 		if err != nil {
-			return fmt.Errorf("unable to get the account ID for %s, %w", a.accountNames[ind], err)
+			return fmt.Errorf("unable to get the account ID for %s: %w", a.accountNames[ind], err)
+		}
+
+		relationship, err := gtsClient.GetAccountRelationship(accountID)
+		if err != nil {
+			return fmt.Errorf("unable to get your relationship to %s: %w", a.accountNames[ind], err)
+		}
+
+		if !relationship.Following {
+			return NotFollowingError{Account: a.accountNames[ind]}
 		}
 
 		accountIDs[ind] = accountID
