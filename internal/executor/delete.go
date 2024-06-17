@@ -9,20 +9,24 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type DeleteExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
-	resourceType  string
-	listID        string
+	printer      *printer.Printer
+	configDir    string
+	resourceType string
+	listID       string
 }
 
-func NewDeleteExecutor(tlf TopLevelFlags, name, summary string) *DeleteExecutor {
+func NewDeleteExecutor(printer *printer.Printer, configDir, name, summary string) *DeleteExecutor {
 	deleteExe := DeleteExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:   printer,
+		configDir: configDir,
 	}
 
 	deleteExe.StringVar(&deleteExe.resourceType, flagType, "", "Specify the type of resource to delete")
@@ -47,7 +51,7 @@ func (d *DeleteExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: d.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(d.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(d.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -64,7 +68,7 @@ func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to delete the list: %w", err)
 	}
 
-	fmt.Println("The list was successfully deleted.")
+	d.printer.PrintSuccess("The list was successfully deleted.")
 
 	return nil
 }

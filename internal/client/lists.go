@@ -17,7 +17,7 @@ const (
 	listPath string = "/api/v1/lists"
 )
 
-func (g *Client) GetAllLists() (model.Lists, error) {
+func (g *Client) GetAllLists() ([]model.List, error) {
 	url := g.Authentication.Instance + listPath
 
 	var lists []model.List

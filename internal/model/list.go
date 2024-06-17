@@ -7,8 +7,6 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type ListRepliesPolicy int
@@ -106,54 +104,4 @@ type List struct {
 	RepliesPolicy ListRepliesPolicy `json:"replies_policy"`
 	Title         string            `json:"title"`
 	Accounts      map[string]string
-}
-
-func (l List) Display(noColor bool) string {
-	format := `
-%s
-  %s
-
-%s
-  %s
-
-%s
-  %s
-
-%s`
-
-	output := fmt.Sprintf(
-		format,
-		utilities.HeaderFormat(noColor, "LIST TITLE:"), l.Title,
-		utilities.HeaderFormat(noColor, "LIST ID:"), l.ID,
-		utilities.HeaderFormat(noColor, "REPLIES POLICY:"), l.RepliesPolicy,
-		utilities.HeaderFormat(noColor, "ADDED ACCOUNTS:"),
-	)
-
-	if len(l.Accounts) > 0 {
-		for acct, name := range l.Accounts {
-			output += "\n • " + utilities.FullDisplayNameFormat(noColor, name, acct)
-		}
-	} else {
-		output += "\n  None"
-	}
-
-	output += "\n"
-
-	return output
-}
-
-type Lists []List
-
-func (l Lists) Display(noColor bool) string {
-	output := "\n" + utilities.HeaderFormat(noColor, "LISTS")
-
-	for i := range l {
-		output += fmt.Sprintf(
-			"\n  • %s (%s)",
-			l[i].Title,
-			l[i].ID,
-		)
-	}
-
-	return output
 }

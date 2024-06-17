@@ -11,39 +11,42 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type CreateExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags            TopLevelFlags
-	addPoll                  bool
-	boostable                bool
-	federated                bool
-	likeable                 bool
+	printer                   *printer.Printer
+	addPoll                   bool
+	boostable                 bool
+	federated                 bool
+	likeable                  bool
 	pollAllowsMultipleChoices bool
 	pollHidesVoteCounts       bool
-	replyable                bool
-	sensitive                *bool
-	content                  string
-	contentType              string
-	fromFile                 string
-	language                 string
-	resourceType             string
-	listTitle                string
-	listRepliesPolicy        string
-	spoilerText              string
-	visibility               string
-	pollExpiresIn            TimeDurationFlagValue
-	pollOptions              MultiStringFlagValue
+	replyable                 bool
+	sensitive                 *bool
+	configDir                 string
+	content                   string
+	contentType               string
+	fromFile                  string
+	language                  string
+	resourceType              string
+	listTitle                 string
+	listRepliesPolicy         string
+	spoilerText               string
+	visibility                string
+	pollExpiresIn             TimeDurationFlagValue
+	pollOptions               MultiStringFlagValue
 }
 
-func NewCreateExecutor(tlf TopLevelFlags, name, summary string) *CreateExecutor {
+func NewCreateExecutor(printer *printer.Printer, configDir, name, summary string) *CreateExecutor {
 	createExe := CreateExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		topLevelFlags: tlf,
+		printer:   printer,
+		configDir: configDir,
 	}
 
 	createExe.BoolVar(&createExe.boostable, flagEnableReposts, true, "Specify if the status can be reposted/boosted by others")
@@ -87,7 +90,7 @@ func (c *CreateExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(c.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(c.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -125,8 +128,8 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to create the list: %w", err)
 	}
 
-	fmt.Println("Successfully created the following list:")
-	utilities.Display(list, *c.topLevelFlags.NoColor, c.topLevelFlags.Pager)
+	c.printer.PrintSuccess("Successfully created the following list:")
+	c.printer.PrintList(list)
 
 	return nil
 }
@@ -222,8 +225,8 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to create the status: %w", err)
 	}
 
-	fmt.Println("Successfully created the following status:")
-	utilities.Display(status, *c.topLevelFlags.NoColor, c.topLevelFlags.Pager)
+	c.printer.PrintSuccess("Successfully created the following status:")
+	c.printer.PrintStatus(status)
 
 	return nil
 }

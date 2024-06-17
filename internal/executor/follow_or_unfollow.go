@@ -9,25 +9,28 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type FollowOrUnfollowExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
-	resourceType  string
-	accountName   string
-	showReposts   bool
-	notify        bool
-	action        string
+	printer      *printer.Printer
+	configDir    string
+	resourceType string
+	accountName  string
+	showReposts  bool
+	notify       bool
+	action       string
 }
 
-func NewFollowOrUnfollowExecutor(tlf TopLevelFlags, name, summary string) *FollowOrUnfollowExecutor {
+func NewFollowOrUnfollowExecutor(printer *printer.Printer, configDir, name, summary string) *FollowOrUnfollowExecutor {
 	command := FollowOrUnfollowExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		topLevelFlags: tlf,
-		action:        name,
+		printer:   printer,
+		configDir: configDir,
+		action:    name,
 	}
 
 	command.StringVar(&command.resourceType, flagType, "", "Specify the type of resource to follow")
@@ -50,7 +53,7 @@ func (f *FollowOrUnfollowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: f.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(f.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(f.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -59,7 +62,7 @@ func (f *FollowOrUnfollowExecutor) Execute() error {
 }
 
 func (f *FollowOrUnfollowExecutor) followOrUnfollowAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, f.accountName, f.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, false, f.accountName, f.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -85,7 +88,7 @@ func (f *FollowOrUnfollowExecutor) followAccount(gtsClient *client.Client, accou
 		return fmt.Errorf("unable to follow the account: %w", err)
 	}
 
-	fmt.Println("The follow request was sent successfully.")
+	f.printer.PrintSuccess("Successfully sent the follow request.")
 
 	return nil
 }
@@ -95,7 +98,7 @@ func (f *FollowOrUnfollowExecutor) unfollowAccount(gtsClient *client.Client, acc
 		return fmt.Errorf("unable to unfollow the account: %w", err)
 	}
 
-	fmt.Println("Successfully unfollowed the account.")
+	f.printer.PrintSuccess("Successfully unfollowed the account.")
 
 	return nil
 }

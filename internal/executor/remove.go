@@ -9,12 +9,14 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type RemoveExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags    TopLevelFlags
+	printer          *printer.Printer
+	configDir        string
 	resourceType     string
 	fromResourceType string
 	listID           string
@@ -22,13 +24,15 @@ type RemoveExecutor struct {
 	accountNames     MultiStringFlagValue
 }
 
-func NewRemoveExecutor(tlf TopLevelFlags, name, summary string) *RemoveExecutor {
+func NewRemoveExecutor(printer *printer.Printer, configDir, name, summary string) *RemoveExecutor {
 	emptyArr := make([]string, 0, 3)
 
 	removeExe := RemoveExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		accountNames:  MultiStringFlagValue(emptyArr),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:      printer,
+		configDir:    configDir,
+		accountNames: MultiStringFlagValue(emptyArr),
 	}
 
 	removeExe.StringVar(&removeExe.resourceType, flagType, "", "Specify the resource type to remove (e.g. account, note)")
@@ -59,7 +63,7 @@ func (r *RemoveExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: r.fromResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(r.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(r.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -107,7 +111,7 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 		return fmt.Errorf("unable to remove the accounts from the list: %w", err)
 	}
 
-	fmt.Println("Successfully removed the account(s) from the list.")
+	r.printer.PrintSuccess("Successfully removed the account(s) from the list.")
 
 	return nil
 }
@@ -133,7 +137,7 @@ func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(r.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -142,7 +146,7 @@ func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to remove the private note from the account: %w", err)
 	}
 
-	fmt.Println("Successfully removed the private note from the account.")
+	r.printer.PrintSuccess("Successfully removed the private note from the account.")
 
 	return nil
 }
@@ -172,7 +176,7 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 		return fmt.Errorf("unable to remove the status from your bookmarks: %w", err)
 	}
 
-	fmt.Println("Successfully removed the status from your bookmarks.")
+	r.printer.PrintSuccess("Successfully removed the status from your bookmarks.")
 
 	return nil
 }
@@ -204,7 +208,7 @@ func (r *RemoveExecutor) removeStarFromStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to remove the %s from the status: %w", r.resourceType, err)
 	}
 
-	fmt.Printf("Successfully removed the %s from the status.\n", r.resourceType)
+	r.printer.PrintSuccess("Successfully removed the " + r.resourceType + " from the status.")
 
 	return nil
 }
@@ -214,7 +218,7 @@ func (r *RemoveExecutor) removeBoostFromStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to remove the boost from the status: %w", err)
 	}
 
-	fmt.Println("Successfully removed the boost from the status.")
+	r.printer.PrintSuccess("Successfully removed the boost from the status.")
 
 	return nil
 }

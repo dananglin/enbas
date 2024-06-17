@@ -6,13 +6,13 @@ package executor
 
 import (
 	"flag"
-	"os"
-	"strings"
-	"text/tabwriter"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type VersionExecutor struct {
 	*flag.FlagSet
+	printer         *printer.Printer
 	showFullVersion bool
 	binaryVersion   string
 	buildTime       string
@@ -20,9 +20,19 @@ type VersionExecutor struct {
 	gitCommit       string
 }
 
-func NewVersionExecutor(name, summary, binaryVersion, buildTime, goVersion, gitCommit string) *VersionExecutor {
+func NewVersionExecutor(
+	enbasPrinter *printer.Printer,
+	name,
+	summary,
+	binaryVersion,
+	buildTime,
+	goVersion,
+	gitCommit string,
+) *VersionExecutor {
 	command := VersionExecutor{
-		FlagSet:         flag.NewFlagSet(name, flag.ExitOnError),
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:         enbasPrinter,
 		binaryVersion:   binaryVersion,
 		buildTime:       buildTime,
 		goVersion:       goVersion,
@@ -38,24 +48,7 @@ func NewVersionExecutor(name, summary, binaryVersion, buildTime, goVersion, gitC
 }
 
 func (v *VersionExecutor) Execute() error {
-	var builder strings.Builder
-
-	if v.showFullVersion {
-		builder.WriteString("Enbas\n")
-
-		tableWriter := tabwriter.NewWriter(&builder, 0, 8, 0, '\t', 0)
-
-		tableWriter.Write([]byte("    Version:\t" + v.binaryVersion + "\n"))
-		tableWriter.Write([]byte("    Git commit:\t" + v.gitCommit + "\n"))
-		tableWriter.Write([]byte("    Go version:\t" + v.goVersion + "\n"))
-		tableWriter.Write([]byte("    Build date:\t" + v.buildTime + "\n"))
-
-		tableWriter.Flush()
-	} else {
-		builder.WriteString("Enbas " + v.binaryVersion + "\n")
-	}
-
-	os.Stdout.WriteString(builder.String())
+	v.printer.PrintVersion(v.showFullVersion, v.binaryVersion, v.buildTime, v.goVersion, v.gitCommit)
 
 	return nil
 }

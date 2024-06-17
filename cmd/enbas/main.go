@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/executor"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 var (
@@ -22,47 +23,33 @@ var (
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v.\n", err)
 		os.Exit(1)
 	}
 }
 
 func run() error {
-	topLevelFlags := executor.TopLevelFlags{
-		ConfigDir: "",
-		NoColor:   nil,
-		Pager:     "",
-	}
-
-	flag.StringVar(
-		&topLevelFlags.ConfigDir,
-		"config-dir",
-		"",
-		"Specify your config directory",
+	var (
+		configDir        string
+		pager            string
+		maxTerminalWidth int
+		noColor          *bool
 	)
 
-	flag.BoolFunc(
-		"no-color",
-		"Disable ANSI colour output when displaying text on screen",
-		func(value string) error {
-			boolVal, err := strconv.ParseBool(value)
-			if err != nil {
-				return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
-			}
+	flag.StringVar(&configDir, "config-dir", "", "Specify your config directory")
+	flag.StringVar(&pager, "pager", "", "Specify your preferred pager to page through long outputs. This is disabled by default.")
+	flag.IntVar(&maxTerminalWidth, "max-terminal-width", 80, "Specify the maximum terminal width when displaying resources on screen.")
 
-			topLevelFlags.NoColor = new(bool)
-			*topLevelFlags.NoColor = boolVal
+	flag.BoolFunc("no-color", "Disable ANSI colour output when displaying text on screen", func(value string) error {
+		boolVal, err := strconv.ParseBool(value)
+		if err != nil {
+			return fmt.Errorf("unable to parse %q as a boolean: %w", value, err)
+		}
 
-			return nil
-		},
-	)
+		noColor = new(bool)
+		*noColor = boolVal
 
-	flag.StringVar(
-		&topLevelFlags.Pager,
-		"pager",
-		"",
-		"Specify your preferred pager to page through long outputs. This is disabled by default.",
-	)
+		return nil
+	})
 
 	flag.Usage = usageFunc(executor.CommandSummaryMap())
 
@@ -75,90 +62,107 @@ func run() error {
 	}
 
 	// If NoColor is still unspecified, check to see if the NO_COLOR environment variable is set
-	if topLevelFlags.NoColor == nil {
-		topLevelFlags.NoColor = new(bool)
+	if noColor == nil {
+		noColor = new(bool)
 		if os.Getenv("NO_COLOR") != "" {
-			*topLevelFlags.NoColor = true
+			*noColor = true
 		} else {
-			*topLevelFlags.NoColor = false
+			*noColor = false
 		}
 	}
 
 	command := flag.Arg(0)
 	args := flag.Args()[1:]
 
+	printer := printer.NewPrinter(*noColor, pager, maxTerminalWidth)
+
 	executorMap := map[string]executor.Executor{
 		executor.CommandAccept: executor.NewAcceptOrRejectExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandAccept,
 			executor.CommandSummaryLookup(executor.CommandAccept),
 		),
 		executor.CommandAdd: executor.NewAddExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandAdd,
 			executor.CommandSummaryLookup(executor.CommandAdd),
 		),
 		executor.CommandBlock: executor.NewBlockOrUnblockExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandBlock,
 			executor.CommandSummaryLookup(executor.CommandBlock),
 		),
 		executor.CommandCreate: executor.NewCreateExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandCreate,
 			executor.CommandSummaryLookup(executor.CommandCreate),
 		),
 		executor.CommandDelete: executor.NewDeleteExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandDelete,
 			executor.CommandSummaryLookup(executor.CommandDelete),
 		),
 		executor.CommandEdit: executor.NewEditExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandEdit,
 			executor.CommandSummaryLookup(executor.CommandEdit),
 		),
 		executor.CommandFollow: executor.NewFollowOrUnfollowExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandFollow,
 			executor.CommandSummaryLookup(executor.CommandFollow),
 		),
 		executor.CommandLogin: executor.NewLoginExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandLogin,
 			executor.CommandSummaryLookup(executor.CommandLogin),
 		),
 		executor.CommandReject: executor.NewAcceptOrRejectExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandReject,
 			executor.CommandSummaryLookup(executor.CommandReject),
 		),
 		executor.CommandRemove: executor.NewRemoveExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandRemove,
 			executor.CommandSummaryLookup(executor.CommandRemove),
 		),
 		executor.CommandSwitch: executor.NewSwitchExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandSwitch,
 			executor.CommandSummaryLookup(executor.CommandSwitch),
 		),
 		executor.CommandUnfollow: executor.NewFollowOrUnfollowExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandUnfollow,
 			executor.CommandSummaryLookup(executor.CommandUnfollow),
 		),
 		executor.CommandUnblock: executor.NewBlockOrUnblockExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandUnblock,
 			executor.CommandSummaryLookup(executor.CommandUnblock),
 		),
 		executor.CommandShow: executor.NewShowExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandShow,
 			executor.CommandSummaryLookup(executor.CommandShow),
 		),
 		executor.CommandVersion: executor.NewVersionExecutor(
+			printer,
 			executor.CommandVersion,
 			executor.CommandSummaryLookup(executor.CommandVersion),
 			binaryVersion,
@@ -167,7 +171,8 @@ func run() error {
 			gitCommit,
 		),
 		executor.CommandWhoami: executor.NewWhoAmIExecutor(
-			topLevelFlags,
+			printer,
+			configDir,
 			executor.CommandWhoami,
 			executor.CommandSummaryLookup(executor.CommandWhoami),
 		),
@@ -175,13 +180,18 @@ func run() error {
 
 	exe, ok := executorMap[command]
 	if !ok {
+		err := executor.UnknownCommandError{Command: command}
+
+		printer.PrintFailure(err.Error() + ".")
 		flag.Usage()
 
-		return executor.UnknownCommandError{Command: command}
+		return err
 	}
 
 	if err := executor.Execute(exe, args); err != nil {
-		return fmt.Errorf("(%s) %w", command, err)
+		printer.PrintFailure("(" + command + ") " + err.Error() + ".")
+
+		return err
 	}
 
 	return nil

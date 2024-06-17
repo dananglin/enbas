@@ -5,11 +5,7 @@
 package model
 
 import (
-	"strconv"
-	"strings"
 	"time"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type Status struct {
@@ -139,86 +135,7 @@ type MediaDimensions struct {
 	Width     int     `json:"width"`
 }
 
-func (s Status) Display(noColor bool) string {
-	indent := "  "
-
-	var builder strings.Builder
-
-	// The account information
-	builder.WriteString(utilities.FullDisplayNameFormat(noColor, s.Account.DisplayName, s.Account.Acct) + "\n\n")
-
-	// The content of the status.
-	builder.WriteString(utilities.HeaderFormat(noColor, "CONTENT:"))
-	builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(s.Content), "\n  ", 80))
-
-	// If a poll exists in a status, write the contents to the builder.
-	if s.Poll != nil {
-		displayPollContent(&builder, *s.Poll, noColor, indent)
-	}
-
-	// The ID of the status
-	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "STATUS ID:") + "\n" + indent + s.ID)
-
-	// Status creation time
-	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "CREATED AT:") + "\n" + indent + utilities.FormatTime(s.CreatedAt))
-
-	// Status stats
-	builder.WriteString(
-		"\n\n" +
-			utilities.HeaderFormat(noColor, "STATS:") +
-			"\n" + indent + utilities.FieldFormat(noColor, "Boosts: ") + strconv.Itoa(s.ReblogsCount) +
-			"\n" + indent + utilities.FieldFormat(noColor, "Likes: ") + strconv.Itoa(s.FavouritesCount) +
-			"\n" + indent + utilities.FieldFormat(noColor, "Replies: ") + strconv.Itoa(s.RepliesCount),
-	)
-
-	// Status visibility
-	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "VISIBILITY:") + "\n" + indent + s.Visibility.String())
-
-	// Status URL
-	builder.WriteString("\n\n" + utilities.HeaderFormat(noColor, "URL:") + "\n" + indent + s.URL)
-
-	return builder.String()
-}
-
 type StatusList struct {
 	Name     string
 	Statuses []Status
-}
-
-func (s StatusList) Display(noColor bool) string {
-	var builder strings.Builder
-
-	separator := strings.Repeat("─", 80)
-
-	builder.WriteString(utilities.HeaderFormat(noColor, s.Name) + "\n")
-
-	for _, status := range s.Statuses {
-		builder.WriteString("\n" + utilities.FullDisplayNameFormat(noColor, status.Account.DisplayName, status.Account.Acct) + "\n")
-
-		statusID := status.ID
-		createdAt := status.CreatedAt
-
-		if status.Reblog != nil {
-			builder.WriteString("reposted this status from " + utilities.FullDisplayNameFormat(noColor, status.Reblog.Account.DisplayName, status.Reblog.Account.Acct) + "\n")
-			statusID = status.Reblog.ID
-			createdAt = status.Reblog.CreatedAt
-		}
-
-		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", 80))
-
-		if status.Poll != nil {
-			displayPollContent(&builder, *status.Poll, noColor, "")
-		}
-
-		builder.WriteString(
-			"\n\n" +
-				utilities.FieldFormat(noColor, "Status ID:") + " " + statusID + "\t" +
-				utilities.FieldFormat(noColor, "Created at:") + " " + utilities.FormatTime(createdAt) +
-				"\n",
-		)
-
-		builder.WriteString(separator + "\n")
-	}
-
-	return builder.String()
 }

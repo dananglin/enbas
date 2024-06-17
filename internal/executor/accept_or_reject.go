@@ -9,23 +9,26 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type AcceptOrRejectExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
-	resourceType  string
-	accountName   string
-	command       string
+	printer      *printer.Printer
+	configDir    string
+	resourceType string
+	accountName  string
+	command      string
 }
 
-func NewAcceptOrRejectExecutor(tlf TopLevelFlags, name, summary string) *AcceptOrRejectExecutor {
+func NewAcceptOrRejectExecutor(enbasPrinter *printer.Printer, configDir, name, summary string) *AcceptOrRejectExecutor {
 	acceptExe := AcceptOrRejectExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		topLevelFlags: tlf,
-		command:       name,
+		printer:   enbasPrinter,
+		configDir: configDir,
+		command:   name,
 	}
 
 	acceptExe.StringVar(&acceptExe.resourceType, flagType, "", "Specify the type of resource to accept or reject")
@@ -46,7 +49,7 @@ func (a *AcceptOrRejectExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: a.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(a.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(a.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -55,7 +58,7 @@ func (a *AcceptOrRejectExecutor) Execute() error {
 }
 
 func (a *AcceptOrRejectExecutor) acceptOrRejectFollowRequest(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, a.accountName, a.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, false, a.accountName, a.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -75,7 +78,7 @@ func (a *AcceptOrRejectExecutor) acceptFollowRequest(gtsClient *client.Client, a
 		return fmt.Errorf("unable to accept the follow request: %w", err)
 	}
 
-	fmt.Println("Successfully accepted the follow request.")
+	a.printer.PrintSuccess("Successfully accepted the follow request.")
 
 	return nil
 }
@@ -85,7 +88,7 @@ func (a *AcceptOrRejectExecutor) rejectFollowRequest(gtsClient *client.Client, a
 		return fmt.Errorf("unable to reject the follow request: %w", err)
 	}
 
-	fmt.Println("Successfully rejected the follow request.")
+	a.printer.PrintSuccess("Successfully rejected the follow request.")
 
 	return nil
 }

@@ -10,23 +10,26 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type EditExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags     TopLevelFlags
+	printer           *printer.Printer
+	configDir         string
 	resourceType      string
 	listID            string
 	listTitle         string
 	listRepliesPolicy string
 }
 
-func NewEditExecutor(tlf TopLevelFlags, name, summary string) *EditExecutor {
+func NewEditExecutor(printer *printer.Printer, configDir, name, summary string) *EditExecutor {
 	editExe := EditExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:   printer,
+		configDir: configDir,
 	}
 
 	editExe.StringVar(&editExe.resourceType, flagType, "", "Specify the type of resource to update")
@@ -53,7 +56,7 @@ func (e *EditExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: e.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(e.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(e.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -89,8 +92,8 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to update the list: %w", err)
 	}
 
-	fmt.Println("Successfully updated the list.")
-	utilities.Display(updatedList, *e.topLevelFlags.NoColor, e.topLevelFlags.Pager)
+	e.printer.PrintSuccess("Successfully updated the list.")
+	e.printer.PrintList(updatedList)
 
 	return nil
 }

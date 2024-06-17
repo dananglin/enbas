@@ -11,21 +11,25 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type LoginExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
-	instance      string
+	printer   *printer.Printer
+	configDir string
+	instance  string
 }
 
-func NewLoginExecutor(tlf TopLevelFlags, name, summary string) *LoginExecutor {
+func NewLoginExecutor(printer *printer.Printer, configDir, name, summary string) *LoginExecutor {
 	command := LoginExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		topLevelFlags: tlf,
-		instance:      "",
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:   printer,
+		configDir: configDir,
+		instance:  "",
 	}
 
 	command.StringVar(&command.instance, flagInstance, "", "Specify the instance that you want to login to.")
@@ -66,21 +70,17 @@ func (c *LoginExecutor) Execute() error {
 
 	utilities.OpenLink(consentPageURL)
 
-	consentMessageFormat := `
-You'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with
-the application's login process. Your browser may have opened the link to the consent page already. If not, please
-copy and paste the link below to your browser:
+	var builder strings.Builder
 
-%s
+	builder.WriteString("\nYou'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with the application's login process.")
+	builder.WriteString("\nYour browser may have opened the link to the consent page already. If not, please copy and paste the link below to your browser:")
+	builder.WriteString("\n\n" + consentPageURL)
+	builder.WriteString("\n\n" + "Once you have the code please copy and paste it below.")
+	builder.WriteString("\n" + "Out-of-band token: ")
 
-Once you have the code please copy and paste it below.
-
-`
-
-	fmt.Printf(consentMessageFormat, consentPageURL)
+	c.printer.PrintInfo(builder.String())
 
 	var code string
-	fmt.Print("Out-of-band token: ")
 
 	if _, err := fmt.Scanln(&code); err != nil {
 		return fmt.Errorf("failed to read access code: %w", err)
@@ -95,12 +95,12 @@ Once you have the code please copy and paste it below.
 		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(c.topLevelFlags.ConfigDir, account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(c.configDir, account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
 
-	fmt.Printf("Successfully logged into %s\n", loginName)
+	c.printer.PrintSuccess("Successfully logged into " + loginName + ".")
 
 	return nil
 }

@@ -4,12 +4,6 @@
 
 package model
 
-import (
-	"fmt"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
-)
-
 type InstanceV2 struct {
 	AccountDomain   string                  `json:"account_domain"`
 	Configuration   InstanceConfiguration   `json:"configuration"`
@@ -115,49 +109,4 @@ type InstanceV2Usage struct {
 
 type InstanceV2Users struct {
 	ActiveMonth int `json:"active_month"`
-}
-
-func (i InstanceV2) Display(noColor bool) string {
-	format := `
-%s
-  %s
-
-%s
-  %s
-
-%s
-  %s
-
-%s
-  %s
-
-%s
-  Running GoToSocial %s
-
-%s
-  %s %s
-  %s %s
-  %s %s
-`
-
-	return fmt.Sprintf(
-		format,
-		utilities.HeaderFormat(noColor, "INSTANCE TITLE:"),
-		i.Title,
-		utilities.HeaderFormat(noColor, "INSTANCE DESCRIPTION:"),
-		utilities.WrapLines(i.DescriptionText, "\n  ", 80),
-		utilities.HeaderFormat(noColor, "DOMAIN:"),
-		i.Domain,
-		utilities.HeaderFormat(noColor, "TERMS AND CONDITIONS:"),
-		utilities.WrapLines(i.TermsText, "\n  ", 80),
-		utilities.HeaderFormat(noColor, "VERSION:"),
-		i.Version,
-		utilities.HeaderFormat(noColor, "CONTACT:"),
-		utilities.FieldFormat(noColor, "Name:"),
-		i.Contact.Account.DisplayName,
-		utilities.FieldFormat(noColor, "Username:"),
-		i.Contact.Account.Acct,
-		utilities.FieldFormat(noColor, "Email:"),
-		i.Contact.Email,
-	)
 }

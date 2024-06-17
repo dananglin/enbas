@@ -10,12 +10,14 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type AddExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags  TopLevelFlags
+	printer        *printer.Printer
+	configDir      string
 	resourceType   string
 	toResourceType string
 	listID         string
@@ -26,13 +28,15 @@ type AddExecutor struct {
 	content        string
 }
 
-func NewAddExecutor(tlf TopLevelFlags, name, summary string) *AddExecutor {
+func NewAddExecutor(printer *printer.Printer, configDir, name, summary string) *AddExecutor {
 	emptyArr := make([]string, 0, 3)
 
 	addExe := AddExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		accountNames:  MultiStringFlagValue(emptyArr),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:      printer,
+		configDir:    configDir,
+		accountNames: MultiStringFlagValue(emptyArr),
 	}
 
 	addExe.StringVar(&addExe.resourceType, flagType, "", "Specify the resource type to add (e.g. account, note)")
@@ -67,7 +71,7 @@ func (a *AddExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: a.toResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(a.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(a.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -124,7 +128,7 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add the accounts to the list: %w", err)
 	}
 
-	fmt.Println("Successfully added the account(s) to the list.")
+	a.printer.PrintSuccess("Successfully added the account(s) to the list.")
 
 	return nil
 }
@@ -150,7 +154,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(a.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -166,7 +170,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add the private note to the account: %w", err)
 	}
 
-	fmt.Println("Successfully added the private note to the account.")
+	a.printer.PrintSuccess("Successfully added the private note to the account.")
 
 	return nil
 }
@@ -196,7 +200,7 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add the status to your bookmarks: %w", err)
 	}
 
-	fmt.Println("Successfully added the status to your bookmarks.")
+	a.printer.PrintSuccess("Successfully added the status to your bookmarks.")
 
 	return nil
 }
@@ -228,7 +232,7 @@ func (a *AddExecutor) addStarToStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add the %s to the status: %w", a.resourceType, err)
 	}
 
-	fmt.Printf("Successfully added a %s to the status.\n", a.resourceType)
+	a.printer.PrintSuccess("Successfully added a " + a.resourceType + " to the status.")
 
 	return nil
 }
@@ -238,7 +242,7 @@ func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add the boost to the status: %w", err)
 	}
 
-	fmt.Println("Successfully added the boost to the status.")
+	a.printer.PrintSuccess("Successfully added the boost to the status.")
 
 	return nil
 }
@@ -285,7 +289,7 @@ func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
 	}
 
-	fmt.Println("Successfully added your vote(s) to the poll.")
+	a.printer.PrintSuccess("Successfully added your vote(s) to the poll.")
 
 	return nil
 }

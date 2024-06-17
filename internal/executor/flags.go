@@ -51,12 +51,6 @@ const (
 	flagVisibility                = "visibility"
 )
 
-type TopLevelFlags struct {
-	ConfigDir string
-	NoColor   *bool
-	Pager     string
-}
-
 type MultiStringFlagValue []string
 
 func (v *MultiStringFlagValue) String() string {

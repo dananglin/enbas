@@ -5,10 +5,7 @@
 package model
 
 import (
-	"fmt"
 	"time"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type Account struct {
@@ -63,59 +60,6 @@ type Field struct {
 	VerifiedAt string `json:"verified_at"`
 }
 
-func (a Account) Display(noColor bool) string {
-	format := `
-%s
-
-%s
-  %s
-
-%s
-  %s
-
-%s
-  %s %d
-  %s %d
-  %s %d
-
-%s
-  %s
-
-%s %s
-
-%s
-  %s`
-
-	metadata := ""
-
-	for _, field := range a.Fields {
-		metadata += fmt.Sprintf(
-			"\n  %s: %s",
-			utilities.FieldFormat(noColor, field.Name),
-			utilities.ConvertHTMLToText(field.Value),
-		)
-	}
-
-	return fmt.Sprintf(
-		format,
-		utilities.FullDisplayNameFormat(noColor, a.DisplayName, a.Acct),
-		utilities.HeaderFormat(noColor, "ACCOUNT ID:"),
-		a.ID,
-		utilities.HeaderFormat(noColor, "JOINED ON:"),
-		utilities.FormatDate(a.CreatedAt),
-		utilities.HeaderFormat(noColor, "STATS:"),
-		utilities.FieldFormat(noColor, "Followers:"), a.FollowersCount,
-		utilities.FieldFormat(noColor, "Following:"), a.FollowingCount,
-		utilities.FieldFormat(noColor, "Statuses:"), a.StatusCount,
-		utilities.HeaderFormat(noColor, "BIOGRAPHY:"),
-		utilities.WrapLines(utilities.ConvertHTMLToText(a.Note), "\n  ", 80),
-		utilities.HeaderFormat(noColor, "METADATA:"),
-		metadata,
-		utilities.HeaderFormat(noColor, "ACCOUNT URL:"),
-		a.URL,
-	)
-}
-
 type AccountRelationship struct {
 	ID                  string `json:"id"`
 	PrivateNote         string `json:"note"`
@@ -133,53 +77,6 @@ type AccountRelationship struct {
 	ShowingReblogs      bool   `json:"showing_reblogs"`
 }
 
-func (a AccountRelationship) Display(noColor bool) string {
-	format := `
-%s
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t
-  %s: %t`
-
-	privateNoteFormat := `
-%s
-  %s`
-
-	output := fmt.Sprintf(
-		format,
-		utilities.HeaderFormat(noColor, "YOUR RELATIONSHIP WITH THIS ACCOUNT:"),
-		utilities.FieldFormat(noColor, "Following"), a.Following,
-		utilities.FieldFormat(noColor, "Is following you"), a.FollowedBy,
-		utilities.FieldFormat(noColor, "A follow request was sent and is pending"), a.FollowRequested,
-		utilities.FieldFormat(noColor, "Received a pending follow request"), a.FollowRequestedBy,
-		utilities.FieldFormat(noColor, "Endorsed"), a.Endorsed,
-		utilities.FieldFormat(noColor, "Showing Reposts (boosts)"), a.ShowingReblogs,
-		utilities.FieldFormat(noColor, "Muted"), a.Muting,
-		utilities.FieldFormat(noColor, "Notifications muted"), a.MutingNotifications,
-		utilities.FieldFormat(noColor, "Blocking"), a.Blocking,
-		utilities.FieldFormat(noColor, "Is blocking you"), a.BlockedBy,
-		utilities.FieldFormat(noColor, "Blocking account's domain"), a.DomainBlocking,
-	)
-
-	if a.PrivateNote != "" {
-		output += "\n"
-		output += fmt.Sprintf(
-			privateNoteFormat,
-			utilities.HeaderFormat(noColor, "YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:"),
-			utilities.WrapLines(a.PrivateNote, "\n  ", 80),
-		)
-	}
-
-	return output
-}
-
 type AccountListType int
 
 const (
@@ -192,37 +89,4 @@ const (
 type AccountList struct {
 	Type     AccountListType
 	Accounts []Account
-}
-
-func (a AccountList) Display(noColor bool) string {
-	output := "\n"
-
-	switch a.Type {
-	case AccountListFollowers:
-		output += utilities.HeaderFormat(noColor, "Followed by:")
-	case AccountListFollowing:
-		output += utilities.HeaderFormat(noColor, "Following:")
-	case AccountListBlockedAccount:
-		output += utilities.HeaderFormat(noColor, "Blocked accounts:")
-	case AccountListFollowRequests:
-		output += utilities.HeaderFormat(noColor, "Accounts that have requested to follow you:")
-	default:
-		output += utilities.HeaderFormat(noColor, "Accounts:")
-	}
-
-	if a.Type == AccountListBlockedAccount {
-		for i := range a.Accounts {
-			output += fmt.Sprintf(
-				"\n  • %s (%s)",
-				a.Accounts[i].Acct,
-				a.Accounts[i].ID,
-			)
-		}
-	} else {
-		for i := range a.Accounts {
-			output += "\n • " + utilities.FullDisplayNameFormat(noColor, a.Accounts[i].DisplayName, a.Accounts[i].Acct)
-		}
-	}
-
-	return output
 }

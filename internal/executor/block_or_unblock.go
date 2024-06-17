@@ -9,23 +9,26 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type BlockOrUnblockExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
-	resourceType  string
-	accountName   string
-	command       string
+	printer      *printer.Printer
+	configDir    string
+	resourceType string
+	accountName  string
+	command      string
 }
 
-func NewBlockOrUnblockExecutor(tlf TopLevelFlags, name, summary string) *BlockOrUnblockExecutor {
+func NewBlockOrUnblockExecutor(printer *printer.Printer, configDir, name, summary string) *BlockOrUnblockExecutor {
 	blockExe := BlockOrUnblockExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		topLevelFlags: tlf,
-		command:       name,
+		printer:   printer,
+		configDir: configDir,
+		command:   name,
 	}
 
 	blockExe.StringVar(&blockExe.resourceType, flagType, "", "Specify the type of resource to block or unblock")
@@ -46,7 +49,7 @@ func (b *BlockOrUnblockExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: b.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(b.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(b.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -55,7 +58,7 @@ func (b *BlockOrUnblockExecutor) Execute() error {
 }
 
 func (b *BlockOrUnblockExecutor) blockOrUnblockAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, b.accountName, b.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, false, b.accountName, b.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -75,7 +78,7 @@ func (b *BlockOrUnblockExecutor) blockAccount(gtsClient *client.Client, accountI
 		return fmt.Errorf("unable to block the account: %w", err)
 	}
 
-	fmt.Println("Successfully blocked the account.")
+	b.printer.PrintSuccess("Successfully blocked the account.")
 
 	return nil
 }
@@ -85,7 +88,7 @@ func (b *BlockOrUnblockExecutor) unblockAccount(gtsClient *client.Client, accoun
 		return fmt.Errorf("unable to unblock the account: %w", err)
 	}
 
-	fmt.Println("Successfully unblocked the account.")
+	b.printer.PrintSuccess("Successfully unblocked the account.")
 
 	return nil
 }

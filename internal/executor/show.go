@@ -10,16 +10,19 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type ShowExecutor struct {
 	*flag.FlagSet
-	topLevelFlags           TopLevelFlags
+
+	printer                 *printer.Printer
 	myAccount               bool
 	skipAccountRelationship bool
 	showUserPreferences     bool
 	showInBrowser           bool
+	configDir               string
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -30,10 +33,12 @@ type ShowExecutor struct {
 	limit                   int
 }
 
-func NewShowExecutor(tlf TopLevelFlags, name, summary string) *ShowExecutor {
+func NewShowExecutor(printer *printer.Printer, configDir, name, summary string) *ShowExecutor {
 	showExe := ShowExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:   printer,
+		configDir: configDir,
 	}
 
 	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "Set to true to lookup your account")
@@ -80,7 +85,7 @@ func (s *ShowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: s.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(s.topLevelFlags.ConfigDir)
+	gtsClient, err := client.NewClientFromConfig(s.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -94,7 +99,7 @@ func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to retrieve the instance details: %w", err)
 	}
 
-	utilities.Display(instance, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintInstance(instance)
 
 	return nil
 }
@@ -106,7 +111,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	)
 
 	if s.myAccount {
-		account, err = getMyAccount(gtsClient, s.topLevelFlags.ConfigDir)
+		account, err = getMyAccount(gtsClient, s.configDir)
 		if err != nil {
 			return fmt.Errorf("received an error while getting the account details: %w", err)
 		}
@@ -127,25 +132,26 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(account, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	var (
+		relationship *model.AccountRelationship = nil
+		preferences *model.Preferences = nil
+	)
 
 	if !s.myAccount && !s.skipAccountRelationship {
-		relationship, err := gtsClient.GetAccountRelationship(account.ID)
+		relationship, err = gtsClient.GetAccountRelationship(account.ID)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account: %w", err)
 		}
-
-		utilities.Display(relationship, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	}
 
 	if s.myAccount && s.showUserPreferences {
-		preferences, err := gtsClient.GetUserPreferences()
+		preferences, err = gtsClient.GetUserPreferences()
 		if err != nil {
 			return fmt.Errorf("unable to retrieve the user preferences: %w", err)
 		}
-
-		utilities.Display(preferences, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
 	}
+
+	s.printer.PrintAccount(account, relationship, preferences)
 
 	return nil
 }
@@ -166,7 +172,7 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		return nil
 	}
 
-	utilities.Display(status, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintStatus(status)
 
 	return nil
 }
@@ -210,12 +216,12 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 	}
 
 	if len(timeline.Statuses) == 0 {
-		fmt.Println("There are no statuses in this timeline.")
+		s.printer.PrintInfo("There are no statuses in this timeline.\n")
 
 		return nil
 	}
 
-	utilities.Display(timeline, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintStatusList(timeline)
 
 	return nil
 }
@@ -244,7 +250,7 @@ func (s *ShowExecutor) showList(gtsClient *client.Client) error {
 		list.Accounts = accountMap
 	}
 
-	utilities.Display(list, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintList(list)
 
 	return nil
 }
@@ -256,18 +262,18 @@ func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 	}
 
 	if len(lists) == 0 {
-		fmt.Println("You have no lists.")
+		s.printer.PrintInfo("You have no lists.\n")
 
 		return nil
 	}
 
-	utilities.Display(lists, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintLists(lists)
 
 	return nil
 }
 
 func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -278,16 +284,16 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 	}
 
 	if len(followers.Accounts) > 0 {
-		utilities.Display(followers, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintAccountList(followers)
 	} else {
-		fmt.Println("There are no followers for this account or the list is hidden.")
+		s.printer.PrintInfo("There are no followers for this account (or the list is hidden).\n")
 	}
 
 	return nil
 }
 
 func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.topLevelFlags.ConfigDir)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -298,9 +304,9 @@ func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 	}
 
 	if len(following.Accounts) > 0 {
-		utilities.Display(following, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintAccountList(following)
 	} else {
-		fmt.Println("This account is not following anyone or the list is hidden.")
+		s.printer.PrintInfo("This account is not following anyone or the list is hidden.\n")
 	}
 
 	return nil
@@ -313,9 +319,9 @@ func (s *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 	}
 
 	if len(blocked.Accounts) > 0 {
-		utilities.Display(blocked, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintAccountList(blocked)
 	} else {
-		fmt.Println("You have no blocked accounts.")
+		s.printer.PrintInfo("You have no blocked accounts.\n")
 	}
 
 	return nil
@@ -328,9 +334,9 @@ func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		utilities.Display(bookmarks, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintStatusList(bookmarks)
 	} else {
-		fmt.Println("You have no bookmarks.")
+		s.printer.PrintInfo("You have no bookmarks.\n")
 	}
 
 	return nil
@@ -343,9 +349,9 @@ func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
 	}
 
 	if len(liked.Statuses) > 0 {
-		utilities.Display(liked, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintStatusList(liked)
 	} else {
-		fmt.Printf("You have no %s statuses.\n", s.resourceType)
+		s.printer.PrintInfo("You have no " + s.resourceType + " statuses.\n")
 	}
 
 	return nil
@@ -358,9 +364,9 @@ func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
 	}
 
 	if len(accounts.Accounts) > 0 {
-		utilities.Display(accounts, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+		s.printer.PrintAccountList(accounts)
 	} else {
-		fmt.Println("You have no follow requests.")
+		s.printer.PrintInfo("You have no follow requests.\n")
 	}
 
 	return nil
@@ -376,7 +382,7 @@ func (s *ShowExecutor) showPoll(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to retrieve the poll: %w", err)
 	}
 
-	utilities.Display(poll, *s.topLevelFlags.NoColor, s.topLevelFlags.Pager)
+	s.printer.PrintPoll(poll)
 
 	return nil
 }

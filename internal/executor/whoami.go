@@ -9,18 +9,22 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 type WhoAmIExecutor struct {
 	*flag.FlagSet
 
-	topLevelFlags TopLevelFlags
+	printer   *printer.Printer
+	configDir string
 }
 
-func NewWhoAmIExecutor(tlf TopLevelFlags, name, summary string) *WhoAmIExecutor {
+func NewWhoAmIExecutor(printer *printer.Printer, configDir, name, summary string) *WhoAmIExecutor {
 	whoExe := WhoAmIExecutor{
-		FlagSet:       flag.NewFlagSet(name, flag.ExitOnError),
-		topLevelFlags: tlf,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+
+		printer:   printer,
+		configDir: configDir,
 	}
 
 	whoExe.Usage = commandUsageFunc(name, summary, whoExe.FlagSet)
@@ -29,12 +33,12 @@ func NewWhoAmIExecutor(tlf TopLevelFlags, name, summary string) *WhoAmIExecutor 
 }
 
 func (c *WhoAmIExecutor) Execute() error {
-	config, err := config.NewCredentialsConfigFromFile(c.topLevelFlags.ConfigDir)
+	config, err := config.NewCredentialsConfigFromFile(c.configDir)
 	if err != nil {
 		return fmt.Errorf("unable to load the credential config: %w", err)
 	}
 
-	fmt.Printf("You are logged in as %q.\n", config.CurrentAccount)
+	c.printer.PrintInfo("You are logged in as '" + config.CurrentAccount + "'.\n")
 
 	return nil
 }
