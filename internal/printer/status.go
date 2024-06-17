@@ -65,19 +65,15 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 		createdAt := status.CreatedAt
 
 		if status.Reblog != nil {
-			builder.WriteString(utilities.WrapLines(
-				"\n"+
-					"reposted this status from "+
-					p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct),
-				"\n",
-				p.maxTerminalWidth,
-			))
+			builder.WriteString(
+				"\n" + utilities.WrapLines("reposted this status from "+p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct), "\n", p.maxTerminalWidth),
+			)
 
 			statusID = status.Reblog.ID
 			createdAt = status.Reblog.CreatedAt
 		}
 
-		builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", p.maxTerminalWidth))
+		builder.WriteString("\n" + utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", p.maxTerminalWidth))
 
 		if status.Poll != nil {
 			builder.WriteString(p.pollOptions(*status.Poll))
