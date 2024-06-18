@@ -32,7 +32,7 @@ func (p Printer) PrintAccount(account model.Account, relationship *model.Account
 	builder.WriteString("\n\n" + p.headerFormat("METADATA:"))
 
 	for _, field := range account.Fields {
-		builder.WriteString("\n" + p.fieldFormat(field.Name) + ": " + field.Value)
+		builder.WriteString("\n" + p.fieldFormat(field.Name) + ": " + utilities.ConvertHTMLToText(field.Value))
 	}
 
 	builder.WriteString("\n\n" + p.headerFormat("ACCOUNT URL:"))
