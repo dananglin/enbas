@@ -18,18 +18,36 @@ func (p Printer) PrintStatus(status model.Status) {
 	// The account information
 	builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct))
 
+	// The ID of the status
+	builder.WriteString("\n\n" + p.headerFormat("STATUS ID:"))
+	builder.WriteString("\n" + status.ID)
+
 	// The content of the status.
 	builder.WriteString("\n\n" + p.headerFormat("CONTENT:"))
 	builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", p.maxTerminalWidth))
+
+	// Details of media attachments (if any).
+	if len(status.MediaAttachments) > 0 {
+		builder.WriteString("\n\n" + p.headerFormat("MEDIA ATTACHMENTS:"))
+
+		for ind, media := range status.MediaAttachments {
+			builder.WriteString("\n\n[" + strconv.Itoa(ind) + "] " + p.fieldFormat("ID:") + " " + media.ID)
+			builder.WriteString("\n    " + p.fieldFormat("Type:") + " " + media.Type)
+
+			description := media.Description
+			if description == "" {
+				description = noMediaDescription
+			}
+
+			builder.WriteString("\n    " + p.fieldFormat("Description:") + " " + description)
+			builder.WriteString("\n    " + p.fieldFormat("Media URL:") + " " + media.URL)
+		}
+	}
 
 	// If a poll exists in a status, write the contents to the builder.
 	if status.Poll != nil {
 		builder.WriteString(p.pollOptions(*status.Poll))
 	}
-
-	// The ID of the status
-	builder.WriteString("\n\n" + p.headerFormat("STATUS ID:"))
-	builder.WriteString("\n" + status.ID)
 
 	// Status creation time
 	builder.WriteString("\n\n" + p.headerFormat("CREATED AT:"))
@@ -77,6 +95,17 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 		if status.Poll != nil {
 			builder.WriteString(p.pollOptions(*status.Poll))
+		}
+
+		for _, media := range status.MediaAttachments {
+			builder.WriteString("\n\n" + p.imageIcon + "  Media (" + media.ID + ")" + "\n   ")
+
+			description := media.Description
+			if description == "" {
+				description = noMediaDescription
+			}
+
+			builder.WriteString(utilities.WrapLines(description, "\n   ", p.maxTerminalWidth-3))
 		}
 
 		builder.WriteString(

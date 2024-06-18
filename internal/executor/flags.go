@@ -14,6 +14,7 @@ import (
 const (
 	flagAddPoll                   = "add-poll"
 	flagAccountName               = "account-name"
+	flagAttachmentID              = "attachment-id"
 	flagBrowser                   = "browser"
 	flagChoose                    = "choose"
 	flagContentType               = "content-type"

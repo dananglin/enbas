@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	minTerminalWidth = 40
+	minTerminalWidth   = 40
+	noMediaDescription = "This media attachment has no description."
 )
 
 type theme struct {
@@ -39,6 +40,7 @@ type Printer struct {
 	failureSymbol    string
 	dateFormat       string
 	dateTimeFormat   string
+	imageIcon        string
 }
 
 func NewPrinter(
@@ -62,6 +64,7 @@ func NewPrinter(
 	}
 
 	return &Printer{
+		theme:            theme,
 		noColor:          noColor,
 		maxTerminalWidth: maxTerminalWidth,
 		pager:            pager,
@@ -72,7 +75,7 @@ func NewPrinter(
 		failureSymbol:    "\u2717",
 		dateFormat:       "02 Jan 2006",
 		dateTimeFormat:   "02 Jan 2006, 15:04 (MST)",
-		theme:            theme,
+		imageIcon:        "\uf03e",
 	}
 }
 

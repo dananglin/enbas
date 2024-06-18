@@ -30,6 +30,7 @@ type ShowExecutor struct {
 	listID                  string
 	tag                     string
 	pollID                  string
+	attachmentID            string
 	limit                   int
 }
 
@@ -52,6 +53,7 @@ func NewShowExecutor(printer *printer.Printer, configDir, name, summary string) 
 	showExe.StringVar(&showExe.listID, flagListID, "", "Specify the ID of the list to display")
 	showExe.StringVar(&showExe.tag, flagTag, "", "Specify the name of the tag to use")
 	showExe.StringVar(&showExe.pollID, flagPollID, "", "Specify the ID of the poll to display")
+	showExe.StringVar(&showExe.attachmentID, flagAttachmentID, "", "Specify the ID of the media attachment to display")
 	showExe.IntVar(&showExe.limit, flagLimit, 20, "Specify the limit of items to display")
 
 	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
@@ -65,20 +67,22 @@ func (s *ShowExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceInstance:      s.showInstance,
-		resourceAccount:       s.showAccount,
-		resourceStatus:        s.showStatus,
-		resourceTimeline:      s.showTimeline,
-		resourceList:          s.showList,
-		resourceFollowers:     s.showFollowers,
-		resourceFollowing:     s.showFollowing,
-		resourceBlocked:       s.showBlocked,
-		resourceBookmarks:     s.showBookmarks,
-		resourceLiked:         s.showLiked,
-		resourceStarred:       s.showLiked,
-		resourceFollowRequest: s.showFollowRequests,
-		resourcePoll:          s.showPoll,
-		resourceMutedAccounts: s.showMutedAccounts,
+		resourceInstance:        s.showInstance,
+		resourceAccount:         s.showAccount,
+		resourceStatus:          s.showStatus,
+		resourceTimeline:        s.showTimeline,
+		resourceList:            s.showList,
+		resourceFollowers:       s.showFollowers,
+		resourceFollowing:       s.showFollowing,
+		resourceBlocked:         s.showBlocked,
+		resourceBookmarks:       s.showBookmarks,
+		resourceLiked:           s.showLiked,
+		resourceStarred:         s.showLiked,
+		resourceFollowRequest:   s.showFollowRequests,
+		resourcePoll:            s.showPoll,
+		resourceMutedAccounts:   s.showMutedAccounts,
+		resourceMedia:           s.showMediaAttachment,
+		resourceMediaAttachment: s.showMediaAttachment,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -134,8 +138,8 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	}
 
 	var (
-		relationship *model.AccountRelationship = nil
-		preferences *model.Preferences = nil
+		relationship *model.AccountRelationship
+		preferences  *model.Preferences
 	)
 
 	if !s.myAccount && !s.skipAccountRelationship {
@@ -399,6 +403,21 @@ func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
 	} else {
 		s.printer.PrintInfo("You have not muted any accounts.\n")
 	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
+	if s.attachmentID == "" {
+		return FlagNotSetError{flagText: flagAttachmentID}
+	}
+
+	attachment, err := gtsClient.GetMediaAttachment(s.attachmentID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the media attachment: %w", err)
+	}
+
+	s.printer.PrintMediaAttachment(attachment)
 
 	return nil
 }
