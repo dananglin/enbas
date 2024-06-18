@@ -223,3 +223,51 @@ func (g *Client) RejectFollowRequest(accountID string) error {
 
 	return nil
 }
+
+func (g *Client) GetMutedAccounts(limit int) (model.AccountList, error) {
+	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/mutes?limit=%d", limit)
+
+	var accounts []model.Account
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of muted accounts: %w", err)
+	}
+
+	muted := model.AccountList{
+		Type:     model.AccountListMuted,
+		Accounts: accounts,
+	}
+
+	return muted, nil
+}
+
+type MuteAccountForm struct {
+	Notifications bool `json:"notifications"`
+	Duration      int  `json:"duration"`
+}
+
+func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
+	data, err := json.Marshal(form)
+	if err != nil {
+		return fmt.Errorf("unable to marshal the form: %w", err)
+	}
+
+	requestBody := bytes.NewBuffer(data)
+	url := g.Authentication.Instance + "/api/v1/accounts/" + accountID + "/mute"
+
+	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+		return fmt.Errorf("received an error after sending the request to mute the account: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Client) UnmuteAccount(accountID string) error {
+	url := g.Authentication.Instance + "/api/v1/accounts/" + accountID + "/unmute"
+
+	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+		return fmt.Errorf("received an error after sending the request to unmute the account: %w", err)
+	}
+
+	return nil
+}

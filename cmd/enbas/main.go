@@ -125,6 +125,12 @@ func run() error {
 			executor.CommandLogin,
 			executor.CommandSummaryLookup(executor.CommandLogin),
 		),
+		executor.CommandMute: executor.NewMuteOrUnmuteExecutor(
+			printer,
+			configDir,
+			executor.CommandMute,
+			executor.CommandSummaryLookup(executor.CommandMute),
+		),
 		executor.CommandReject: executor.NewAcceptOrRejectExecutor(
 			printer,
 			configDir,
@@ -148,6 +154,12 @@ func run() error {
 			configDir,
 			executor.CommandUnfollow,
 			executor.CommandSummaryLookup(executor.CommandUnfollow),
+		),
+		executor.CommandUnmute: executor.NewMuteOrUnmuteExecutor(
+			printer,
+			configDir,
+			executor.CommandUnmute,
+			executor.CommandSummaryLookup(executor.CommandUnmute),
 		),
 		executor.CommandUnblock: executor.NewBlockOrUnblockExecutor(
 			printer,

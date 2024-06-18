@@ -58,6 +58,10 @@ func (b *BlockOrUnblockExecutor) Execute() error {
 }
 
 func (b *BlockOrUnblockExecutor) blockOrUnblockAccount(gtsClient *client.Client) error {
+	if b.accountName == "" {
+		return FlagNotSetError{flagText: flagAccountName}
+	}
+
 	accountID, err := getAccountID(gtsClient, false, b.accountName, b.configDir)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)

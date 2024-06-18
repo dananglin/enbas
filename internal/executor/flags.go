@@ -32,6 +32,8 @@ const (
 	flagListTitle                 = "list-title"
 	flagListRepliesPolicy         = "list-replies-policy"
 	flagMyAccount                 = "my-account"
+	flagMuteDuration              = "mute-duration"
+	flagMuteNotifications         = "mute-notifications"
 	flagNotify                    = "notify"
 	flagPollAllowsMultipleChoices = "poll-allows-multiple-choices"
 	flagPollExpiresIn             = "poll-expires-in"

@@ -117,6 +117,8 @@ func (p Printer) PrintAccountList(list model.AccountList) {
 		builder.WriteString(p.headerFormat("Blocked accounts:"))
 	case model.AccountListFollowRequests:
 		builder.WriteString(p.headerFormat("Accounts that have requested to follow you:"))
+	case model.AccountListMuted:
+		builder.WriteString(p.headerFormat("Muted accounts:"))
 	default:
 		builder.WriteString(p.headerFormat("Accounts:"))
 	}

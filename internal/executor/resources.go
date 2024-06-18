@@ -16,6 +16,7 @@ const (
 	resourceLike          = "like"
 	resourceLiked         = "liked"
 	resourceList          = "list"
+	resourceMutedAccounts = "muted-accounts"
 	resourceNote          = "note"
 	resourcePoll          = "poll"
 	resourceStatus        = "status"

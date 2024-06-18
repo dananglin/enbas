@@ -78,6 +78,7 @@ func (s *ShowExecutor) Execute() error {
 		resourceStarred:       s.showLiked,
 		resourceFollowRequest: s.showFollowRequests,
 		resourcePoll:          s.showPoll,
+		resourceMutedAccounts: s.showMutedAccounts,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -383,6 +384,21 @@ func (s *ShowExecutor) showPoll(gtsClient *client.Client) error {
 	}
 
 	s.printer.PrintPoll(poll)
+
+	return nil
+}
+
+func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
+	muted, err := gtsClient.GetMutedAccounts(s.limit)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the list of muted accounts: %w", err)
+	}
+
+	if len(muted.Accounts) > 0 {
+		s.printer.PrintAccountList(muted)
+	} else {
+		s.printer.PrintInfo("You have not muted any accounts.\n")
+	}
 
 	return nil
 }
