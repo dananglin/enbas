@@ -82,7 +82,7 @@ type StatusReblogged struct {
 	Mentions           []Mention        `json:"mentions"`
 	Muted              bool             `json:"muted"`
 	Pinned             bool             `json:"pinned"`
-	Poll               Poll             `json:"poll"`
+	Poll               *Poll            `json:"poll"`
 	Reblogged          bool             `json:"reblogged"`
 	RebloggsCount      int              `json:"reblogs_count"`
 	RepliesCount       int              `json:"replies_count"`

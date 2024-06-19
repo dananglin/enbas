@@ -81,6 +81,9 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 		statusID := status.ID
 		createdAt := status.CreatedAt
+		content := status.Content
+		poll := status.Poll
+		mediaAttachments := status.MediaAttachments
 
 		if status.Reblog != nil {
 			builder.WriteString(
@@ -89,15 +92,18 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 			statusID = status.Reblog.ID
 			createdAt = status.Reblog.CreatedAt
+			content = status.Reblog.Content
+			poll = status.Reblog.Poll
+			mediaAttachments = status.Reblog.MediaAttachments
 		}
 
-		builder.WriteString("\n" + utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", p.maxTerminalWidth))
+		builder.WriteString("\n" + utilities.WrapLines(utilities.ConvertHTMLToText(content), "\n", p.maxTerminalWidth))
 
-		if status.Poll != nil {
-			builder.WriteString(p.pollOptions(*status.Poll))
+		if poll != nil {
+			builder.WriteString(p.pollOptions(*poll))
 		}
 
-		for _, media := range status.MediaAttachments {
+		for _, media := range mediaAttachments {
 			builder.WriteString("\n\n" + p.imageIcon + "  Media (" + media.ID + ")" + "\n   ")
 
 			description := media.Description
