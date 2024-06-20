@@ -104,7 +104,8 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 		}
 
 		for _, media := range mediaAttachments {
-			builder.WriteString("\n\n" + p.imageIcon + "  Media (" + media.ID + ")" + "\n   ")
+			builder.WriteString("\n\n" + p.imageIcon + "  Media attachment: " + media.ID)
+			builder.WriteString("\n   Media type: " + media.Type + "\n   ")
 
 			description := media.Description
 			if description == "" {
