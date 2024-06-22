@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
@@ -41,7 +43,7 @@ func (e CredentialsNotFoundError) Error() string {
 // directory. If the directory is not specified then the default directory is used. If the directory
 // is not present, it will be created.
 func SaveCredentials(configDir, username string, credentials Credentials) (string, error) {
-	if err := ensureConfigDir(calculateConfigDir(configDir)); err != nil {
+	if err := utilities.EnsureDirectory(utilities.CalculateConfigDir(configDir)); err != nil {
 		return "", fmt.Errorf("unable to ensure the configuration directory: %w", err)
 	}
 
@@ -141,5 +143,5 @@ func saveCredentialsConfigFile(authConfig CredentialsConfig, configDir string) e
 }
 
 func credentialsConfigFile(configDir string) string {
-	return filepath.Join(calculateConfigDir(configDir), credentialsFileName)
+	return filepath.Join(utilities.CalculateConfigDir(configDir), credentialsFileName)
 }

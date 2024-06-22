@@ -5,6 +5,7 @@
 package utilities
 
 import (
+	"errors"
 	"fmt"
 	"os"
 )
@@ -16,4 +17,16 @@ func ReadFile(path string) (string, error) {
 	}
 
 	return string(data), nil
+}
+
+func FileExists(path string) (bool, error) {
+	if _, err := os.Stat(path); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("unable to check if the file exists: %w", err)
+	}
+
+	return true, nil
 }

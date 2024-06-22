@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal"
@@ -60,13 +61,50 @@ func (g *Client) AuthCodeURL() string {
 	)
 }
 
+func (g *Client) DownloadMedia(url, path string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return fmt.Errorf("unable to create the HTTP request: %w", err)
+	}
+
+	request.Header.Set("User-Agent", g.UserAgent)
+
+	response, err := g.HTTPClient.Do(request)
+	if err != nil {
+		return fmt.Errorf("received an error after attempting the download: %w", err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf(
+			"did not receive an OK response from the GoToSocial server: got %d",
+			response.StatusCode,
+		)
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("unable to create %s: %w", path, err)
+	}
+	defer file.Close()
+
+	if _, err = io.Copy(file, response.Body); err != nil {
+		return fmt.Errorf("unable to save the download to %s: %w", path, err)
+	}
+
+	return nil
+}
+
 func (g *Client) sendRequest(method string, url string, requestBody io.Reader, object any) error {
 	ctx, cancel := context.WithTimeout(context.Background(), g.Timeout)
 	defer cancel()
 
 	request, err := http.NewRequestWithContext(ctx, method, url, requestBody)
 	if err != nil {
-		return fmt.Errorf("unable to create the HTTP request, %w", err)
+		return fmt.Errorf("unable to create the HTTP request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json; charset=utf-8")

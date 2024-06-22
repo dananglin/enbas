@@ -7,6 +7,8 @@ package executor
 import (
 	"flag"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
@@ -23,6 +25,7 @@ type ShowExecutor struct {
 	showUserPreferences     bool
 	showInBrowser           bool
 	configDir               string
+	cacheRoot               string
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -30,16 +33,22 @@ type ShowExecutor struct {
 	listID                  string
 	tag                     string
 	pollID                  string
-	attachmentID            string
+	fromResourceType        string
+	imageViewer             string
+	videoPlayer             string
 	limit                   int
+	attachmentIDs           MultiStringFlagValue
 }
 
-func NewShowExecutor(printer *printer.Printer, configDir, name, summary string) *ShowExecutor {
+func NewShowExecutor(printer *printer.Printer, configDir, cacheRoot, imageViewer, videoPlayer, name, summary string) *ShowExecutor {
 	showExe := ShowExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
+		printer:     printer,
+		configDir:   configDir,
+		cacheRoot:   cacheRoot,
+		imageViewer: imageViewer,
+		videoPlayer: videoPlayer,
 	}
 
 	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "Set to true to lookup your account")
@@ -53,7 +62,8 @@ func NewShowExecutor(printer *printer.Printer, configDir, name, summary string) 
 	showExe.StringVar(&showExe.listID, flagListID, "", "Specify the ID of the list to display")
 	showExe.StringVar(&showExe.tag, flagTag, "", "Specify the name of the tag to use")
 	showExe.StringVar(&showExe.pollID, flagPollID, "", "Specify the ID of the poll to display")
-	showExe.StringVar(&showExe.attachmentID, flagAttachmentID, "", "Specify the ID of the media attachment to display")
+	showExe.Var(&showExe.attachmentIDs, flagAttachmentID, "Specify the ID of the media attachment to display")
+	showExe.StringVar(&showExe.fromResourceType, flagFrom, "", "Specify the resource type to view the target resource from (e.g. status for viewing media from, etc)")
 	showExe.IntVar(&showExe.limit, flagLimit, 20, "Specify the limit of items to display")
 
 	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
@@ -81,7 +91,7 @@ func (s *ShowExecutor) Execute() error {
 		resourceFollowRequest:   s.showFollowRequests,
 		resourcePoll:            s.showPoll,
 		resourceMutedAccounts:   s.showMutedAccounts,
-		resourceMedia:           s.showMediaAttachment,
+		resourceMedia:           s.showMedia,
 		resourceMediaAttachment: s.showMediaAttachment,
 	}
 
@@ -408,16 +418,131 @@ func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
-	if s.attachmentID == "" {
+	if len(s.attachmentIDs) == 0 {
 		return FlagNotSetError{flagText: flagAttachmentID}
 	}
 
-	attachment, err := gtsClient.GetMediaAttachment(s.attachmentID)
+	if len(s.attachmentIDs) != 1 {
+		return fmt.Errorf(
+			"unexpected number of attachment IDs received: want 1, got %d",
+			len(s.attachmentIDs),
+		)
+	}
+
+	attachment, err := gtsClient.GetMediaAttachment(s.attachmentIDs[0])
 	if err != nil {
 		return fmt.Errorf("unable to retrieve the media attachment: %w", err)
 	}
 
 	s.printer.PrintMediaAttachment(attachment)
+
+	return nil
+}
+
+func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
+	if s.fromResourceType == "" {
+		return FlagNotSetError{flagText: flagFrom}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		resourceStatus: s.showMediaFromStatus,
+	}
+
+	doFunc, ok := funcMap[s.fromResourceType]
+	if !ok {
+		return fmt.Errorf("do not support viewing media from %s", s.fromResourceType)
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
+	if len(s.attachmentIDs) == 0 {
+		return FlagNotSetError{flagText: flagAttachmentID}
+	}
+
+	if s.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	status, err := gtsClient.GetStatus(s.statusID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the status: %w", err)
+	}
+
+	cacheDir := filepath.Join(
+		utilities.CalculateCacheDir(s.cacheRoot, utilities.GetFQDN(gtsClient.Authentication.Instance)),
+		"media",
+	)
+
+	if err := utilities.EnsureDirectory(cacheDir); err != nil {
+		return fmt.Errorf("unable to ensure the existence of the directory %q: %w", cacheDir, err)
+	}
+
+	type media struct {
+		url       string
+		mediaType string
+	}
+
+	attachmentsHashMap := make(map[string]media)
+	imageFiles := make([]string, 0)
+	videoFiles := make([]string, 0)
+
+	for _, statusAttachment := range status.MediaAttachments {
+		attachmentsHashMap[statusAttachment.ID] = media{
+			url:       statusAttachment.URL,
+			mediaType: statusAttachment.Type,
+		}
+	}
+
+	for _, attachmentID := range s.attachmentIDs {
+		mediaObj, ok := attachmentsHashMap[attachmentID]
+		if !ok {
+			return fmt.Errorf("unknown media attachment: %s", attachmentID)
+		}
+
+		split := strings.Split(mediaObj.url, "/")
+		filename := split[len(split)-1]
+		filePath := filepath.Join(cacheDir, filename)
+
+		fileExists, err := utilities.FileExists(filePath)
+		if err != nil {
+			return fmt.Errorf(
+				"unable to check if the media file is already downloaded for %s: %w",
+				attachmentID,
+				err,
+			)
+		}
+
+		if !fileExists {
+			if err := gtsClient.DownloadMedia(mediaObj.url, filePath); err != nil {
+				return fmt.Errorf(
+					"unable to download the media attachment for %s: %w",
+					attachmentID,
+					err,
+				)
+			}
+		}
+
+		switch mediaObj.mediaType {
+		case "image":
+			imageFiles = append(imageFiles, filePath)
+		case "video":
+			videoFiles = append(videoFiles, filePath)
+		}
+	}
+
+	if len(imageFiles) > 0 {
+		if err := utilities.OpenMedia(s.imageViewer, imageFiles); err != nil {
+			return fmt.Errorf("unable to open the image viewer: %w", err)
+		}
+	}
+
+	if len(videoFiles) > 0 {
+		if err := utilities.OpenMedia(s.videoPlayer, videoFiles); err != nil {
+			return fmt.Errorf("unable to open the video player: %w", err)
+		}
+	}
 
 	return nil
 }

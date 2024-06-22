@@ -30,13 +30,19 @@ func main() {
 func run() error {
 	var (
 		configDir        string
+		cacheDir         string
 		pager            string
+		imageViewer      string
+		videoPlayer      string
 		maxTerminalWidth int
 		noColor          *bool
 	)
 
 	flag.StringVar(&configDir, "config-dir", "", "Specify your config directory")
+	flag.StringVar(&cacheDir, "cache-dir", "", "Specify your cache directory")
 	flag.StringVar(&pager, "pager", "", "Specify your preferred pager to page through long outputs. This is disabled by default.")
+	flag.StringVar(&imageViewer, "image-viewer", "", "Specify your favourite image viewer.")
+	flag.StringVar(&videoPlayer, "video-player", "", "Specify your favourite video player.")
 	flag.IntVar(&maxTerminalWidth, "max-terminal-width", 80, "Specify the maximum terminal width when displaying resources on screen.")
 
 	flag.BoolFunc("no-color", "Disable ANSI colour output when displaying text on screen", func(value string) error {
@@ -170,6 +176,9 @@ func run() error {
 		executor.CommandShow: executor.NewShowExecutor(
 			printer,
 			configDir,
+			cacheDir,
+			imageViewer,
+			videoPlayer,
 			executor.CommandShow,
 			executor.CommandSummaryLookup(executor.CommandShow),
 		),
