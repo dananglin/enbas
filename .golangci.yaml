@@ -31,5 +31,8 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-  #- json
+  - exhaustivestruct
+  - exhaustruct
+  - gomnd
+  - tagliatelle
   fast: false

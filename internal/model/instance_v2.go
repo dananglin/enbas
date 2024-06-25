@@ -95,7 +95,7 @@ type InstanceV2Thumbnail struct {
 	ThumbnailDescription string                      `json:"thumbnail_description"`
 	ThumbnailType        string                      `json:"thumbnail_type"`
 	URL                  string                      `json:"url"`
-	Versions              InstanceV2ThumbnailVersions `json:"versions"`
+	Versions             InstanceV2ThumbnailVersions `json:"versions"`
 }
 
 type InstanceV2ThumbnailVersions struct {

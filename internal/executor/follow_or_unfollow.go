@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -16,7 +17,7 @@ type FollowOrUnfollowExecutor struct {
 	*flag.FlagSet
 
 	printer      *printer.Printer
-	configDir    string
+	config       *config.Config
 	resourceType string
 	accountName  string
 	showReposts  bool
@@ -24,13 +25,13 @@ type FollowOrUnfollowExecutor struct {
 	action       string
 }
 
-func NewFollowOrUnfollowExecutor(printer *printer.Printer, configDir, name, summary string) *FollowOrUnfollowExecutor {
+func NewFollowOrUnfollowExecutor(printer *printer.Printer, config *config.Config, name, summary string) *FollowOrUnfollowExecutor {
 	command := FollowOrUnfollowExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
-		action:    name,
+		printer: printer,
+		config:  config,
+		action:  name,
 	}
 
 	command.StringVar(&command.resourceType, flagType, "", "Specify the type of resource to follow")
@@ -53,7 +54,7 @@ func (f *FollowOrUnfollowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: f.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(f.configDir)
+	gtsClient, err := client.NewClientFromFile(f.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -62,7 +63,7 @@ func (f *FollowOrUnfollowExecutor) Execute() error {
 }
 
 func (f *FollowOrUnfollowExecutor) followOrUnfollowAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, f.accountName, f.configDir)
+	accountID, err := getAccountID(gtsClient, false, f.accountName, f.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

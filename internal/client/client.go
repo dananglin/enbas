@@ -25,8 +25,8 @@ type Client struct {
 	Timeout        time.Duration
 }
 
-func NewClientFromConfig(configDir string) (*Client, error) {
-	config, err := config.NewCredentialsConfigFromFile(configDir)
+func NewClientFromFile(path string) (*Client, error) {
+	config, err := config.NewCredentialsConfigFromFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get the authentication configuration: %w", err)
 	}
@@ -51,7 +51,7 @@ func NewClient(authentication config.Credentials) *Client {
 
 func (g *Client) AuthCodeURL() string {
 	format := "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code"
-	escapedRedirectURI := url.QueryEscape(internal.RedirectUri)
+	escapedRedirectURI := url.QueryEscape(internal.RedirectURI)
 
 	return fmt.Sprintf(
 		format,

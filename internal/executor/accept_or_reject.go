@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -16,19 +17,19 @@ type AcceptOrRejectExecutor struct {
 	*flag.FlagSet
 
 	printer      *printer.Printer
-	configDir    string
+	config       *config.Config
 	resourceType string
 	accountName  string
 	command      string
 }
 
-func NewAcceptOrRejectExecutor(enbasPrinter *printer.Printer, configDir, name, summary string) *AcceptOrRejectExecutor {
+func NewAcceptOrRejectExecutor(enbasPrinter *printer.Printer, config *config.Config, name, summary string) *AcceptOrRejectExecutor {
 	acceptExe := AcceptOrRejectExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   enbasPrinter,
-		configDir: configDir,
-		command:   name,
+		printer: enbasPrinter,
+		config:  config,
+		command: name,
 	}
 
 	acceptExe.StringVar(&acceptExe.resourceType, flagType, "", "Specify the type of resource to accept or reject")
@@ -49,7 +50,7 @@ func (a *AcceptOrRejectExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: a.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(a.configDir)
+	gtsClient, err := client.NewClientFromFile(a.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -58,7 +59,7 @@ func (a *AcceptOrRejectExecutor) Execute() error {
 }
 
 func (a *AcceptOrRejectExecutor) acceptOrRejectFollowRequest(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, a.accountName, a.configDir)
+	accountID, err := getAccountID(gtsClient, false, a.accountName, a.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

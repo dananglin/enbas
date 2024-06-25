@@ -17,7 +17,7 @@ import (
 var errEmptyAccessToken = errors.New("received an empty access token")
 
 type tokenRequest struct {
-	RedirectUri  string `json:"redirect_uri"`
+	RedirectURI  string `json:"redirect_uri"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 	GrantType    string `json:"grant_type"`
@@ -33,7 +33,7 @@ type tokenResponse struct {
 
 func (g *Client) UpdateToken(code string) error {
 	params := tokenRequest{
-		RedirectUri:  internal.RedirectUri,
+		RedirectURI:  internal.RedirectURI,
 		ClientID:     g.Authentication.ClientID,
 		ClientSecret: g.Authentication.ClientSecret,
 		GrantType:    "authorization_code",

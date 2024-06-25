@@ -20,7 +20,7 @@ func CalculateConfigDir(configDir string) string {
 
 	configRoot, err := os.UserConfigDir()
 	if err != nil {
-		configRoot = "."
+		return filepath.Join(os.Getenv("HOME"), "."+internal.ApplicationName, "config")
 	}
 
 	return filepath.Join(configRoot, internal.ApplicationName)
@@ -33,7 +33,7 @@ func CalculateCacheDir(cacheDir, instanceFQDN string) string {
 
 	cacheRoot, err := os.UserCacheDir()
 	if err != nil {
-		cacheRoot = "."
+		return filepath.Join(os.Getenv("HOME"), "."+internal.ApplicationName, "cache")
 	}
 
 	return filepath.Join(cacheRoot, internal.ApplicationName, instanceFQDN)

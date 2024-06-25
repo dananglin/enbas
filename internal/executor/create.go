@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -19,6 +20,7 @@ type CreateExecutor struct {
 	*flag.FlagSet
 
 	printer                   *printer.Printer
+	config                    *config.Config
 	addPoll                   bool
 	boostable                 bool
 	federated                 bool
@@ -27,7 +29,6 @@ type CreateExecutor struct {
 	pollHidesVoteCounts       bool
 	replyable                 bool
 	sensitive                 *bool
-	configDir                 string
 	content                   string
 	contentType               string
 	fromFile                  string
@@ -41,12 +42,12 @@ type CreateExecutor struct {
 	pollOptions               MultiStringFlagValue
 }
 
-func NewCreateExecutor(printer *printer.Printer, configDir, name, summary string) *CreateExecutor {
+func NewCreateExecutor(printer *printer.Printer, config *config.Config, name, summary string) *CreateExecutor {
 	createExe := CreateExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
+		printer: printer,
+		config:  config,
 	}
 
 	createExe.BoolVar(&createExe.boostable, flagEnableReposts, true, "Specify if the status can be reposted/boosted by others")
@@ -90,7 +91,7 @@ func (c *CreateExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(c.configDir)
+	gtsClient, err := client.NewClientFromFile(c.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}

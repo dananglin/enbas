@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -16,19 +17,19 @@ type BlockOrUnblockExecutor struct {
 	*flag.FlagSet
 
 	printer      *printer.Printer
-	configDir    string
+	config       *config.Config
 	resourceType string
 	accountName  string
 	command      string
 }
 
-func NewBlockOrUnblockExecutor(printer *printer.Printer, configDir, name, summary string) *BlockOrUnblockExecutor {
+func NewBlockOrUnblockExecutor(printer *printer.Printer, config *config.Config, name, summary string) *BlockOrUnblockExecutor {
 	blockExe := BlockOrUnblockExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
-		command:   name,
+		printer: printer,
+		config:  config,
+		command: name,
 	}
 
 	blockExe.StringVar(&blockExe.resourceType, flagType, "", "Specify the type of resource to block or unblock")
@@ -49,7 +50,7 @@ func (b *BlockOrUnblockExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: b.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(b.configDir)
+	gtsClient, err := client.NewClientFromFile(b.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -62,7 +63,7 @@ func (b *BlockOrUnblockExecutor) blockOrUnblockAccount(gtsClient *client.Client)
 		return FlagNotSetError{flagText: flagAccountName}
 	}
 
-	accountID, err := getAccountID(gtsClient, false, b.accountName, b.configDir)
+	accountID, err := getAccountID(gtsClient, false, b.accountName, b.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

@@ -12,6 +12,7 @@ const (
 	CommandDelete   string = "delete"
 	CommandEdit     string = "edit"
 	CommandFollow   string = "follow"
+	CommandInit     string = "init"
 	CommandLogin    string = "login"
 	CommandMute     string = "mute"
 	CommandReject   string = "reject"
@@ -31,6 +32,7 @@ const (
 	commandDeleteSummary   string = "Delete a specific resource"
 	commandEditSummary     string = "Edit a specific resource"
 	commandFollowSummary   string = "Follow a resource (e.g. an account)"
+	commandInitSummary     string = "Create a new configuration file in the specified configuration directory"
 	commandLoginSummary    string = "Login to an account on GoToSocial"
 	commandMuteSummary     string = "Mute a resource (e.g. an account)"
 	commandRejectSummary   string = "Reject a request (e.g. a follow request)"
@@ -53,6 +55,7 @@ func CommandSummaryMap() map[string]string {
 		CommandDelete:   commandDeleteSummary,
 		CommandEdit:     commandEditSummary,
 		CommandFollow:   commandFollowSummary,
+		CommandInit:     commandInitSummary,
 		CommandLogin:    commandLoginSummary,
 		CommandMute:     commandMuteSummary,
 		CommandReject:   commandRejectSummary,

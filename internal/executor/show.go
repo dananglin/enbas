@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -20,12 +21,11 @@ type ShowExecutor struct {
 	*flag.FlagSet
 
 	printer                 *printer.Printer
+	config                  *config.Config
 	myAccount               bool
 	skipAccountRelationship bool
 	showUserPreferences     bool
 	showInBrowser           bool
-	configDir               string
-	cacheRoot               string
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -34,21 +34,16 @@ type ShowExecutor struct {
 	tag                     string
 	pollID                  string
 	fromResourceType        string
-	imageViewer             string
-	videoPlayer             string
 	limit                   int
 	attachmentIDs           MultiStringFlagValue
 }
 
-func NewShowExecutor(printer *printer.Printer, configDir, cacheRoot, imageViewer, videoPlayer, name, summary string) *ShowExecutor {
+func NewShowExecutor(printer *printer.Printer, config *config.Config, name, summary string) *ShowExecutor {
 	showExe := ShowExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:     printer,
-		configDir:   configDir,
-		cacheRoot:   cacheRoot,
-		imageViewer: imageViewer,
-		videoPlayer: videoPlayer,
+		printer: printer,
+		config:  config,
 	}
 
 	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "Set to true to lookup your account")
@@ -100,7 +95,7 @@ func (s *ShowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: s.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(s.configDir)
+	gtsClient, err := client.NewClientFromFile(s.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -126,7 +121,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	)
 
 	if s.myAccount {
-		account, err = getMyAccount(gtsClient, s.configDir)
+		account, err = getMyAccount(gtsClient, s.config.CredentialsFile)
 		if err != nil {
 			return fmt.Errorf("received an error while getting the account details: %w", err)
 		}
@@ -288,7 +283,7 @@ func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.configDir)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -308,7 +303,7 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.configDir)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -471,7 +466,7 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 	}
 
 	cacheDir := filepath.Join(
-		utilities.CalculateCacheDir(s.cacheRoot, utilities.GetFQDN(gtsClient.Authentication.Instance)),
+		utilities.CalculateCacheDir(s.config.CacheDirectory, utilities.GetFQDN(gtsClient.Authentication.Instance)),
 		"media",
 	)
 
@@ -498,7 +493,7 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 	for _, attachmentID := range s.attachmentIDs {
 		mediaObj, ok := attachmentsHashMap[attachmentID]
 		if !ok {
-			return fmt.Errorf("unknown media attachment: %s", attachmentID)
+			return UnknownMediaAttachmentError{AttachmentID: attachmentID}
 		}
 
 		split := strings.Split(mediaObj.url, "/")
@@ -533,13 +528,13 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 	}
 
 	if len(imageFiles) > 0 {
-		if err := utilities.OpenMedia(s.imageViewer, imageFiles); err != nil {
+		if err := utilities.OpenMedia(s.config.Integrations.ImageViewer, imageFiles); err != nil {
 			return fmt.Errorf("unable to open the image viewer: %w", err)
 		}
 	}
 
 	if len(videoFiles) > 0 {
-		if err := utilities.OpenMedia(s.videoPlayer, videoFiles); err != nil {
+		if err := utilities.OpenMedia(s.config.Integrations.VideoPlayer, videoFiles); err != nil {
 			return fmt.Errorf("unable to open the video player: %w", err)
 		}
 	}

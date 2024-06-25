@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -16,21 +17,21 @@ type MuteOrUnmuteExecutor struct {
 	*flag.FlagSet
 
 	printer           *printer.Printer
+	config            *config.Config
 	accountName       string
-	configDir         string
 	command           string
 	resourceType      string
 	muteDuration      TimeDurationFlagValue
 	muteNotifications bool
 }
 
-func NewMuteOrUnmuteExecutor(printer *printer.Printer, configDir, name, summary string) *MuteOrUnmuteExecutor {
+func NewMuteOrUnmuteExecutor(printer *printer.Printer, config *config.Config, name, summary string) *MuteOrUnmuteExecutor {
 	exe := MuteOrUnmuteExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
-		command:   name,
+		printer: printer,
+		config:  config,
+		command: name,
 	}
 
 	exe.StringVar(&exe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
@@ -53,7 +54,7 @@ func (m *MuteOrUnmuteExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: m.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(m.configDir)
+	gtsClient, err := client.NewClientFromFile(m.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -66,7 +67,7 @@ func (m *MuteOrUnmuteExecutor) muteOrUnmuteAccount(gtsClient *client.Client) err
 		return FlagNotSetError{flagText: flagAccountName}
 	}
 
-	accountID, err := getAccountID(gtsClient, false, m.accountName, m.configDir)
+	accountID, err := getAccountID(gtsClient, false, m.accountName, m.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

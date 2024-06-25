@@ -24,7 +24,7 @@ type registerRequest struct {
 func (g *Client) Register() error {
 	params := registerRequest{
 		ClientName:   internal.ApplicationName,
-		RedirectUris: internal.RedirectUri,
+		RedirectUris: internal.RedirectURI,
 		Scopes:       "read write",
 		Website:      internal.ApplicationWebsite,
 	}

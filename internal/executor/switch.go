@@ -15,17 +15,17 @@ import (
 type SwitchExecutor struct {
 	*flag.FlagSet
 
-	configDir      string
+	config         *config.Config
 	toResourceType string
 	accountName    string
 	printer        *printer.Printer
 }
 
-func NewSwitchExecutor(printer *printer.Printer, configDir, name, summary string) *SwitchExecutor {
+func NewSwitchExecutor(printer *printer.Printer, config *config.Config, name, summary string) *SwitchExecutor {
 	switchExe := SwitchExecutor{
-		FlagSet:   flag.NewFlagSet(name, flag.ExitOnError),
-		printer:   printer,
-		configDir: configDir,
+		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
+		printer: printer,
+		config:  config,
 	}
 
 	switchExe.StringVar(&switchExe.toResourceType, flagTo, "", "The account to switch to")
@@ -54,7 +54,7 @@ func (s *SwitchExecutor) switchToAccount() error {
 		return NoAccountSpecifiedError{}
 	}
 
-	if err := config.UpdateCurrentAccount(s.accountName, s.configDir); err != nil {
+	if err := config.UpdateCurrentAccount(s.accountName, s.config.CredentialsFile); err != nil {
 		return fmt.Errorf("unable to switch account to the account: %w", err)
 	}
 

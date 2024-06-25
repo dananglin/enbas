@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -17,7 +18,7 @@ type AddExecutor struct {
 	*flag.FlagSet
 
 	printer        *printer.Printer
-	configDir      string
+	config         *config.Config
 	resourceType   string
 	toResourceType string
 	listID         string
@@ -28,14 +29,14 @@ type AddExecutor struct {
 	content        string
 }
 
-func NewAddExecutor(printer *printer.Printer, configDir, name, summary string) *AddExecutor {
+func NewAddExecutor(printer *printer.Printer, config *config.Config, name, summary string) *AddExecutor {
 	emptyArr := make([]string, 0, 3)
 
 	addExe := AddExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
 		printer:      printer,
-		configDir:    configDir,
+		config:       config,
 		accountNames: MultiStringFlagValue(emptyArr),
 	}
 
@@ -71,7 +72,7 @@ func (a *AddExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: a.toResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(a.configDir)
+	gtsClient, err := client.NewClientFromFile(a.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -154,7 +155,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(a.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.configDir)
+	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

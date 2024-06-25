@@ -10,15 +10,16 @@ import (
 	"os"
 	"strconv"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/executor"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 var (
-	binaryVersion string
-	buildTime     string
-	goVersion     string
-	gitCommit     string
+	binaryVersion string //nolint:gochecknoglobals
+	buildTime     string //nolint:gochecknoglobals
+	goVersion     string //nolint:gochecknoglobals
+	gitCommit     string //nolint:gochecknoglobals
 )
 
 func main() {
@@ -29,22 +30,11 @@ func main() {
 
 func run() error {
 	var (
-		configDir        string
-		cacheDir         string
-		pager            string
-		imageViewer      string
-		videoPlayer      string
-		maxTerminalWidth int
-		noColor          *bool
+		configDir string
+		noColor   *bool
 	)
 
 	flag.StringVar(&configDir, "config-dir", "", "Specify your config directory")
-	flag.StringVar(&cacheDir, "cache-dir", "", "Specify your cache directory")
-	flag.StringVar(&pager, "pager", "", "Specify your preferred pager to page through long outputs. This is disabled by default.")
-	flag.StringVar(&imageViewer, "image-viewer", "", "Specify your favourite image viewer.")
-	flag.StringVar(&videoPlayer, "video-player", "", "Specify your favourite video player.")
-	flag.IntVar(&maxTerminalWidth, "max-terminal-width", 80, "Specify the maximum terminal width when displaying resources on screen.")
-
 	flag.BoolFunc("no-color", "Disable ANSI colour output when displaying text on screen", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
@@ -67,7 +57,8 @@ func run() error {
 		return nil
 	}
 
-	// If NoColor is still unspecified, check to see if the NO_COLOR environment variable is set
+	// If NoColor is still unspecified,
+	// check to see if the NO_COLOR environment variable is set
 	if noColor == nil {
 		noColor = new(bool)
 		if os.Getenv("NO_COLOR") != "" {
@@ -80,110 +71,132 @@ func run() error {
 	command := flag.Arg(0)
 	args := flag.Args()[1:]
 
-	printer := printer.NewPrinter(*noColor, pager, maxTerminalWidth)
+	var (
+		enbasConfig  *config.Config
+		enbasPrinter *printer.Printer
+		err          error
+	)
+
+	switch command {
+	case executor.CommandInit, executor.CommandVersion:
+		enbasPrinter = printer.NewPrinter(*noColor, "", 0)
+	default:
+		enbasConfig, err = config.NewConfigFromFile(configDir)
+		if err != nil {
+			enbasPrinter = printer.NewPrinter(*noColor, "", 0)
+			enbasPrinter.PrintFailure("unable to load the configuration: " + err.Error() + ".")
+
+			return err
+		}
+
+		enbasPrinter = printer.NewPrinter(*noColor, enbasConfig.Integrations.Pager, enbasConfig.LineWrapMaxWidth)
+	}
 
 	executorMap := map[string]executor.Executor{
 		executor.CommandAccept: executor.NewAcceptOrRejectExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandAccept,
 			executor.CommandSummaryLookup(executor.CommandAccept),
 		),
 		executor.CommandAdd: executor.NewAddExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandAdd,
 			executor.CommandSummaryLookup(executor.CommandAdd),
 		),
 		executor.CommandBlock: executor.NewBlockOrUnblockExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandBlock,
 			executor.CommandSummaryLookup(executor.CommandBlock),
 		),
 		executor.CommandCreate: executor.NewCreateExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandCreate,
 			executor.CommandSummaryLookup(executor.CommandCreate),
 		),
 		executor.CommandDelete: executor.NewDeleteExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandDelete,
 			executor.CommandSummaryLookup(executor.CommandDelete),
 		),
 		executor.CommandEdit: executor.NewEditExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandEdit,
 			executor.CommandSummaryLookup(executor.CommandEdit),
 		),
 		executor.CommandFollow: executor.NewFollowOrUnfollowExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandFollow,
 			executor.CommandSummaryLookup(executor.CommandFollow),
 		),
-		executor.CommandLogin: executor.NewLoginExecutor(
-			printer,
+		executor.CommandInit: executor.NewInitExecutor(
+			enbasPrinter,
 			configDir,
+			executor.CommandInit,
+			executor.CommandSummaryLookup(executor.CommandInit),
+		),
+		executor.CommandLogin: executor.NewLoginExecutor(
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandLogin,
 			executor.CommandSummaryLookup(executor.CommandLogin),
 		),
 		executor.CommandMute: executor.NewMuteOrUnmuteExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandMute,
 			executor.CommandSummaryLookup(executor.CommandMute),
 		),
 		executor.CommandReject: executor.NewAcceptOrRejectExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandReject,
 			executor.CommandSummaryLookup(executor.CommandReject),
 		),
 		executor.CommandRemove: executor.NewRemoveExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandRemove,
 			executor.CommandSummaryLookup(executor.CommandRemove),
 		),
 		executor.CommandSwitch: executor.NewSwitchExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandSwitch,
 			executor.CommandSummaryLookup(executor.CommandSwitch),
 		),
 		executor.CommandUnfollow: executor.NewFollowOrUnfollowExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandUnfollow,
 			executor.CommandSummaryLookup(executor.CommandUnfollow),
 		),
 		executor.CommandUnmute: executor.NewMuteOrUnmuteExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandUnmute,
 			executor.CommandSummaryLookup(executor.CommandUnmute),
 		),
 		executor.CommandUnblock: executor.NewBlockOrUnblockExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandUnblock,
 			executor.CommandSummaryLookup(executor.CommandUnblock),
 		),
 		executor.CommandShow: executor.NewShowExecutor(
-			printer,
-			configDir,
-			cacheDir,
-			imageViewer,
-			videoPlayer,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandShow,
 			executor.CommandSummaryLookup(executor.CommandShow),
 		),
 		executor.CommandVersion: executor.NewVersionExecutor(
-			printer,
+			enbasPrinter,
 			executor.CommandVersion,
 			executor.CommandSummaryLookup(executor.CommandVersion),
 			binaryVersion,
@@ -192,8 +205,8 @@ func run() error {
 			gitCommit,
 		),
 		executor.CommandWhoami: executor.NewWhoAmIExecutor(
-			printer,
-			configDir,
+			enbasPrinter,
+			enbasConfig,
 			executor.CommandWhoami,
 			executor.CommandSummaryLookup(executor.CommandWhoami),
 		),
@@ -201,16 +214,16 @@ func run() error {
 
 	exe, ok := executorMap[command]
 	if !ok {
-		err := executor.UnknownCommandError{Command: command}
+		err = executor.UnknownCommandError{Command: command}
 
-		printer.PrintFailure(err.Error() + ".")
+		enbasPrinter.PrintFailure(err.Error() + ".")
 		flag.Usage()
 
 		return err
 	}
 
-	if err := executor.Execute(exe, args); err != nil {
-		printer.PrintFailure("(" + command + ") " + err.Error() + ".")
+	if err = executor.Execute(exe, args); err != nil {
+		enbasPrinter.PrintFailure("(" + command + ") " + err.Error() + ".")
 
 		return err
 	}

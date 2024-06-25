@@ -6,7 +6,7 @@ package executor
 
 import (
 	"flag"
-	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -15,27 +15,41 @@ func commandUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
 	return func() {
 		var builder strings.Builder
 
-		fmt.Fprintf(
-			&builder,
-			"SUMMARY:\n  %s - %s\n\nUSAGE:\n  enbas %s [flags]\n\nFLAGS:",
-			name,
-			summary,
-			name,
-		)
+		builder.WriteString("SUMMARY:")
+		builder.WriteString("\n  " + name + " - " + summary)
+		builder.WriteString("\n\nUSAGE:")
+		builder.WriteString("\n  enbas " + name)
+
+		flagMap := make(map[string]string)
 
 		flagset.VisitAll(func(f *flag.Flag) {
-			fmt.Fprintf(
-				&builder,
-				"\n  --%s\n        %s",
-				f.Name,
-				f.Usage,
-			)
+			flagMap[f.Name] = f.Usage
 		})
+
+		if len(flagMap) > 0 {
+			flags := make([]string, len(flagMap))
+			ind := 0
+
+			for f := range flagMap {
+				flags[ind] = f
+				ind++
+			}
+
+			slices.Sort(flags)
+
+			builder.WriteString(" [flags]")
+			builder.WriteString("\n\nFLAGS:")
+
+			for _, value := range flags {
+				builder.WriteString("\n  --" + value)
+				builder.WriteString("\n        " + flagMap[value])
+			}
+		}
 
 		builder.WriteString("\n")
 
 		w := flag.CommandLine.Output()
 
-		fmt.Fprint(w, builder.String())
+		_, _ = w.Write([]byte(builder.String()))
 	}
 }

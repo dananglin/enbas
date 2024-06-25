@@ -12,6 +12,7 @@ import (
 
 type VersionExecutor struct {
 	*flag.FlagSet
+
 	printer         *printer.Printer
 	showFullVersion bool
 	binaryVersion   string
@@ -21,7 +22,7 @@ type VersionExecutor struct {
 }
 
 func NewVersionExecutor(
-	enbasPrinter *printer.Printer,
+	printer *printer.Printer,
 	name,
 	summary,
 	binaryVersion,
@@ -32,7 +33,7 @@ func NewVersionExecutor(
 	command := VersionExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:         enbasPrinter,
+		printer:         printer,
 		binaryVersion:   binaryVersion,
 		buildTime:       buildTime,
 		goVersion:       goVersion,

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
@@ -16,7 +17,7 @@ type RemoveExecutor struct {
 	*flag.FlagSet
 
 	printer          *printer.Printer
-	configDir        string
+	config           *config.Config
 	resourceType     string
 	fromResourceType string
 	listID           string
@@ -24,14 +25,14 @@ type RemoveExecutor struct {
 	accountNames     MultiStringFlagValue
 }
 
-func NewRemoveExecutor(printer *printer.Printer, configDir, name, summary string) *RemoveExecutor {
+func NewRemoveExecutor(printer *printer.Printer, config *config.Config, name, summary string) *RemoveExecutor {
 	emptyArr := make([]string, 0, 3)
 
 	removeExe := RemoveExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
 		printer:      printer,
-		configDir:    configDir,
+		config:       config,
 		accountNames: MultiStringFlagValue(emptyArr),
 	}
 
@@ -63,7 +64,7 @@ func (r *RemoveExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: r.fromResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(r.configDir)
+	gtsClient, err := client.NewClientFromFile(r.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}
@@ -137,7 +138,7 @@ func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(r.accountNames))
 	}
 
-	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.configDir)
+	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

@@ -15,16 +15,16 @@ import (
 type WhoAmIExecutor struct {
 	*flag.FlagSet
 
-	printer   *printer.Printer
-	configDir string
+	printer *printer.Printer
+	config  *config.Config
 }
 
-func NewWhoAmIExecutor(printer *printer.Printer, configDir, name, summary string) *WhoAmIExecutor {
+func NewWhoAmIExecutor(printer *printer.Printer, config *config.Config, name, summary string) *WhoAmIExecutor {
 	whoExe := WhoAmIExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
+		printer: printer,
+		config:  config,
 	}
 
 	whoExe.Usage = commandUsageFunc(name, summary, whoExe.FlagSet)
@@ -33,7 +33,7 @@ func NewWhoAmIExecutor(printer *printer.Printer, configDir, name, summary string
 }
 
 func (c *WhoAmIExecutor) Execute() error {
-	config, err := config.NewCredentialsConfigFromFile(c.configDir)
+	config, err := config.NewCredentialsConfigFromFile(c.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to load the credential config: %w", err)
 	}

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
@@ -17,19 +18,19 @@ type EditExecutor struct {
 	*flag.FlagSet
 
 	printer           *printer.Printer
-	configDir         string
+	config            *config.Config
 	resourceType      string
 	listID            string
 	listTitle         string
 	listRepliesPolicy string
 }
 
-func NewEditExecutor(printer *printer.Printer, configDir, name, summary string) *EditExecutor {
+func NewEditExecutor(printer *printer.Printer, config *config.Config, name, summary string) *EditExecutor {
 	editExe := EditExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
+		printer: printer,
+		config:  config,
 	}
 
 	editExe.StringVar(&editExe.resourceType, flagType, "", "Specify the type of resource to update")
@@ -56,7 +57,7 @@ func (e *EditExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: e.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromConfig(e.configDir)
+	gtsClient, err := client.NewClientFromFile(e.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
 	}

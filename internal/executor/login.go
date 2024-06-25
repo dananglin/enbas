@@ -18,18 +18,18 @@ import (
 type LoginExecutor struct {
 	*flag.FlagSet
 
-	printer   *printer.Printer
-	configDir string
-	instance  string
+	printer  *printer.Printer
+	config   *config.Config
+	instance string
 }
 
-func NewLoginExecutor(printer *printer.Printer, configDir, name, summary string) *LoginExecutor {
+func NewLoginExecutor(printer *printer.Printer, config *config.Config, name, summary string) *LoginExecutor {
 	command := LoginExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer:   printer,
-		configDir: configDir,
-		instance:  "",
+		printer:  printer,
+		config:   config,
+		instance: "",
 	}
 
 	command.StringVar(&command.instance, flagInstance, "", "Specify the instance that you want to login to.")
@@ -95,7 +95,7 @@ func (c *LoginExecutor) Execute() error {
 		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(c.configDir, account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(c.config.CredentialsFile, account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
