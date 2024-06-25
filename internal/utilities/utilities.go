@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os/exec"
 	"regexp"
+	"slices"
+	"strings"
 )
 
 func GetFQDN(url string) string {
@@ -27,10 +29,12 @@ func OpenMedia(viewer string, paths []string) error {
 		return UnspecifiedProgramError{}
 	}
 
-	command := exec.Command(viewer, paths...)
+	cmd := slices.Concat(strings.Split(viewer, " "), paths)
+
+	command := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
 
 	if err := command.Start(); err != nil {
-		return fmt.Errorf("received an error after starting the image viewer: %w", err)
+		return fmt.Errorf("received an error after starting the program: %w", err)
 	}
 
 	return nil
