@@ -24,7 +24,7 @@ type LoginExecutor struct {
 }
 
 func NewLoginExecutor(printer *printer.Printer, config *config.Config, name, summary string) *LoginExecutor {
-	command := LoginExecutor{
+	loginExe := LoginExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
 		printer:  printer,
@@ -32,21 +32,21 @@ func NewLoginExecutor(printer *printer.Printer, config *config.Config, name, sum
 		instance: "",
 	}
 
-	command.StringVar(&command.instance, flagInstance, "", "Specify the instance that you want to login to.")
+	loginExe.StringVar(&loginExe.instance, flagInstance, "", "Specify the instance that you want to login to.")
 
-	command.Usage = commandUsageFunc(name, summary, command.FlagSet)
+	loginExe.Usage = commandUsageFunc(name, summary, loginExe.FlagSet)
 
-	return &command
+	return &loginExe
 }
 
-func (c *LoginExecutor) Execute() error {
+func (l *LoginExecutor) Execute() error {
 	var err error
 
-	if c.instance == "" {
+	if l.instance == "" {
 		return FlagNotSetError{flagText: flagInstance}
 	}
 
-	instance := c.instance
+	instance := l.instance
 
 	if !strings.HasPrefix(instance, "https") || !strings.HasPrefix(instance, "http") {
 		instance = "https://" + instance
@@ -68,7 +68,7 @@ func (c *LoginExecutor) Execute() error {
 
 	consentPageURL := gtsClient.AuthCodeURL()
 
-	utilities.OpenLink(consentPageURL)
+	_ = utilities.OpenLink(l.config.Integrations.Browser, consentPageURL)
 
 	var builder strings.Builder
 
@@ -78,7 +78,7 @@ func (c *LoginExecutor) Execute() error {
 	builder.WriteString("\n\n" + "Once you have the code please copy and paste it below.")
 	builder.WriteString("\n" + "Out-of-band token: ")
 
-	c.printer.PrintInfo(builder.String())
+	l.printer.PrintInfo(builder.String())
 
 	var code string
 
@@ -95,12 +95,12 @@ func (c *LoginExecutor) Execute() error {
 		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(c.config.CredentialsFile, account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(l.config.CredentialsFile, account.Username, gtsClient.Authentication)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
 
-	c.printer.PrintSuccess("Successfully logged into " + loginName + ".")
+	l.printer.PrintSuccess("Successfully logged into " + loginName + ".")
 
 	return nil
 }

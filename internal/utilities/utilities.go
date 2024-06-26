@@ -39,3 +39,26 @@ func OpenMedia(viewer string, paths []string) error {
 
 	return nil
 }
+
+type UnspecifiedBrowserError struct{}
+
+func (e UnspecifiedBrowserError) Error() string {
+	return "the browser to view this link is not specified"
+}
+
+func OpenLink(browser, url string) error {
+	if browser == "" {
+		return UnspecifiedBrowserError{}
+	}
+
+	cmd := strings.Split(browser, " ")
+	cmd = append(cmd, url)
+
+	command := exec.Command(cmd[0], cmd[1:]...)
+
+	if err := command.Start(); err != nil {
+		return fmt.Errorf("received an error after starting the program to view the link: %w", err)
+	}
+
+	return nil
+}

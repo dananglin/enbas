@@ -137,7 +137,9 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	}
 
 	if s.showInBrowser {
-		utilities.OpenLink(account.URL)
+		if err := utilities.OpenLink(s.config.Integrations.Browser, account.URL); err != nil {
+			return fmt.Errorf("unable to open link: %w", err)
+		}
 
 		return nil
 	}
@@ -177,7 +179,9 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 	}
 
 	if s.showInBrowser {
-		utilities.OpenLink(status.URL)
+		if err := utilities.OpenLink(s.config.Integrations.Browser, status.URL); err != nil {
+			return fmt.Errorf("unable to open link: %w", err)
+		}
 
 		return nil
 	}
