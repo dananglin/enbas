@@ -23,7 +23,7 @@ func (p Printer) PrintList(list model.List) {
 
 	if len(list.Accounts) > 0 {
 		for acct, name := range list.Accounts {
-			builder.WriteString("\n" + p.bullet + " " + p.fullDisplayNameFormat(name, acct))
+			builder.WriteString("\n" + symbolBullet + " " + p.fullDisplayNameFormat(name, acct))
 		}
 	} else {
 		builder.WriteString("\n" + "None")
@@ -40,7 +40,7 @@ func (p Printer) PrintLists(lists []model.List) {
 	builder.WriteString("\n" + p.headerFormat("LISTS"))
 
 	for i := range lists {
-		builder.WriteString("\n" + p.bullet + " " + lists[i].Title + " (" + lists[i].ID + ")")
+		builder.WriteString("\n" + symbolBullet + " " + lists[i].Title + " (" + lists[i].ID + ")")
 	}
 
 	builder.WriteString("\n")

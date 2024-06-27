@@ -59,6 +59,12 @@ func (p Printer) PrintStatus(status model.Status) {
 	builder.WriteString("\n" + p.fieldFormat("Likes: ") + strconv.Itoa(status.FavouritesCount))
 	builder.WriteString("\n" + p.fieldFormat("Replies: ") + strconv.Itoa(status.RepliesCount))
 
+	// The user's actions on the status
+	builder.WriteString("\n\n" + p.headerFormat("YOUR ACTIONS:"))
+	builder.WriteString("\n" + p.fieldFormat("Boosted: ") + strconv.FormatBool(status.Reblogged))
+	builder.WriteString("\n" + p.fieldFormat("Liked: ") + strconv.FormatBool(status.Favourited))
+	builder.WriteString("\n" + p.fieldFormat("Bookmarked: ") + strconv.FormatBool(status.Bookmarked))
+
 	// Status visibility
 	builder.WriteString("\n\n" + p.headerFormat("VISIBILITY:"))
 	builder.WriteString("\n" + status.Visibility.String())
@@ -104,7 +110,7 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 		}
 
 		for _, media := range mediaAttachments {
-			builder.WriteString("\n\n" + p.imageIcon + "  Media attachment: " + media.ID)
+			builder.WriteString("\n\n" + symbolImage + "  Media attachment: " + media.ID)
 			builder.WriteString("\n   Media type: " + media.Type + "\n   ")
 
 			description := media.Description
@@ -114,6 +120,25 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 			builder.WriteString(utilities.WrapLines(description, "\n   ", p.maxTerminalWidth-3))
 		}
+
+		boosted := symbolBoosted
+		if status.Reblogged {
+			boosted = p.theme.boldyellow + symbolBoosted + p.theme.reset
+		}
+
+		liked := symbolNotLiked
+		if status.Favourited {
+			liked = p.theme.boldyellow + symbolLiked + p.theme.reset
+		}
+
+		bookmarked := symbolNotBookmarked
+		if status.Bookmarked {
+			bookmarked = p.theme.boldyellow + symbolBookmarked + p.theme.reset
+		}
+
+		builder.WriteString("\n\n" + boosted + " " + p.fieldFormat("boosted:") + " " + strconv.FormatBool(status.Bookmarked))
+		builder.WriteString("\n" + liked + " " + p.fieldFormat("liked:") + " " + strconv.FormatBool(status.Favourited))
+		builder.WriteString("\n" + bookmarked + " " + p.fieldFormat("bookmarked:") + " " + strconv.FormatBool(status.Bookmarked))
 
 		builder.WriteString(
 			"\n\n" +

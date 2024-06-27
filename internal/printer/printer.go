@@ -13,8 +13,20 @@ import (
 )
 
 const (
-	minTerminalWidth   = 40
-	noMediaDescription = "This media attachment has no description."
+	minTerminalWidth    = 40
+	noMediaDescription  = "This media attachment has no description."
+	symbolBullet        = "\u2022"
+	symbolPollMeter     = "\u2501"
+	symbolSuccess       = "\u2714"
+	symbolFailure       = "\u2717"
+	symbolImage         = "\uf03e"
+	symbolLiked         = "\uf51f"
+	symbolNotLiked      = "\uf41e"
+	symbolBookmarked    = "\uf47a"
+	symbolNotBookmarked = "\uf461"
+	symbolBoosted       = "\u2BAD"
+	dateFormat          = "02 Jan 2006"
+	dateTimeFormat      = "02 Jan 2006, 15:04 (MST)"
 )
 
 type theme struct {
@@ -26,6 +38,8 @@ type theme struct {
 	grey        string
 	red         string
 	boldred     string
+	yellow      string
+	boldyellow  string
 }
 
 type Printer struct {
@@ -34,13 +48,6 @@ type Printer struct {
 	maxTerminalWidth int
 	pager            string
 	statusSeparator  string
-	bullet           string
-	pollMeterSymbol  string
-	successSymbol    string
-	failureSymbol    string
-	dateFormat       string
-	dateTimeFormat   string
-	imageIcon        string
 }
 
 func NewPrinter(
@@ -57,6 +64,8 @@ func NewPrinter(
 		grey:        "\033[90m",
 		red:         "\033[31m",
 		boldred:     "\033[31;1m",
+		yellow:      "\033[33m",
+		boldyellow:  "\033[33;1m",
 	}
 
 	if maxTerminalWidth < minTerminalWidth {
@@ -69,29 +78,22 @@ func NewPrinter(
 		maxTerminalWidth: maxTerminalWidth,
 		pager:            pager,
 		statusSeparator:  strings.Repeat("\u2501", maxTerminalWidth),
-		bullet:           "\u2022",
-		pollMeterSymbol:  "\u2501",
-		successSymbol:    "\u2714",
-		failureSymbol:    "\u2717",
-		dateFormat:       "02 Jan 2006",
-		dateTimeFormat:   "02 Jan 2006, 15:04 (MST)",
-		imageIcon:        "\uf03e",
 	}
 }
 
 func (p Printer) PrintSuccess(text string) {
-	success := p.theme.boldgreen + p.successSymbol + p.theme.reset
+	success := p.theme.boldgreen + symbolSuccess + p.theme.reset
 	if p.noColor {
-		success = p.successSymbol
+		success = symbolSuccess
 	}
 
 	printToStdout(success + " " + text + "\n")
 }
 
 func (p Printer) PrintFailure(text string) {
-	failure := p.theme.boldred + p.failureSymbol + p.theme.reset
+	failure := p.theme.boldred + symbolFailure + p.theme.reset
 	if p.noColor {
-		failure = p.failureSymbol
+		failure = symbolFailure
 	}
 
 	printToStderr(failure + " " + text + "\n")
@@ -135,11 +137,11 @@ func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
 }
 
 func (p Printer) formatDate(date time.Time) string {
-	return date.Local().Format(p.dateFormat)
+	return date.Local().Format(dateFormat)
 }
 
 func (p Printer) formatDateTime(date time.Time) string {
-	return date.Local().Format(p.dateTimeFormat)
+	return date.Local().Format(dateTimeFormat)
 }
 
 func (p Printer) print(text string) {

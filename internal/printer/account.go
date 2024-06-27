@@ -125,11 +125,11 @@ func (p Printer) PrintAccountList(list model.AccountList) {
 
 	if list.Type == model.AccountListBlockedAccount {
 		for ind := range list.Accounts {
-			builder.WriteString("\n" + p.bullet + " " + list.Accounts[ind].Acct + " (" + list.Accounts[ind].ID + ")")
+			builder.WriteString("\n" + symbolBullet + " " + list.Accounts[ind].Acct + " (" + list.Accounts[ind].ID + ")")
 		}
 	} else {
 		for ind := range list.Accounts {
-			builder.WriteString("\n" + p.bullet + " " + p.fullDisplayNameFormat(list.Accounts[ind].DisplayName, list.Accounts[ind].Acct))
+			builder.WriteString("\n" + symbolBullet + " " + p.fullDisplayNameFormat(list.Accounts[ind].DisplayName, list.Accounts[ind].Acct))
 		}
 	}
 

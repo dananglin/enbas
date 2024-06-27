@@ -85,10 +85,10 @@ func (p Printer) pollMeter(votage float64) string {
 		}
 	}
 
-	meter := "\n" + voteBlockColor + strings.Repeat(p.pollMeterSymbol, numVoteBlocks) + p.theme.reset
+	meter := "\n" + voteBlockColor + strings.Repeat(symbolPollMeter, numVoteBlocks) + p.theme.reset
 
 	if !p.noColor {
-		meter += backgroundBlockColor + strings.Repeat(p.pollMeterSymbol, numBackgroundBlocks) + p.theme.reset
+		meter += backgroundBlockColor + strings.Repeat(symbolPollMeter, numBackgroundBlocks) + p.theme.reset
 	}
 
 	return meter
