@@ -71,7 +71,15 @@ func SaveDefaultConfigToFile(configDir string) error {
 	}
 	defer file.Close()
 
-	config := defaultConfig(configDir)
+	config := defaultConfig()
+
+	credentialsFilePath, err := utilities.AbsolutePath(defaultCredentialsConfigFile(configDir))
+	if err != nil {
+		return fmt.Errorf("unable to calculate the path to the credentials file: %w", err)
+	}
+
+	config.CredentialsFile = credentialsFilePath
+
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "    ")
 
@@ -86,11 +94,9 @@ func configFile(configDir string) string {
 	return filepath.Join(utilities.CalculateConfigDir(configDir), configFileName)
 }
 
-func defaultConfig(configDir string) Config {
-	credentialsFilePath := defaultCredentialsConfigFile(configDir)
-
+func defaultConfig() Config {
 	return Config{
-		CredentialsFile: credentialsFilePath,
+		CredentialsFile: "",
 		CacheDirectory:  "",
 		HTTP: HTTPConfig{
 			Timeout:      5,
