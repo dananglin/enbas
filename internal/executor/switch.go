@@ -16,16 +16,17 @@ type SwitchExecutor struct {
 	*flag.FlagSet
 
 	config         *config.Config
+	printer        *printer.Printer
 	toResourceType string
 	accountName    string
-	printer        *printer.Printer
 }
 
 func NewSwitchExecutor(printer *printer.Printer, config *config.Config, name, summary string) *SwitchExecutor {
 	switchExe := SwitchExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-		printer: printer,
+
 		config:  config,
+		printer: printer,
 	}
 
 	switchExe.StringVar(&switchExe.toResourceType, flagTo, "", "The account to switch to")
