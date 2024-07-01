@@ -100,7 +100,7 @@ func (l *LoginExecutor) Execute() error {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
 
-	l.printer.PrintSuccess("Successfully logged into " + loginName + ".")
+	l.printer.PrintSuccess("You have successfully logged as " + loginName + ".")
 
 	return nil
 }
