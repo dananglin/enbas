@@ -7,6 +7,7 @@ package executor
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
@@ -26,12 +27,15 @@ type MuteOrUnmuteExecutor struct {
 }
 
 func NewMuteOrUnmuteExecutor(printer *printer.Printer, config *config.Config, name, summary string) *MuteOrUnmuteExecutor {
+	muteDuration := TimeDurationFlagValue{time.Duration(0 * time.Second)}
+
 	exe := MuteOrUnmuteExecutor{
 		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
 
-		printer: printer,
-		config:  config,
-		command: name,
+		printer:      printer,
+		config:       config,
+		command:      name,
+		muteDuration: muteDuration,
 	}
 
 	exe.StringVar(&exe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
