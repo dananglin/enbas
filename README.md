@@ -18,8 +18,11 @@ At this time it is not recommended for use this with your production GoToSocial 
 ### Repository mirrors
 
 Enbas is actively developed in [Code Flow](https://codeflow.dananglin.me.uk/apollo/enbas) with
-the `main` branch mirrored to [Codeberg](https://codeberg.org/dananglin/enbas) and
-[GitHub](https://github.com/dananglin/enbas).
+the `main` branch mirrored to the following forges:
+
+- **Codeberg**: https://codeberg.org/dananglin/enbas
+- **Radicle**: https://app.radicle.xyz/nodes/seed.radicle.garden/rad:zhqv2orTvTh2x2d7kYky9NhctrpK
+- **GitHub**: https://github.com/dananglin/enbas
 
 ### Documentation
 
