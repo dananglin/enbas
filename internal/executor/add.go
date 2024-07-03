@@ -47,7 +47,7 @@ func NewAddExecutor(printer *printer.Printer, config *config.Config, name, summa
 	addExe.StringVar(&addExe.content, flagContent, "", "The content of the resource")
 	addExe.StringVar(&addExe.pollID, flagPollID, "", "The ID of the poll")
 	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
-	addExe.Var(&addExe.choices, flagVote, "Your vote")
+	addExe.Var(&addExe.choices, flagVote, "Add a vote to an option in a poll")
 
 	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
 
