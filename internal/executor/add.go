@@ -47,7 +47,7 @@ func NewAddExecutor(printer *printer.Printer, config *config.Config, name, summa
 	addExe.StringVar(&addExe.content, flagContent, "", "The content of the resource")
 	addExe.StringVar(&addExe.pollID, flagPollID, "", "The ID of the poll")
 	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
-	addExe.Var(&addExe.choices, flagChoose, "Specify your choice ")
+	addExe.Var(&addExe.choices, flagVote, "Your vote")
 
 	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
 
@@ -270,7 +270,7 @@ func (a *AddExecutor) addToPoll(gtsClient *client.Client) error {
 
 func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
 	if len(a.choices) == 0 {
-		return errors.New("please use --" + flagChoose + " to make a choice in this poll")
+		return errors.New("please use --" + flagVote + " to make a choice in this poll")
 	}
 
 	poll, err := gtsClient.GetPoll(a.pollID)

@@ -16,7 +16,6 @@ const (
 	flagAccountName               = "account-name"
 	flagAttachmentID              = "attachment-id"
 	flagBrowser                   = "browser"
-	flagChoose                    = "choose"
 	flagContentType               = "content-type"
 	flagContent                   = "content"
 	flagEnableFederation          = "enable-federation"
@@ -52,6 +51,7 @@ const (
 	flagTo                        = "to"
 	flagType                      = "type"
 	flagVisibility                = "visibility"
+	flagVote                      = "vote"
 )
 
 type MultiStringFlagValue []string
