@@ -52,6 +52,19 @@ func (e UnsupportedRemoveOperationError) Error() string {
 		"' is not supported"
 }
 
+type UnsupportedShowOperationError struct {
+	ResourceType         string
+	ShowFromResourceType string
+}
+
+func (e UnsupportedShowOperationError) Error() string {
+	return "showing '" +
+		e.ResourceType +
+		"' from '" +
+		e.ShowFromResourceType +
+		"' is not supported"
+}
+
 type EmptyContentError struct {
 	ResourceType string
 	Hint         string

@@ -287,6 +287,26 @@ func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
+	if s.fromResourceType == "" {
+		return FlagNotSetError{flagText: flagFrom}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		resourceAccount: s.showFollowersFromAccount,
+	}
+
+	doFunc, ok := funcMap[s.fromResourceType]
+	if !ok {
+		return UnsupportedShowOperationError{
+			ResourceType:         s.resourceType,
+			ShowFromResourceType: s.fromResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (s *ShowExecutor) showFollowersFromAccount(gtsClient *client.Client) error {
 	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
@@ -307,6 +327,26 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
+	if s.fromResourceType == "" {
+		return FlagNotSetError{flagText: flagFrom}
+	}
+
+	funcMap := map[string]func(*client.Client) error{
+		resourceAccount: s.showFollowingFromAccount,
+	}
+
+	doFunc, ok := funcMap[s.fromResourceType]
+	if !ok {
+		return UnsupportedShowOperationError{
+			ResourceType:         s.resourceType,
+			ShowFromResourceType: s.fromResourceType,
+		}
+	}
+
+	return doFunc(gtsClient)
+}
+
+func (s *ShowExecutor) showFollowingFromAccount(gtsClient *client.Client) error {
 	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
@@ -449,7 +489,10 @@ func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
 
 	doFunc, ok := funcMap[s.fromResourceType]
 	if !ok {
-		return fmt.Errorf("do not support viewing media from %s", s.fromResourceType)
+		return UnsupportedShowOperationError{
+			ResourceType:         s.resourceType,
+			ShowFromResourceType: s.fromResourceType,
+		}
 	}
 
 	return doFunc(gtsClient)
