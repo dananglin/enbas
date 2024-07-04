@@ -123,10 +123,25 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf(
-			"did not receive an OK response from the GoToSocial server: got %d",
-			response.StatusCode,
-		)
+		message := struct {
+			Error string `json:"error"`
+		}{
+			Error: "",
+		}
+
+		if err := json.NewDecoder(response.Body).Decode(&message); err != nil {
+			return ResponseError{
+				StatusCode:       response.StatusCode,
+				Message:          "",
+				MessageDecodeErr: err,
+			}
+		}
+
+		return ResponseError{
+			StatusCode:       response.StatusCode,
+			Message:          message.Error,
+			MessageDecodeErr: nil,
+		}
 	}
 
 	if object == nil {
