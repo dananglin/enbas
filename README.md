@@ -26,10 +26,10 @@ the `main` branch mirrored to the following forges:
 
 ### Documentation
 
-- **[Installation guide](./docs/installation.md)**: A guide for installing Enbas on your machine.
-- **[Getting started guide](./docs/getting_started.md)**: A guide to help you get started on using Enbas.
-- **[Configuration reference](./docs/configuration.md)**: The configuration reference documentation.
-- **[User manual](./docs/manual.md)**: The user manual.
+- **[Installation guide](docs/installation.md)**: A guide for installing Enbas on your machine.
+- **[Getting started guide](docs/getting_started.md)**: A guide to help you get started on using Enbas.
+- **[Configuration reference](docs/configuration.md)**: The configuration reference documentation.
+- **[User manual](docs/manual.md)**: The user manual.
 
 ### Licensing
 

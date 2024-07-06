@@ -50,25 +50,19 @@ func NewCreateExecutor(printer *printer.Printer, config *config.Config, name, su
 		config:  config,
 	}
 
+	createExe.StringVar(&createExe.resourceType, flagType, "", "Specify the type of resource to create")
+
+	// Flags for statuses
 	createExe.BoolVar(&createExe.boostable, flagEnableReposts, true, "Specify if the status can be reposted/boosted by others")
-	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "Specify if the status can be federated beyond the local timelines")
-	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "Specify if the status can be liked/favourited")
-	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "Specify if the status can be replied to")
-	createExe.BoolVar(&createExe.pollAllowsMultipleChoices, flagPollAllowsMultipleChoices, false, "The poll allows viewers to make multiple choices in the poll")
-	createExe.BoolVar(&createExe.pollHidesVoteCounts, flagPollHidesVoteCounts, false, "The poll will hide the vote count until it is closed")
-	createExe.BoolVar(&createExe.addPoll, flagAddPoll, false, "Add a poll to the status")
 	createExe.StringVar(&createExe.content, flagContent, "", "The content of the status to create")
 	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
+	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "Specify if the status can be federated beyond the local timelines")
 	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "The file path where to read the contents from")
 	createExe.StringVar(&createExe.language, flagLanguage, "", "The ISO 639 language code for this status")
+	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "Specify if the status can be liked/favourited")
+	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "Specify if the status can be replied to")
 	createExe.StringVar(&createExe.spoilerText, flagSpoilerText, "", "The text to display as the status' warning or subject")
 	createExe.StringVar(&createExe.visibility, flagVisibility, "", "The visibility of the posted status")
-	createExe.StringVar(&createExe.resourceType, flagType, "", "Specify the type of resource to create")
-	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "Specify the title of the list")
-	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "Specify the policy of the replies for this list (valid values are followed, list and none)")
-	createExe.Var(&createExe.pollOptions, flagPollOption, "A poll option. Use this multiple times to set multiple options")
-	createExe.Var(&createExe.pollExpiresIn, flagPollExpiresIn, "The duration in which the poll is open for")
-
 	createExe.BoolFunc(flagSensitive, "Specify if the status should be marked as sensitive", func(value string) error {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
@@ -80,6 +74,17 @@ func NewCreateExecutor(printer *printer.Printer, config *config.Config, name, su
 
 		return nil
 	})
+
+	// Flags specifically for polls
+	createExe.BoolVar(&createExe.addPoll, flagAddPoll, false, "Add a poll to the status")
+	createExe.BoolVar(&createExe.pollAllowsMultipleChoices, flagPollAllowsMultipleChoices, false, "The poll allows viewers to make multiple choices in the poll")
+	createExe.BoolVar(&createExe.pollHidesVoteCounts, flagPollHidesVoteCounts, false, "The poll will hide the vote count until it is closed")
+	createExe.Var(&createExe.pollOptions, flagPollOption, "A poll option. Use this multiple times to set multiple options")
+	createExe.Var(&createExe.pollExpiresIn, flagPollExpiresIn, "The duration in which the poll is open for")
+
+	// Flags for lists
+	createExe.StringVar(&createExe.listTitle, flagListTitle, "", "Specify the title of the list")
+	createExe.StringVar(&createExe.listRepliesPolicy, flagListRepliesPolicy, "list", "Specify the policy of the replies for this list (valid values are followed, list and none)")
 
 	createExe.Usage = commandUsageFunc(name, summary, createExe.FlagSet)
 
