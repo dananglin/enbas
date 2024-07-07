@@ -136,9 +136,9 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 			bookmarked = p.theme.boldyellow + symbolBookmarked + p.theme.reset
 		}
 
-		builder.WriteString("\n\n" + boosted + " " + p.fieldFormat("boosted:") + " " + strconv.FormatBool(status.Bookmarked))
-		builder.WriteString("\n" + liked + " " + p.fieldFormat("liked:") + " " + strconv.FormatBool(status.Favourited))
-		builder.WriteString("\n" + bookmarked + " " + p.fieldFormat("bookmarked:") + " " + strconv.FormatBool(status.Bookmarked))
+		builder.WriteString("\n\n" + boosted + " " + p.fieldFormat("boosted: ") + strconv.FormatBool(status.Reblogged))
+		builder.WriteString("\n" + liked + " " + p.fieldFormat("liked: ") + strconv.FormatBool(status.Favourited))
+		builder.WriteString("\n" + bookmarked + " " + p.fieldFormat("bookmarked: ") + strconv.FormatBool(status.Bookmarked))
 
 		builder.WriteString(
 			"\n\n" +
