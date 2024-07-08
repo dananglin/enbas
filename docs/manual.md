@@ -401,6 +401,10 @@ enbas show --type status --status-id 01J1Z9PT0243JT9QNQ5W96Z8CA
    ```
    enbas create --type status --content-type markdown --visibility private --from-file status.md
    ```
+- Reply to another status.
+  ```
+  enbas create --type status --in-reply-to 01J2A86E3M7WWH37H1QENT7CSH --content "@bernie thanks for this! Looking forward to trying this out."
+  ```
 - Create a status with a poll
    ```
    enbas create \
@@ -428,6 +432,7 @@ enbas show --type status --status-id 01J1Z9PT0243JT9QNQ5W96Z8CA
 | `enable-likes` | boolean | false | The status can be liked (favourtied). | true |
 | `enable-replies` | boolean | false | The status can be replied to. | true |
 | `from-file` | string | false | The path to the file where to read the contents of the status from. | |
+| `in-reply-to` | string | false | The ID of the status that you want to reply to. | |
 | `language` | string | false | The ISO 639 language code that the status is written in.<br>If this is not specified then the default language from your posting preferences will be used. | |
 | `sensitive` | string | false | The status should be marked as sensitive.<br>If this is not specified then the default sensitivity from your posting preferences will be used. | |
 | `spoiler-text` | string | false | The text to display as the status' warning or subject. | |

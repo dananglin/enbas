@@ -13,8 +13,12 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
+const (
+	baseStatusesPath string = "/api/v1/statuses"
+)
+
 func (g *Client) GetStatus(statusID string) (model.Status, error) {
-	path := "/api/v1/statuses/" + statusID
+	path := baseStatusesPath + "/" + statusID
 	url := g.Authentication.Instance + path
 
 	var status model.Status
@@ -31,6 +35,7 @@ func (g *Client) GetStatus(statusID string) (model.Status, error) {
 
 type CreateStatusForm struct {
 	Content     string                  `json:"status"`
+	InReplyTo   string                  `json:"in_reply_to_id"`
 	Language    string                  `json:"language"`
 	SpoilerText string                  `json:"spoiler_text"`
 	Boostable   bool                    `json:"boostable"`
@@ -57,7 +62,7 @@ func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + "/api/v1/statuses"
+	url := g.Authentication.Instance + baseStatusesPath
 
 	var status model.Status
 
@@ -119,7 +124,7 @@ func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
 }
 
 func (g *Client) LikeStatus(statusID string) error {
-	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/favourite"
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf(
@@ -132,7 +137,7 @@ func (g *Client) LikeStatus(statusID string) error {
 }
 
 func (g *Client) UnlikeStatus(statusID string) error {
-	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/unfavourite"
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf(
@@ -163,7 +168,7 @@ func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusL
 }
 
 func (g *Client) ReblogStatus(statusID string) error {
-	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/reblog"
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf(
@@ -176,7 +181,7 @@ func (g *Client) ReblogStatus(statusID string) error {
 }
 
 func (g *Client) UnreblogStatus(statusID string) error {
-	url := g.Authentication.Instance + "/api/v1/statuses/" + statusID + "/unreblog"
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf(

@@ -25,6 +25,7 @@ const (
 	flagFrom                      = "from"
 	flagFromFile                  = "from-file"
 	flagFull                      = "full"
+	flagInReplyTo                 = "in-reply-to"
 	flagInstance                  = "instance"
 	flagLanguage                  = "language"
 	flagLimit                     = "limit"

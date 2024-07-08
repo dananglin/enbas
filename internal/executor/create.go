@@ -32,6 +32,7 @@ type CreateExecutor struct {
 	content                   string
 	contentType               string
 	fromFile                  string
+	inReplyTo                 string
 	language                  string
 	resourceType              string
 	listTitle                 string
@@ -58,6 +59,7 @@ func NewCreateExecutor(printer *printer.Printer, config *config.Config, name, su
 	createExe.StringVar(&createExe.contentType, flagContentType, "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
 	createExe.BoolVar(&createExe.federated, flagEnableFederation, true, "Specify if the status can be federated beyond the local timelines")
 	createExe.StringVar(&createExe.fromFile, flagFromFile, "", "The file path where to read the contents from")
+	createExe.StringVar(&createExe.inReplyTo, flagInReplyTo, "", "The ID of the status that you want to reply to")
 	createExe.StringVar(&createExe.language, flagLanguage, "", "The ISO 639 language code for this status")
 	createExe.BoolVar(&createExe.likeable, flagEnableLikes, true, "Specify if the status can be liked/favourited")
 	createExe.BoolVar(&createExe.replyable, flagEnableReplies, true, "Specify if the status can be replied to")
@@ -204,6 +206,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		SpoilerText: c.spoilerText,
 		Boostable:   c.boostable,
 		Federated:   c.federated,
+		InReplyTo:   c.inReplyTo,
 		Likeable:    c.likeable,
 		Replyable:   c.replyable,
 		Sensitive:   sensitive,
