@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	listPath string = "/api/v1/lists"
+	baseListPath string = "/api/v1/lists"
 )
 
 func (g *Client) GetAllLists() ([]model.List, error) {
-	url := g.Authentication.Instance + listPath
+	url := g.Authentication.Instance + baseListPath
 
 	var lists []model.List
 
@@ -33,7 +33,7 @@ func (g *Client) GetAllLists() ([]model.List, error) {
 }
 
 func (g *Client) GetList(listID string) (model.List, error) {
-	url := g.Authentication.Instance + listPath + "/" + listID
+	url := g.Authentication.Instance + baseListPath + "/" + listID
 
 	var list model.List
 
@@ -59,7 +59,7 @@ func (g *Client) CreateList(form CreateListForm) (model.List, error) {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + "/api/v1/lists"
+	url := g.Authentication.Instance + baseListPath
 
 	var list model.List
 
@@ -88,7 +88,7 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + listPath + "/" + listToUpdate.ID
+	url := g.Authentication.Instance + baseListPath + "/" + listToUpdate.ID
 
 	var updatedList model.List
 
@@ -103,7 +103,7 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 }
 
 func (g *Client) DeleteList(listID string) error {
-	url := g.Authentication.Instance + "/api/v1/lists/" + listID
+	url := g.Authentication.Instance + baseListPath + "/" + listID
 
 	return g.sendRequest(http.MethodDelete, url, nil, nil)
 }
@@ -121,7 +121,7 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + listPath + "/" + listID + "/accounts"
+	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf(
@@ -146,7 +146,7 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + listPath + "/" + listID + "/accounts"
+	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
 	if err := g.sendRequest(http.MethodDelete, url, requestBody, nil); err != nil {
 		return fmt.Errorf(
@@ -159,7 +159,7 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 }
 
 func (g *Client) GetAccountsFromList(listID string, limit int) ([]model.Account, error) {
-	path := fmt.Sprintf("%s/%s/accounts?limit=%d", listPath, listID, limit)
+	path := fmt.Sprintf("%s/%s/accounts?limit=%d", baseListPath, listID, limit)
 	url := g.Authentication.Instance + path
 
 	var accounts []model.Account
