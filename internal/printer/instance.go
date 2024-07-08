@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func (p Printer) PrintInstance(instance model.InstanceV2) {
@@ -18,13 +17,13 @@ func (p Printer) PrintInstance(instance model.InstanceV2) {
 	builder.WriteString("\n" + instance.Title)
 
 	builder.WriteString("\n\n" + p.headerFormat("INSTANCE DESCRIPTION:"))
-	builder.WriteString("\n" + utilities.WrapLines(instance.DescriptionText, "\n", p.maxTerminalWidth))
+	builder.WriteString("\n" + p.wrapLines(instance.DescriptionText, 0))
 
 	builder.WriteString("\n\n" + p.headerFormat("DOMAIN:"))
 	builder.WriteString("\n" + instance.Domain)
 
 	builder.WriteString("\n\n" + p.headerFormat("TERMS AND CONDITIONS:"))
-	builder.WriteString("\n" + utilities.WrapLines(instance.TermsText, "\n  ", p.maxTerminalWidth))
+	builder.WriteString("\n" + p.wrapLines(instance.TermsText, 2))
 
 	builder.WriteString("\n\n" + p.headerFormat("VERSION:"))
 	builder.WriteString("\nRunning GoToSocial " + instance.Version)

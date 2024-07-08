@@ -71,8 +71,8 @@ func (p Printer) pollOptions(poll model.Poll) string {
 }
 
 func (p Printer) pollMeter(votage float64) string {
-	numVoteBlocks := int(math.Floor(float64(p.maxTerminalWidth) * votage))
-	numBackgroundBlocks := p.maxTerminalWidth - numVoteBlocks
+	numVoteBlocks := int(math.Floor(float64(p.lineWrapCharacterLimit) * votage))
+	numBackgroundBlocks := p.lineWrapCharacterLimit - numVoteBlocks
 
 	voteBlockColor := p.theme.boldgreen
 	backgroundBlockColor := p.theme.grey

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func (p Printer) PrintStatus(status model.Status) {
@@ -24,7 +23,7 @@ func (p Printer) PrintStatus(status model.Status) {
 
 	// The content of the status.
 	builder.WriteString("\n\n" + p.headerFormat("CONTENT:"))
-	builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(status.Content), "\n", p.maxTerminalWidth))
+	builder.WriteString(p.convertHTMLToText(status.Content, true))
 
 	// Details of media attachments (if any).
 	if len(status.MediaAttachments) > 0 {
@@ -93,7 +92,10 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 		if status.Reblog != nil {
 			builder.WriteString(
-				"\n" + utilities.WrapLines("reposted this status from "+p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct), "\n", p.maxTerminalWidth),
+				"\n" + p.wrapLines(
+					"reposted this status from "+p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct),
+					0,
+				),
 			)
 
 			statusID = status.Reblog.ID
@@ -103,22 +105,25 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 			mediaAttachments = status.Reblog.MediaAttachments
 		}
 
-		builder.WriteString("\n" + utilities.WrapLines(utilities.ConvertHTMLToText(content), "\n", p.maxTerminalWidth))
+		builder.WriteString("\n" + p.convertHTMLToText(content, true))
 
 		if poll != nil {
 			builder.WriteString(p.pollOptions(*poll))
 		}
 
 		for _, media := range mediaAttachments {
-			builder.WriteString("\n\n" + symbolImage + "  Media attachment: " + media.ID)
-			builder.WriteString("\n   Media type: " + media.Type + "\n   ")
+			builder.WriteString("\n\n" + symbolImage + " " + p.fieldFormat("Media attachment: ") + media.ID)
+			builder.WriteString("\n  " + p.fieldFormat("Media type: ") + media.Type + "\n")
 
-			description := media.Description
-			if description == "" {
-				description = noMediaDescription
+			description := "  " + p.fieldFormat("Description: ")
+
+			if media.Description == "" {
+				description += noMediaDescription
+			} else {
+				description += media.Description
 			}
 
-			builder.WriteString(utilities.WrapLines(description, "\n   ", p.maxTerminalWidth-3))
+			builder.WriteString(p.wrapLines(description, 2))
 		}
 
 		boosted := symbolBoosted

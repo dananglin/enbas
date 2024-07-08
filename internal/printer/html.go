@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package utilities
+package printer
 
 import (
 	"io"
@@ -23,7 +23,7 @@ type htmlConvertState struct {
 	orderedListIndex int
 }
 
-func ConvertHTMLToText(text string) string {
+func (p Printer) convertHTMLToText(text string, wrapLines bool) string {
 	var builder strings.Builder
 
 	state := htmlConvertState{
@@ -37,6 +37,10 @@ func ConvertHTMLToText(text string) string {
 		tt := token.Next()
 		switch tt {
 		case html.ErrorToken:
+			if wrapLines {
+				return p.wrapLines(builder.String(), 0)
+			}
+
 			return builder.String()
 		case html.TextToken:
 			text := token.Token().Data
@@ -66,7 +70,7 @@ func processTagToken(state *htmlConvertState, writer io.StringWriter, tag string
 	case "<li>":
 		switch state.htmlListType {
 		case htmlUnorderedList:
-			_, _ = writer.WriteString("• ")
+			_, _ = writer.WriteString(symbolBullet + " ")
 		case htmlOrderedList:
 			_, _ = writer.WriteString(strconv.Itoa(state.orderedListIndex) + ". ")
 			state.orderedListIndex++

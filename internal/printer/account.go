@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func (p Printer) PrintAccount(account model.Account, relationship *model.AccountRelationship, preferences *model.Preferences) {
@@ -28,11 +27,11 @@ func (p Printer) PrintAccount(account model.Account, relationship *model.Account
 	builder.WriteString("\n" + p.fieldFormat("Statuses:"))
 	builder.WriteString(" " + strconv.Itoa(account.StatusCount))
 	builder.WriteString("\n\n" + p.headerFormat("BIOGRAPHY:"))
-	builder.WriteString(utilities.WrapLines(utilities.ConvertHTMLToText(account.Note), "\n", p.maxTerminalWidth))
+	builder.WriteString(p.convertHTMLToText(account.Note, true))
 	builder.WriteString("\n\n" + p.headerFormat("METADATA:"))
 
 	for _, field := range account.Fields {
-		builder.WriteString("\n" + p.fieldFormat(field.Name) + ": " + utilities.ConvertHTMLToText(field.Value))
+		builder.WriteString("\n" + p.fieldFormat(field.Name) + ": " + p.convertHTMLToText(field.Value, false))
 	}
 
 	builder.WriteString("\n\n" + p.headerFormat("ACCOUNT URL:"))
@@ -80,7 +79,7 @@ func (p Printer) accountRelationship(relationship *model.AccountRelationship) st
 
 	if relationship.PrivateNote != "" {
 		builder.WriteString("\n\n" + p.headerFormat("YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:"))
-		builder.WriteString("\n" + utilities.WrapLines(relationship.PrivateNote, "\n", p.maxTerminalWidth))
+		builder.WriteString("\n" + p.wrapLines(relationship.PrivateNote, 0))
 	}
 
 	return builder.String()

@@ -43,17 +43,17 @@ type theme struct {
 }
 
 type Printer struct {
-	theme            theme
-	noColor          bool
-	maxTerminalWidth int
-	pager            string
-	statusSeparator  string
+	theme                  theme
+	noColor                bool
+	lineWrapCharacterLimit int
+	pager                  string
+	statusSeparator        string
 }
 
 func NewPrinter(
 	noColor bool,
 	pager string,
-	maxTerminalWidth int,
+	lineWrapCharacterLimit int,
 ) *Printer {
 	theme := theme{
 		reset:       "\033[0m",
@@ -68,16 +68,16 @@ func NewPrinter(
 		boldyellow:  "\033[33;1m",
 	}
 
-	if maxTerminalWidth < minTerminalWidth {
-		maxTerminalWidth = minTerminalWidth
+	if lineWrapCharacterLimit < minTerminalWidth {
+		lineWrapCharacterLimit = minTerminalWidth
 	}
 
 	return &Printer{
-		theme:            theme,
-		noColor:          noColor,
-		maxTerminalWidth: maxTerminalWidth,
-		pager:            pager,
-		statusSeparator:  strings.Repeat("\u2501", maxTerminalWidth),
+		theme:                  theme,
+		noColor:                noColor,
+		lineWrapCharacterLimit: lineWrapCharacterLimit,
+		pager:                  pager,
+		statusSeparator:        strings.Repeat("\u2501", lineWrapCharacterLimit),
 	}
 }
 
