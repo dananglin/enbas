@@ -13,9 +13,13 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
+const (
+	baseAccountsPath       = "/api/v1/accounts"
+	baseFollowRequestsPath = "/api/v1/follow_requests"
+)
+
 func (g *Client) VerifyCredentials() (model.Account, error) {
-	path := "/api/v1/accounts/verify_credentials"
-	url := g.Authentication.Instance + path
+	url := g.Authentication.Instance + baseAccountsPath + "/verify_credentials"
 
 	var account model.Account
 
@@ -27,8 +31,7 @@ func (g *Client) VerifyCredentials() (model.Account, error) {
 }
 
 func (g *Client) GetAccount(accountURI string) (model.Account, error) {
-	path := "/api/v1/accounts/lookup?acct=" + accountURI
-	url := g.Authentication.Instance + path
+	url := g.Authentication.Instance + baseAccountsPath + "/lookup?acct=" + accountURI
 
 	var account model.Account
 
@@ -40,8 +43,7 @@ func (g *Client) GetAccount(accountURI string) (model.Account, error) {
 }
 
 func (g *Client) GetAccountRelationship(accountID string) (*model.AccountRelationship, error) {
-	path := "/api/v1/accounts/relationships?id=" + accountID
-	url := g.Authentication.Instance + path
+	url := g.Authentication.Instance + baseAccountsPath + "/relationships?id=" + accountID
 
 	var relationships []model.AccountRelationship
 
@@ -75,7 +77,7 @@ func (g *Client) FollowAccount(form FollowAccountForm) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/follow", form.AccountID)
+	url := g.Authentication.Instance + baseAccountsPath + "/" + form.AccountID + "/follow"
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf("received an error after sending the follow request: %w", err)
@@ -85,7 +87,7 @@ func (g *Client) FollowAccount(form FollowAccountForm) error {
 }
 
 func (g *Client) UnfollowAccount(accountID string) error {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/unfollow", accountID)
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unfollow"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to unfollow the account: %w", err)
@@ -95,7 +97,7 @@ func (g *Client) UnfollowAccount(accountID string) error {
 }
 
 func (g *Client) GetFollowers(accountID string, limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/followers?limit=%d", accountID, limit)
+	url := g.Authentication.Instance + fmt.Sprintf("%s/%s/followers?limit=%d", baseAccountsPath, accountID, limit)
 
 	accounts := make([]model.Account, limit)
 
@@ -112,7 +114,7 @@ func (g *Client) GetFollowers(accountID string, limit int) (model.AccountList, e
 }
 
 func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/following?limit=%d", accountID, limit)
+	url := g.Authentication.Instance + fmt.Sprintf("%s/%s/following?limit=%d", baseAccountsPath, accountID, limit)
 
 	accounts := make([]model.Account, limit)
 
@@ -129,7 +131,7 @@ func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, e
 }
 
 func (g *Client) BlockAccount(accountID string) error {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/block", accountID)
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/block"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to block the account: %w", err)
@@ -139,7 +141,7 @@ func (g *Client) BlockAccount(accountID string) error {
 }
 
 func (g *Client) UnblockAccount(accountID string) error {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/unblock", accountID)
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unblock"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to unblock the account: %w", err)
@@ -178,7 +180,7 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/accounts/%s/note", accountID)
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/note"
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to set the private note: %w", err)
@@ -188,7 +190,7 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 }
 
 func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/follow_requests?limit=%d", limit)
+	url := g.Authentication.Instance + fmt.Sprintf("%s?limit=%d", baseFollowRequestsPath, limit)
 
 	var accounts []model.Account
 
@@ -205,7 +207,7 @@ func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
 }
 
 func (g *Client) AcceptFollowRequest(accountID string) error {
-	url := g.Authentication.Instance + "/api/v1/follow_requests/" + accountID + "/authorize"
+	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/authorize"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to accept the follow request: %w", err)
@@ -215,7 +217,7 @@ func (g *Client) AcceptFollowRequest(accountID string) error {
 }
 
 func (g *Client) RejectFollowRequest(accountID string) error {
-	url := g.Authentication.Instance + "/api/v1/follow_requests/" + accountID + "/reject"
+	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/reject"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to reject the follow request: %w", err)
@@ -253,7 +255,7 @@ func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + "/api/v1/accounts/" + accountID + "/mute"
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/mute"
 
 	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to mute the account: %w", err)
@@ -263,7 +265,7 @@ func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
 }
 
 func (g *Client) UnmuteAccount(accountID string) error {
-	url := g.Authentication.Instance + "/api/v1/accounts/" + accountID + "/unmute"
+	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unmute"
 
 	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
 		return fmt.Errorf("received an error after sending the request to unmute the account: %w", err)
