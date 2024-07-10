@@ -82,27 +82,39 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 	builder.WriteString(p.headerFormat(list.Name) + "\n")
 
 	for _, status := range list.Statuses {
-		builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct))
-
 		statusID := status.ID
-		createdAt := status.CreatedAt
+		createdAt := p.formatDateTime(status.CreatedAt)
+		boostedAt := ""
 		content := status.Content
 		poll := status.Poll
 		mediaAttachments := status.MediaAttachments
 
-		if status.Reblog != nil {
-			builder.WriteString(
-				"\n" + p.wrapLines(
-					"reposted this status from "+p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct),
-					0,
-				),
-			)
+		switch {
+		case status.Reblog != nil:
+			builder.WriteString("\n" + p.wrapLines(
+				p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
+					" boosted this status from "+
+					p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct)+
+					":",
+				0,
+			))
 
 			statusID = status.Reblog.ID
-			createdAt = status.Reblog.CreatedAt
+			createdAt = p.formatDateTime(status.Reblog.CreatedAt)
+			boostedAt = p.formatDateTime(status.CreatedAt)
 			content = status.Reblog.Content
 			poll = status.Reblog.Poll
 			mediaAttachments = status.Reblog.MediaAttachments
+		case status.InReplyToID != "":
+			builder.WriteString("\n" + p.wrapLines(
+				p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
+					" posted in reply to "+
+					status.InReplyToID+
+					":",
+				0,
+			))
+		default:
+			builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct) + " posted:")
 		}
 
 		builder.WriteString("\n" + p.convertHTMLToText(content, true))
@@ -147,12 +159,15 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 
 		builder.WriteString(
 			"\n\n" +
-				p.fieldFormat("Status ID:") + " " + statusID + "\t" +
-				p.fieldFormat("Created at:") + " " + p.formatDateTime(createdAt) +
-				"\n",
+				p.fieldFormat("Status ID: ") + statusID +
+				"\n" + p.fieldFormat("Created at: ") + createdAt,
 		)
 
-		builder.WriteString(p.statusSeparator + "\n")
+		if boostedAt != "" {
+			builder.WriteString("\n" + p.fieldFormat("Boosted at: ") + boostedAt)
+		}
+
+		builder.WriteString("\n" + p.statusSeparator + "\n")
 	}
 
 	p.print(builder.String())
