@@ -23,9 +23,15 @@ type ShowExecutor struct {
 	printer                 *printer.Printer
 	config                  *config.Config
 	myAccount               bool
-	skipAccountRelationship bool
-	showUserPreferences     bool
+	excludeBoosts           bool
+	excludeReplies          bool
+	onlyMedia               bool
+	onlyPinned              bool
+	onlyPublic              bool
 	showInBrowser           bool
+	showUserPreferences     bool
+	showStatuses            bool
+	skipAccountRelationship bool
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -50,6 +56,12 @@ func NewShowExecutor(printer *printer.Printer, config *config.Config, name, summ
 	showExe.BoolVar(&showExe.skipAccountRelationship, flagSkipRelationship, false, "Set to true to skip showing your relationship to the specified account")
 	showExe.BoolVar(&showExe.showUserPreferences, flagShowPreferences, false, "Show your preferences")
 	showExe.BoolVar(&showExe.showInBrowser, flagBrowser, false, "Set to true to view in the browser")
+	showExe.BoolVar(&showExe.showStatuses, flagShowStatuses, false, "Set to true to view the statuses created from the specified account")
+	showExe.BoolVar(&showExe.excludeReplies, flagExcludeReplies, false, "Set to true to exclude statuses that are a reply to another status")
+	showExe.BoolVar(&showExe.excludeBoosts, flagExcludeBoosts, false, "Set to true to exclude statuses that are boosts of another status")
+	showExe.BoolVar(&showExe.onlyPinned, flagOnlyPinned, false, "Set to true to show only the account's pinned statuses")
+	showExe.BoolVar(&showExe.onlyMedia, flagOnlyMedia, false, "Set to true to show only the statuses with media attachments")
+	showExe.BoolVar(&showExe.onlyPublic, flagOnlyPublic, false, "Set to true to show only the account's public posts")
 	showExe.StringVar(&showExe.resourceType, flagType, "", "Specify the type of resource to display")
 	showExe.StringVar(&showExe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
 	showExe.StringVar(&showExe.statusID, flagStatusID, "", "Specify the ID of the status to display")
@@ -147,6 +159,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	var (
 		relationship *model.AccountRelationship
 		preferences  *model.Preferences
+		statuses     *model.StatusList
 	)
 
 	if !s.myAccount && !s.skipAccountRelationship {
@@ -163,7 +176,24 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		}
 	}
 
-	s.printer.PrintAccount(account, relationship, preferences)
+	if s.showStatuses {
+		form := client.GetAccountStatusesForm{
+			AccountID:      account.ID,
+			Limit:          s.limit,
+			ExcludeReplies: s.excludeReplies,
+			ExcludeReblogs: s.excludeBoosts,
+			Pinned:         s.onlyPinned,
+			OnlyMedia:      s.onlyMedia,
+			OnlyPublic:     s.onlyPublic,
+		}
+
+		statuses, err = gtsClient.GetAccountStatuses(form)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve the account's statuses: %w", err)
+		}
+	}
+
+	s.printer.PrintAccount(account, relationship, preferences, statuses)
 
 	return nil
 }

@@ -77,6 +77,10 @@ func (p Printer) PrintStatus(status model.Status) {
 }
 
 func (p Printer) PrintStatusList(list model.StatusList) {
+	p.print(p.statusList(list))
+}
+
+func (p Printer) statusList(list model.StatusList) string {
 	var builder strings.Builder
 
 	builder.WriteString(p.headerFormat(list.Name) + "\n")
@@ -170,5 +174,5 @@ func (p Printer) PrintStatusList(list model.StatusList) {
 		builder.WriteString("\n" + p.statusSeparator + "\n")
 	}
 
-	p.print(builder.String())
+	return builder.String()
 }

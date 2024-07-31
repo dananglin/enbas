@@ -273,3 +273,40 @@ func (g *Client) UnmuteAccount(accountID string) error {
 
 	return nil
 }
+
+type GetAccountStatusesForm struct {
+	AccountID      string
+	Limit          int
+	ExcludeReplies bool
+	ExcludeReblogs bool
+	Pinned         bool
+	OnlyMedia      bool
+	OnlyPublic     bool
+}
+
+func (g *Client) GetAccountStatuses(form GetAccountStatusesForm) (*model.StatusList, error) {
+	path := baseAccountsPath + "/" + form.AccountID + "/statuses"
+	query := fmt.Sprintf(
+		"?limit=%d&exclude_replies=%t&exclude_reblogs=%t&pinned=%t&only_media=%t&only_public=%t",
+		form.Limit,
+		form.ExcludeReplies,
+		form.ExcludeReblogs,
+		form.Pinned,
+		form.OnlyMedia,
+		form.OnlyPublic,
+	)
+	url := g.Authentication.Instance + path + query
+
+	var statuses []model.Status
+
+	if err := g.sendRequest(http.MethodGet, url, nil, &statuses); err != nil {
+		return nil, fmt.Errorf("received an error after sending the request to get the account's statuses: %w", err)
+	}
+
+	statusList := model.StatusList{
+		Name:     "STATUSES:",
+		Statuses: statuses,
+	}
+
+	return &statusList, nil
+}

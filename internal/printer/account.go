@@ -11,7 +11,12 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (p Printer) PrintAccount(account model.Account, relationship *model.AccountRelationship, preferences *model.Preferences) {
+func (p Printer) PrintAccount(
+	account model.Account,
+	relationship *model.AccountRelationship,
+	preferences *model.Preferences,
+	statuses *model.StatusList,
+) {
 	var builder strings.Builder
 
 	builder.WriteString("\n" + p.fullDisplayNameFormat(account.DisplayName, account.Acct))
@@ -43,6 +48,10 @@ func (p Printer) PrintAccount(account model.Account, relationship *model.Account
 
 	if preferences != nil {
 		builder.WriteString(p.userPreferences(preferences))
+	}
+
+	if statuses != nil {
+		builder.WriteString("\n\n" + p.statusList(*statuses))
 	}
 
 	builder.WriteString("\n\n")

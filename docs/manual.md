@@ -17,8 +17,7 @@ SPDX-License-Identifier: CC-BY-4.0
   - [Switch between accounts](#switch-between-accounts)
   - [See the account that you are currently logged in as](#see-the-account-that-you-are-currently-logged-in-as)
 - [Accounts](#accounts)
-  - [View your own account](#view-your-own-account)
-  - [View an account](#view-an-account)
+  - [View account information](#view-account-information)
   - [Follow an account](#follow-an-account)
   - [Unfollow an account](#unfollow-an-account)
   - [Show an account's followers](#show-an-accounts-followers)
@@ -135,34 +134,40 @@ enbas whoami
 
 ## Accounts
 
-### View your own account
+### View account information
 
-Prints the information from your own account.
-
-```
-enbas show --type account --my-account
-```
-
-| flag | type | required | description | default |
-|------|------|----------|-------------|---------|
-| `type` | string | true | The resource you want to view. Here this should be `account`. | |
-| `my-account` | boolean | true | Use this flag to view your own account. | |
-| `show-preferences` | boolean | false | Show your posting preferences. | false |
-
-### View an account
-
-Prints the information of a local or a remote account.
-If the account is unknown by your instance a `404` message will be shown instead.
-
-```
-enbas show --type account --account-name @name@example.social
-```
+- View information from your own account
+   ```
+   enbas show --type account --my-account
+   ```
+- View information from a local or remote account.
+   ```
+   enbas show --type account --account-name @name@example.social
+   ```
+- View an account and show the public statuses that it has created.
+   ```
+   enbas show --type account --account-name @name@example.social --show-statuses --only-public
+   ```
 
 | flag | type | required | description | default |
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to view. Here this should be `account`. | |
-| `account-name` | string | true | The name of the account to view. | |
+| `my-account` | boolean | true | Set to `true` to view your own account. | |
+| `show-preferences` | boolean | false | Show your posting preferences. Only applicable with the `my-account` flag. | false |
+| `account-name` | string | false | The name of the account to view. This is not required with the `my-account` flag. | |
 | `skip-relationship` | boolean | false | Set to `true` to skip viewing your relationship to the account you are viewing (including the private note if you've created one). | false |
+
+Additional flags for viewing an account's statuses.
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `show-statuses` | bool | false | Set to `true` to view the statuses created from this account. | false |
+| `limit` | integer | false | The maximum amount of statuses to show from this account. | 20 |
+| `exclude-replies` | bool | false | Set to `true` to exclude replies. | false |
+| `exclude-boosts` | bool | false | Set to `true` to exclude boosts. | false |
+| `only-pinned` | bool | false | Set to `true` to view only pinned statuses. | false |
+| `only-media` | bool | false | Set to `true` to view only statuses with media attachments. | false |
+| `only-public` | bool | false | Set to `true` to view only public statuses. | false |
 
 ### Follow an account
 
