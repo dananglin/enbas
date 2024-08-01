@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2024 Dan Anglin <d.n.i.anglin@gmail.com>
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 package executor
 
 type FlagNotSetError struct {
@@ -116,10 +112,10 @@ func (e NotFollowingError) Error() string {
 	return "you are not following " + e.Account
 }
 
-//type UnknownMediaAttachmentError struct {
-//	AttachmentID string
-//}
-//
-//func (e UnknownMediaAttachmentError) Error() string {
-//	return "unknown media attachment '" + e.AttachmentID + "'"
-//}
+type UnknownMediaAttachmentError struct {
+	AttachmentID string
+}
+
+func (e UnknownMediaAttachmentError) Error() string {
+	return "unknown media attachment '" + e.AttachmentID + "'"
+}

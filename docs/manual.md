@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2024 Dan Anglin <d.n.i.anglin@gmail.com>
-
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 # User Manual
 
 ## Table of Contents
@@ -722,23 +716,16 @@ video player in your configuration file respectively.
 See the [configuration reference page](configuration.md#integration) on how to set up integration with
 your media players.
 
-- View a specific media attachment from a specific status
-   ```
-   enbas show --type media --from status --status-id 01J0N11V4V7PWH0DDRAVT7TCFK --attachment-id 01J0N0RQSJ7CFGKHA30F7GBQXT
-   ```
-- View all image attachments from a specific status
-   ```
-   enbas show --type media --from status --status-id 01J0N11V4V7PWH0DDRAVT7TCFK --all-images
-   ```
+```
+enbas show --type media --from status --status-id 01J0N11V4V7PWH0DDRAVT7TCFK --attachment-id 01J0N0RQSJ7CFGKHA30F7GBQXT
+```
 
 | flag | type | required | description | default |
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to view.<br>Here this should be `media`. | |
 | `from` | string | true | The resource you want to view the media from.<br>Here this should be `status`. | |
 | `status-id` | string | true | The ID of the status that you want to view the media from. | |
-| `attachment-id` | string | false | The ID of the media attachment to download and view.<br>Use this flag multiple times to specify multiple media attachments. | |
-| `all-images` | boolean | false | Set to `true` to show all images from the status. | false |
-| `all-videos` | boolean | false | Set to `true` to show all videos from the status. | false |
+| `attachment-id` | string | true | The ID of the media attachment to download and view.<br>Use this flag multiple times to specify multiple media attachments. | |
 
 ## Bookmarks
 

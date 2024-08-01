@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2024 Dan Anglin <d.n.i.anglin@gmail.com>
-
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 # Enbas
 
 ### Overview
@@ -33,7 +27,8 @@ the `main` branch mirrored to the following forges:
 
 ### Licensing
 
-Each file is annotated with the licensing information, but in general:
+The licensing information associated with each file is specified in the [REUSE.toml](REUSE.toml) file,
+but in general:
 
 - All original source code is licensed under GPL-3.0-or-later.
 - All documentation is licensed under CC-BY-4.0.
