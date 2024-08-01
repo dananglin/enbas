@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/media"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -28,6 +28,8 @@ type ShowExecutor struct {
 	showUserPreferences     bool
 	showStatuses            bool
 	skipAccountRelationship bool
+	getAllImages            bool
+	getAllVideos            bool
 	resourceType            string
 	accountName             string
 	statusID                string
@@ -58,6 +60,8 @@ func NewShowExecutor(printer *printer.Printer, config *config.Config, name, summ
 	showExe.BoolVar(&showExe.onlyPinned, flagOnlyPinned, false, "Set to true to show only the account's pinned statuses")
 	showExe.BoolVar(&showExe.onlyMedia, flagOnlyMedia, false, "Set to true to show only the statuses with media attachments")
 	showExe.BoolVar(&showExe.onlyPublic, flagOnlyPublic, false, "Set to true to show only the account's public posts")
+	showExe.BoolVar(&showExe.getAllImages, flagAllImages, false, "Set to true to show all images from a status")
+	showExe.BoolVar(&showExe.getAllVideos, flagAllVideos, false, "Set to true to show all videos from a status")
 	showExe.StringVar(&showExe.resourceType, flagType, "", "Specify the type of resource to display")
 	showExe.StringVar(&showExe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
 	showExe.StringVar(&showExe.statusID, flagStatusID, "", "Specify the ID of the status to display")
@@ -525,10 +529,6 @@ func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
-	if len(s.attachmentIDs) == 0 {
-		return FlagNotSetError{flagText: flagAttachmentID}
-	}
-
 	if s.statusID == "" {
 		return FlagNotSetError{flagText: flagStatusID}
 	}
@@ -547,65 +547,26 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to ensure the existence of the directory %q: %w", cacheDir, err)
 	}
 
-	type media struct {
-		url       string
-		mediaType string
+	mediaBundle := media.NewBundle(
+		cacheDir,
+		status.MediaAttachments,
+		s.getAllImages,
+		s.getAllVideos,
+		s.attachmentIDs,
+	)
+
+	if err := mediaBundle.Download(gtsClient); err != nil {
+		return fmt.Errorf("unable to download the media bundle: %w", err)
 	}
 
-	attachmentsHashMap := make(map[string]media)
-	imageFiles := make([]string, 0)
-	videoFiles := make([]string, 0)
-
-	for _, statusAttachment := range status.MediaAttachments {
-		attachmentsHashMap[statusAttachment.ID] = media{
-			url:       statusAttachment.URL,
-			mediaType: statusAttachment.Type,
-		}
-	}
-
-	for _, attachmentID := range s.attachmentIDs {
-		mediaObj, ok := attachmentsHashMap[attachmentID]
-		if !ok {
-			return UnknownMediaAttachmentError{AttachmentID: attachmentID}
-		}
-
-		split := strings.Split(mediaObj.url, "/")
-		filename := split[len(split)-1]
-		filePath := filepath.Join(cacheDir, filename)
-
-		fileExists, err := utilities.FileExists(filePath)
-		if err != nil {
-			return fmt.Errorf(
-				"unable to check if the media file is already downloaded for %s: %w",
-				attachmentID,
-				err,
-			)
-		}
-
-		if !fileExists {
-			if err := gtsClient.DownloadMedia(mediaObj.url, filePath); err != nil {
-				return fmt.Errorf(
-					"unable to download the media attachment for %s: %w",
-					attachmentID,
-					err,
-				)
-			}
-		}
-
-		switch mediaObj.mediaType {
-		case "image":
-			imageFiles = append(imageFiles, filePath)
-		case "video":
-			videoFiles = append(videoFiles, filePath)
-		}
-	}
-
+	imageFiles := mediaBundle.ImageFiles()
 	if len(imageFiles) > 0 {
 		if err := utilities.OpenMedia(s.config.Integrations.ImageViewer, imageFiles); err != nil {
 			return fmt.Errorf("unable to open the image viewer: %w", err)
 		}
 	}
 
+	videoFiles := mediaBundle.VideoFiles()
 	if len(videoFiles) > 0 {
 		if err := utilities.OpenMedia(s.config.Integrations.VideoPlayer, videoFiles); err != nil {
 			return fmt.Errorf("unable to open the video player: %w", err)

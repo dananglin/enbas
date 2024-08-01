@@ -10,6 +10,8 @@ import (
 const (
 	flagAddPoll                   = "add-poll"
 	flagAccountName               = "account-name"
+	flagAllImages                 = "all-images"
+	flagAllVideos                 = "all-videos"
 	flagAttachmentID              = "attachment-id"
 	flagBrowser                   = "browser"
 	flagContentType               = "content-type"

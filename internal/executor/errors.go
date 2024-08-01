@@ -111,11 +111,3 @@ type NotFollowingError struct {
 func (e NotFollowingError) Error() string {
 	return "you are not following " + e.Account
 }
-
-type UnknownMediaAttachmentError struct {
-	AttachmentID string
-}
-
-func (e UnknownMediaAttachmentError) Error() string {
-	return "unknown media attachment '" + e.AttachmentID + "'"
-}
