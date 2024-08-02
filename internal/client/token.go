@@ -28,7 +28,7 @@ type tokenResponse struct {
 }
 
 func (g *Client) UpdateToken(code string) error {
-	params := tokenRequest{
+	tokenReq := tokenRequest{
 		RedirectURI:  internal.RedirectURI,
 		ClientID:     g.Authentication.ClientID,
 		ClientSecret: g.Authentication.ClientSecret,
@@ -36,7 +36,7 @@ func (g *Client) UpdateToken(code string) error {
 		Code:         code,
 	}
 
-	data, err := json.Marshal(params)
+	data, err := json.Marshal(tokenReq)
 	if err != nil {
 		return fmt.Errorf("unable to marshal the request body: %w", err)
 	}
@@ -46,7 +46,15 @@ func (g *Client) UpdateToken(code string) error {
 
 	var response tokenResponse
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, &response); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      &response,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the token request: %w", err)
 	}
 

@@ -18,14 +18,14 @@ type registerRequest struct {
 }
 
 func (g *Client) Register() error {
-	params := registerRequest{
+	registerParams := registerRequest{
 		ClientName:   internal.ApplicationName,
 		RedirectUris: internal.RedirectURI,
 		Scopes:       "read write",
 		Website:      internal.ApplicationWebsite,
 	}
 
-	data, err := json.Marshal(params)
+	data, err := json.Marshal(registerParams)
 	if err != nil {
 		return fmt.Errorf("unable to marshal the request body: %w", err)
 	}
@@ -35,7 +35,15 @@ func (g *Client) Register() error {
 
 	var app model.Application
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, &app); err != nil {
+	requestParams := requestParameters{
+		httpMethod: http.MethodPost,
+		url: url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output: &app,
+	}
+
+	if err := g.sendRequest(requestParams); err != nil {
 		return fmt.Errorf("received an error after sending the registration request: %w", err)
 	}
 

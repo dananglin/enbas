@@ -56,7 +56,15 @@ func (g *Client) getTimeline(path string, timeline model.StatusList) (model.Stat
 
 	var statuses []model.Status
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &statuses); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &statuses,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return timeline, fmt.Errorf("received an error after sending the request to get the timeline: %w", err)
 	}
 

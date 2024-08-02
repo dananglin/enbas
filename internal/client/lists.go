@@ -18,7 +18,15 @@ func (g *Client) GetAllLists() ([]model.List, error) {
 
 	var lists []model.List
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &lists); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &lists,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return nil, fmt.Errorf(
 			"received an error after sending the request to get the list of lists: %w",
 			err,
@@ -33,7 +41,15 @@ func (g *Client) GetList(listID string) (model.List, error) {
 
 	var list model.List
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &list); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &list,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.List{}, fmt.Errorf(
 			"received an error after sending the request to get the list: %w",
 			err,
@@ -59,7 +75,15 @@ func (g *Client) CreateList(form CreateListForm) (model.List, error) {
 
 	var list model.List
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, &list); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      &list,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.List{}, fmt.Errorf(
 			"received an error after sending the request to create the list: %w",
 			err,
@@ -88,7 +112,15 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 
 	var updatedList model.List
 
-	if err := g.sendRequest(http.MethodPut, url, requestBody, &updatedList); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPut,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      &updatedList,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.List{}, fmt.Errorf(
 			"received an error after sending the request to update the list: %w",
 			err,
@@ -101,7 +133,22 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 func (g *Client) DeleteList(listID string) error {
 	url := g.Authentication.Instance + baseListPath + "/" + listID
 
-	return g.sendRequest(http.MethodDelete, url, nil, nil)
+	params := requestParameters{
+		httpMethod:  http.MethodDelete,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to delete the list: %w",
+			err,
+		)
+	}
+
+	return nil
 }
 
 func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
@@ -119,7 +166,15 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to add the accounts to the list: %w",
 			err,
@@ -144,7 +199,15 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
-	if err := g.sendRequest(http.MethodDelete, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodDelete,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to remove the accounts from the list: %w",
 			err,
@@ -160,7 +223,15 @@ func (g *Client) GetAccountsFromList(listID string, limit int) ([]model.Account,
 
 	var accounts []model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return nil, fmt.Errorf(
 			"received an error after sending the request to get the accounts from the list: %w",
 			err,

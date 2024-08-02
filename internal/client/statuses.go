@@ -19,7 +19,15 @@ func (g *Client) GetStatus(statusID string) (model.Status, error) {
 
 	var status model.Status
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &status); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &status,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.Status{}, fmt.Errorf(
 			"received an error after sending the request to get the status information: %w",
 			err,
@@ -62,7 +70,15 @@ func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
 
 	var status model.Status
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, &status); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      &status,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.Status{}, fmt.Errorf(
 			"received an error after sending the request to create the status: %w",
 			err,
@@ -81,7 +97,15 @@ func (g *Client) GetBookmarks(limit int) (model.StatusList, error) {
 		Statuses: nil,
 	}
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &bookmarks.Statuses); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &bookmarks.Statuses,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return bookmarks, fmt.Errorf(
 			"received an error after sending the request to get the bookmarks: %w",
 			err,
@@ -95,7 +119,15 @@ func (g *Client) AddStatusToBookmarks(statusID string) error {
 	path := fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID)
 	url := g.Authentication.Instance + path
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to add the status to the list of bookmarks: %w",
 			err,
@@ -109,7 +141,15 @@ func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
 	path := fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID)
 	url := g.Authentication.Instance + path
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to remove the status from the list of bookmarks: %w",
 			err,
@@ -122,7 +162,15 @@ func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
 func (g *Client) LikeStatus(statusID string) error {
 	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to like the status: %w",
 			err,
@@ -135,7 +183,15 @@ func (g *Client) LikeStatus(statusID string) error {
 func (g *Client) UnlikeStatus(statusID string) error {
 	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to unlike the status: %w",
 			err,
@@ -153,7 +209,15 @@ func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusL
 		Statuses: nil,
 	}
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &liked.Statuses); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &liked.Statuses,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.StatusList{}, fmt.Errorf(
 			"received an error after sending the request to get the list of statuses: %w",
 			err,
@@ -166,7 +230,15 @@ func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusL
 func (g *Client) ReblogStatus(statusID string) error {
 	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to reblog the status; %w",
 			err,
@@ -179,7 +251,15 @@ func (g *Client) ReblogStatus(statusID string) error {
 func (g *Client) UnreblogStatus(statusID string) error {
 	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
 			"received an error after sending the request to un-reblog the status; %w",
 			err,

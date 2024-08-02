@@ -14,6 +14,10 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 )
 
+const (
+	applicationJSON string = "application/json; charset=utf-8"
+)
+
 type Client struct {
 	Authentication config.Credentials
 	HTTPClient     http.Client
@@ -94,17 +98,28 @@ func (g *Client) DownloadMedia(url, path string) error {
 	return nil
 }
 
-func (g *Client) sendRequest(method string, url string, requestBody io.Reader, object any) error {
+type requestParameters struct {
+	httpMethod  string
+	url         string
+	contentType string
+	requestBody io.Reader
+	output      any
+}
+
+func (g *Client) sendRequest(params requestParameters) error {
 	ctx, cancel := context.WithTimeout(context.Background(), g.Timeout)
 	defer cancel()
 
-	request, err := http.NewRequestWithContext(ctx, method, url, requestBody)
+	request, err := http.NewRequestWithContext(ctx, params.httpMethod, params.url, params.requestBody)
 	if err != nil {
 		return fmt.Errorf("unable to create the HTTP request: %w", err)
 	}
 
-	request.Header.Set("Content-Type", "application/json; charset=utf-8")
-	request.Header.Set("Accept", "application/json; charset=utf-8")
+	if params.contentType != "" {
+		request.Header.Set("Content-Type", params.contentType)
+	}
+
+	request.Header.Set("Accept", applicationJSON)
 	request.Header.Set("User-Agent", g.UserAgent)
 
 	if len(g.Authentication.AccessToken) > 0 {
@@ -140,11 +155,11 @@ func (g *Client) sendRequest(method string, url string, requestBody io.Reader, o
 		}
 	}
 
-	if object == nil {
+	if params.output == nil {
 		return nil
 	}
 
-	if err := json.NewDecoder(response.Body).Decode(object); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(params.output); err != nil {
 		return fmt.Errorf(
 			"unable to decode the response from the GoToSocial server: %w",
 			err,

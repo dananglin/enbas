@@ -18,7 +18,15 @@ func (g *Client) GetPoll(pollID string) (model.Poll, error) {
 
 	var poll model.Poll
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &poll); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &poll,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.Poll{}, fmt.Errorf(
 			"received an error after sending the request to get the poll: %w",
 			err,
@@ -43,7 +51,15 @@ func (g *Client) VoteInPoll(pollID string, choices []int) error {
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + pollPath + "/" + pollID + "/votes"
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to vote in the poll: %w", err)
 	}
 

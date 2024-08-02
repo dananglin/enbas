@@ -19,7 +19,15 @@ func (g *Client) VerifyCredentials() (model.Account, error) {
 
 	var account model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &account); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &account,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.Account{}, fmt.Errorf("received an error after sending the request to verify the credentials: %w", err)
 	}
 
@@ -31,7 +39,15 @@ func (g *Client) GetAccount(accountURI string) (model.Account, error) {
 
 	var account model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &account); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &account,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.Account{}, fmt.Errorf("received an error after sending the request to get the account information: %w", err)
 	}
 
@@ -43,7 +59,15 @@ func (g *Client) GetAccountRelationship(accountID string) (*model.AccountRelatio
 
 	var relationships []model.AccountRelationship
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &relationships); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &relationships,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return nil, fmt.Errorf(
 			"received an error after sending the request to get the account relationship: %w",
 			err,
@@ -75,7 +99,15 @@ func (g *Client) FollowAccount(form FollowAccountForm) error {
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + baseAccountsPath + "/" + form.AccountID + "/follow"
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the follow request: %w", err)
 	}
 
@@ -85,7 +117,15 @@ func (g *Client) FollowAccount(form FollowAccountForm) error {
 func (g *Client) UnfollowAccount(accountID string) error {
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unfollow"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to unfollow the account: %w", err)
 	}
 
@@ -97,7 +137,15 @@ func (g *Client) GetFollowers(accountID string, limit int) (model.AccountList, e
 
 	accounts := make([]model.Account, limit)
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followers: %w", err)
 	}
 
@@ -114,7 +162,15 @@ func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, e
 
 	accounts := make([]model.Account, limit)
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followed accounts: %w", err)
 	}
 
@@ -129,7 +185,15 @@ func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, e
 func (g *Client) BlockAccount(accountID string) error {
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/block"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to block the account: %w", err)
 	}
 
@@ -139,7 +203,15 @@ func (g *Client) BlockAccount(accountID string) error {
 func (g *Client) UnblockAccount(accountID string) error {
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unblock"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to unblock the account: %w", err)
 	}
 
@@ -151,7 +223,15 @@ func (g *Client) GetBlockedAccounts(limit int) (model.AccountList, error) {
 
 	var accounts []model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of blocked accounts: %w", err)
 	}
 
@@ -178,7 +258,15 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/note"
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to set the private note: %w", err)
 	}
 
@@ -190,7 +278,15 @@ func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
 
 	var accounts []model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of follow requests: %w", err)
 	}
 
@@ -205,7 +301,15 @@ func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
 func (g *Client) AcceptFollowRequest(accountID string) error {
 	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/authorize"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to accept the follow request: %w", err)
 	}
 
@@ -215,7 +319,15 @@ func (g *Client) AcceptFollowRequest(accountID string) error {
 func (g *Client) RejectFollowRequest(accountID string) error {
 	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/reject"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to reject the follow request: %w", err)
 	}
 
@@ -227,7 +339,15 @@ func (g *Client) GetMutedAccounts(limit int) (model.AccountList, error) {
 
 	var accounts []model.Account
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &accounts); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of muted accounts: %w", err)
 	}
 
@@ -253,7 +373,15 @@ func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
 	requestBody := bytes.NewBuffer(data)
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/mute"
 
-	if err := g.sendRequest(http.MethodPost, url, requestBody, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: requestBody,
+		contentType: applicationJSON,
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to mute the account: %w", err)
 	}
 
@@ -263,7 +391,15 @@ func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
 func (g *Client) UnmuteAccount(accountID string) error {
 	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unmute"
 
-	if err := g.sendRequest(http.MethodPost, url, nil, nil); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf("received an error after sending the request to unmute the account: %w", err)
 	}
 
@@ -295,7 +431,15 @@ func (g *Client) GetAccountStatuses(form GetAccountStatusesForm) (*model.StatusL
 
 	var statuses []model.Status
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &statuses); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &statuses,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return nil, fmt.Errorf("received an error after sending the request to get the account's statuses: %w", err)
 	}
 

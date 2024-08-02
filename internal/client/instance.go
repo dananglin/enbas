@@ -13,7 +13,15 @@ func (g *Client) GetInstance() (model.InstanceV2, error) {
 
 	var instance model.InstanceV2
 
-	if err := g.sendRequest(http.MethodGet, url, nil, &instance); err != nil {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &instance,
+	}
+
+	if err := g.sendRequest(params); err != nil {
 		return model.InstanceV2{}, fmt.Errorf("received an error after sending the request to get the instance details: %w", err)
 	}
 
