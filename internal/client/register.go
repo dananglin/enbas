@@ -36,11 +36,11 @@ func (g *Client) Register() error {
 	var app model.Application
 
 	requestParams := requestParameters{
-		httpMethod: http.MethodPost,
-		url: url,
+		httpMethod:  http.MethodPost,
+		url:         url,
 		requestBody: requestBody,
 		contentType: applicationJSON,
-		output: &app,
+		output:      &app,
 	}
 
 	if err := g.sendRequest(requestParams); err != nil {

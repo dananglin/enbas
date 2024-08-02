@@ -17,11 +17,11 @@ func (g *Client) GetMediaAttachment(mediaAttachmentID string) (model.Attachment,
 	var attachment model.Attachment
 
 	params := requestParameters{
-		httpMethod: http.MethodGet,
-		url: url,
+		httpMethod:  http.MethodGet,
+		url:         url,
 		requestBody: nil,
 		contentType: "",
-		output: &attachment,
+		output:      &attachment,
 	}
 
 	if err := g.sendRequest(params); err != nil {
