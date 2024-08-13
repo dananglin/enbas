@@ -25,7 +25,7 @@ func (m *UnmuteExecutor) Execute() error {
 }
 
 func (m *UnmuteExecutor) unmuteAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, m.accountName, m.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, m.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

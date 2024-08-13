@@ -93,7 +93,7 @@ func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
 }
 
 func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, r.accountNames, r.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, r.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

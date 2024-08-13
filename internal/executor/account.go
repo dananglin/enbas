@@ -12,7 +12,6 @@ func getAccountID(
 	gtsClient *client.Client,
 	myAccount bool,
 	accountNames internalFlag.StringSliceValue,
-	credentialsFile string,
 ) (string, error) {
 	account, err := getAccount(gtsClient, myAccount, accountNames)
 	if err != nil {

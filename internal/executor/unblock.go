@@ -25,7 +25,7 @@ func (b *UnblockExecutor) Execute() error {
 }
 
 func (b *UnblockExecutor) unblockAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, b.accountName, b.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, b.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

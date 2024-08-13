@@ -104,7 +104,7 @@ func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, a.accountNames, a.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, a.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

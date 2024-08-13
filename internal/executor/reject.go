@@ -25,7 +25,7 @@ func (r *RejectExecutor) Execute() error {
 }
 
 func (r *RejectExecutor) rejectFollowRequest(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, r.accountName, r.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, r.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

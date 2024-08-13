@@ -253,7 +253,7 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowersFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -293,7 +293,7 @@ func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showFollowingFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
