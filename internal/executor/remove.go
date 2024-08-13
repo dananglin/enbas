@@ -1,47 +1,10 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
-
-type RemoveExecutor struct {
-	*flag.FlagSet
-
-	printer          *printer.Printer
-	config           *config.Config
-	resourceType     string
-	fromResourceType string
-	listID           string
-	statusID         string
-	accountNames     MultiStringFlagValue
-}
-
-func NewRemoveExecutor(printer *printer.Printer, config *config.Config, name, summary string) *RemoveExecutor {
-	emptyArr := make([]string, 0, 3)
-
-	removeExe := RemoveExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer:      printer,
-		config:       config,
-		accountNames: MultiStringFlagValue(emptyArr),
-	}
-
-	removeExe.StringVar(&removeExe.resourceType, flagType, "", "Specify the resource type to remove (e.g. account, note)")
-	removeExe.StringVar(&removeExe.fromResourceType, flagFrom, "", "Specify the resource type to remove from (e.g. list, account, etc)")
-	removeExe.StringVar(&removeExe.listID, flagListID, "", "The ID of the list to remove from")
-	removeExe.StringVar(&removeExe.statusID, flagStatusID, "", "The ID of the status")
-	removeExe.Var(&removeExe.accountNames, flagAccountName, "The name of the account to remove from the resource")
-
-	removeExe.Usage = commandUsageFunc(name, summary, removeExe.FlagSet)
-
-	return &removeExe
-}
 
 func (r *RemoveExecutor) Execute() error {
 	if r.fromResourceType == "" {
@@ -89,19 +52,19 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 		return FlagNotSetError{flagText: flagListID}
 	}
 
-	if len(r.accountNames) == 0 {
+	if r.accountNames.Empty() {
 		return NoAccountSpecifiedError{}
 	}
 
-	accountIDs := make([]string, len(r.accountNames))
+	accounts, err := getOtherAccounts(gtsClient, r.accountNames)
+	if err != nil {
+		return fmt.Errorf("unable to get the accounts: %w", err)
+	}
 
-	for ind := range r.accountNames {
-		accountID, err := getTheirAccountID(gtsClient, r.accountNames[ind])
-		if err != nil {
-			return fmt.Errorf("unable to get the account ID for %s: %w", r.accountNames[ind], err)
-		}
+	accountIDs := make([]string, len(accounts))
 
-		accountIDs[ind] = accountID
+	for ind := range accounts {
+		accountIDs[ind] = accounts[ind].ID
 	}
 
 	if err := gtsClient.RemoveAccountsFromList(r.listID, accountIDs); err != nil {
@@ -130,11 +93,7 @@ func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
 }
 
 func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
-	if len(r.accountNames) != 1 {
-		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(r.accountNames))
-	}
-
-	accountID, err := getAccountID(gtsClient, false, r.accountNames[0], r.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, r.accountNames, r.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

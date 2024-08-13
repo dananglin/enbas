@@ -2,53 +2,10 @@ package executor
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
-
-type AddExecutor struct {
-	*flag.FlagSet
-
-	printer        *printer.Printer
-	config         *config.Config
-	resourceType   string
-	toResourceType string
-	listID         string
-	statusID       string
-	pollID         string
-	choices        MultiIntFlagValue
-	accountNames   MultiStringFlagValue
-	content        string
-}
-
-func NewAddExecutor(printer *printer.Printer, config *config.Config, name, summary string) *AddExecutor {
-	emptyArr := make([]string, 0, 3)
-
-	addExe := AddExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer:      printer,
-		config:       config,
-		accountNames: MultiStringFlagValue(emptyArr),
-	}
-
-	addExe.StringVar(&addExe.resourceType, flagType, "", "Specify the resource type to add (e.g. account, note)")
-	addExe.StringVar(&addExe.toResourceType, flagTo, "", "Specify the target resource type to add to (e.g. list, account, etc)")
-	addExe.StringVar(&addExe.listID, flagListID, "", "The ID of the list")
-	addExe.StringVar(&addExe.statusID, flagStatusID, "", "The ID of the status")
-	addExe.StringVar(&addExe.content, flagContent, "", "The content of the resource")
-	addExe.StringVar(&addExe.pollID, flagPollID, "", "The ID of the poll")
-	addExe.Var(&addExe.accountNames, flagAccountName, "The name of the account")
-	addExe.Var(&addExe.choices, flagVote, "Add a vote to an option in a poll")
-
-	addExe.Usage = commandUsageFunc(name, summary, addExe.FlagSet)
-
-	return &addExe
-}
 
 func (a *AddExecutor) Execute() error {
 	if a.toResourceType == "" {
@@ -97,28 +54,28 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 		return FlagNotSetError{flagText: flagListID}
 	}
 
-	if len(a.accountNames) == 0 {
+	if a.accountNames.Empty() {
 		return NoAccountSpecifiedError{}
 	}
 
-	accountIDs := make([]string, len(a.accountNames))
+	accounts, err := getOtherAccounts(gtsClient, a.accountNames)
+	if err != nil {
+		return fmt.Errorf("unable to get the accounts: %w", err)
+	}
 
-	for ind := range a.accountNames {
-		accountID, err := getTheirAccountID(gtsClient, a.accountNames[ind])
-		if err != nil {
-			return fmt.Errorf("unable to get the account ID for %s: %w", a.accountNames[ind], err)
-		}
+	accountIDs := make([]string, len(accounts))
 
-		relationship, err := gtsClient.GetAccountRelationship(accountID)
+	for ind := range accounts {
+		relationship, err := gtsClient.GetAccountRelationship(accounts[ind].ID)
 		if err != nil {
-			return fmt.Errorf("unable to get your relationship to %s: %w", a.accountNames[ind], err)
+			return fmt.Errorf("unable to get your relationship to %s: %w", accounts[ind].Acct, err)
 		}
 
 		if !relationship.Following {
-			return NotFollowingError{Account: a.accountNames[ind]}
+			return NotFollowingError{Account: accounts[ind].Acct}
 		}
 
-		accountIDs[ind] = accountID
+		accountIDs[ind] = accounts[ind].ID
 	}
 
 	if err := gtsClient.AddAccountsToList(a.listID, accountIDs); err != nil {
@@ -147,11 +104,7 @@ func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
-	if len(a.accountNames) != 1 {
-		return fmt.Errorf("unexpected number of accounts specified: want 1, got %d", len(a.accountNames))
-	}
-
-	accountID, err := getAccountID(gtsClient, false, a.accountNames[0], a.config.CredentialsFile)
+	accountID, err := getAccountID(gtsClient, false, a.accountNames, a.config.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -265,7 +218,7 @@ func (a *AddExecutor) addToPoll(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
-	if len(a.choices) == 0 {
+	if a.votes.Empty() {
 		return errors.New("please use --" + flagVote + " to make a choice in this poll")
 	}
 
@@ -278,11 +231,11 @@ func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
 		return PollClosedError{}
 	}
 
-	if !poll.Multiple && len(a.choices) > 1 {
+	if !poll.Multiple && !a.votes.ExpectedLength(1) {
 		return MultipleChoiceError{}
 	}
 
-	if err := gtsClient.VoteInPoll(a.pollID, []int(a.choices)); err != nil {
+	if err := gtsClient.VoteInPoll(a.pollID, []int(a.votes)); err != nil {
 		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
 	}
 

@@ -1,39 +1,13 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
-
-type LoginExecutor struct {
-	*flag.FlagSet
-
-	printer  *printer.Printer
-	config   *config.Config
-	instance string
-}
-
-func NewLoginExecutor(printer *printer.Printer, config *config.Config, name, summary string) *LoginExecutor {
-	loginExe := LoginExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer:  printer,
-		config:   config,
-		instance: "",
-	}
-
-	loginExe.StringVar(&loginExe.instance, flagInstance, "", "Specify the instance that you want to login to.")
-
-	loginExe.Usage = commandUsageFunc(name, summary, loginExe.FlagSet)
-
-	return &loginExe
-}
 
 func (l *LoginExecutor) Execute() error {
 	var err error

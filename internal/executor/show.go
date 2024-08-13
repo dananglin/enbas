@@ -1,82 +1,14 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 	"path/filepath"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/media"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
-
-type ShowExecutor struct {
-	*flag.FlagSet
-
-	printer                 *printer.Printer
-	config                  *config.Config
-	myAccount               bool
-	excludeBoosts           bool
-	excludeReplies          bool
-	onlyMedia               bool
-	onlyPinned              bool
-	onlyPublic              bool
-	showInBrowser           bool
-	showUserPreferences     bool
-	showStatuses            bool
-	skipAccountRelationship bool
-	getAllImages            bool
-	getAllVideos            bool
-	resourceType            string
-	accountName             string
-	statusID                string
-	timelineCategory        string
-	listID                  string
-	tag                     string
-	pollID                  string
-	fromResourceType        string
-	limit                   int
-	attachmentIDs           MultiStringFlagValue
-}
-
-func NewShowExecutor(printer *printer.Printer, config *config.Config, name, summary string) *ShowExecutor {
-	showExe := ShowExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer: printer,
-		config:  config,
-	}
-
-	showExe.BoolVar(&showExe.myAccount, flagMyAccount, false, "Set to true to lookup your account")
-	showExe.BoolVar(&showExe.skipAccountRelationship, flagSkipRelationship, false, "Set to true to skip showing your relationship to the specified account")
-	showExe.BoolVar(&showExe.showUserPreferences, flagShowPreferences, false, "Show your preferences")
-	showExe.BoolVar(&showExe.showInBrowser, flagBrowser, false, "Set to true to view in the browser")
-	showExe.BoolVar(&showExe.showStatuses, flagShowStatuses, false, "Set to true to view the statuses created from the specified account")
-	showExe.BoolVar(&showExe.excludeReplies, flagExcludeReplies, false, "Set to true to exclude statuses that are a reply to another status")
-	showExe.BoolVar(&showExe.excludeBoosts, flagExcludeBoosts, false, "Set to true to exclude statuses that are boosts of another status")
-	showExe.BoolVar(&showExe.onlyPinned, flagOnlyPinned, false, "Set to true to show only the account's pinned statuses")
-	showExe.BoolVar(&showExe.onlyMedia, flagOnlyMedia, false, "Set to true to show only the statuses with media attachments")
-	showExe.BoolVar(&showExe.onlyPublic, flagOnlyPublic, false, "Set to true to show only the account's public posts")
-	showExe.BoolVar(&showExe.getAllImages, flagAllImages, false, "Set to true to show all images from a status")
-	showExe.BoolVar(&showExe.getAllVideos, flagAllVideos, false, "Set to true to show all videos from a status")
-	showExe.StringVar(&showExe.resourceType, flagType, "", "Specify the type of resource to display")
-	showExe.StringVar(&showExe.accountName, flagAccountName, "", "Specify the account name in full (username@domain)")
-	showExe.StringVar(&showExe.statusID, flagStatusID, "", "Specify the ID of the status to display")
-	showExe.StringVar(&showExe.timelineCategory, flagTimelineCategory, model.TimelineCategoryHome, "Specify the timeline category to view")
-	showExe.StringVar(&showExe.listID, flagListID, "", "Specify the ID of the list to display")
-	showExe.StringVar(&showExe.tag, flagTag, "", "Specify the name of the tag to use")
-	showExe.StringVar(&showExe.pollID, flagPollID, "", "Specify the ID of the poll to display")
-	showExe.Var(&showExe.attachmentIDs, flagAttachmentID, "Specify the ID of the media attachment to display")
-	showExe.StringVar(&showExe.fromResourceType, flagFrom, "", "Specify the resource type to view the target resource from (e.g. status for viewing media from, etc)")
-	showExe.IntVar(&showExe.limit, flagLimit, 20, "Specify the limit of items to display")
-
-	showExe.Usage = commandUsageFunc(name, summary, showExe.FlagSet)
-
-	return &showExe
-}
 
 func (s *ShowExecutor) Execute() error {
 	if s.resourceType == "" {
@@ -127,25 +59,9 @@ func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
-	var (
-		account model.Account
-		err     error
-	)
-
-	if s.myAccount {
-		account, err = getMyAccount(gtsClient, s.config.CredentialsFile)
-		if err != nil {
-			return fmt.Errorf("received an error while getting the account details: %w", err)
-		}
-	} else {
-		if s.accountName == "" {
-			return FlagNotSetError{flagText: flagAccountName}
-		}
-
-		account, err = getAccount(gtsClient, s.accountName)
-		if err != nil {
-			return fmt.Errorf("received an error while getting the account details: %w", err)
-		}
+	account, err := getAccount(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
+	if err != nil {
+		return fmt.Errorf("unable to get the account information: %w", err)
 	}
 
 	if s.showInBrowser {

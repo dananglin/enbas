@@ -1,4 +1,4 @@
-package executor
+package usage
 
 import (
 	"flag"
@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// commandUsageFunc returns the function used to print a command's help page.
-func commandUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
+// ExecutorUsageFunc returns the function used to print a command's help page.
+func ExecutorUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
 	return func() {
 		var builder strings.Builder
 

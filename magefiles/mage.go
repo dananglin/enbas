@@ -110,10 +110,21 @@ func Clean() error {
 
 // ldflags returns the build flags.
 func ldflags() string {
-	ldflagsfmt := "-s -w -X main.binaryVersion=%s -X main.gitCommit=%s -X main.goVersion=%s -X main.buildTime=%s"
+	versionPackage := "codeflow.dananglin.me.uk/apollo/enbas/internal/version"
+	binaryVersionVar := versionPackage + "." + "BinaryVersion"
+	gitCommitVar := versionPackage + "." + "GitCommit"
+	goVersionVar := versionPackage + "." + "GoVersion"
+	buildTimeVar := versionPackage + "." + "BuildTime"
+	ldflagsfmt := "-s -w -X %s=%s -X %s=%s -X %s=%s -X %s=%s"
 	buildTime := time.Now().UTC().Format(time.RFC3339)
 
-	return fmt.Sprintf(ldflagsfmt, version(), gitCommit(), runtime.Version(), buildTime)
+	return fmt.Sprintf(
+		ldflagsfmt,
+		binaryVersionVar, version(),
+		gitCommitVar, gitCommit(),
+		goVersionVar, runtime.Version(),
+		buildTimeVar, buildTime,
+	)
 }
 
 // version returns the latest git tag using git describe.

@@ -1,43 +1,11 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
-
-type EditExecutor struct {
-	*flag.FlagSet
-
-	printer           *printer.Printer
-	config            *config.Config
-	resourceType      string
-	listID            string
-	listTitle         string
-	listRepliesPolicy string
-}
-
-func NewEditExecutor(printer *printer.Printer, config *config.Config, name, summary string) *EditExecutor {
-	editExe := EditExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer: printer,
-		config:  config,
-	}
-
-	editExe.StringVar(&editExe.resourceType, flagType, "", "Specify the type of resource to update")
-	editExe.StringVar(&editExe.listID, flagListID, "", "Specify the ID of the list to update")
-	editExe.StringVar(&editExe.listTitle, flagListTitle, "", "Specify the title of the list")
-	editExe.StringVar(&editExe.listRepliesPolicy, flagListRepliesPolicy, "", "Specify the policy of the replies for this list (valid values are followed, list and none)")
-
-	editExe.Usage = commandUsageFunc(name, summary, editExe.FlagSet)
-
-	return &editExe
-}
 
 func (e *EditExecutor) Execute() error {
 	if e.resourceType == "" {

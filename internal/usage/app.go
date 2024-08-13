@@ -1,4 +1,4 @@
-package main
+package usage
 
 import (
 	"flag"
@@ -6,9 +6,11 @@ import (
 	"slices"
 	"strings"
 	"text/tabwriter"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/version"
 )
 
-func usageFunc(summaries map[string]string) func() {
+func AppUsageFunc() func() {
 	cmds := make([]string, len(summaries))
 	ind := 0
 
@@ -24,8 +26,8 @@ func usageFunc(summaries map[string]string) func() {
 
 		builder.WriteString("SUMMARY:\n    enbas - A GoToSocial client for the terminal.\n\n")
 
-		if binaryVersion != "" {
-			builder.WriteString("VERSION:\n    " + binaryVersion + "\n\n")
+		if version.BinaryVersion != "" {
+			builder.WriteString("VERSION:\n    " + version.BinaryVersion + "\n\n")
 		}
 
 		builder.WriteString("USAGE:\n    enbas [flags]\n    enbas [flags] [command]\n\nCOMMANDS:")

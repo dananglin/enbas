@@ -1,38 +1,10 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
-
-type DeleteExecutor struct {
-	*flag.FlagSet
-
-	printer      *printer.Printer
-	config       *config.Config
-	resourceType string
-	listID       string
-}
-
-func NewDeleteExecutor(printer *printer.Printer, config *config.Config, name, summary string) *DeleteExecutor {
-	deleteExe := DeleteExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer: printer,
-		config:  config,
-	}
-
-	deleteExe.StringVar(&deleteExe.resourceType, flagType, "", "Specify the type of resource to delete")
-	deleteExe.StringVar(&deleteExe.listID, flagListID, "", "Specify the ID of the list to delete")
-
-	deleteExe.Usage = commandUsageFunc(name, summary, deleteExe.FlagSet)
-
-	return &deleteExe
-}
 
 func (d *DeleteExecutor) Execute() error {
 	if d.resourceType == "" {

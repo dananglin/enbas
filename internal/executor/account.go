@@ -5,49 +5,51 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func getAccountID(gtsClient *client.Client, myAccount bool, accountName, path string) (string, error) {
+func getAccountID(
+	gtsClient *client.Client,
+	myAccount bool,
+	accountNames internalFlag.StringSliceValue,
+	credentialsFile string,
+) (string, error) {
+	account, err := getAccount(gtsClient, myAccount, accountNames, credentialsFile)
+	if err != nil {
+		return "", fmt.Errorf("unable to get the account information: %w", err)
+	}
+
+	return account.ID, nil
+}
+
+func getAccount(
+	gtsClient *client.Client,
+	myAccount bool,
+	accountNames internalFlag.StringSliceValue,
+	credentialsFile string,
+) (model.Account, error) {
 	var (
-		accountID string
-		err       error
+		account model.Account
+		err     error
 	)
 
 	switch {
 	case myAccount:
-		accountID, err = getMyAccountID(gtsClient, path)
+		account, err = getMyAccount(gtsClient, credentialsFile)
 		if err != nil {
-			return "", fmt.Errorf("unable to get your account ID: %w", err)
+			return account, fmt.Errorf("unable to get your account ID: %w", err)
 		}
-	case accountName != "":
-		accountID, err = getTheirAccountID(gtsClient, accountName)
+	case !accountNames.Empty():
+		account, err = getOtherAccount(gtsClient, accountNames)
 		if err != nil {
-			return "", fmt.Errorf("unable to get their account ID: %w", err)
+			return account, fmt.Errorf("unable to get the account ID: %w", err)
 		}
 	default:
-		return "", NoAccountSpecifiedError{}
+		return account, NoAccountSpecifiedError{}
 	}
 
-	return accountID, nil
-}
-
-func getTheirAccountID(gtsClient *client.Client, accountURI string) (string, error) {
-	account, err := getAccount(gtsClient, accountURI)
-	if err != nil {
-		return "", fmt.Errorf("unable to retrieve your account: %w", err)
-	}
-
-	return account.ID, nil
-}
-
-func getMyAccountID(gtsClient *client.Client, path string) (string, error) {
-	account, err := getMyAccount(gtsClient, path)
-	if err != nil {
-		return "", fmt.Errorf("received an error while getting your account details: %w", err)
-	}
-
-	return account.ID, nil
+	return account, nil
 }
 
 func getMyAccount(gtsClient *client.Client, path string) (model.Account, error) {
@@ -58,7 +60,7 @@ func getMyAccount(gtsClient *client.Client, path string) (model.Account, error) 
 
 	accountURI := authConfig.CurrentAccount
 
-	account, err := getAccount(gtsClient, accountURI)
+	account, err := gtsClient.GetAccount(accountURI)
 	if err != nil {
 		return model.Account{}, fmt.Errorf("unable to retrieve your account: %w", err)
 	}
@@ -66,11 +68,35 @@ func getMyAccount(gtsClient *client.Client, path string) (model.Account, error) 
 	return account, nil
 }
 
-func getAccount(gtsClient *client.Client, accountURI string) (model.Account, error) {
-	account, err := gtsClient.GetAccount(accountURI)
+func getOtherAccount(gtsClient *client.Client, accountNames internalFlag.StringSliceValue) (model.Account, error) {
+	expectedNumAccountNames := 1
+	if !accountNames.ExpectedLength(expectedNumAccountNames) {
+		return model.Account{}, fmt.Errorf(
+			"received an unexpected number of account names: want %d",
+			expectedNumAccountNames,
+		)
+	}
+
+	account, err := gtsClient.GetAccount(accountNames[0])
 	if err != nil {
 		return model.Account{}, fmt.Errorf("unable to retrieve the account details: %w", err)
 	}
 
 	return account, nil
+}
+
+func getOtherAccounts(gtsClient *client.Client, accountNames internalFlag.StringSliceValue) ([]model.Account, error) {
+	numAccountNames := len(accountNames)
+	accounts := make([]model.Account, numAccountNames)
+
+	for ind := 0; ind < numAccountNames; ind++ {
+		var err error
+
+		accounts[ind], err = gtsClient.GetAccount(accountNames[ind])
+		if err != nil {
+			return nil, fmt.Errorf("unable to retrieve the account information for %s: %w", accountNames[ind], err)
+		}
+	}
+
+	return accounts, nil
 }

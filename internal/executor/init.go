@@ -1,33 +1,11 @@
 package executor
 
 import (
-	"flag"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
-
-type InitExecutor struct {
-	*flag.FlagSet
-
-	printer   *printer.Printer
-	configDir string
-}
-
-func NewInitExecutor(printer *printer.Printer, configDir, name, summary string) *InitExecutor {
-	initExe := InitExecutor{
-		FlagSet: flag.NewFlagSet(name, flag.ExitOnError),
-
-		printer:   printer,
-		configDir: configDir,
-	}
-
-	initExe.Usage = commandUsageFunc(name, summary, initExe.FlagSet)
-
-	return &initExe
-}
 
 func (i *InitExecutor) Execute() error {
 	if err := utilities.EnsureDirectory(i.configDir); err != nil {

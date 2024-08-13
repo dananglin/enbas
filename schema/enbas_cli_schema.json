@@ -1,0 +1,440 @@
+{
+  "flags": {
+    "account-name": {
+      "type": "StringSliceValue",
+      "description": "The name of the account"
+    },
+    "all-images": {
+      "type": "bool",
+      "description": "Set to true to show all images from a status"
+    },
+    "all-videos": {
+      "type": "bool",
+      "description": "Set to true to show all videos from a status"
+    },
+    "attachment-id": {
+      "type": "StringSliceValue",
+      "description": "The ID of the media attachment"
+    },
+    "add-poll": {
+      "type": "bool",
+      "description": "Set to true to add a poll when creating a status"
+    },
+    "browser": {
+      "type": "bool",
+      "description": "Set to true to view in the your favourite browser"
+    },
+    "content": {
+      "type": "string",
+      "description": "The content of the created resource"
+    },
+    "content-type": {
+      "type": "string",
+      "description": "The type that the contents should be parsed from (valid values are plain and markdown)"
+    },
+    "enable-federation": {
+      "type": "bool",
+      "description": "Set to true to federate the status beyond the local timelines"
+    },
+    "enable-likes": {
+      "type": "bool",
+      "description": "Set to true to allow the status to be liked (favourited)"
+    },
+    "enable-replies": {
+      "type": "bool",
+      "description": "Set to true to allow viewers to reply to the status"
+    },
+    "enable-reposts": {
+      "type": "bool",
+      "description": "Set to true to allow the status to be reposted (boosted) by others"
+    },
+    "exclude-boosts": {
+      "type": "bool",
+      "description": "Set to true to exclude statuses that are boosts of another status"
+    },
+    "exclude-replies": {
+      "type": "bool",
+      "description": "Set to true to exclude statuses that are a reply to another status"
+    },
+    "from": {
+      "type": "string",
+      "description": "The resource type to action the target resource from (e.g. status)"
+    },
+    "from-file": {
+      "type": "string",
+      "description": "The file path where to read the contents from"
+    },
+    "full": {
+      "type": "bool",
+      "description": "Set to true to print the build information in full"
+    },
+    "in-reply-to": {
+      "type": "string",
+      "description": "The ID of the status that you want to reply to"
+    },
+    "instance": {
+      "type": "string",
+      "description": "The instance that you want to log into"
+    },
+    "language": {
+      "type": "string",
+      "description": "The ISO 639 language code for this status"
+    },
+    "limit": {
+      "type": "int",
+      "description": "Specify the limit of items to display"
+    },
+    "list-id": {
+      "type": "string",
+      "description": "The ID of the list in question"
+    },
+    "list-title": {
+      "type": "string",
+      "description": "The title of the list"
+    },
+    "list-replies-policy": {
+      "type": "string",
+      "description": "The replies policy of the list"
+    },
+    "mute-duration": {
+      "type": "TimeDurationValue",
+      "description": "Specify how long the mute should last for. To mute indefinitely, set this to 0s"
+    },
+    "mute-notifications": {
+      "type": "bool",
+      "description": "Set to true to mute notifications as well as posts"
+    },
+    "my-account": {
+      "type": "bool",
+      "description": "Set to true to specify your account"
+    },
+    "notify": {
+      "type": "bool",
+      "description": "Get notifications from statuses from the account you want to follow"
+    },
+    "only-media": {
+      "type": "bool",
+      "description": "Set to true to show only the statuses with media attachments"
+    },
+    "only-pinned": {
+      "type": "bool",
+      "description": "Set to true to show only the account's pinned statuses"
+    },
+    "only-public": {
+      "type": "bool",
+      "description": "Set to true to show only the account's public posts"
+    },
+    "poll-allows-multiple-choices": {
+      "type": "bool",
+      "description": "Set to true to allow viewers to make multiple choices in the poll"
+    },
+    "poll-expires-in": {
+      "type": "TimeDurationValue",
+      "description": "The duration in which the poll is open for"
+    },
+    "poll-hides-vote-counts": {
+      "type": "bool",
+      "description": "Set to true to hide the vote count until the poll is closed"
+    },
+    "poll-id": {
+      "type": "string",
+      "description": "The ID of the poll"
+    },
+    "poll-option": {
+      "type": "StringSliceValue",
+      "description": "A poll option. Use this multiple times to set multiple options"
+    },
+    "sensitive": {
+      "type": "BoolPtrValue",
+      "description": "Set to true if the status should be marked as sensitive"
+    },
+    "show-preferences": {
+      "type": "bool",
+      "description": "Set to true to view your posting preferences when viewing your account information"
+    },
+    "show-reposts": {
+      "type": "bool",
+      "description": "Show reposts from the account you want to follow"
+    },
+    "show-statuses": {
+      "type": "bool",
+      "description": "Set to true to view the statuses created from the account you are viewing"
+    },
+    "skip-relationship": {
+      "type": "bool",
+      "description": "Set to true to skip showing your relationship to the account that you are viewing"
+    },
+    "spoiler-text": {
+      "type": "string",
+      "description": "The text to display as the status' warning or subject"
+    },
+    "status-id": {
+      "type": "string",
+      "description": "The ID of the status"
+    },
+    "tag": {
+      "type": "string",
+      "description": "The name of the tag"
+    },
+    "timeline-category": {
+      "type": "string",
+      "description": "The timeline category"
+    },
+    "to": {
+      "type": "string",
+      "description": "The resource type to action the target resource to (e.g. status)"
+    },
+    "type": {
+      "type": "string",
+      "description": "The type of resource you want to action on (e.g. account, status)"
+    },
+    "visibility": {
+      "type": "string",
+      "description": "The visibility of the posted status"
+    },
+    "vote": {
+      "type": "IntSliceValue",
+      "description": "Add a vote to an option in a poll"
+    }
+  },
+
+  "commands": {
+    "accept": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Accepts a request (e.g. a follow request)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "add": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name", "fieldName": "accountNames" },
+        { "flag": "content", "default": "" },
+        { "flag": "list-id", "fieldName": "listID", "default": "" },
+        { "flag": "poll-id", "fieldName": "pollID", "default": "" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
+        { "flag": "to", "fieldName": "toResourceType", "default": "" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" },
+        { "flag": "vote", "fieldName": "votes" }
+      ],
+      "summary": "Adds a resource to another resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "block": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Blocks a resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "create": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "add-poll", "default": "false" },
+        { "flag": "content", "default": "" },
+        { "flag": "content-type", "default": "plain" },
+        { "flag": "enable-federation", "fieldName": "federated", "default": "true" },
+        { "flag": "enable-likes", "fieldName": "likeable", "default": "true" },
+        { "flag": "enable-replies", "fieldName": "replyable", "default": "true" },
+        { "flag": "enable-reposts", "fieldName": "boostable", "default": "true" },
+        { "flag": "from-file", "default": "" },
+        { "flag": "in-reply-to", "default": "" },
+        { "flag": "language", "default": "" },
+        { "flag": "list-replies-policy", "default": "list" },
+        { "flag": "list-title", "default": "" },
+        { "flag": "poll-allows-multiple-choices", "default": "false" },
+        { "flag": "poll-expires-in" },
+        { "flag": "poll-hides-vote-counts", "default": "false" },
+        { "flag": "poll-option", "fieldName": "pollOptions" },
+        { "flag": "sensitive" },
+        { "flag": "spoiler-text", "default": "" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" },
+        { "flag": "visibility", "default": "" }
+      ],
+      "summary": "Creates a specific resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "delete": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "list-id", "fieldName": "listID",       "default": ""},
+        { "flag": "type",    "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Deletes a specific resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "edit": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "list-id", "fieldName": "listID", "default": ""},
+        { "flag": "list-title", "default": "" },
+        { "flag": "list-replies-policy", "default": "" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Edit a specific resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "follow": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "notify", "default": "false" },
+        { "flag": "show-reposts", "default": "true" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Follow a resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "init": {
+      "additionalFields": [
+        { "name": "configDir", "type": "string"}
+      ],
+      "flags": [],
+      "summary": "Creates a new configuration file in the specified configuration directory",
+      "useConfig": false,
+      "usePrinter": true
+    },
+    "login": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "instance", "default": "" }
+      ],
+      "summary": "Logs into an account on GoToSocial",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "mute": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "mute-duration" },
+        { "flag": "mute-notifications", "default": "false" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Mutes a specific resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "reject": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Rejects a request (e.g. a follow request)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "remove": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name", "fieldName": "accountNames" },
+        { "flag": "from", "fieldName": "fromResourceType", "default": "" },
+        { "flag": "list-id", "fieldName": "listID", "default": "" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Removes a resource from another resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "show": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "all-images", "fieldName": "getAllImages", "default": "false" },
+        { "flag": "all-videos", "fieldName": "getAllVideos", "default": "false" },
+        { "flag": "attachment-id", "fieldName": "attachmentIDs" },
+        { "flag": "browser", "fieldName": "showInBrowser", "default": "false" },
+        { "flag": "exclude-boosts", "default": "false" },
+        { "flag": "exclude-replies", "default": "false" },
+        { "flag": "from", "fieldName": "fromResourceType", "default": "" },
+        { "flag": "limit", "default": "20" },
+        { "flag": "list-id", "fieldName": "listID", "default": "" },
+        { "flag": "my-account", "default": "false" },
+        { "flag": "only-media", "default": "false" },
+        { "flag": "only-pinned", "default": "false" },
+        { "flag": "only-public", "default": "false" },
+        { "flag": "poll-id", "fieldName": "pollID", "default": "" },
+        { "flag": "show-preferences", "fieldName": "showUserPreferences", "default": "false" },
+        { "flag": "show-statuses", "default": "false" },
+        { "flag": "skip-relationship", "fieldName": "skipAccountRelationship", "default": "false" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
+        { "flag": "timeline-category", "default": "home" },
+        { "flag": "tag", "default": "" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Shows details about a specified resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "switch": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "to",           "default": "" }
+      ],
+      "summary": "Performs a switch operation (e.g. switching between logged in accounts)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "unblock": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Unblocks a resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "unfollow": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Unfollows a resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "unmute": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Umutes a specific resource (e.g. an account)",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "version": {
+      "additionalFields": [],
+      "flags": [
+        { "flag": "full", "default": "false" }
+      ],
+      "summary": "Prints the application's version and build information",
+      "useConfig": false,
+      "usePrinter": true
+    },
+    "whoami": {
+      "additionalFields": [],
+      "flags": [],
+      "summary": "Prints the account that you are currently logged into",
+      "useConfig": true,
+      "usePrinter": true
+    }
+  }
+}
