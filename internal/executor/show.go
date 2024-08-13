@@ -59,7 +59,7 @@ func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
-	account, err := getAccount(gtsClient, s.myAccount, s.accountName, s.config.CredentialsFile)
+	account, err := getAccount(gtsClient, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("unable to get the account information: %w", err)
 	}
