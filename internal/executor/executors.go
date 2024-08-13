@@ -82,7 +82,7 @@ func NewAddExecutor(
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.StringVar(&exe.pollID, "poll-id", "", "The ID of the poll")
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
-	exe.StringVar(&exe.toResourceType, "to", "", "TBC")
+	exe.StringVar(&exe.toResourceType, "to", "", "The resource type to action the target resource to (e.g. status)")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 	exe.Var(&exe.votes, "vote", "Add a vote to an option in a poll")
 
@@ -407,7 +407,7 @@ func NewRemoveExecutor(
 	exe.Usage = usage.ExecutorUsageFunc("remove", "Removes a resource from another resource", exe.FlagSet)
 
 	exe.Var(&exe.accountNames, "account-name", "The name of the account")
-	exe.StringVar(&exe.fromResourceType, "from", "", "Specify the resource type to action the target resource from")
+	exe.StringVar(&exe.fromResourceType, "from", "", "The resource type to action the target resource from (e.g. status)")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
@@ -465,7 +465,7 @@ func NewShowExecutor(
 	exe.BoolVar(&exe.showInBrowser, "browser", false, "Set to true to view in the your favourite browser")
 	exe.BoolVar(&exe.excludeBoosts, "exclude-boosts", false, "Set to true to exclude statuses that are boosts of another status")
 	exe.BoolVar(&exe.excludeReplies, "exclude-replies", false, "Set to true to exclude statuses that are a reply to another status")
-	exe.StringVar(&exe.fromResourceType, "from", "", "Specify the resource type to action the target resource from")
+	exe.StringVar(&exe.fromResourceType, "from", "", "The resource type to action the target resource from (e.g. status)")
 	exe.IntVar(&exe.limit, "limit", 20, "Specify the limit of items to display")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.BoolVar(&exe.myAccount, "my-account", false, "Set to true to specify your account")
@@ -507,7 +507,7 @@ func NewSwitchExecutor(
 	exe.Usage = usage.ExecutorUsageFunc("switch", "Performs a switch operation (e.g. switching between logged in accounts)", exe.FlagSet)
 
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
-	exe.StringVar(&exe.to, "to", "", "TBC")
+	exe.StringVar(&exe.to, "to", "", "The resource type to action the target resource to (e.g. status)")
 
 	return &exe
 }
