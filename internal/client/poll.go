@@ -5,36 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
 const (
 	pollPath string = "/api/v1/polls"
 )
 
-func (g *Client) GetPoll(pollID string) (model.Poll, error) {
-	url := g.Authentication.Instance + pollPath + "/" + pollID
-
-	var poll model.Poll
-
-	params := requestParameters{
-		httpMethod:  http.MethodGet,
-		url:         url,
-		requestBody: nil,
-		contentType: "",
-		output:      &poll,
-	}
-
-	if err := g.sendRequest(params); err != nil {
-		return model.Poll{}, fmt.Errorf(
-			"received an error after sending the request to get the poll: %w",
-			err,
-		)
-	}
-
-	return poll, nil
-}
+// func (g *Client) GetPoll(pollID string) (model.Poll, error) {
+// 	url := g.Authentication.Instance + pollPath + "/" + pollID
+//
+// 	var poll model.Poll
+//
+// 	params := requestParameters{
+// 		httpMethod:  http.MethodGet,
+// 		url:         url,
+// 		requestBody: nil,
+// 		contentType: "",
+// 		output:      &poll,
+// 	}
+//
+// 	if err := g.sendRequest(params); err != nil {
+// 		return model.Poll{}, fmt.Errorf(
+// 			"received an error after sending the request to get the poll: %w",
+// 			err,
+// 		)
+// 	}
+//
+// 	return poll, nil
+// }
 
 func (g *Client) VoteInPoll(pollID string, choices []int) error {
 	form := struct {

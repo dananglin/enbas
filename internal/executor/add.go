@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -17,7 +16,6 @@ func (a *AddExecutor) Execute() error {
 		resourceAccount:   a.addToAccount,
 		resourceBookmarks: a.addToBookmarks,
 		resourceStatus:    a.addToStatus,
-		resourcePoll:      a.addToPoll,
 	}
 
 	doFunc, ok := funcMap[a.toResourceType]
@@ -164,6 +162,7 @@ func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 		resourceStar:  a.addStarToStatus,
 		resourceLike:  a.addStarToStatus,
 		resourceBoost: a.addBoostToStatus,
+		resourceVote:  a.addVoteToStatus,
 	}
 
 	doFunc, ok := funcMap[a.resourceType]
@@ -197,45 +196,40 @@ func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addToPoll(gtsClient *client.Client) error {
-	if a.pollID == "" {
-		return FlagNotSetError{flagText: flagPollID}
-	}
-
-	funcMap := map[string]func(*client.Client) error{
-		resourceVote: a.addVoteToPoll,
-	}
-
-	doFunc, ok := funcMap[a.resourceType]
-	if !ok {
-		return UnsupportedAddOperationError{
-			ResourceType:      a.resourceType,
-			AddToResourceType: a.toResourceType,
-		}
-	}
-
-	return doFunc(gtsClient)
-}
-
-func (a *AddExecutor) addVoteToPoll(gtsClient *client.Client) error {
+func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 	if a.votes.Empty() {
-		return errors.New("please use --" + flagVote + " to make a choice in this poll")
+		return NoVotesError{}
 	}
 
-	poll, err := gtsClient.GetPoll(a.pollID)
+	status, err := gtsClient.GetStatus(a.statusID)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the poll: %w", err)
+		return fmt.Errorf("unable to get the status: %w", err)
 	}
 
-	if poll.Expired {
+	if status.Poll == nil {
+		return NoPollInStatusError{}
+	}
+
+	if status.Poll.Expired {
 		return PollClosedError{}
 	}
 
-	if !poll.Multiple && !a.votes.ExpectedLength(1) {
+	if !status.Poll.Multiple && !a.votes.ExpectedLength(1) {
 		return MultipleChoiceError{}
 	}
 
-	if err := gtsClient.VoteInPoll(a.pollID, []int(a.votes)); err != nil {
+	myAccountID, err := getAccountID(gtsClient, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	if status.Account.ID == myAccountID {
+		return PollOwnerVoteError{}
+	}
+
+	pollID := status.Poll.ID
+
+	if err := gtsClient.VoteInPoll(pollID, []int(a.votes)); err != nil {
 		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
 	}
 

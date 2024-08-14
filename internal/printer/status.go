@@ -1,13 +1,14 @@
 package printer
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (p Printer) PrintStatus(status model.Status) {
+func (p Printer) PrintStatus(status model.Status, userAccountID string) {
 	var builder strings.Builder
 
 	// The account information
@@ -41,7 +42,13 @@ func (p Printer) PrintStatus(status model.Status) {
 
 	// If a poll exists in a status, write the contents to the builder.
 	if status.Poll != nil {
-		builder.WriteString(p.pollOptions(*status.Poll))
+		pollOwner := false
+		if status.Account.ID == userAccountID {
+			pollOwner = true
+		}
+
+		builder.WriteString("\n\n" + p.headerFormat("POLL DETAILS:"))
+		builder.WriteString(p.pollDetails(*status.Poll, pollOwner))
 	}
 
 	// Status creation time
@@ -72,17 +79,18 @@ func (p Printer) PrintStatus(status model.Status) {
 	p.print(builder.String())
 }
 
-func (p Printer) PrintStatusList(list model.StatusList) {
-	p.print(p.statusList(list))
+func (p Printer) PrintStatusList(list model.StatusList, userAccountID string) {
+	p.print(p.statusList(list, userAccountID))
 }
 
-func (p Printer) statusList(list model.StatusList) string {
+func (p Printer) statusList(list model.StatusList, userAccountID string) string {
 	var builder strings.Builder
 
 	builder.WriteString(p.headerFormat(list.Name) + "\n")
 
 	for _, status := range list.Statuses {
 		statusID := status.ID
+		statusOwnerID := status.Account.ID
 		createdAt := p.formatDateTime(status.CreatedAt)
 		boostedAt := ""
 		content := status.Content
@@ -100,6 +108,7 @@ func (p Printer) statusList(list model.StatusList) string {
 			))
 
 			statusID = status.Reblog.ID
+			statusOwnerID = status.Reblog.Account.ID
 			createdAt = p.formatDateTime(status.Reblog.CreatedAt)
 			boostedAt = p.formatDateTime(status.CreatedAt)
 			content = status.Reblog.Content
@@ -120,7 +129,12 @@ func (p Printer) statusList(list model.StatusList) string {
 		builder.WriteString("\n" + p.convertHTMLToText(content, true))
 
 		if poll != nil {
-			builder.WriteString(p.pollOptions(*poll))
+			pollOwner := false
+			if statusOwnerID == userAccountID {
+				pollOwner = true
+			}
+
+			builder.WriteString(p.pollDetails(*poll, pollOwner))
 		}
 
 		for _, media := range mediaAttachments {
@@ -171,4 +185,79 @@ func (p Printer) statusList(list model.StatusList) string {
 	}
 
 	return builder.String()
+}
+
+func (p Printer) pollDetails(poll model.Poll, owner bool) string {
+	var builder strings.Builder
+
+	for ind, option := range poll.Options {
+		var (
+			votage     float64
+			percentage int
+		)
+
+		// Show the poll results under any of the following conditions:
+		//     - the user is the owner of the poll
+		//     - the poll has expired
+		//     - the user has voted in the poll
+		if owner || poll.Expired || poll.Voted {
+			if poll.VotesCount == 0 {
+				percentage = 0
+			} else {
+				votage = float64(option.VotesCount) / float64(poll.VotesCount)
+				percentage = int(math.Floor(100 * votage))
+			}
+
+			optionTitle := "\n\n" + "[" + strconv.Itoa(ind) + "] " + option.Title
+
+			for _, vote := range poll.OwnVotes {
+				if ind == vote {
+					optionTitle += " " + symbolCheckMark
+
+					break
+				}
+			}
+
+			builder.WriteString(optionTitle)
+			builder.WriteString(p.pollMeter(votage))
+			builder.WriteString("\n" + strconv.Itoa(option.VotesCount) + " votes " + "(" + strconv.Itoa(percentage) + "%)")
+		} else {
+			builder.WriteString("\n" + "[" + strconv.Itoa(ind) + "] " + option.Title)
+		}
+	}
+
+	pollStatusField := "Poll is open until: "
+	if poll.Expired {
+		pollStatusField = "Poll was closed on: "
+	}
+
+	builder.WriteString("\n\n" + p.fieldFormat(pollStatusField) + p.formatDateTime(poll.ExpiredAt))
+	builder.WriteString("\n" + p.fieldFormat("Total votes: ") + strconv.Itoa(poll.VotesCount))
+	builder.WriteString("\n" + p.fieldFormat("Multiple choices allowed: ") + strconv.FormatBool(poll.Multiple))
+
+	return builder.String()
+}
+
+func (p Printer) pollMeter(votage float64) string {
+	numVoteBlocks := int(math.Floor(float64(p.lineWrapCharacterLimit) * votage))
+	numBackgroundBlocks := p.lineWrapCharacterLimit - numVoteBlocks
+
+	voteBlockColour := p.theme.boldgreen
+	backgroundBlockColor := p.theme.grey
+
+	if p.noColor {
+		voteBlockColour = p.theme.reset
+
+		if numVoteBlocks == 0 {
+			numVoteBlocks = 1
+		}
+	}
+
+	meter := "\n" + voteBlockColour + strings.Repeat(symbolPollMeter, numVoteBlocks) + p.theme.reset
+
+	if !p.noColor {
+		meter += backgroundBlockColor + strings.Repeat(symbolPollMeter, numBackgroundBlocks) + p.theme.reset
+	}
+
+	return meter
 }

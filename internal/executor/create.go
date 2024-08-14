@@ -149,8 +149,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to create the status: %w", err)
 	}
 
-	c.printer.PrintSuccess("Successfully created the following status:")
-	c.printer.PrintStatus(status)
+	c.printer.PrintSuccess("Successfully created the status with ID: " + status.ID)
 
 	return nil
 }

@@ -28,7 +28,6 @@ func (s *ShowExecutor) Execute() error {
 		resourceLiked:           s.showLiked,
 		resourceStarred:         s.showLiked,
 		resourceFollowRequest:   s.showFollowRequests,
-		resourcePoll:            s.showPoll,
 		resourceMutedAccounts:   s.showMutedAccounts,
 		resourceMedia:           s.showMedia,
 		resourceMediaAttachment: s.showMediaAttachment,
@@ -76,6 +75,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		relationship *model.AccountRelationship
 		preferences  *model.Preferences
 		statuses     *model.StatusList
+		myAccountID  string
 	)
 
 	if !s.myAccount && !s.skipAccountRelationship {
@@ -85,10 +85,13 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		}
 	}
 
-	if s.myAccount && s.showUserPreferences {
-		preferences, err = gtsClient.GetUserPreferences()
-		if err != nil {
-			return fmt.Errorf("unable to retrieve the user preferences: %w", err)
+	if s.myAccount {
+		myAccountID = account.ID
+		if s.showUserPreferences {
+			preferences, err = gtsClient.GetUserPreferences()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve the user preferences: %w", err)
+			}
 		}
 	}
 
@@ -109,7 +112,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 		}
 	}
 
-	s.printer.PrintAccount(account, relationship, preferences, statuses)
+	s.printer.PrintAccount(account, relationship, preferences, statuses, myAccountID)
 
 	return nil
 }
@@ -132,7 +135,12 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		return nil
 	}
 
-	s.printer.PrintStatus(status)
+	myAccountID, err := getAccountID(gtsClient, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	s.printer.PrintStatus(status, myAccountID)
 
 	return nil
 }
@@ -181,7 +189,12 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		return nil
 	}
 
-	s.printer.PrintStatusList(timeline)
+	myAccountID, err := getAccountID(gtsClient, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	s.printer.PrintStatusList(timeline, myAccountID)
 
 	return nil
 }
@@ -334,7 +347,12 @@ func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		s.printer.PrintStatusList(bookmarks)
+		myAccountID, err := getAccountID(gtsClient, true, nil)
+		if err != nil {
+			return fmt.Errorf("unable to get your account ID: %w", err)
+		}
+
+		s.printer.PrintStatusList(bookmarks, myAccountID)
 	} else {
 		s.printer.PrintInfo("You have no bookmarks.\n")
 	}
@@ -349,7 +367,12 @@ func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
 	}
 
 	if len(liked.Statuses) > 0 {
-		s.printer.PrintStatusList(liked)
+		myAccountID, err := getAccountID(gtsClient, true, nil)
+		if err != nil {
+			return fmt.Errorf("unable to get your account ID: %w", err)
+		}
+
+		s.printer.PrintStatusList(liked, myAccountID)
 	} else {
 		s.printer.PrintInfo("You have no " + s.resourceType + " statuses.\n")
 	}
@@ -368,21 +391,6 @@ func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
 	} else {
 		s.printer.PrintInfo("You have no follow requests.\n")
 	}
-
-	return nil
-}
-
-func (s *ShowExecutor) showPoll(gtsClient *client.Client) error {
-	if s.pollID == "" {
-		return FlagNotSetError{flagText: flagPollID}
-	}
-
-	poll, err := gtsClient.GetPoll(s.pollID)
-	if err != nil {
-		return fmt.Errorf("unable to retrieve the poll: %w", err)
-	}
-
-	s.printer.PrintPoll(poll)
 
 	return nil
 }

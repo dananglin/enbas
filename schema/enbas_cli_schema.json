@@ -136,10 +136,6 @@
       "type": "bool",
       "description": "Set to true to hide the vote count until the poll is closed"
     },
-    "poll-id": {
-      "type": "string",
-      "description": "The ID of the poll"
-    },
     "poll-option": {
       "type": "StringSliceValue",
       "description": "A poll option. Use this multiple times to set multiple options"
@@ -215,7 +211,6 @@
         { "flag": "account-name", "fieldName": "accountNames" },
         { "flag": "content", "default": "" },
         { "flag": "list-id", "fieldName": "listID", "default": "" },
-        { "flag": "poll-id", "fieldName": "pollID", "default": "" },
         { "flag": "status-id", "fieldName": "statusID", "default": "" },
         { "flag": "to", "fieldName": "toResourceType", "default": "" },
         { "flag": "type", "fieldName": "resourceType", "default": "" },
@@ -367,7 +362,6 @@
         { "flag": "only-media", "default": "false" },
         { "flag": "only-pinned", "default": "false" },
         { "flag": "only-public", "default": "false" },
-        { "flag": "poll-id", "fieldName": "pollID", "default": "" },
         { "flag": "show-preferences", "fieldName": "showUserPreferences", "default": "false" },
         { "flag": "show-statuses", "default": "false" },
         { "flag": "skip-relationship", "fieldName": "skipAccountRelationship", "default": "false" },

@@ -13,7 +13,7 @@ const (
 	noMediaDescription  = "This media attachment has no description."
 	symbolBullet        = "\u2022"
 	symbolPollMeter     = "\u2501"
-	symbolSuccess       = "\u2714"
+	symbolCheckMark     = "\u2714"
 	symbolFailure       = "\u2717"
 	symbolImage         = "\uf03e"
 	symbolLiked         = "\uf51f"
@@ -78,9 +78,9 @@ func NewPrinter(
 }
 
 func (p Printer) PrintSuccess(text string) {
-	success := p.theme.boldgreen + symbolSuccess + p.theme.reset
+	success := p.theme.boldgreen + symbolCheckMark + p.theme.reset
 	if p.noColor {
-		success = symbolSuccess
+		success = symbolCheckMark
 	}
 
 	printToStdout(success + " " + text + "\n")

@@ -104,6 +104,24 @@ func (e NoPollOptionError) Error() string {
 		" flag to add options to the poll"
 }
 
+type NoVotesError struct{}
+
+func (e NoVotesError) Error() string {
+	return "no votes were made, please add your vote(s) using the --vote flag"
+}
+
+type NoPollInStatusError struct{}
+
+func (e NoPollInStatusError) Error() string {
+	return "this status does not have a poll"
+}
+
+type PollOwnerVoteError struct{}
+
+func (e PollOwnerVoteError) Error() string {
+	return "you cannot vote in your own poll"
+}
+
 type NotFollowingError struct {
 	Account string
 }

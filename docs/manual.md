@@ -39,6 +39,7 @@
   - [View a list of statuses that you've liked](#view-a-list-of-statuses-that-youve-liked)
   - [Mute a status](#mute-a-status)
   - [Unmute a status](#unmute-a-status)
+  - [Vote in a poll within a status](#vote-in-a-poll-within-a-status)
 - [Polls](#polls)
   - [Create a poll](#create-a-poll)
   - [View a poll](#view-a-poll)
@@ -528,6 +529,21 @@ _Not yet supported_
 
 _Not yet supported_
 
+### Vote in a poll within a status
+
+Adds your vote(s) to a poll within a status.
+
+```
+enbas add --type vote --to status --status-id 01J55XVV2MM6MKQ7QHFBAVAE8R --vote 3
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to add.<br>Here this should be `vote`. | |
+| `to` | string | true | The resource you want to add the vote to.<br>Here this should be `status`. | |
+| `status-id` | string | true | The ID of the poll you want to add the votes to. | |
+| `vote` | int | true | The ID of the option that you want to vote for.<br>You can use this flag multiple times to vote for more than one option if the poll allows multiple choices. | |
+
 ## Polls
 
 ### Create a poll
@@ -536,31 +552,11 @@ See [Create a status](#create-a-status).
 
 ### View a poll
 
-Prints the poll information to the screen.
-
-```
-enbas show --type poll --poll-id 01J0CEEZBZ6E6AYQSJPHCQYBDA
-```
-
-| flag | type | required | description | default |
-|------|------|----------|-------------|---------|
-| `type` | string | true | The resource you want to view.<br>Here this should be `poll`. | |
-| `poll-id` | string | true | The ID of the poll that you want to view. | |
+You can view a poll within a [status](#view-a-status) or within a [timeline](#view-a-timeline).
 
 ### Vote in a poll
 
-Add your vote(s) to a poll.
-
-```
-enbas add --type vote --to poll --poll-id 01J1TVJ705VV3VP02FVVBSMX7E --vote 3
-```
-
-| flag | type | required | description | default |
-|------|------|----------|-------------|---------|
-| `type` | string | true | The resource you want to add.<br>Here this should be `vote`. | |
-| `to` | string | true | The resource you want to add the vote to.<br>Here this should be `poll`. | |
-| `poll-id` | string | true | The ID of the poll you want to add the votes to. | |
-| `vote` | int | true | The ID of the option that you want to vote for.<br>You can use this flag multiple times to vote for more than one option if the poll allows multiple choices. | |
+See [Vote in a poll within a status](#vote-in-a-poll-within-a-status)
 
 ## Lists
 

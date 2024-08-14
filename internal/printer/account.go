@@ -12,6 +12,7 @@ func (p Printer) PrintAccount(
 	relationship *model.AccountRelationship,
 	preferences *model.Preferences,
 	statuses *model.StatusList,
+	userAccountID string,
 ) {
 	var builder strings.Builder
 
@@ -47,7 +48,7 @@ func (p Printer) PrintAccount(
 	}
 
 	if statuses != nil {
-		builder.WriteString("\n\n" + p.statusList(*statuses))
+		builder.WriteString("\n\n" + p.statusList(*statuses, userAccountID))
 	}
 
 	builder.WriteString("\n\n")

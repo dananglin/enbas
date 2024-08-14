@@ -56,7 +56,6 @@ type AddExecutor struct {
 	accountNames   internalFlag.StringSliceValue
 	content        string
 	listID         string
-	pollID         string
 	statusID       string
 	toResourceType string
 	resourceType   string
@@ -80,7 +79,6 @@ func NewAddExecutor(
 	exe.Var(&exe.accountNames, "account-name", "The name of the account")
 	exe.StringVar(&exe.content, "content", "", "The content of the created resource")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
-	exe.StringVar(&exe.pollID, "poll-id", "", "The ID of the poll")
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.toResourceType, "to", "", "The resource type to action the target resource to (e.g. status)")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
@@ -434,7 +432,6 @@ type ShowExecutor struct {
 	onlyMedia               bool
 	onlyPinned              bool
 	onlyPublic              bool
-	pollID                  string
 	showUserPreferences     bool
 	showStatuses            bool
 	skipAccountRelationship bool
@@ -472,7 +469,6 @@ func NewShowExecutor(
 	exe.BoolVar(&exe.onlyMedia, "only-media", false, "Set to true to show only the statuses with media attachments")
 	exe.BoolVar(&exe.onlyPinned, "only-pinned", false, "Set to true to show only the account's pinned statuses")
 	exe.BoolVar(&exe.onlyPublic, "only-public", false, "Set to true to show only the account's public posts")
-	exe.StringVar(&exe.pollID, "poll-id", "", "The ID of the poll")
 	exe.BoolVar(&exe.showUserPreferences, "show-preferences", false, "Set to true to view your posting preferences when viewing your account information")
 	exe.BoolVar(&exe.showStatuses, "show-statuses", false, "Set to true to view the statuses created from the account you are viewing")
 	exe.BoolVar(&exe.skipAccountRelationship, "skip-relationship", false, "Set to true to skip showing your relationship to the account that you are viewing")
