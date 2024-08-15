@@ -28,6 +28,10 @@
   - [View your follow requests](#view-your-follow-requests)
   - [Accept a follow request](#accept-a-follow-request)
   - [Reject a follow request](#reject-a-follow-request)
+- [Media Attachments](#media-attachments)
+  - [Create a media attachment](#create-a-media-attachment)
+  - [Edit a media attachment](#edit-a-media-attachment)
+  - [View a media attachment](#view-a-media-attachment)
 - [Statuses](#statuses)
   - [View a status](#view-a-status)
   - [Create a status](#create-a-status)
@@ -54,8 +58,6 @@
   - [Remove accounts from a list](#remove-accounts-from-a-list)
 - [Timelines](#timelines)
   - [View a timeline](#view-a-timeline)
-- [Media Attachment](#media-attachment)
-  - [View media attachment](#view-media-attachment)
 - [Media](#media)
   - [View media from a status](#view-media-from-a-status)
 - [Bookmarks](#bookmarks)
@@ -370,6 +372,64 @@ enbas reject --type follow-request --account-name @person.example.social
 | `type` | string | true | The resource you want to accept.<br>Here this should be `follow-request`. | |
 | `account-name` | string | true | The name of the account that you want to reject. | |
 
+## Media Attachments
+
+### Create a media attachment
+
+Uploads media from a file to the instance and creates a media attachment.
+You can write a description of the media in a text file and specify the path with the `media-description` flag (see the examples below).
+
+- Create a media attachment with a simple description and a focus of x=-0.1, y=0.5
+   ```
+   enbas create --type media-attachment \
+       --media-file picture.png \
+       --media-description "A picture of an old, slanted wooden bench in front of the woods." \
+       --media-focus "-0.1,0.5"
+   ```
+- Create a media attachment using a description written in the `description.txt` text file.
+   ```
+   enbas create --type media-attachment \
+       --media-file picture.png \
+       --media-description file@description.txt
+   ```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to create.<br>Here this should be `media-attachment`. | |
+| `media-file` | string | true | The path to the media file. | |
+| `media-description` | string | false | The description of the media attachment which will be used as the media's alt-text.<br>To use a description from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@description.txt`)| |
+| `media-focus` | string | false | The media's focus values. This should be in the form of two comma-separated numbers between -1 and 1 (e.g. 0.25,-0.34) | |
+
+### Edit a media attachment
+
+Edits the description and/or the focus of a media attachment that you own.
+
+```
+enbas edit --type media-attachment \
+    --attachment-id 01J5B9A8WFK59W11MS6AHPYWBR \
+    --media-description "An updated description of a picture."
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to edit.<br>Here this should be `media-attachment`. | |
+| `media-description` | string | false | The description of the media attachment to edit.<br>To use a description from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@description.txt`)| |
+| `media-focus` | string | false | The media's focus values. This should be in the form of two comma-separated numbers between -1 and 1 (e.g. 0.25,-0.34) | |
+
+### View a media attachment
+
+Prints information about a given media attachment that you own.
+You can only see information about the media attachment that you own.
+
+```
+enbas show --type media-attachment --attachment-id 01J0N0RQSJ7CFGKHA30F7GBQXT
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to view.<br>Here this should be `media`. | |
+| `attachment-id` | string | true | The ID of the media attachment to view. | |
+
 ## Statuses
 
 ### View a status
@@ -421,10 +481,28 @@ enbas show --type status --status-id 01J1Z9PT0243JT9QNQ5W96Z8CA
        --poll-option "other (please comment)"
    ```
    ![A screenshot of a status with a poll](../assets/images/created_poll.png "A status with a poll")
+- Create a status with a media attachment that you have created.
+   ```
+   enbas create \
+       --type status \
+       --attachment-id 01J5BDHYJ7MWMMG76FP49H7SWD \
+       --content "I went out for a walk in the woods and found this interesting looking wooden bench."
+   ```
+- Upload and attach 4 media files to a new status. You must set the same number of `media-description` and `media-focus` flags **must** as the `media-file` flags.
+  The first `media-description` and `media-focus` flags correspond to the first `media-file` flag and so on.
+   ```
+   enbas create --type status --visibility public \
+       --content "This post has a picture of a cat, a dog, a bee and a bird." \
+       --media-file cat.jpg   --media-description file@cat.txt  --media-focus "0,0" \
+       --media-file dog.jpg   --media-description file@dog.txt  --media-focus "-0.1,0.25" \
+       --media-file bee.jpg   --media-description file@bee.txt  --media-focus "1,1" \
+       --media-file bird.webp --media-description file@bird.txt --media-focus "0,0"
+   ```
 
 | flag | type | required | description | default |
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to create.<br>Here this should be `status`. | |
+| `attachment-id` | string | false | The ID of the media attachment to attach to the status.<br>Use this flag multiple times to attach multiple media. |
 | `content` | string | false | The content of the status.<br>This flag takes precedence over `from-file`.| |
 | `content-type` | string | false | The format that the content is created in.<br>Valid values are `plain` and `markdown`. | plain |
 | `enable-reposts` | boolean | false | The status can be reposted (boosted) by others. | true |
@@ -434,6 +512,9 @@ enbas show --type status --status-id 01J1Z9PT0243JT9QNQ5W96Z8CA
 | `from-file` | string | false | The path to the file where to read the contents of the status from. | |
 | `in-reply-to` | string | false | The ID of the status that you want to reply to. | |
 | `language` | string | false | The ISO 639 language code that the status is written in.<br>If this is not specified then the default language from your posting preferences will be used. | |
+| `media-file` | string | false | The path to the media file.<br>Use this flag multiple times to upload multiple media files. | |
+| `media-description` | string | false | The description of the media attachment which will be used as the media's alt-text.<br>To use a description from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@description.txt`)<br>Use this flag multiple times to set multiple descriptions.| |
+| `media-focus` | string | false | The media's focus values. This should be in the form of two comma-separated numbers between -1 and 1 (e.g. 0.25,-0.34).<br>Use this flag multiple times to set multiple focus values. | |
 | `sensitive` | string | false | The status should be marked as sensitive.<br>If this is not specified then the default sensitivity from your posting preferences will be used. | |
 | `spoiler-text` | string | false | The text to display as the status' warning or subject. | |
 | `visibility` | string | false | The visibility of the status.<br>Valid values are `public`, `private`, `unlisted`, `mutuals_only` and `direct`.<br>If this is not specified then the default visibility from your posting preferences will be used. | |
@@ -682,22 +763,6 @@ Prints a list of statuses from a timeline.
 | `list-id` | string | false | The ID of the list you want to view.<br>This is only required if `timeline-category` is set to `list`. | |
 | `tag` | string | false | The hashtag you want to view.<br>This is only required if `timeline-category` is set to `tag`. | |
 | `limit` | integer | false | The maximum number of statuses to print. | 20 |
-
-## Media Attachment
-
-### View media attachment
-
-Prints information about a given media attachment that you own.
-You can only see information about the media attachment that you own.
-
-```
-enbas show --type media-attachment --attachment-id 01J0N0RQSJ7CFGKHA30F7GBQXT
-```
-
-| flag | type | required | description | default |
-|------|------|----------|-------------|---------|
-| `type` | string | true | The resource you want to view.<br>Here this should be `media`. | |
-| `attachment-id` | string | true | The ID of the media attachment to view. | |
 
 ## Media
 

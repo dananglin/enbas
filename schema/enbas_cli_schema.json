@@ -96,6 +96,18 @@
       "type": "string",
       "description": "The replies policy of the list"
     },
+    "media-description": {
+      "type": "StringSliceValue",
+      "description": "The description of the media attachment which will be used as the alt-text"
+    },
+    "media-file": {
+      "type": "StringSliceValue",
+      "description": "The path to the media file"
+    },
+    "media-focus": {
+      "type": "StringSliceValue",
+      "description": "The focus of the media file"
+    },
     "mute-duration": {
       "type": "TimeDurationValue",
       "description": "Specify how long the mute should last for. To mute indefinitely, set this to 0s"
@@ -234,6 +246,7 @@
       "additionalFields": [],
       "flags": [
         { "flag": "add-poll", "default": "false" },
+        { "flag": "attachment-id", "fieldName": "attachmentIDs" },
         { "flag": "content", "default": "" },
         { "flag": "content-type", "default": "plain" },
         { "flag": "enable-federation", "fieldName": "federated", "default": "true" },
@@ -245,6 +258,9 @@
         { "flag": "language", "default": "" },
         { "flag": "list-replies-policy", "default": "list" },
         { "flag": "list-title", "default": "" },
+        { "flag": "media-description", "fieldName": "mediaDescriptions" },
+        { "flag": "media-focus", "fieldName": "mediaFocusValues" },
+        { "flag": "media-file", "fieldName": "mediaFiles" },
         { "flag": "poll-allows-multiple-choices", "default": "false" },
         { "flag": "poll-expires-in" },
         { "flag": "poll-hides-vote-counts", "default": "false" },
@@ -271,9 +287,12 @@
     "edit": {
       "additionalFields": [],
       "flags": [
+        { "flag": "attachment-id", "fieldName": "attachmentIDs" },
         { "flag": "list-id", "fieldName": "listID", "default": ""},
         { "flag": "list-title", "default": "" },
         { "flag": "list-replies-policy", "default": "" },
+        { "flag": "media-description", "fieldName": "mediaDescriptions" },
+        { "flag": "media-focus", "fieldName": "mediaFocusValues" },
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Edit a specific resource",

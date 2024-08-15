@@ -5,9 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func ReadFile(path string) (string, error) {
+const filePrefix string = "file@"
+
+func ReadContents(text string) (string, error) {
+	if !strings.HasPrefix(text, filePrefix) {
+		return text, nil
+	}
+
+	return ReadTextFile(strings.TrimPrefix(text, filePrefix))
+}
+
+func ReadTextFile(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return "", fmt.Errorf("unable to open %q: %w", path, err)

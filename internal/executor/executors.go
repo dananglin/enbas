@@ -121,6 +121,7 @@ type CreateExecutor struct {
 	printer                   *printer.Printer
 	config                    *config.Config
 	addPoll                   bool
+	attachmentIDs             internalFlag.StringSliceValue
 	content                   string
 	contentType               string
 	federated                 bool
@@ -132,6 +133,9 @@ type CreateExecutor struct {
 	language                  string
 	listRepliesPolicy         string
 	listTitle                 string
+	mediaDescriptions         internalFlag.StringSliceValue
+	mediaFocusValues          internalFlag.StringSliceValue
+	mediaFiles                internalFlag.StringSliceValue
 	pollAllowsMultipleChoices bool
 	pollExpiresIn             internalFlag.TimeDurationValue
 	pollHidesVoteCounts       bool
@@ -147,17 +151,22 @@ func NewCreateExecutor(
 	config *config.Config,
 ) *CreateExecutor {
 	exe := CreateExecutor{
-		FlagSet:       flag.NewFlagSet("create", flag.ExitOnError),
-		printer:       printer,
-		config:        config,
-		pollExpiresIn: internalFlag.NewTimeDurationValue(),
-		pollOptions:   internalFlag.NewStringSliceValue(),
-		sensitive:     internalFlag.NewBoolPtrValue(),
+		FlagSet:           flag.NewFlagSet("create", flag.ExitOnError),
+		printer:           printer,
+		config:            config,
+		attachmentIDs:     internalFlag.NewStringSliceValue(),
+		mediaDescriptions: internalFlag.NewStringSliceValue(),
+		mediaFocusValues:  internalFlag.NewStringSliceValue(),
+		mediaFiles:        internalFlag.NewStringSliceValue(),
+		pollExpiresIn:     internalFlag.NewTimeDurationValue(),
+		pollOptions:       internalFlag.NewStringSliceValue(),
+		sensitive:         internalFlag.NewBoolPtrValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("create", "Creates a specific resource", exe.FlagSet)
 
 	exe.BoolVar(&exe.addPoll, "add-poll", false, "Set to true to add a poll when creating a status")
+	exe.Var(&exe.attachmentIDs, "attachment-id", "The ID of the media attachment")
 	exe.StringVar(&exe.content, "content", "", "The content of the created resource")
 	exe.StringVar(&exe.contentType, "content-type", "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
 	exe.BoolVar(&exe.federated, "enable-federation", true, "Set to true to federate the status beyond the local timelines")
@@ -169,6 +178,9 @@ func NewCreateExecutor(
 	exe.StringVar(&exe.language, "language", "", "The ISO 639 language code for this status")
 	exe.StringVar(&exe.listRepliesPolicy, "list-replies-policy", "list", "The replies policy of the list")
 	exe.StringVar(&exe.listTitle, "list-title", "", "The title of the list")
+	exe.Var(&exe.mediaDescriptions, "media-description", "The description of the media attachment which will be used as the alt-text")
+	exe.Var(&exe.mediaFocusValues, "media-focus", "The focus of the media file")
+	exe.Var(&exe.mediaFiles, "media-file", "The path to the media file")
 	exe.BoolVar(&exe.pollAllowsMultipleChoices, "poll-allows-multiple-choices", false, "Set to true to allow viewers to make multiple choices in the poll")
 	exe.Var(&exe.pollExpiresIn, "poll-expires-in", "The duration in which the poll is open for")
 	exe.BoolVar(&exe.pollHidesVoteCounts, "poll-hides-vote-counts", false, "Set to true to hide the vote count until the poll is closed")
@@ -213,9 +225,12 @@ type EditExecutor struct {
 	*flag.FlagSet
 	printer           *printer.Printer
 	config            *config.Config
+	attachmentIDs     internalFlag.StringSliceValue
 	listID            string
 	listTitle         string
 	listRepliesPolicy string
+	mediaDescriptions internalFlag.StringSliceValue
+	mediaFocusValues  internalFlag.StringSliceValue
 	resourceType      string
 }
 
@@ -224,16 +239,22 @@ func NewEditExecutor(
 	config *config.Config,
 ) *EditExecutor {
 	exe := EditExecutor{
-		FlagSet: flag.NewFlagSet("edit", flag.ExitOnError),
-		printer: printer,
-		config:  config,
+		FlagSet:           flag.NewFlagSet("edit", flag.ExitOnError),
+		printer:           printer,
+		config:            config,
+		attachmentIDs:     internalFlag.NewStringSliceValue(),
+		mediaDescriptions: internalFlag.NewStringSliceValue(),
+		mediaFocusValues:  internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("edit", "Edit a specific resource", exe.FlagSet)
 
+	exe.Var(&exe.attachmentIDs, "attachment-id", "The ID of the media attachment")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.StringVar(&exe.listTitle, "list-title", "", "The title of the list")
 	exe.StringVar(&exe.listRepliesPolicy, "list-replies-policy", "", "The replies policy of the list")
+	exe.Var(&exe.mediaDescriptions, "media-description", "The description of the media attachment which will be used as the alt-text")
+	exe.Var(&exe.mediaFocusValues, "media-focus", "The focus of the media file")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	return &exe

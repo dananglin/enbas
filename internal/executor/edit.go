@@ -5,6 +5,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func (e *EditExecutor) Execute() error {
@@ -13,7 +14,8 @@ func (e *EditExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*client.Client) error{
-		resourceList: e.editList,
+		resourceList:            e.editList,
+		resourceMediaAttachment: e.editMediaAttachment,
 	}
 
 	doFunc, ok := funcMap[e.resourceType]
@@ -57,8 +59,62 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to update the list: %w", err)
 	}
 
-	e.printer.PrintSuccess("Successfully updated the list.")
+	e.printer.PrintSuccess("Successfully edited the list.")
 	e.printer.PrintList(updatedList)
+
+	return nil
+}
+
+func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
+	expectedNumValues := 1
+
+	if !e.attachmentIDs.ExpectedLength(expectedNumValues) {
+		return fmt.Errorf(
+			"received an unexpected number of media attachment IDs: want %d",
+			expectedNumValues,
+		)
+	}
+
+	attachment, err := gtsClient.GetMediaAttachment(e.attachmentIDs[0])
+	if err != nil {
+		return fmt.Errorf("unable to get the media attachment: %w", err)
+	}
+
+	description := attachment.Description
+	if !e.mediaDescriptions.Empty() {
+		if !e.mediaDescriptions.ExpectedLength(expectedNumValues) {
+			return fmt.Errorf(
+				"received an unexpected number of media descriptions: want %d",
+				expectedNumValues,
+			)
+		}
+
+		var err error
+		description, err = utilities.ReadContents(e.mediaDescriptions[0])
+		if err != nil {
+			return fmt.Errorf(
+				"unable to read the contents from %s: %w",
+				e.mediaDescriptions[0],
+			)
+		}
+	}
+
+	focus := fmt.Sprintf("%f,%f", attachment.Meta.Focus.X, attachment.Meta.Focus.Y)
+	if !e.mediaFocusValues.Empty() {
+		if !e.mediaFocusValues.ExpectedLength(expectedNumValues) {
+			return fmt.Errorf(
+				"received an unexpected number of media focus values: want %d",
+				expectedNumValues,
+			)
+		}
+		focus = e.mediaFocusValues[0]
+	}
+
+	if _, err = gtsClient.UpdateMediaAttachment(attachment.ID, description, focus); err != nil {
+		return fmt.Errorf("unable to update the media attachment: %w", err)
+	}
+
+	e.printer.PrintSuccess("Successfully edited the media attachment.")
 
 	return nil
 }
