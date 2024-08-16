@@ -1,0 +1,16 @@
+---
+name: REUSE Compliance Check
+
+on:
+  push:
+    branches:
+    - "main"
+
+jobs:
+  check:
+    runs-on: docker
+    steps:
+    - name: Checkout Repository
+      uses: https://code.forgejo.org/actions/checkout@v4
+    - name: REUSE Compliance Check
+      uses: https://github.com/fsfe/reuse-action@v4
