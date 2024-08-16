@@ -12,6 +12,8 @@ path = [
     "**.go",
     "go.mod",
     "magefiles/go.mod",
+    "cmd/enbas-codegen/templates/**/*.go.gotmpl",
+    "schema/enbas_cli_schema.json",
 ]
 precedence              = "override"
 SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"
