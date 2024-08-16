@@ -152,6 +152,10 @@
       "type": "StringSliceValue",
       "description": "A poll option. Use this multiple times to set multiple options"
     },
+    "save-text": {
+      "type": "bool",
+      "description": "Set to true to save the text of the deleted status"
+    },
     "sensitive": {
       "type": "BoolPtrValue",
       "description": "Set to true if the status should be marked as sensitive"
@@ -277,7 +281,9 @@
     "delete": {
       "additionalFields": [],
       "flags": [
-        { "flag": "list-id", "fieldName": "listID",       "default": ""},
+        { "flag": "list-id", "fieldName": "listID", "default": ""},
+        { "flag": "save-text", "default": "false" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
         { "flag": "type",    "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Deletes a specific resource",

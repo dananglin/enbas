@@ -55,3 +55,17 @@ func FileExists(path string) (bool, error) {
 
 	return true, nil
 }
+
+func SaveTextToFile(path, text string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("unable to open %q: %w", path, err)
+	}
+	defer file.Close()
+
+	if _, err := fmt.Fprint(file, text); err != nil {
+		return fmt.Errorf("received an error writing the text to the file: %w", err)
+	}
+
+	return nil
+}

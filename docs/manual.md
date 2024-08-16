@@ -453,6 +453,8 @@ enbas show --type status --status-id 01J1Z9PT0243JT9QNQ5W96Z8CA
 
 ### Create a status
 
+Creates a new status.
+
 - Create a simple status that is publicly visible.
    ```
    enbas create --type status --content-type plain --visibility public --content "Hello, Fediverse!"
@@ -531,7 +533,19 @@ Additional flags for polls.
 
 ### Delete a status
 
-_Not yet supported_
+Deletes a status that belongs to you.
+You can optionally save the text of the deleted status for redrafting purposes.
+The saved text will be written to a text file within your cache directory.
+
+```
+enbas delete --type status --status-id 01J5B0N6DKZGYPQEZW9HWKV0VA
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to delete.<br>Here this should be `status`. | |
+| `status-id` | string | true | The ID of the status that you want to delete. | |
+| `save-text` | bool | false | Set to `true` to save the text of the deleted status. | false |
 
 ### Boost (Repost) a status
 

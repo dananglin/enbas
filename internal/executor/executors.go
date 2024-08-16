@@ -199,6 +199,8 @@ type DeleteExecutor struct {
 	printer      *printer.Printer
 	config       *config.Config
 	listID       string
+	saveText     bool
+	statusID     string
 	resourceType string
 }
 
@@ -215,6 +217,8 @@ func NewDeleteExecutor(
 	exe.Usage = usage.ExecutorUsageFunc("delete", "Deletes a specific resource", exe.FlagSet)
 
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
+	exe.BoolVar(&exe.saveText, "save-text", false, "Set to true to save the text of the deleted status")
+	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	return &exe

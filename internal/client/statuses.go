@@ -311,3 +311,26 @@ func (g *Client) UnmuteStatus(statusID string) error {
 
 	return nil
 }
+
+func (g *Client) DeleteStatus(statusID string) (string, error) {
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID
+
+	var status model.Status
+
+	params := requestParameters{
+		httpMethod:  http.MethodDelete,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      &status,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return "", fmt.Errorf(
+			"received an error after sending the request to delete the status: %w",
+			err,
+		)
+	}
+
+	return status.Text, nil
+}
