@@ -335,6 +335,7 @@
         { "flag": "account-name" },
         { "flag": "mute-duration" },
         { "flag": "mute-notifications", "default": "false" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Mutes a specific resource (e.g. an account)",
@@ -427,6 +428,7 @@
       "additionalFields": [],
       "flags": [
         { "flag": "account-name" },
+        { "flag": "status-id", "fieldName": "statusID", "default": "" },
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Umutes a specific resource (e.g. an account)",

@@ -241,7 +241,7 @@ func (g *Client) ReblogStatus(statusID string) error {
 
 	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
-			"received an error after sending the request to reblog the status; %w",
+			"received an error after sending the request to reblog the status: %w",
 			err,
 		)
 	}
@@ -262,7 +262,49 @@ func (g *Client) UnreblogStatus(statusID string) error {
 
 	if err := g.sendRequest(params); err != nil {
 		return fmt.Errorf(
-			"received an error after sending the request to un-reblog the status; %w",
+			"received an error after sending the request to un-reblog the status: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) MuteStatus(statusID string) error {
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/mute"
+
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to mute the status: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *Client) UnmuteStatus(statusID string) error {
+	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute"
+
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         url,
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to unmute the status: %w",
 			err,
 		)
 	}

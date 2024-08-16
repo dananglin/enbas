@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -9,6 +10,7 @@ import (
 func (m *MuteExecutor) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
 		resourceAccount: m.muteAccount,
+		resourceStatus:  m.muteStatus,
 	}
 
 	doFunc, ok := funcMap[m.resourceType]
@@ -40,6 +42,47 @@ func (m *MuteExecutor) muteAccount(gtsClient *client.Client) error {
 	}
 
 	m.printer.PrintSuccess("Successfully muted the account.")
+
+	return nil
+}
+
+func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
+	if m.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	status, err := gtsClient.GetStatus(m.statusID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the status: %w", err)
+	}
+
+	myAccountID, err := getAccountID(gtsClient, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	canMute := false
+
+	if status.Account.ID == myAccountID {
+		canMute = true
+	} else {
+		for _, mention := range status.Mentions {
+			if mention.ID == myAccountID {
+				canMute = true
+				break
+			}
+		}
+	}
+
+	if !canMute {
+		return errors.New("unable to mute the status because you are not the owner and you are not mentioned in it")
+	}
+
+	if err := gtsClient.MuteStatus(m.statusID); err != nil {
+		return fmt.Errorf("unable to mute the status: %w", err)
+	}
+
+	m.printer.PrintSuccess("Successfully muted the status.")
 
 	return nil
 }

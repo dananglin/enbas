@@ -604,11 +604,29 @@ enbas show --type liked
 
 ### Mute a status
 
-_Not yet supported_
+Mutes a status in order to stop receiving future notifications for replies, likes, boosts, etc.
+
+```
+enbas mute --type status --status-id 01J56ZJAGEWG967GS1EK0TV3GA
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to mute.<br>Here this should be `status`. | |
+| `status-id` | string | true | The ID of the status that you want to mute. | |
 
 ### Unmute a status
 
-_Not yet supported_
+Unmute a status in order to start receiving future notification from the status' thread.
+
+```
+enbas mute --type status --status-id 01J56ZJAGEWG967GS1EK0TV3GA
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to unmute.<br>Here this should be `status`. | |
+| `status-id` | string | true | The ID of the status that you want to unmute. | |
 
 ### Vote in a poll within a status
 

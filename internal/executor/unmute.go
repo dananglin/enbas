@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -9,6 +10,7 @@ import (
 func (m *UnmuteExecutor) Execute() error {
 	funcMap := map[string]func(*client.Client) error{
 		resourceAccount: m.unmuteAccount,
+		resourceStatus:  m.unmuteStatus,
 	}
 
 	doFunc, ok := funcMap[m.resourceType]
@@ -35,6 +37,47 @@ func (m *UnmuteExecutor) unmuteAccount(gtsClient *client.Client) error {
 	}
 
 	m.printer.PrintSuccess("Successfully unmuted the account.")
+
+	return nil
+}
+
+func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
+	if m.statusID == "" {
+		return FlagNotSetError{flagText: flagStatusID}
+	}
+
+	status, err := gtsClient.GetStatus(m.statusID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve the status: %w", err)
+	}
+
+	myAccountID, err := getAccountID(gtsClient, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	canUnmute := false
+
+	if status.Account.ID == myAccountID {
+		canUnmute = true
+	} else {
+		for _, mention := range status.Mentions {
+			if mention.ID == myAccountID {
+				canUnmute = true
+				break
+			}
+		}
+	}
+
+	if !canUnmute {
+		return errors.New("unable to unmute the status because you are not the owner and you are not mentioned in it")
+	}
+
+	if err := gtsClient.UnmuteStatus(m.statusID); err != nil {
+		return fmt.Errorf("unable to unmute the status: %w", err)
+	}
+
+	m.printer.PrintSuccess("Successfully unmuted the status.")
 
 	return nil
 }

@@ -66,6 +66,7 @@ func (p Printer) PrintStatus(status model.Status, userAccountID string) {
 	builder.WriteString("\n" + p.fieldFormat("Boosted: ") + strconv.FormatBool(status.Reblogged))
 	builder.WriteString("\n" + p.fieldFormat("Liked: ") + strconv.FormatBool(status.Favourited))
 	builder.WriteString("\n" + p.fieldFormat("Bookmarked: ") + strconv.FormatBool(status.Bookmarked))
+	builder.WriteString("\n" + p.fieldFormat("Muted: ") + strconv.FormatBool(status.Muted))
 
 	// Status visibility
 	builder.WriteString("\n\n" + p.headerFormat("VISIBILITY:"))

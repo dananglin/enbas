@@ -347,6 +347,7 @@ type MuteExecutor struct {
 	accountName       internalFlag.StringSliceValue
 	muteDuration      internalFlag.TimeDurationValue
 	muteNotifications bool
+	statusID          string
 	resourceType      string
 }
 
@@ -367,6 +368,7 @@ func NewMuteExecutor(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.Var(&exe.muteDuration, "mute-duration", "Specify how long the mute should last for. To mute indefinitely, set this to 0s")
 	exe.BoolVar(&exe.muteNotifications, "mute-notifications", false, "Set to true to mute notifications as well as posts")
+	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	return &exe
@@ -591,6 +593,7 @@ type UnmuteExecutor struct {
 	printer      *printer.Printer
 	config       *config.Config
 	accountName  internalFlag.StringSliceValue
+	statusID     string
 	resourceType string
 }
 
@@ -608,6 +611,7 @@ func NewUnmuteExecutor(
 	exe.Usage = usage.ExecutorUsageFunc("unmute", "Umutes a specific resource (e.g. an account)", exe.FlagSet)
 
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
+	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	return &exe
