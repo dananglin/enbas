@@ -10,7 +10,7 @@ run:
   tests: true
 
 output:
-  format: colored-line-number
+  formats: colored-line-number
   print-issues-lines: true
   print-linter-name: true
   uniq-by-line: true
@@ -31,8 +31,9 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-  - exhaustivestruct
+  - execinquery
   - exhaustruct
   - gomnd
+  - mnd
   - tagliatelle
   fast: false
