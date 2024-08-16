@@ -62,7 +62,6 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	var (
 		err        error
-		content    string
 		language   string
 		visibility string
 		sensitive  bool
@@ -94,12 +93,12 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 		if descriptionsExists {
 			for ind := 0; ind < expectedLength; ind++ {
-				content, err := utilities.ReadContents(c.mediaDescriptions[ind])
+				mediaDesc, err := utilities.ReadContents(c.mediaDescriptions[ind])
 				if err != nil {
 					return fmt.Errorf("unable to read the contents from %s: %w", c.mediaDescriptions[ind], err)
 				}
 
-				mediaDescriptions[ind] = content
+				mediaDescriptions[ind] = mediaDesc
 			}
 		}
 
@@ -133,22 +132,13 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	switch {
-	case c.content != "":
-		content = c.content
-	case c.fromFile != "":
-		content, err = utilities.ReadTextFile(c.fromFile)
-		if err != nil {
-			return fmt.Errorf("unable to get the status contents from %q: %w", c.fromFile, err)
-		}
-	default:
-		if len(attachmentIDs) == 0 {
-			// TODO: revisit this error type
-			return EmptyContentError{
-				ResourceType: resourceStatus,
-				Hint:         "please use --" + flagContent + " or --" + flagFromFile,
-			}
-		}
+	if c.content == "" && len(attachmentIDs) == 0 {
+		return errors.New("please add content to the status that you want to create")
+	}
+
+	content, err := utilities.ReadContents(c.content)
+	if err != nil {
+		return fmt.Errorf("unable to read the contents from %s: %w", c.content, err)
 	}
 
 	numAttachmentIDs := len(attachmentIDs)

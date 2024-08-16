@@ -4,7 +4,6 @@ const (
 	flagAttachmentID = "attachment-id"
 	flagContent      = "content"
 	flagFrom         = "from"
-	flagFromFile     = "from-file"
 	flagInstance     = "instance"
 	flagListID       = "list-id"
 	flagListTitle    = "list-title"

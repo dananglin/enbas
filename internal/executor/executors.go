@@ -128,7 +128,6 @@ type CreateExecutor struct {
 	likeable                  bool
 	replyable                 bool
 	boostable                 bool
-	fromFile                  string
 	inReplyTo                 string
 	language                  string
 	listRepliesPolicy         string
@@ -173,7 +172,6 @@ func NewCreateExecutor(
 	exe.BoolVar(&exe.likeable, "enable-likes", true, "Set to true to allow the status to be liked (favourited)")
 	exe.BoolVar(&exe.replyable, "enable-replies", true, "Set to true to allow viewers to reply to the status")
 	exe.BoolVar(&exe.boostable, "enable-reposts", true, "Set to true to allow the status to be reposted (boosted) by others")
-	exe.StringVar(&exe.fromFile, "from-file", "", "The file path where to read the contents from")
 	exe.StringVar(&exe.inReplyTo, "in-reply-to", "", "The ID of the status that you want to reply to")
 	exe.StringVar(&exe.language, "language", "", "The ISO 639 language code for this status")
 	exe.StringVar(&exe.listRepliesPolicy, "list-replies-policy", "list", "The replies policy of the list")

@@ -60,10 +60,6 @@
       "type": "string",
       "description": "The resource type to action the target resource from (e.g. status)"
     },
-    "from-file": {
-      "type": "string",
-      "description": "The file path where to read the contents from"
-    },
     "full": {
       "type": "bool",
       "description": "Set to true to print the build information in full"
@@ -257,7 +253,6 @@
         { "flag": "enable-likes", "fieldName": "likeable", "default": "true" },
         { "flag": "enable-replies", "fieldName": "replyable", "default": "true" },
         { "flag": "enable-reposts", "fieldName": "boostable", "default": "true" },
-        { "flag": "from-file", "default": "" },
         { "flag": "in-reply-to", "default": "" },
         { "flag": "language", "default": "" },
         { "flag": "list-replies-policy", "default": "list" },

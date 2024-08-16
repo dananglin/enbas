@@ -61,21 +61,6 @@ func (e UnsupportedShowOperationError) Error() string {
 		"' is not supported"
 }
 
-type EmptyContentError struct {
-	ResourceType string
-	Hint         string
-}
-
-func (e EmptyContentError) Error() string {
-	message := "the content of this " + e.ResourceType + " should not be empty"
-
-	if e.Hint != "" {
-		message += ", " + e.Hint
-	}
-
-	return message
-}
-
 type UnknownCommandError struct {
 	Command string
 }

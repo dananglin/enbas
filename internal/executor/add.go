@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -108,10 +109,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	}
 
 	if a.content == "" {
-		return EmptyContentError{
-			ResourceType: resourceNote,
-			Hint:         "please use --" + flagContent,
-		}
+		return errors.New("please add content to the status that you want to create")
 	}
 
 	if err := gtsClient.SetPrivateNote(accountID, a.content); err != nil {

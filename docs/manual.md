@@ -461,7 +461,7 @@ Creates a new status.
    ```
 - Create a private status from a file.
    ```
-   enbas create --type status --content-type markdown --visibility private --from-file status.md
+   enbas create --type status --content-type markdown --visibility private --content file@status.md
    ```
 - Reply to another status.
   ```
@@ -505,13 +505,12 @@ Creates a new status.
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to create.<br>Here this should be `status`. | |
 | `attachment-id` | string | false | The ID of the media attachment to attach to the status.<br>Use this flag multiple times to attach multiple media. |
-| `content` | string | false | The content of the status.<br>This flag takes precedence over `from-file`.| |
+| `content` | string | false | The content of the status.<br>To read the content from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@status.md`).| |
 | `content-type` | string | false | The format that the content is created in.<br>Valid values are `plain` and `markdown`. | plain |
 | `enable-reposts` | boolean | false | The status can be reposted (boosted) by others. | true |
 | `enable-federation` | boolean | false | The status can be federated beyond the local timelines. | true |
 | `enable-likes` | boolean | false | The status can be liked (favourtied). | true |
 | `enable-replies` | boolean | false | The status can be replied to. | true |
-| `from-file` | string | false | The path to the file where to read the contents of the status from. | |
 | `in-reply-to` | string | false | The ID of the status that you want to reply to. | |
 | `language` | string | false | The ISO 639 language code that the status is written in.<br>If this is not specified then the default language from your posting preferences will be used. | |
 | `media-file` | string | false | The path to the media file.<br>Use this flag multiple times to upload multiple media files. | |
