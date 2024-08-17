@@ -184,7 +184,7 @@ func NewCreateExecutor(
 	exe.BoolVar(&exe.pollHidesVoteCounts, "poll-hides-vote-counts", false, "Set to true to hide the vote count until the poll is closed")
 	exe.Var(&exe.pollOptions, "poll-option", "A poll option. Use this multiple times to set multiple options")
 	exe.Var(&exe.sensitive, "sensitive", "Set to true if the status should be marked as sensitive")
-	exe.StringVar(&exe.spoilerText, "spoiler-text", "", "The text to display as the status' warning or subject")
+	exe.StringVar(&exe.spoilerText, "spoiler-text", "", "The subject, summary or content warning for the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 	exe.StringVar(&exe.visibility, "visibility", "", "The visibility of the posted status")
 

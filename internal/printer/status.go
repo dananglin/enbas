@@ -18,6 +18,12 @@ func (p Printer) PrintStatus(status model.Status, userAccountID string) {
 	builder.WriteString("\n\n" + p.headerFormat("STATUS ID:"))
 	builder.WriteString("\n" + status.ID)
 
+	// The subject, summary of content warning of the status
+	if status.SpoilerText != "" {
+		builder.WriteString("\n\n" + p.headerFormat("SUMMARY:"))
+		builder.WriteString("\n" + status.SpoilerText)
+	}
+
 	// The content of the status.
 	builder.WriteString("\n\n" + p.headerFormat("CONTENT:"))
 	builder.WriteString(p.convertHTMLToText(status.Content, true))
@@ -97,6 +103,7 @@ func (p Printer) statusList(list model.StatusList, userAccountID string) string 
 		content := status.Content
 		poll := status.Poll
 		mediaAttachments := status.MediaAttachments
+		summary := status.SpoilerText
 
 		switch {
 		case status.Reblog != nil:
@@ -115,6 +122,8 @@ func (p Printer) statusList(list model.StatusList, userAccountID string) string 
 			content = status.Reblog.Content
 			poll = status.Reblog.Poll
 			mediaAttachments = status.Reblog.MediaAttachments
+			summary = status.Reblog.SpoilerText
+
 		case status.InReplyToID != "":
 			builder.WriteString("\n" + p.wrapLines(
 				p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
@@ -125,6 +134,10 @@ func (p Printer) statusList(list model.StatusList, userAccountID string) string 
 			))
 		default:
 			builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct) + " posted:")
+		}
+
+		if summary != "" {
+			builder.WriteString("\n\n" + p.bold(p.wrapLines(summary, 0)))
 		}
 
 		builder.WriteString("\n" + p.convertHTMLToText(content, true))

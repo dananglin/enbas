@@ -174,7 +174,7 @@
     },
     "spoiler-text": {
       "type": "string",
-      "description": "The text to display as the status' warning or subject"
+      "description": "The subject, summary or content warning for the status"
     },
     "status-id": {
       "type": "string",

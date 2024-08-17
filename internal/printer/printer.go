@@ -27,6 +27,7 @@ const (
 
 type theme struct {
 	reset       string
+	bold        string
 	boldblue    string
 	boldmagenta string
 	green       string
@@ -53,6 +54,7 @@ func NewPrinter(
 ) *Printer {
 	theme := theme{
 		reset:       "\033[0m",
+		bold:        "\033[1m",
 		boldblue:    "\033[34;1m",
 		boldmagenta: "\033[35;1m",
 		green:       "\033[32m",
@@ -113,6 +115,14 @@ func (p Printer) fieldFormat(text string) string {
 	}
 
 	return p.theme.green + text + p.theme.reset
+}
+
+func (p Printer) bold(text string) string {
+	if p.noColor {
+		return text
+	}
+
+	return p.theme.bold + text + p.theme.reset
 }
 
 func (p Printer) fullDisplayNameFormat(displayName, acct string) string {

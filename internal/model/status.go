@@ -28,7 +28,7 @@ type Status struct {
 	ReblogsCount       int              `json:"reblogs_count"`
 	RepliesCount       int              `json:"replies_count"`
 	Sensitive          bool             `json:"sensitive"`
-	SpolierText        string           `json:"spoiler_text"`
+	SpoilerText        string           `json:"spoiler_text"`
 	Tags               []Tag            `json:"tags"`
 	Text               string           `json:"text"`
 	URI                string           `json:"uri"`
@@ -83,7 +83,7 @@ type StatusReblogged struct {
 	RebloggsCount      int              `json:"reblogs_count"`
 	RepliesCount       int              `json:"replies_count"`
 	Sensitive          bool             `json:"sensitive"`
-	SpolierText        string           `json:"spoiler_text"`
+	SpoilerText        string           `json:"spoiler_text"`
 	Tags               []Tag            `json:"tags"`
 	Text               string           `json:"text"`
 	URI                string           `json:"uri"`
