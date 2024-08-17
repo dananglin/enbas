@@ -1,0 +1,16 @@
+---
+name: "Enbas Mage Action"
+description: "Runs a mage target in the Enbas project"
+
+inputs:
+  target:
+    description: "The mage target to run"
+    required: true
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  entrypoint: "mage"
+  args:
+  - -v
+  - ${{ inputs.target }}

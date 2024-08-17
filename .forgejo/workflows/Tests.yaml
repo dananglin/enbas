@@ -1,0 +1,23 @@
+---
+name: Tests
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+
+jobs:
+  test:
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: docker
+    steps:
+    - name: Checkout Repository
+      uses: https://code.forgejo.org/actions/checkout@v4
+    - name: Test
+      uses: ./.forgejo/actions/mage
+      with:
+        target: test
+      env:
+        ENBAS_TEST_VERBOSE: "1"
+        ENBAS_TEST_COVER: "1"
