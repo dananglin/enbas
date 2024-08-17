@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -40,8 +39,8 @@ func (a *AddExecutor) addToList(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[a.resourceType]
 	if !ok {
 		return UnsupportedAddOperationError{
-			ResourceType:      a.resourceType,
-			AddToResourceType: a.toResourceType,
+			resourceType:      a.resourceType,
+			addToResourceType: a.toResourceType,
 		}
 	}
 
@@ -71,7 +70,7 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 		}
 
 		if !relationship.Following {
-			return NotFollowingError{Account: accounts[ind].Acct}
+			return NotFollowingError{account: accounts[ind].Acct}
 		}
 
 		accountIDs[ind] = accounts[ind].ID
@@ -94,8 +93,8 @@ func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[a.resourceType]
 	if !ok {
 		return UnsupportedAddOperationError{
-			ResourceType:      a.resourceType,
-			AddToResourceType: a.toResourceType,
+			resourceType:      a.resourceType,
+			addToResourceType: a.toResourceType,
 		}
 	}
 
@@ -109,7 +108,7 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	}
 
 	if a.content == "" {
-		return errors.New("please add content to the status that you want to create")
+		return Error{"please add content to the note you want to add"}
 	}
 
 	if err := gtsClient.SetPrivateNote(accountID, a.content); err != nil {
@@ -129,8 +128,8 @@ func (a *AddExecutor) addToBookmarks(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[a.resourceType]
 	if !ok {
 		return UnsupportedAddOperationError{
-			ResourceType:      a.resourceType,
-			AddToResourceType: a.toResourceType,
+			resourceType:      a.resourceType,
+			addToResourceType: a.toResourceType,
 		}
 	}
 
@@ -166,8 +165,8 @@ func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[a.resourceType]
 	if !ok {
 		return UnsupportedAddOperationError{
-			ResourceType:      a.resourceType,
-			AddToResourceType: a.toResourceType,
+			resourceType:      a.resourceType,
+			addToResourceType: a.toResourceType,
 		}
 	}
 
@@ -196,7 +195,7 @@ func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
 
 func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 	if a.votes.Empty() {
-		return NoVotesError{}
+		return Error{"please add your vote(s) to the poll"}
 	}
 
 	status, err := gtsClient.GetStatus(a.statusID)
@@ -205,15 +204,15 @@ func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 	}
 
 	if status.Poll == nil {
-		return NoPollInStatusError{}
+		return Error{"this status does not have a poll"}
 	}
 
 	if status.Poll.Expired {
-		return PollClosedError{}
+		return Error{"this poll is closed"}
 	}
 
 	if !status.Poll.Multiple && !a.votes.ExpectedLength(1) {
-		return MultipleChoiceError{}
+		return Error{"this poll does not allow multiple choices"}
 	}
 
 	myAccountID, err := getAccountID(gtsClient, true, nil)
@@ -222,7 +221,7 @@ func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 	}
 
 	if status.Account.ID == myAccountID {
-		return PollOwnerVoteError{}
+		return Error{"you cannot vote in your own poll"}
 	}
 
 	pollID := status.Poll.ID

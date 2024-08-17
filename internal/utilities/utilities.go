@@ -50,7 +50,7 @@ func OpenLink(browser, url string) error {
 	cmd := strings.Split(browser, " ")
 	cmd = append(cmd, url)
 
-	command := exec.Command(cmd[0], cmd[1:]...)
+	command := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
 
 	if err := command.Start(); err != nil {
 		return fmt.Errorf("received an error after starting the program to view the link: %w", err)

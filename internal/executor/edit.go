@@ -69,10 +69,11 @@ func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
 	expectedNumValues := 1
 
 	if !e.attachmentIDs.ExpectedLength(expectedNumValues) {
-		return fmt.Errorf(
-			"received an unexpected number of media attachment IDs: want %d",
-			expectedNumValues,
-		)
+		return UnexpectedNumValuesError{
+			name:     "media attachment IDs",
+			expected: expectedNumValues,
+			actual:   len(e.attachmentIDs),
+		}
 	}
 
 	attachment, err := gtsClient.GetMediaAttachment(e.attachmentIDs[0])
@@ -83,18 +84,21 @@ func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
 	description := attachment.Description
 	if !e.mediaDescriptions.Empty() {
 		if !e.mediaDescriptions.ExpectedLength(expectedNumValues) {
-			return fmt.Errorf(
-				"received an unexpected number of media descriptions: want %d",
-				expectedNumValues,
-			)
+			return UnexpectedNumValuesError{
+				name:     "media description",
+				expected: expectedNumValues,
+				actual:   len(e.mediaDescriptions),
+			}
 		}
 
 		var err error
+
 		description, err = utilities.ReadContents(e.mediaDescriptions[0])
 		if err != nil {
 			return fmt.Errorf(
 				"unable to read the contents from %s: %w",
 				e.mediaDescriptions[0],
+				err,
 			)
 		}
 	}
@@ -102,11 +106,13 @@ func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
 	focus := fmt.Sprintf("%f,%f", attachment.Meta.Focus.X, attachment.Meta.Focus.Y)
 	if !e.mediaFocusValues.Empty() {
 		if !e.mediaFocusValues.ExpectedLength(expectedNumValues) {
-			return fmt.Errorf(
-				"received an unexpected number of media focus values: want %d",
-				expectedNumValues,
-			)
+			return UnexpectedNumValuesError{
+				name:     "media focus values",
+				expected: expectedNumValues,
+				actual:   len(e.mediaFocusValues),
+			}
 		}
+
 		focus = e.mediaFocusValues[0]
 	}
 

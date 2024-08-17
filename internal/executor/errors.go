@@ -1,5 +1,15 @@
 package executor
 
+import "fmt"
+
+type Error struct {
+	message string
+}
+
+func (e Error) Error() string {
+	return e.message
+}
+
 type FlagNotSetError struct {
 	flagText string
 }
@@ -23,94 +33,87 @@ func (e NoAccountSpecifiedError) Error() string {
 }
 
 type UnsupportedAddOperationError struct {
-	ResourceType      string
-	AddToResourceType string
+	resourceType      string
+	addToResourceType string
 }
 
 func (e UnsupportedAddOperationError) Error() string {
 	return "adding '" +
-		e.ResourceType +
+		e.resourceType +
 		"' to '" +
-		e.AddToResourceType +
+		e.addToResourceType +
 		"' is not supported"
 }
 
 type UnsupportedRemoveOperationError struct {
-	ResourceType           string
-	RemoveFromResourceType string
+	resourceType           string
+	removeFromResourceType string
 }
 
 func (e UnsupportedRemoveOperationError) Error() string {
 	return "removing '" +
-		e.ResourceType +
+		e.resourceType +
 		"' from '" +
-		e.RemoveFromResourceType +
+		e.removeFromResourceType +
 		"' is not supported"
 }
 
 type UnsupportedShowOperationError struct {
-	ResourceType         string
-	ShowFromResourceType string
+	resourceType         string
+	showFromResourceType string
 }
 
 func (e UnsupportedShowOperationError) Error() string {
 	return "showing '" +
-		e.ResourceType +
+		e.resourceType +
 		"' from '" +
-		e.ShowFromResourceType +
+		e.showFromResourceType +
 		"' is not supported"
 }
 
 type UnknownCommandError struct {
-	Command string
+	command string
 }
 
 func (e UnknownCommandError) Error() string {
-	return "unknown command '" + e.Command + "'"
-}
-
-type PollClosedError struct{}
-
-func (e PollClosedError) Error() string {
-	return "this poll is closed"
-}
-
-type MultipleChoiceError struct{}
-
-func (e MultipleChoiceError) Error() string {
-	return "this poll does not allow multiple choices"
-}
-
-type NoPollOptionError struct{}
-
-func (e NoPollOptionError) Error() string {
-	return "no options were provided for this poll, please use the --" +
-		flagPollOption +
-		" flag to add options to the poll"
-}
-
-type NoVotesError struct{}
-
-func (e NoVotesError) Error() string {
-	return "no votes were made, please add your vote(s) using the --vote flag"
-}
-
-type NoPollInStatusError struct{}
-
-func (e NoPollInStatusError) Error() string {
-	return "this status does not have a poll"
-}
-
-type PollOwnerVoteError struct{}
-
-func (e PollOwnerVoteError) Error() string {
-	return "you cannot vote in your own poll"
+	return "unknown command '" + e.command + "'"
 }
 
 type NotFollowingError struct {
-	Account string
+	account string
 }
 
 func (e NotFollowingError) Error() string {
-	return "you are not following " + e.Account
+	return "you are not following " + e.account
+}
+
+type MismatchedNumMediaValuesError struct {
+	valueType     string
+	numValues     int
+	numMediaFiles int
+}
+
+func (e MismatchedNumMediaValuesError) Error() string {
+	return fmt.Sprintf(
+		"unexpected number of %s: received %d media files but got %d %s",
+		e.valueType,
+		e.numMediaFiles,
+		e.numValues,
+		e.valueType,
+	)
+}
+
+type UnexpectedNumValuesError struct {
+	name     string
+	actual   int
+	expected int
+}
+
+func (e UnexpectedNumValuesError) Error() string {
+	return fmt.Sprintf(
+		"received an unexpected number of %s: received %d, expected %d",
+		e.name,
+		e.actual,
+		e.expected,
+	)
 }

@@ -39,8 +39,8 @@ func (r *RemoveExecutor) removeFromList(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[r.resourceType]
 	if !ok {
 		return UnsupportedRemoveOperationError{
-			ResourceType:           r.resourceType,
-			RemoveFromResourceType: r.fromResourceType,
+			resourceType:           r.resourceType,
+			removeFromResourceType: r.fromResourceType,
 		}
 	}
 
@@ -84,8 +84,8 @@ func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[r.resourceType]
 	if !ok {
 		return UnsupportedRemoveOperationError{
-			ResourceType:           r.resourceType,
-			RemoveFromResourceType: r.fromResourceType,
+			resourceType:           r.resourceType,
+			removeFromResourceType: r.fromResourceType,
 		}
 	}
 
@@ -115,8 +115,8 @@ func (r *RemoveExecutor) removeFromBookmarks(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[r.resourceType]
 	if !ok {
 		return UnsupportedRemoveOperationError{
-			ResourceType:           r.resourceType,
-			RemoveFromResourceType: r.fromResourceType,
+			resourceType:           r.resourceType,
+			removeFromResourceType: r.fromResourceType,
 		}
 	}
 
@@ -151,8 +151,8 @@ func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[r.resourceType]
 	if !ok {
 		return UnsupportedRemoveOperationError{
-			ResourceType:           r.resourceType,
-			RemoveFromResourceType: r.fromResourceType,
+			resourceType:           r.resourceType,
+			removeFromResourceType: r.fromResourceType,
 		}
 	}
 

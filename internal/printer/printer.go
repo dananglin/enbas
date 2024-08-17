@@ -143,11 +143,11 @@ func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
 }
 
 func (p Printer) formatDate(date time.Time) string {
-	return date.Local().Format(dateFormat)
+	return date.Local().Format(dateFormat) //nolint:gosmopolitan
 }
 
 func (p Printer) formatDateTime(date time.Time) string {
-	return date.Local().Format(dateTimeFormat)
+	return date.Local().Format(dateTimeFormat) //nolint:gosmopolitan
 }
 
 func (p Printer) print(text string) {

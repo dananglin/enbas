@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -64,13 +63,14 @@ func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
 		for _, mention := range status.Mentions {
 			if mention.ID == myAccountID {
 				canUnmute = true
+
 				break
 			}
 		}
 	}
 
 	if !canUnmute {
-		return errors.New("unable to unmute the status because you are not the owner and you are not mentioned in it")
+		return Error{"unable to unmute the status because the status does not belong to you nor are you mentioned in it"}
 	}
 
 	if err := gtsClient.UnmuteStatus(m.statusID); err != nil {

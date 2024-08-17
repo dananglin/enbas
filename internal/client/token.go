@@ -3,14 +3,11 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal"
 )
-
-var errEmptyAccessToken = errors.New("received an empty access token")
 
 type tokenRequest struct {
 	RedirectURI  string `json:"redirect_uri"`
@@ -59,7 +56,7 @@ func (g *Client) UpdateToken(code string) error {
 	}
 
 	if response.AccessToken == "" {
-		return errEmptyAccessToken
+		return Error{"received an empty access token"}
 	}
 
 	g.Authentication.AccessToken = response.AccessToken

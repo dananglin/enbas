@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -72,27 +71,35 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	if !c.mediaFiles.Empty() {
 		descriptionsExists := false
 		focusValuesExists := false
-		expectedLength := len(c.mediaFiles)
-		mediaDescriptions := make([]string, expectedLength)
+		numMediaFiles := len(c.mediaFiles)
+		mediaDescriptions := make([]string, numMediaFiles)
 
 		if !c.mediaDescriptions.Empty() {
 			descriptionsExists = true
 
-			if !c.mediaDescriptions.ExpectedLength(expectedLength) {
-				return errors.New("the number of media descriptions does not match the number of media files")
+			if !c.mediaDescriptions.ExpectedLength(numMediaFiles) {
+				return MismatchedNumMediaValuesError{
+					valueType:     "media descriptions",
+					numValues:     len(c.mediaDescriptions),
+					numMediaFiles: numMediaFiles,
+				}
 			}
 		}
 
 		if !c.mediaFocusValues.Empty() {
 			focusValuesExists = true
 
-			if !c.mediaFocusValues.ExpectedLength(expectedLength) {
-				return errors.New("the number of media focus values does not match the number of media files")
+			if !c.mediaFocusValues.ExpectedLength(numMediaFiles) {
+				return MismatchedNumMediaValuesError{
+					valueType:     "media focus values",
+					numValues:     len(c.mediaFocusValues),
+					numMediaFiles: numMediaFiles,
+				}
 			}
 		}
 
 		if descriptionsExists {
-			for ind := 0; ind < expectedLength; ind++ {
+			for ind := 0; ind < numMediaFiles; ind++ {
 				mediaDesc, err := utilities.ReadContents(c.mediaDescriptions[ind])
 				if err != nil {
 					return fmt.Errorf("unable to read the contents from %s: %w", c.mediaDescriptions[ind], err)
@@ -102,7 +109,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 			}
 		}
 
-		for ind := 0; ind < expectedLength; ind++ {
+		for ind := 0; ind < numMediaFiles; ind++ {
 			var (
 				mediaFile   string
 				description string
@@ -133,7 +140,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	}
 
 	if c.content == "" && len(attachmentIDs) == 0 {
-		return errors.New("please add content to the status that you want to create")
+		return Error{"please add content to the status that you want to create"}
 	}
 
 	content, err := utilities.ReadContents(c.content)
@@ -144,7 +151,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	numAttachmentIDs := len(attachmentIDs)
 
 	if c.addPoll && numAttachmentIDs > 0 {
-		return fmt.Errorf("attaching media to a poll is not allowed")
+		return Error{"attaching media to a poll is not allowed"}
 	}
 
 	preferences, err := gtsClient.GetUserPreferences()
@@ -202,7 +209,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 	if c.addPoll {
 		if len(c.pollOptions) == 0 {
-			return NoPollOptionError{}
+			return Error{"no options were provided for this poll"}
 		}
 
 		poll := client.CreateStatusPollForm{
@@ -227,28 +234,33 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 func (c *CreateExecutor) createMediaAttachment(gtsClient *client.Client) error {
 	expectedNumValues := 1
+
 	if !c.mediaFiles.ExpectedLength(expectedNumValues) {
-		return fmt.Errorf(
-			"received an unexpected number of media files: want %d",
-			expectedNumValues,
-		)
+		return UnexpectedNumValuesError{
+			name:     "media files",
+			expected: expectedNumValues,
+			actual:   len(c.mediaFiles),
+		}
 	}
 
 	description := ""
 	if !c.mediaDescriptions.Empty() {
 		if !c.mediaDescriptions.ExpectedLength(expectedNumValues) {
-			return fmt.Errorf(
-				"received an unexpected number of media descriptions: want %d",
-				expectedNumValues,
-			)
+			return UnexpectedNumValuesError{
+				name:     "media descriptions",
+				expected: expectedNumValues,
+				actual:   len(c.mediaDescriptions),
+			}
 		}
 
 		var err error
+
 		description, err = utilities.ReadContents(c.mediaDescriptions[0])
 		if err != nil {
 			return fmt.Errorf(
 				"unable to read the contents from %s: %w",
 				c.mediaDescriptions[0],
+				err,
 			)
 		}
 	}
@@ -256,11 +268,13 @@ func (c *CreateExecutor) createMediaAttachment(gtsClient *client.Client) error {
 	focus := ""
 	if !c.mediaFocusValues.Empty() {
 		if !c.mediaFocusValues.ExpectedLength(expectedNumValues) {
-			return fmt.Errorf(
-				"received an unexpected number of media focus values: want %d",
-				expectedNumValues,
-			)
+			return UnexpectedNumValuesError{
+				name:     "media focus values",
+				expected: expectedNumValues,
+				actual:   len(c.mediaFocusValues),
+			}
 		}
+
 		focus = c.mediaFocusValues[0]
 	}
 

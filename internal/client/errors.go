@@ -30,3 +30,22 @@ func (e ResponseError) Error() string {
 		e.Message,
 	)
 }
+
+type BadStatusCodeError struct {
+	statusCode int
+}
+
+func (e BadStatusCodeError) Error() string {
+	return fmt.Sprintf(
+		"did not receive an OK response from the GoToSocial server: got %d",
+		e.statusCode,
+	)
+}
+
+type Error struct {
+	message string
+}
+
+func (e Error) Error() string {
+	return e.message
+}

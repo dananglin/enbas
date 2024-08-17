@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -62,7 +61,7 @@ func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
 	}
 
 	if status.Account.ID != myAccountID {
-		return errors.New("unable to delete the status because the status does not belong to you")
+		return Error{"unable to delete the status because the status does not belong to you"}
 	}
 
 	text, err := gtsClient.DeleteStatus(d.statusID)

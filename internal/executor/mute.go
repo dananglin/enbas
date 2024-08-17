@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"errors"
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
@@ -69,13 +68,14 @@ func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
 		for _, mention := range status.Mentions {
 			if mention.ID == myAccountID {
 				canMute = true
+
 				break
 			}
 		}
 	}
 
 	if !canMute {
-		return errors.New("unable to mute the status because you are not the owner and you are not mentioned in it")
+		return Error{"unable to mute the status because the status does not belong to you nor are you mentioned in it"}
 	}
 
 	if err := gtsClient.MuteStatus(m.statusID); err != nil {

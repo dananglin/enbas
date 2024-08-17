@@ -145,7 +145,7 @@ func execute(
 
 	exe, ok := executorMap[command]
 	if !ok {
-		return UnknownCommandError{Command: command}
+		return UnknownCommandError{command: command}
 	}
 
 	if err := exe.Parse(args); err != nil {

@@ -79,10 +79,9 @@ func (g *Client) DownloadMedia(url, path string) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf(
-			"did not receive an OK response from the GoToSocial server: got %d",
-			response.StatusCode,
-		)
+		return BadStatusCodeError{
+			statusCode: response.StatusCode,
+		}
 	}
 
 	file, err := os.Create(path)

@@ -257,8 +257,8 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[s.fromResourceType]
 	if !ok {
 		return UnsupportedShowOperationError{
-			ResourceType:         s.resourceType,
-			ShowFromResourceType: s.fromResourceType,
+			resourceType:         s.resourceType,
+			showFromResourceType: s.fromResourceType,
 		}
 	}
 
@@ -297,8 +297,8 @@ func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[s.fromResourceType]
 	if !ok {
 		return UnsupportedShowOperationError{
-			ResourceType:         s.resourceType,
-			ShowFromResourceType: s.fromResourceType,
+			resourceType:         s.resourceType,
+			showFromResourceType: s.fromResourceType,
 		}
 	}
 
@@ -444,8 +444,8 @@ func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
 	doFunc, ok := funcMap[s.fromResourceType]
 	if !ok {
 		return UnsupportedShowOperationError{
-			ResourceType:         s.resourceType,
-			ShowFromResourceType: s.fromResourceType,
+			resourceType:         s.resourceType,
+			showFromResourceType: s.fromResourceType,
 		}
 	}
 
