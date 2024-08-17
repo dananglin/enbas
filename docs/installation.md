@@ -8,7 +8,7 @@ Pre-built binaries will soon be available on the release page on both Codeberg a
 
 ### Build requirements
 
-- **Go:** A minimum version of Go 1.22.5 is required for installing spruce.
+- **Go:** A minimum version of Go 1.23.0 is required for installing spruce.
   Please go [here](https://go.dev/dl/) to download the latest version.
 
 - **Mage (Optional):** The project includes mage targets for building and installing the binary. The main
