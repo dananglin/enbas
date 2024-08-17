@@ -72,13 +72,10 @@ func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
 	d.printer.PrintSuccess("The status was successfully deleted.")
 
 	if d.saveText {
-		cacheDir := filepath.Join(
-			utilities.CalculateCacheDir(
-				d.config.CacheDirectory,
-				utilities.GetFQDN(gtsClient.Authentication.Instance),
-			),
-			"statuses",
-		)
+		cacheDir, err := utilities.CalculateStatusesCacheDir(d.config.CacheDirectory, gtsClient.Authentication.Instance)
+		if err != nil {
+			return fmt.Errorf("unable to get the cache directory for the status: %w", err)
+		}
 
 		if err := utilities.EnsureDirectory(cacheDir); err != nil {
 			return fmt.Errorf("unable to ensure the existence of the directory %q: %w", cacheDir, err)

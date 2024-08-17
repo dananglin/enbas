@@ -99,7 +99,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		}
 
 		if descriptionsExists {
-			for ind := 0; ind < numMediaFiles; ind++ {
+			for ind := range numMediaFiles {
 				mediaDesc, err := utilities.ReadContents(c.mediaDescriptions[ind])
 				if err != nil {
 					return fmt.Errorf("unable to read the contents from %s: %w", c.mediaDescriptions[ind], err)
@@ -109,7 +109,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 			}
 		}
 
-		for ind := 0; ind < numMediaFiles; ind++ {
+		for ind := range numMediaFiles {
 			var (
 				mediaFile   string
 				description string
@@ -156,7 +156,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 	preferences, err := gtsClient.GetUserPreferences()
 	if err != nil {
-		fmt.Println("WARNING: Unable to get your posting preferences: %w", err)
+		c.printer.PrintInfo("WARNING: Unable to get your posting preferences: " + err.Error() + ".\n")
 	}
 
 	if c.language != "" {
@@ -179,12 +179,12 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 
 	parsedVisibility, err := model.ParseStatusVisibility(visibility)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	parsedContentType, err := model.ParseStatusContentType(c.contentType)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	form := client.CreateStatusForm{

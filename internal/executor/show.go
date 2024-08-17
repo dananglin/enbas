@@ -2,7 +2,6 @@ package executor
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/media"
@@ -462,10 +461,10 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	cacheDir := filepath.Join(
-		utilities.CalculateCacheDir(s.config.CacheDirectory, utilities.GetFQDN(gtsClient.Authentication.Instance)),
-		"media",
-	)
+	cacheDir, err := utilities.CalculateMediaCacheDir(s.config.CacheDirectory, gtsClient.Authentication.Instance)
+	if err != nil {
+		return fmt.Errorf("unable to get the media cache directory: %w", err)
+	}
 
 	if err := utilities.EnsureDirectory(cacheDir); err != nil {
 		return fmt.Errorf("unable to ensure the existence of the directory %q: %w", cacheDir, err)

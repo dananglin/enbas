@@ -79,7 +79,7 @@ func getOtherAccounts(gtsClient *client.Client, accountNames internalFlag.String
 	numAccountNames := len(accountNames)
 	accounts := make([]model.Account, numAccountNames)
 
-	for ind := 0; ind < numAccountNames; ind++ {
+	for ind := range numAccountNames {
 		var err error
 
 		accounts[ind], err = gtsClient.GetAccount(accountNames[ind])

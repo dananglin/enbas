@@ -45,5 +45,5 @@ func run() error {
 	command := flag.Arg(0)
 	args := flag.Args()[1:]
 
-	return executor.Execute(command, args, noColor, configDir)
+	return executor.Execute(command, args, noColor, configDir) //nolint:wrapcheck
 }

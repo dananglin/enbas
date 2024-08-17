@@ -24,11 +24,13 @@ func main() {
 
 	schema, err := newEnbasCLISchemaFromFile(enbasCLISchemaFilepath)
 	if err != nil {
-		fmt.Printf("ERROR: Unable to read the schema file: %v.\n", err)
+		fmt.Fprintf(os.Stderr, "ERROR: Unable to read the schema file: %v.\n", err)
+		os.Exit(1)
 	}
 
 	if err := generateExecutors(schema, packageName); err != nil {
-		fmt.Printf("ERROR: Unable to generate the executors: %v.\n", err)
+		fmt.Fprintf(os.Stderr, "ERROR: Unable to generate the executors: %v.\n", err)
+		os.Exit(1)
 	}
 }
 

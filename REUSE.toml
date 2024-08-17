@@ -15,6 +15,8 @@ path = [
     "cmd/enbas-codegen/templates/**/*.go.gotmpl",
     "schema/enbas_cli_schema.json",
     ".forgejo/workflows/*.yaml",
+    ".forgejo/actions/**/action.yaml",
+    ".forgejo/actions/**/Dockerfile",
 ]
 precedence              = "override"
 SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"
