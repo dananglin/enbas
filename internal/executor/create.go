@@ -34,12 +34,12 @@ func (c *CreateExecutor) Execute() error {
 
 func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 	if c.listTitle == "" {
-		return FlagNotSetError{flagText: flagListTitle}
+		return Error{"please provide the title of the list that you want to create"}
 	}
 
 	parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(c.listRepliesPolicy)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	form := client.CreateListForm{

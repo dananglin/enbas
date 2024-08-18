@@ -13,7 +13,7 @@ func (l *LoginExecutor) Execute() error {
 	var err error
 
 	if l.instance == "" {
-		return FlagNotSetError{flagText: flagInstance}
+		return Error{"please specify the instance that you want to log into"}
 	}
 
 	instance := l.instance

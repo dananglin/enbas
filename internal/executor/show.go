@@ -176,7 +176,7 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		timeline, err = gtsClient.GetListTimeline(list.ID, list.Title, s.limit)
 	case model.TimelineCategoryTag:
 		if s.tag == "" {
-			return FlagNotSetError{flagText: flagTag}
+			return Error{"please provide the name of the tag"}
 		}
 
 		timeline, err = gtsClient.GetTagTimeline(s.tag, s.limit)
@@ -416,10 +416,6 @@ func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
 }
 
 func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
-	if len(s.attachmentIDs) == 0 {
-		return FlagNotSetError{flagText: flagAttachmentID}
-	}
-
 	if len(s.attachmentIDs) != 1 {
 		return fmt.Errorf(
 			"unexpected number of attachment IDs received: want 1, got %d",
