@@ -47,7 +47,10 @@ func (m *MuteExecutor) muteAccount(gtsClient *client.Client) error {
 
 func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
 	if m.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action: "mute",
+		}
 	}
 
 	status, err := gtsClient.GetStatus(m.statusID)

@@ -42,7 +42,10 @@ func (m *UnmuteExecutor) unmuteAccount(gtsClient *client.Client) error {
 
 func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
 	if m.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "unmute",
+		}
 	}
 
 	status, err := gtsClient.GetStatus(m.statusID)

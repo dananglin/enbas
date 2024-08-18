@@ -118,7 +118,10 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 
 func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 	if s.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "view",
+		}
 	}
 
 	status, err := gtsClient.GetStatus(s.statusID)
@@ -157,7 +160,10 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		timeline, err = gtsClient.GetPublicTimeline(s.limit)
 	case model.TimelineCategoryList:
 		if s.listID == "" {
-			return FlagNotSetError{flagText: flagListID}
+			return MissingIDError{
+				resource: resourceList,
+				action:   "view the timeline in",
+			}
 		}
 
 		var list model.List
@@ -453,7 +459,10 @@ func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
 
 func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 	if s.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "view the media from",
+		}
 	}
 
 	status, err := gtsClient.GetStatus(s.statusID)

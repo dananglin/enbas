@@ -117,3 +117,12 @@ func (e UnexpectedNumValuesError) Error() string {
 		e.expected,
 	)
 }
+
+type MissingIDError struct {
+	resource string
+	action   string
+}
+
+func (e MissingIDError) Error() string {
+	return "please provide the ID of the " + e.resource + " you want to " + e.action
+}

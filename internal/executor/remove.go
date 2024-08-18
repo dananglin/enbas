@@ -49,7 +49,10 @@ func (r *RemoveExecutor) removeFromList(gtsClient *client.Client) error {
 
 func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error {
 	if r.listID == "" {
-		return FlagNotSetError{flagText: flagListID}
+		return MissingIDError{
+			resource: resourceList,
+			action:   "remove from",
+		}
 	}
 
 	if r.accountNames.Empty() {
@@ -125,7 +128,10 @@ func (r *RemoveExecutor) removeFromBookmarks(gtsClient *client.Client) error {
 
 func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) error {
 	if r.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "remove",
+		}
 	}
 
 	if err := gtsClient.RemoveStatusFromBookmarks(r.statusID); err != nil {
@@ -139,7 +145,10 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 
 func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
 	if r.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "remove from",
+		}
 	}
 
 	funcMap := map[string]func(*client.Client) error{

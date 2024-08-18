@@ -32,6 +32,13 @@ func (a *AddExecutor) Execute() error {
 }
 
 func (a *AddExecutor) addToList(gtsClient *client.Client) error {
+	if a.listID == "" {
+		return MissingIDError{
+			resource: resourceList,
+			action:   "add to",
+		}
+	}
+
 	funcMap := map[string]func(*client.Client) error{
 		resourceAccount: a.addAccountsToList,
 	}
@@ -48,10 +55,6 @@ func (a *AddExecutor) addToList(gtsClient *client.Client) error {
 }
 
 func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
-	if a.listID == "" {
-		return FlagNotSetError{flagText: flagListID}
-	}
-
 	if a.accountNames.Empty() {
 		return NoAccountSpecifiedError{}
 	}
@@ -138,7 +141,10 @@ func (a *AddExecutor) addToBookmarks(gtsClient *client.Client) error {
 
 func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 	if a.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "add to your bookmarks",
+		}
 	}
 
 	if err := gtsClient.AddStatusToBookmarks(a.statusID); err != nil {
@@ -152,7 +158,10 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 
 func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 	if a.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "add to",
+		}
 	}
 
 	funcMap := map[string]func(*client.Client) error{

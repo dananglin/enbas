@@ -33,7 +33,10 @@ func (e *EditExecutor) Execute() error {
 
 func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	if e.listID == "" {
-		return FlagNotSetError{flagText: flagListID}
+		return MissingIDError{
+			resource: resourceList,
+			action: "edit",
+		}
 	}
 
 	list, err := gtsClient.GetList(e.listID)

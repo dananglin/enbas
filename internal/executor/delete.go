@@ -33,7 +33,10 @@ func (d *DeleteExecutor) Execute() error {
 
 func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 	if d.listID == "" {
-		return FlagNotSetError{flagText: flagListID}
+		return MissingIDError{
+			resource: resourceList,
+			action:   "delete",
+		}
 	}
 
 	if err := gtsClient.DeleteList(d.listID); err != nil {
@@ -47,7 +50,10 @@ func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 
 func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
 	if d.statusID == "" {
-		return FlagNotSetError{flagText: flagStatusID}
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "delete",
+		}
 	}
 
 	status, err := gtsClient.GetStatus(d.statusID)
