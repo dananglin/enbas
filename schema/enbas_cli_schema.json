@@ -172,13 +172,13 @@
       "type": "bool",
       "description": "Set to true to skip showing your relationship to the account that you are viewing"
     },
-    "spoiler-text": {
-      "type": "string",
-      "description": "The subject, summary or content warning for the status"
-    },
     "status-id": {
       "type": "string",
       "description": "The ID of the status"
+    },
+    "summary": {
+      "type": "string",
+      "description": "The summary of the status (a.k.a the subject, spoiler text or content warning)"
     },
     "tag": {
       "type": "string",
@@ -265,7 +265,7 @@
         { "flag": "poll-hides-vote-counts", "default": "false" },
         { "flag": "poll-option", "fieldName": "pollOptions" },
         { "flag": "sensitive" },
-        { "flag": "spoiler-text", "default": "" },
+        { "flag": "summary", "default": "" },
         { "flag": "type", "fieldName": "resourceType", "default": "" },
         { "flag": "visibility", "default": "" }
       ],

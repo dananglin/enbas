@@ -140,7 +140,7 @@ type CreateExecutor struct {
 	pollHidesVoteCounts       bool
 	pollOptions               internalFlag.StringSliceValue
 	sensitive                 internalFlag.BoolPtrValue
-	spoilerText               string
+	summary                   string
 	resourceType              string
 	visibility                string
 }
@@ -184,7 +184,7 @@ func NewCreateExecutor(
 	exe.BoolVar(&exe.pollHidesVoteCounts, "poll-hides-vote-counts", false, "Set to true to hide the vote count until the poll is closed")
 	exe.Var(&exe.pollOptions, "poll-option", "A poll option. Use this multiple times to set multiple options")
 	exe.Var(&exe.sensitive, "sensitive", "Set to true if the status should be marked as sensitive")
-	exe.StringVar(&exe.spoilerText, "spoiler-text", "", "The subject, summary or content warning for the status")
+	exe.StringVar(&exe.summary, "summary", "", "The summary of the status (a.k.a the subject, spoiler text or content warning)")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 	exe.StringVar(&exe.visibility, "visibility", "", "The visibility of the posted status")
 

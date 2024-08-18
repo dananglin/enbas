@@ -191,7 +191,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		Content:       content,
 		ContentType:   parsedContentType,
 		Language:      language,
-		SpoilerText:   c.spoilerText,
+		SpoilerText:   c.summary,
 		Boostable:     c.boostable,
 		Federated:     c.federated,
 		InReplyTo:     c.inReplyTo,

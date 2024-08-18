@@ -517,7 +517,7 @@ Creates a new status.
 | `media-description` | string | false | The description of the media attachment which will be used as the media's alt-text.<br>To use a description from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@description.txt`)<br>Use this flag multiple times to set multiple descriptions.| |
 | `media-focus` | string | false | The media's focus values. This should be in the form of two comma-separated numbers between -1 and 1 (e.g. 0.25,-0.34).<br>Use this flag multiple times to set multiple focus values. | |
 | `sensitive` | string | false | The status should be marked as sensitive.<br>If this is not specified then the default sensitivity from your posting preferences will be used. | |
-| `spoiler-text` | string | false | The text to display as the status' warning or subject. | |
+| `summary` | string | false | The summary of the status (a.k.a the subject, spoiler text or content warning). | |
 | `visibility` | string | false | The visibility of the status.<br>Valid values are `public`, `private`, `unlisted`, `mutuals_only` and `direct`.<br>If this is not specified then the default visibility from your posting preferences will be used. | |
 
 Additional flags for polls.
