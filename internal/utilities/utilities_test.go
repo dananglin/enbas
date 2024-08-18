@@ -7,8 +7,6 @@ import (
 )
 
 func TestGetFQDN(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		instance string
 		want     string

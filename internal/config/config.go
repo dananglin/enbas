@@ -10,7 +10,11 @@ import (
 )
 
 const (
-	configFileName = "config.json"
+	configFileName string = "config.json"
+
+	defaultHTTPTimeout      int = 5
+	defaultHTTPMediaTimeout int = 30
+	defaultLineWrapMaxWidth int = 80
 )
 
 type Config struct {
@@ -35,7 +39,10 @@ type Integrations struct {
 }
 
 func NewConfigFromFile(configDir string) (*Config, error) {
-	path := configFile(configDir)
+	path, err := configPath(configDir)
+	if err != nil {
+		return nil, fmt.Errorf("unable to calculate the path to your config file: %w", err)
+	}
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -53,13 +60,19 @@ func NewConfigFromFile(configDir string) (*Config, error) {
 }
 
 func FileExists(configDir string) (bool, error) {
-	path := configFile(configDir)
+	path, err := configPath(configDir)
+	if err != nil {
+		return false, fmt.Errorf("unable to calculate the path to your config file: %w", err)
+	}
 
 	return utilities.FileExists(path)
 }
 
 func SaveDefaultConfigToFile(configDir string) error {
-	path := configFile(configDir)
+	path, err := configPath(configDir)
+	if err != nil {
+		return fmt.Errorf("unable to calculate the path to your config file: %w", err)
+	}
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -69,7 +82,7 @@ func SaveDefaultConfigToFile(configDir string) error {
 
 	config := defaultConfig()
 
-	credentialsFilePath, err := utilities.AbsolutePath(defaultCredentialsConfigFile(configDir))
+	credentialsFilePath, err := defaultCredentialsConfigFile(configDir)
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to the credentials file: %w", err)
 	}
@@ -86,8 +99,13 @@ func SaveDefaultConfigToFile(configDir string) error {
 	return nil
 }
 
-func configFile(configDir string) string {
-	return filepath.Join(utilities.CalculateConfigDir(configDir), configFileName)
+func configPath(configDir string) (string, error) {
+	configDir, err := utilities.CalculateConfigDir(configDir)
+	if err != nil {
+		return "", fmt.Errorf("unable to get the config directory: %w", err)
+	}
+
+	return filepath.Join(configDir, configFileName), nil
 }
 
 func defaultConfig() Config {
@@ -95,10 +113,10 @@ func defaultConfig() Config {
 		CredentialsFile: "",
 		CacheDirectory:  "",
 		HTTP: HTTPConfig{
-			Timeout:      5,
-			MediaTimeout: 30,
+			Timeout:      defaultHTTPTimeout,
+			MediaTimeout: defaultHTTPMediaTimeout,
 		},
-		LineWrapMaxWidth: 80,
+		LineWrapMaxWidth: defaultLineWrapMaxWidth,
 		Integrations: Integrations{
 			Browser:     "",
 			Editor:      "",

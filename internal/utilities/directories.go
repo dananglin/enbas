@@ -14,17 +14,17 @@ const (
 	cacheStatusesDir = "statuses"
 )
 
-func CalculateConfigDir(configDir string) string {
+func CalculateConfigDir(configDir string) (string, error) {
 	if configDir != "" {
-		return configDir
+		return configDir, nil
 	}
 
 	configRoot, err := os.UserConfigDir()
 	if err != nil {
-		return filepath.Join(os.Getenv("HOME"), "."+internal.ApplicationName, "config")
+		return "", fmt.Errorf("unable to get your default config diretory: %w", err)
 	}
 
-	return filepath.Join(configRoot, internal.ApplicationName)
+	return filepath.Join(configRoot, internal.ApplicationName), nil
 }
 
 func CalculateMediaCacheDir(cacheRoot, instance string) (string, error) {

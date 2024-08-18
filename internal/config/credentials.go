@@ -38,9 +38,15 @@ func (e CredentialsNotFoundError) Error() string {
 // directory. If the directory is not specified then the default directory is used. If the directory
 // is not present, it will be created.
 func SaveCredentials(filePath, username string, credentials Credentials) (string, error) {
-	directory := filepath.Dir(filePath)
+	part := filepath.Dir(filePath)
 
-	if err := utilities.EnsureDirectory(utilities.CalculateConfigDir(directory)); err != nil {
+	// ensure that the directory exists.
+	credentialsDir, err := utilities.CalculateConfigDir(part)
+	if err != nil {
+		return "", fmt.Errorf("unable to calculate the directory to your credentials file: %w", err)
+	}
+
+	if err := utilities.EnsureDirectory(credentialsDir); err != nil {
 		return "", fmt.Errorf("unable to ensure the configuration directory: %w", err)
 	}
 
@@ -128,6 +134,16 @@ func saveCredentialsConfigFile(authConfig CredentialsConfig, filePath string) er
 	return nil
 }
 
-func defaultCredentialsConfigFile(configDir string) string {
-	return filepath.Join(utilities.CalculateConfigDir(configDir), defaultCredentialsFileName)
+func defaultCredentialsConfigFile(configDir string) (string, error) {
+	dir, err := utilities.CalculateConfigDir(configDir)
+	if err != nil {
+		return "", fmt.Errorf("unable to calculate the config directory: %w", err)
+	}
+
+	path, err := utilities.AbsolutePath(filepath.Join(dir, defaultCredentialsFileName))
+	if err != nil {
+		return "", fmt.Errorf("unable to get the absolute path to the credentials config file: %w", err)
+	}
+
+	return path, nil
 }
