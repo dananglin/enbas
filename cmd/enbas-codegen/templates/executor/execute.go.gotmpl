@@ -11,21 +11,45 @@ package executor
 {{ print "" }}
 {{ print "" }}
 import "fmt"
+import "flag"
+import "os"
 import "codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+import internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 import "codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
+import "codeflow.dananglin.me.uk/apollo/enbas/internal/usage"
 {{ print "" }}
 {{ print "" }}
-func Execute(
-	command string,
-	args []string,
-	noColor bool,
-	configDir string,
-) error {
+func Execute() error {
 	var (
+		configDir    string
+		noColorFlag  internalFlag.BoolPtrValue
+		noColor      bool
 		enbasConfig  *config.Config
 		enbasPrinter *printer.Printer
 		err          error
 	)
+
+	flag.StringVar(&configDir, "config-dir", "", "The path to your configuration directory")
+	flag.Var(&noColorFlag, "no-color", "Set to true to disable ANSI colour output when displaying text on screen")
+
+	flag.Usage = usage.AppUsageFunc()
+
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		flag.Usage()
+
+		return nil
+	}
+
+	if noColorFlag.Value != nil {
+		noColor = *noColorFlag.Value
+	} else if os.Getenv("NO_COLOR") != "" {
+		noColor = true
+	}
+
+	command := flag.Arg(0)
+	args := flag.Args()[1:]
 
 	switch command {
 	case "init", "version":
@@ -94,7 +118,7 @@ func execute(
 
 	exe, ok := executorMap[command]
 	if !ok {
-		return UnknownCommandError{Command: command}
+		return UnknownCommandError{command: command}
 	}
 
 	if err := exe.Parse(args); err != nil {

@@ -6,23 +6,47 @@
 package executor
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/usage"
 )
 
-func Execute(
-	command string,
-	args []string,
-	noColor bool,
-	configDir string,
-) error {
+func Execute() error {
 	var (
+		configDir    string
+		noColorFlag  internalFlag.BoolPtrValue
+		noColor      bool
 		enbasConfig  *config.Config
 		enbasPrinter *printer.Printer
 		err          error
 	)
+
+	flag.StringVar(&configDir, "config-dir", "", "The path to your configuration directory")
+	flag.Var(&noColorFlag, "no-color", "Set to true to disable ANSI colour output when displaying text on screen")
+
+	flag.Usage = usage.AppUsageFunc()
+
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		flag.Usage()
+
+		return nil
+	}
+
+	if noColorFlag.Value != nil {
+		noColor = *noColorFlag.Value
+	} else if os.Getenv("NO_COLOR") != "" {
+		noColor = true
+	}
+
+	command := flag.Arg(0)
+	args := flag.Args()[1:]
 
 	switch command {
 	case "init", "version":
