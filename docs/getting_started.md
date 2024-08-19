@@ -8,7 +8,8 @@ Follow along to log into your own account.
 
 ## Your configuration directory
 
-Enbas uses Go's [os.UserConfigDir()](https://pkg.go.dev/os#UserConfigDir) function to calculate the location of your configuration directory.
+You can use the `--config-dir` global flag to specify the path to your configuration directory.
+Alternatively Enbas tries to set the directory based on your home configuration directory using Go's [os.UserConfigDir()](https://pkg.go.dev/os#UserConfigDir) function.
 
 If you've set the `XDG_CONFIG_HOME` environment variable, the configuration directory will be set to `$XDG_CONFIG_HOME/enbas`.
 
@@ -17,8 +18,6 @@ If this is not set, then:
 - on Linux the configuration directory will be set to `$HOME/.config/enbas`.
 - on Darwin (MacOS) the configuration directory will be set to `$HOME/Library/Application Support/enbas`.
 - on Windows the configuration directory will be set within the `%AppData%` directory.
-
-Alternatively you can use the `--config-dir` global flag to specify your configuration directory.
 
 ## Generate your configuration file
 
