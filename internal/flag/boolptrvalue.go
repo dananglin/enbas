@@ -34,3 +34,5 @@ func (b *BoolPtrValue) Set(value string) error {
 
 	return nil
 }
+
+func (b *BoolPtrValue) IsBoolFlag() bool { return true }
