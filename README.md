@@ -24,6 +24,7 @@ the `main` branch mirrored to the following forges:
 - **[Getting started guide](docs/getting_started.md)**: A guide to help you get started on using Enbas.
 - **[Configuration reference](docs/configuration.md)**: The configuration reference documentation.
 - **[User manual](docs/manual.md)**: The user manual.
+- **[Tips and Tricks](docs/tips_and_tricks.md)**: Additional tips and tricks.
 
 ### Licensing
 

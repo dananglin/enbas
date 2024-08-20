@@ -1,6 +1,7 @@
 package flag_test
 
 import (
+	"flag"
 	"slices"
 	"testing"
 
@@ -10,52 +11,86 @@ import (
 func TestBoolPtrValue(t *testing.T) {
 	tests := []struct {
 		input string
-		want  bool
+		want  string
 	}{
 		{
 			input: "True",
-			want:  true,
+			want:  "true",
+		},
+		{
+			input: "true",
+			want:  "true",
+		},
+		{
+			input: "1",
+			want:  "true",
+		},
+		{
+			input: "False",
+			want:  "false",
 		},
 		{
 			input: "false",
-			want:  false,
+			want:  "false",
+		},
+		{
+			input: "0",
+			want:  "false",
 		},
 	}
 
-	value := internalFlag.NewBoolPtrValue()
-
 	for _, test := range slices.All(tests) {
-		if err := value.Set(test.input); err != nil {
-			t.Fatalf(
-				"Unable to parse %s as a BoolPtrValue: %v",
-				test.input,
-				err,
-			)
+		args := []string{"--boolean-value=" + test.input}
+
+		t.Run("Flag parsing test: "+test.input, testBoolPtrValueParsing(args, test.want))
+	}
+}
+
+func testBoolPtrValueParsing(args []string, want string) func(t *testing.T) {
+	return func(t *testing.T) {
+		flagset := flag.NewFlagSet("test", flag.ExitOnError)
+		boolVal := internalFlag.NewBoolPtrValue()
+
+		flagset.Var(&boolVal, "boolean-value", "Boolean value")
+
+		if err := flagset.Parse(args); err != nil {
+			t.Fatalf("Received an error parsing the flag: %v", err)
 		}
 
-		got := *value.Value
+		got := boolVal.String()
 
-		if got != test.want {
+		if got != want {
 			t.Errorf(
-				"Unexpected bool parsed from %s: want %t, got %t",
-				test.input,
-				test.want,
+				"Unexpected boolean value found after parsing BoolPtrValue: want %s, got %s",
+				want,
 				got,
 			)
 		} else {
 			t.Logf(
-				"Expected bool parsed from %s: got %t",
-				test.input,
+				"Expected boolean value found after parsing BoolPtrValue: got %s",
 				got,
 			)
 		}
 	}
 }
 
-func TestNilBoolPtrValue(t *testing.T) {
-	value := internalFlag.NewBoolPtrValue()
+func TestNotSetBoolPtrValue(t *testing.T) {
+	flagset := flag.NewFlagSet("test", flag.ExitOnError)
+	boolVal := internalFlag.NewBoolPtrValue()
+
+	var otherVal string
+
+	flagset.Var(&boolVal, "boolean-value", "Boolean value")
+	flagset.StringVar(&otherVal, "other-value", "", "Another value")
+
+	args := []string{"--other-value", "other-value"}
+
+	if err := flagset.Parse(args); err != nil {
+		t.Fatalf("Received an error parsing the flag: %v", err)
+	}
+
 	want := "NOT SET"
-	got := value.String()
+	got := boolVal.String()
 
 	if got != want {
 		t.Errorf("Unexpected string returned from the nil value; want %s, got %s", want, got)

@@ -19,5 +19,4 @@ jobs:
       with:
         target: test
       env:
-        ENBAS_TEST_VERBOSE: "1"
         ENBAS_TEST_COVER: "1"

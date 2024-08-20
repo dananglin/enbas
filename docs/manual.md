@@ -269,16 +269,21 @@ enbas show --type blocked
 
 ### Mute an account
 
-```
-enbas mute --type account --account-name @name@example.social --mute-notifications --mute-duration="1h"
-```
+- Mute an account indefinitely.
+   ```
+   enbas mute --type account --account-name @name@example.social --mute-notifications"
+   ```
+- Mute an account for 1 and a half hours.
+   ```
+   enbas mute --type account --account-name @name@example.social --mute-notifications --mute-duration="1 hour and 30 minutes"
+   ```
 
 | flag | type | required | description | default |
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to mute.<br>Here this should be `account`. | |
 | `account-name` | string | true | The name of the account to mute. | |
 | `mute-notifications` | boolean | false | Set to `true` to mute notifications as well as statuses. | false |
-| `mute-duration` | string | false | Specify how long the account should be muted for.<br>Set to `0s` to mute indefinitely | 0s (indefinitely). |
+| `mute-duration` | [time duration value](tips_and_tricks.md#the-time-duration-value) | false | Specify how long the account should be muted for.<br>Set to `0 seconds` to mute indefinitely | 0 seconds (indefinitely). |
 
 ### Unmute an account
 
@@ -476,7 +481,7 @@ Creates a new status.
        --content "The age-old question: which text editor do you prefer?" \
        --add-poll \
        --poll-allows-multiple-choices=false \
-       --poll-expires-in 168h \
+       --poll-expires-in "7 days" \
        --poll-option "emacs" \
        --poll-option "vim/neovim" \
        --poll-option "nano" \
@@ -528,7 +533,7 @@ Additional flags for polls.
 | `poll-allows-multiple-choices` | boolean | false | Set to `true` to allow users to make multiple choices. | false |
 | `poll-hides-vote-counts` | boolean | false | Set to `true` to hide the vote count until the poll is closed. | false |
 | `poll-option` | string | true | An option in the poll. Use this flag multiple times to set multiple options. | |
-| `poll-expires-in` | string | false | The duration in which the poll is open for. | |
+| `poll-expires-in` | [time duration value](tips_and_tricks.md#the-time-duration-value) | false | The duration in which the poll is open for. | |
 
 ### Delete a status
 
