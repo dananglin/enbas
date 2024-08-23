@@ -4,6 +4,8 @@ import (
 	"flag"
 	"slices"
 	"strings"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 )
 
 // ExecutorUsageFunc returns the function used to print a command's help page.
@@ -14,7 +16,7 @@ func ExecutorUsageFunc(name, summary string, flagset *flag.FlagSet) func() {
 		builder.WriteString("SUMMARY:")
 		builder.WriteString("\n  " + name + " - " + summary)
 		builder.WriteString("\n\nUSAGE:")
-		builder.WriteString("\n  enbas " + name)
+		builder.WriteString("\n  " + info.ApplicationName + " " + name)
 
 		flagMap := make(map[string]string)
 

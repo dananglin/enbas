@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
@@ -19,10 +19,10 @@ type registerRequest struct {
 
 func (g *Client) Register() error {
 	registerParams := registerRequest{
-		ClientName:   internal.ApplicationName,
-		RedirectUris: internal.RedirectURI,
+		ClientName:   info.ApplicationName,
+		RedirectUris: redirectURI,
 		Scopes:       "read write",
-		Website:      internal.ApplicationWebsite,
+		Website:      info.ApplicationWebsite,
 	}
 
 	data, err := json.Marshal(registerParams)

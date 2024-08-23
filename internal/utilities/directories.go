@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 )
 
 const (
@@ -24,7 +24,7 @@ func CalculateConfigDir(configDir string) (string, error) {
 		return "", fmt.Errorf("unable to get your default config diretory: %w", err)
 	}
 
-	return filepath.Join(configRoot, internal.ApplicationName), nil
+	return filepath.Join(configRoot, info.ApplicationName), nil
 }
 
 func CalculateMediaCacheDir(cacheRoot, instance string) (string, error) {
@@ -57,7 +57,7 @@ func calculateCacheDir(cacheRoot, instance string) (string, error) {
 		return "", fmt.Errorf("unable to get your default cache directory: %w", err)
 	}
 
-	return filepath.Join(cacheRoot, internal.ApplicationName, fqdn), nil
+	return filepath.Join(cacheRoot, info.ApplicationName, fqdn), nil
 }
 
 func EnsureDirectory(dir string) error {

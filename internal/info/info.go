@@ -1,4 +1,9 @@
-package version
+package info
+
+const (
+	ApplicationName    string = "enbas"
+	ApplicationWebsite string = "https://codeflow.dananglin.me.uk/apollo/enbas"
+)
 
 var (
 	BinaryVersion string //nolint:gochecknoglobals

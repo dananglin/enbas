@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/version"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 )
 
 func AppUsageFunc() func() {
@@ -24,13 +24,13 @@ func AppUsageFunc() func() {
 	return func() {
 		var builder strings.Builder
 
-		builder.WriteString("SUMMARY:\n    enbas - A GoToSocial client for the terminal.\n\n")
+		builder.WriteString("SUMMARY:\n    " + info.ApplicationName + " - A GoToSocial client for the terminal.\n\n")
 
-		if version.BinaryVersion != "" {
-			builder.WriteString("VERSION:\n    " + version.BinaryVersion + "\n\n")
+		if info.BinaryVersion != "" {
+			builder.WriteString("VERSION:\n    " + info.BinaryVersion + "\n\n")
 		}
 
-		builder.WriteString("USAGE:\n    enbas [flags]\n    enbas [flags] [command]\n\nCOMMANDS:")
+		builder.WriteString("USAGE:\n    " + info.ApplicationName + " [flags]\n    " + info.ApplicationName + " [flags] [command]\n\nCOMMANDS:")
 
 		tableWriter := tabwriter.NewWriter(&builder, 0, 8, 0, '\t', 0)
 
@@ -45,7 +45,7 @@ func AppUsageFunc() func() {
 			fmt.Fprintf(&builder, "\n    --%s\n        %s", f.Name, f.Usage)
 		})
 
-		builder.WriteString("\n\nUse \"enbas [command] --help\" for more information about a command.\n")
+		builder.WriteString("\n\nUse \"" + info.ApplicationName + " [command] --help\" for more information about a command.\n")
 
 		w := flag.CommandLine.Output()
 		fmt.Fprint(w, builder.String())

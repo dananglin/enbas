@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
 )
 
 type tokenRequest struct {
@@ -26,7 +24,7 @@ type tokenResponse struct {
 
 func (g *Client) UpdateToken(code string) error {
 	tokenReq := tokenRequest{
-		RedirectURI:  internal.RedirectURI,
+		RedirectURI:  redirectURI,
 		ClientID:     g.Authentication.ClientID,
 		ClientSecret: g.Authentication.ClientSecret,
 		GrantType:    "authorization_code",

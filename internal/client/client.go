@@ -10,12 +10,13 @@ import (
 	"os"
 	"time"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 )
 
 const (
 	applicationJSON string = "application/json; charset=utf-8"
+	redirectURI     string = "urn:ietf:wg:oauth:2.0:oob"
+	userAgent       string = "Enbas/0.0.0"
 )
 
 type Client struct {
@@ -42,7 +43,7 @@ func NewClient(authentication config.Credentials) *Client {
 	gtsClient := Client{
 		Authentication: authentication,
 		HTTPClient:     httpClient,
-		UserAgent:      internal.UserAgent,
+		UserAgent:      userAgent,
 		Timeout:        5 * time.Second,
 	}
 
@@ -51,7 +52,7 @@ func NewClient(authentication config.Credentials) *Client {
 
 func (g *Client) AuthCodeURL() string {
 	format := "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code"
-	escapedRedirectURI := url.QueryEscape(internal.RedirectURI)
+	escapedRedirectURI := url.QueryEscape(redirectURI)
 
 	return fmt.Sprintf(
 		format,

@@ -110,7 +110,7 @@ func Clean() error {
 
 // ldflags returns the build flags.
 func ldflags() string {
-	versionPackage := "codeflow.dananglin.me.uk/apollo/enbas/internal/version"
+	versionPackage := "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	binaryVersionVar := versionPackage + "." + "BinaryVersion"
 	gitCommitVar := versionPackage + "." + "GitCommit"
 	goVersionVar := versionPackage + "." + "GoVersion"
