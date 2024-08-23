@@ -129,6 +129,14 @@ func {{ $execute_command_function_name }}(
 	exe.Var(&exe.{{ flagFieldName $flag }}, {{ printf "%q" $flag.Flag }}, {{ getFlagDescription $flag.Flag | printf "%q" }})
 	{{- end -}}
 	{{- end -}}
+	{{ print "" }}
+	{{ print "" }}
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("({{ $name }}) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
 	{{- if $command.UseConfig -}}
 	{{ print "" }}
 	{{ print "" }}
@@ -155,13 +163,6 @@ func {{ $execute_command_function_name }}(
 	{{- end -}}
 	{{ print "" }}
 	{{ print "" }}
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("({{ $name }}) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
-
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
 		exe.printer.PrintFailure("({{ $name }}) execution error: " + err.Error() + ".")

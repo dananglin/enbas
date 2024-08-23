@@ -106,6 +106,13 @@ func ExecuteAcceptCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(accept) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -121,13 +128,6 @@ func ExecuteAcceptCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(accept) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -179,6 +179,13 @@ func ExecuteAddCommand(
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 	exe.Var(&exe.votes, "vote", "Add a vote to an option in a poll")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(add) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -194,13 +201,6 @@ func ExecuteAddCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(add) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -241,6 +241,13 @@ func ExecuteBlockCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(block) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -256,13 +263,6 @@ func ExecuteBlockCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(block) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -351,6 +351,13 @@ func ExecuteCreateCommand(
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 	exe.StringVar(&exe.visibility, "visibility", "", "The visibility of the posted status")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(create) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -366,13 +373,6 @@ func ExecuteCreateCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(create) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -416,6 +416,13 @@ func ExecuteDeleteCommand(
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(delete) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -431,13 +438,6 @@ func ExecuteDeleteCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(delete) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -490,6 +490,13 @@ func ExecuteEditCommand(
 	exe.Var(&exe.mediaFocusValues, "media-focus", "The focus of the media file")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(edit) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -505,13 +512,6 @@ func ExecuteEditCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(edit) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -556,6 +556,13 @@ func ExecuteFollowCommand(
 	exe.BoolVar(&exe.showReposts, "show-reposts", true, "Show reposts from the account you want to follow")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(follow) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -571,13 +578,6 @@ func ExecuteFollowCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(follow) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -612,15 +612,15 @@ func ExecuteInitCommand(
 
 	exe.Usage = usage.ExecutorUsageFunc("init", "Creates a new configuration file in the specified configuration directory", exe.FlagSet)
 
-	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(noColor, "", 0)
-
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(init) flag parsing error: " + err.Error() + ".")
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(init) flag parsing error: " + err.Error() + ".")
 
 		return err
 	}
+
+	// Create the printer for the executor.
+	exe.printer = printer.NewPrinter(noColor, "", 0)
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -658,6 +658,13 @@ func ExecuteLoginCommand(
 
 	exe.StringVar(&exe.instance, "instance", "", "The instance that you want to log into")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(login) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -673,13 +680,6 @@ func ExecuteLoginCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(login) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -727,6 +727,13 @@ func ExecuteMuteCommand(
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(mute) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -742,13 +749,6 @@ func ExecuteMuteCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(mute) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -789,6 +789,13 @@ func ExecuteRejectCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(reject) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -804,13 +811,6 @@ func ExecuteRejectCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(reject) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -857,6 +857,13 @@ func ExecuteRemoveCommand(
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(remove) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -872,13 +879,6 @@ func ExecuteRemoveCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(remove) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -958,6 +958,13 @@ func ExecuteShowCommand(
 	exe.StringVar(&exe.tag, "tag", "", "The name of the tag")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(show) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -973,13 +980,6 @@ func ExecuteShowCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(show) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1020,6 +1020,13 @@ func ExecuteSwitchCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.to, "to", "", "The resource type to action the target resource to (e.g. status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(switch) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -1035,13 +1042,6 @@ func ExecuteSwitchCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(switch) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1082,6 +1082,13 @@ func ExecuteUnblockCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(unblock) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -1097,13 +1104,6 @@ func ExecuteUnblockCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(unblock) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1144,6 +1144,13 @@ func ExecuteUnfollowCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(unfollow) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -1159,13 +1166,6 @@ func ExecuteUnfollowCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(unfollow) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1208,6 +1208,13 @@ func ExecuteUnmuteCommand(
 	exe.StringVar(&exe.statusID, "status-id", "", "The ID of the status")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(unmute) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -1223,13 +1230,6 @@ func ExecuteUnmuteCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(unmute) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1267,15 +1267,15 @@ func ExecuteVersionCommand(
 
 	exe.BoolVar(&exe.full, "full", false, "Set to true to print the build information in full")
 
-	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(noColor, "", 0)
-
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(version) flag parsing error: " + err.Error() + ".")
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(version) flag parsing error: " + err.Error() + ".")
 
 		return err
 	}
+
+	// Create the printer for the executor.
+	exe.printer = printer.NewPrinter(noColor, "", 0)
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
@@ -1310,6 +1310,13 @@ func ExecuteWhoamiCommand(
 
 	exe.Usage = usage.ExecutorUsageFunc("whoami", "Prints the account that you are currently logged into", exe.FlagSet)
 
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(whoami) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
@@ -1325,13 +1332,6 @@ func ExecuteWhoamiCommand(
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
 	)
-
-	// Parse the remaining arguments.
-	if err := exe.Parse(args); err != nil {
-		exe.printer.PrintFailure("(whoami) flag parsing error: " + err.Error() + ".")
-
-		return err
-	}
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
