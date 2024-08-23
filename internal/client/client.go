@@ -16,7 +16,7 @@ import (
 const (
 	applicationJSON string = "application/json; charset=utf-8"
 	redirectURI     string = "urn:ietf:wg:oauth:2.0:oob"
-	userAgent       string = "Enbas/0.0.0"
+	userAgent       string = "Enbas/0.2.0"
 )
 
 type Client struct {
