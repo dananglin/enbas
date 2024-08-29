@@ -8,7 +8,7 @@ Pre-built binaries will soon be available on the release page on both Codeberg a
 
 ### Build requirements
 
-- **Go:** A minimum version of Go 1.23.0 is required for installing spruce.
+- **Go:** A minimum version of Go 1.23.0 is required for installing Enbas.
   Please go [here](https://go.dev/dl/) to download the latest version.
 
 - **Mage (Optional):** The project includes mage targets for building and installing the binary. The main
@@ -57,46 +57,46 @@ go install ./cmd/enbas
 
 Type `enbas` from your terminal to verify that the installation was successful. You should see the help documentation.
 
-```bash
+```
 $ enbas
 SUMMARY:
     enbas - A GoToSocial client for the terminal.
 
 VERSION:
-    v0.1.0
+    v0.2.0
 
 USAGE:
     enbas [flags]
     enbas [flags] [command]
 
 COMMANDS:
-    accept      Accept a request (e.g. a follow request)
-    add         Add a resource to another resource
-    block       Block a resource (e.g. an account)
-    create      Create a specific resource
-    delete      Delete a specific resource
+    accept      Accepts a request (e.g. a follow request)
+    add         Adds a resource to another resource
+    block       Blocks a resource (e.g. an account)
+    create      Creates a specific resource
+    delete      Deletes a specific resource
     edit        Edit a specific resource
     follow      Follow a resource (e.g. an account)
-    init        Create a new configuration file in the specified configuration directory
-    login       Login to an account on GoToSocial
-    mute        Mute a resource (e.g. an account)
-    reject      Reject a request (e.g. a follow request)
-    remove      Remove a resource from another resource
-    show        Print details about a specified resource
-    switch      Perform a switch operation (e.g. switch logged in accounts)
-    unblock     Unblock a resource (e.g. an account)
-    unfollow    Unfollow a resource (e.g. an account)
-    unmute      Unmute a resource (e.g. an account)
-    version     Print the application's version and build information
-    whoami      Print the account that you are currently logged in to
+    init        Creates a new configuration file in the specified configuration directory
+    login       Logs into an account on GoToSocial
+    mute        Mutes a specific resource (e.g. an account)
+    reject      Rejects a request (e.g. a follow request)
+    remove      Removes a resource from another resource
+    show        Shows details about a specified resource
+    switch      Performs a switch operation (e.g. switching between logged in accounts)
+    unblock     Unblocks a resource (e.g. an account)
+    unfollow    Unfollows a resource (e.g. an account)
+    unmute      Umutes a specific resource (e.g. an account)
+    version     Prints the application's version and build information
+    whoami      Prints the account that you are currently logged into
 
 FLAGS:
     --help
         print the help message
     --config-dir
-        Specify your config directory
+        The path to your configuration directory
     --no-color
-        Disable ANSI colour output when displaying text on screen
+        Set to true to disable ANSI colour output when displaying text on screen
 
 Use "enbas [command] --help" for more information about a command.
 ```
@@ -106,12 +106,13 @@ The build information is correctly displayed if you've downloaded the binary fro
 or if you've built it with Mage.
 
 ```bash
+$ enbas version --full
 Enbas
 
-Version:    v0.1.0
-Git commit: c8892a6
-Go version: go1.22.4
-Build date: 2024-06-28T21:57:37Z
+Version:    v0.2.0
+Git commit: fa58e5b
+Go version: go1.23.0
+Build date: 2024-08-29T07:24:53Z
 ```
 
 Once you have completed the installation proceed to the [Getting Started guide](./getting_started.md).
