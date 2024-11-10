@@ -49,7 +49,7 @@ func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
 	if m.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
-			action: "mute",
+			action:   "mute",
 		}
 	}
 

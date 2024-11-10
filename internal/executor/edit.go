@@ -35,7 +35,7 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	if e.listID == "" {
 		return MissingIDError{
 			resource: resourceList,
-			action: "edit",
+			action:   "edit",
 		}
 	}
 

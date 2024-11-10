@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/magefile/mage/mg"
@@ -14,19 +15,19 @@ import (
 )
 
 const (
-	app                  = "enbas"
+	app    = "enbas"
+	binary = "./__build/" + app
+
 	defaultInstallPrefix = "/usr/local"
 	envInstallPrefix     = "ENBAS_INSTALL_PREFIX"
 	envTestVerbose       = "ENBAS_TEST_VERBOSE"
 	envTestCover         = "ENBAS_TEST_COVER"
 	envBuildRebuildAll   = "ENBAS_BUILD_REBUILD_ALL"
 	envBuildVerbose      = "ENBAS_BUILD_VERBOSE"
+	envFailOnFormatting  = "ENBAS_FAIL_ON_FORMATTING"
 )
 
-var (
-	Default = Build
-	binary  = "./__build/" + app
-)
+var Default = Build
 
 // Test run the go tests.
 // To enable verbose mode set ENBAS_TEST_VERBOSE=1.
@@ -50,6 +51,48 @@ func Test() error {
 // Lint runs golangci-lint against the code.
 func Lint() error {
 	return sh.RunV("golangci-lint", "run", "--color", "always")
+}
+
+// Gosec runs gosec against the code.
+func Gosec() error {
+	return sh.RunV("gosec", "./...")
+}
+
+// Staticcheck runs staticcheck against the code.
+func Staticcheck() error {
+	return sh.RunV("staticcheck", "./...")
+}
+
+// Gofmt checks the code for formatting.
+// To fail on formatting set BEACON_FAIL_ON_FORMATTING=1
+func Gofmt() error {
+	output, err := sh.Output("go", "fmt", "./...")
+	if err != nil {
+		return err
+	}
+
+	formattedFiles := ""
+
+	for _, file := range strings.Split(output, "\n") {
+		formattedFiles += "\n- " + file
+	}
+
+	if os.Getenv(envFailOnFormatting) != "1" {
+		fmt.Println(formattedFiles)
+
+		return nil
+	}
+
+	if len(output) != 0 {
+		return fmt.Errorf("The following files needed to be formatted: %s", formattedFiles)
+	}
+
+	return nil
+}
+
+// Govet runs go vet against the code.
+func Govet() error {
+	return sh.RunV("go", "vet", "./...")
 }
 
 // Build build the executable.
