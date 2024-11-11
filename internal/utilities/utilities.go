@@ -27,7 +27,7 @@ func OpenMedia(viewer string, paths []string) error {
 
 	cmd := slices.Concat(strings.Split(viewer, " "), paths)
 
-	command := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
+	command := exec.Command(cmd[0], cmd[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
 
 	if err := command.Start(); err != nil {
 		return fmt.Errorf("received an error after starting the program: %w", err)
@@ -50,7 +50,7 @@ func OpenLink(browser, url string) error {
 	cmd := strings.Split(browser, " ")
 	cmd = append(cmd, url)
 
-	command := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
+	command := exec.Command(cmd[0], cmd[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
 
 	if err := command.Start(); err != nil {
 		return fmt.Errorf("received an error after starting the program to view the link: %w", err)

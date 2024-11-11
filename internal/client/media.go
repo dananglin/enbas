@@ -7,10 +7,10 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
@@ -38,7 +38,7 @@ func (g *Client) GetMediaAttachment(mediaAttachmentID string) (model.Attachment,
 }
 
 func (g *Client) CreateMediaAttachment(path, description, focus string) (model.Attachment, error) {
-	file, err := os.Open(path)
+	file, err := utilities.OpenFile(path)
 	if err != nil {
 		return model.Attachment{}, fmt.Errorf("unable to open the file: %w", err)
 	}

@@ -101,10 +101,10 @@ func UpdateCurrentAccount(account string, filePath string) error {
 
 // NewCredentialsConfigFromFile creates a new CredentialsConfig value from reading
 // the credentials file.
-func NewCredentialsConfigFromFile(filePath string) (CredentialsConfig, error) {
-	file, err := os.Open(filePath)
+func NewCredentialsConfigFromFile(path string) (CredentialsConfig, error) {
+	file, err := utilities.OpenFile(path)
 	if err != nil {
-		return CredentialsConfig{}, fmt.Errorf("unable to open %s: %w", filePath, err)
+		return CredentialsConfig{}, fmt.Errorf("unable to open %s: %w", path, err)
 	}
 	defer file.Close()
 
@@ -118,7 +118,7 @@ func NewCredentialsConfigFromFile(filePath string) (CredentialsConfig, error) {
 }
 
 func saveCredentialsConfigFile(authConfig CredentialsConfig, filePath string) error {
-	file, err := os.Create(filePath)
+	file, err := utilities.CreateFile(filePath)
 	if err != nil {
 		return fmt.Errorf("unable to create the file at %s: %w", filePath, err)
 	}

@@ -7,10 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
@@ -85,7 +85,7 @@ func (g *Client) DownloadMedia(url, path string) error {
 		}
 	}
 
-	file, err := os.Create(path)
+	file, err := utilities.CreateFile(path)
 	if err != nil {
 		return fmt.Errorf("unable to create %s: %w", path, err)
 	}

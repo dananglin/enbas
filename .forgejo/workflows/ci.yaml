@@ -24,10 +24,10 @@ jobs:
       env:
         ENBAS_TEST_VERBOSE: "1"
         ENBAS_TEST_COVER: "1"
-    #- name: Run gosec
-    #  uses: https://codeflow.dananglin.me.uk/actions/mage-ci@main
-    #  with:
-    #    target: gosec
+    - name: Run gosec
+      uses: https://codeflow.dananglin.me.uk/actions/mage-ci@main
+      with:
+        target: gosec
     - name: Run go vet
       uses: https://codeflow.dananglin.me.uk/actions/mage-ci@main
       with:

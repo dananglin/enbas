@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 type enbasCLISchema struct {
@@ -12,7 +13,7 @@ type enbasCLISchema struct {
 }
 
 func newEnbasCLISchemaFromFile(path string) (enbasCLISchema, error) {
-	file, err := os.Open(path)
+	file, err := utilities.OpenFile(path)
 	if err != nil {
 		return enbasCLISchema{}, fmt.Errorf("unable to open the schema file: %w", err)
 	}

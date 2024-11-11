@@ -38,7 +38,7 @@ func AppUsageFunc() func() {
 			fmt.Fprintf(tableWriter, "\n    %s\t%s", cmd, summaries[cmd])
 		}
 
-		tableWriter.Flush()
+		_ = tableWriter.Flush()
 
 		builder.WriteString("\n\nFLAGS:\n    --help\n        print the help message")
 		flag.VisitAll(func(f *flag.Flag) {

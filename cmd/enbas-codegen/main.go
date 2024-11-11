@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func main() {
@@ -74,7 +76,7 @@ func generateExecutors(schema enbasCLISchema, packageName string) error {
 
 			output := strings.TrimSuffix(templateFilename, ".gotmpl")
 
-			file, err := os.Create(output)
+			file, err := utilities.CreateFile(output)
 			if err != nil {
 				return fmt.Errorf("unable to create the output file: %w", err)
 			}

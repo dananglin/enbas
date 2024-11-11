@@ -19,7 +19,7 @@ func ReadContents(text string) (string, error) {
 }
 
 func ReadTextFile(path string) (string, error) {
-	file, err := os.Open(path)
+	file, err := OpenFile(path)
 	if err != nil {
 		return "", fmt.Errorf("unable to open %q: %w", path, err)
 	}
@@ -57,7 +57,7 @@ func FileExists(path string) (bool, error) {
 }
 
 func SaveTextToFile(path, text string) error {
-	file, err := os.Create(path)
+	file, err := CreateFile(path)
 	if err != nil {
 		return fmt.Errorf("unable to open %q: %w", path, err)
 	}
@@ -68,4 +68,32 @@ func SaveTextToFile(path, text string) error {
 	}
 
 	return nil
+}
+
+func OpenFile(path string) (*os.File, error) {
+	absPath, err := AbsolutePath(path)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating the absolute path: %w", err)
+	}
+
+	file, err := os.Open(absPath) // #nosec G304 -- The path is cleaned when calculating the absolute path.
+	if err != nil {
+		return nil, fmt.Errorf("error opening the file: %w", err)
+	}
+
+	return file, nil
+}
+
+func CreateFile(path string) (*os.File, error) {
+	absPath, err := AbsolutePath(path)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating the absolute path: %w", err)
+	}
+
+	file, err := os.Create(absPath) // #nosec G304 -- The path is cleaned when calculating the absolute path.
+	if err != nil {
+		return nil, fmt.Errorf("error opening the file: %w", err)
+	}
+
+	return file, nil
 }

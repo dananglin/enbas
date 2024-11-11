@@ -162,9 +162,9 @@ func (p Printer) print(text string) {
 	pager := new(exec.Cmd)
 
 	if len(cmdSplit) == 1 {
-		pager = exec.Command(cmdSplit[0]) //nolint:gosec
+		pager = exec.Command(cmdSplit[0]) // #nosec G204 -- External command call defined in user's configuration file.
 	} else {
-		pager = exec.Command(cmdSplit[0], cmdSplit[1:]...) //nolint:gosec
+		pager = exec.Command(cmdSplit[0], cmdSplit[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
 	}
 
 	pipe, err := pager.StdinPipe()
@@ -188,9 +188,9 @@ func (p Printer) print(text string) {
 }
 
 func printToStdout(text string) {
-	os.Stdout.WriteString(text)
+	_, _ = os.Stdout.WriteString(text)
 }
 
 func printToStderr(text string) {
-	os.Stderr.WriteString(text)
+	_, _ = os.Stderr.WriteString(text)
 }

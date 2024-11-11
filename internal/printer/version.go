@@ -25,7 +25,7 @@ func (p Printer) PrintVersion(showFullVersion bool) {
 	_, _ = tableWriter.Write([]byte(p.fieldFormat("Go version:") + "\t" + info.GoVersion + "\n"))
 	_, _ = tableWriter.Write([]byte(p.fieldFormat("Build date:") + "\t" + info.BuildTime + "\n"))
 
-	tableWriter.Flush()
+	_ = tableWriter.Flush()
 
 	printToStdout(builder.String())
 }

@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -44,7 +43,7 @@ func NewConfigFromFile(configDir string) (*Config, error) {
 		return nil, fmt.Errorf("unable to calculate the path to your config file: %w", err)
 	}
 
-	file, err := os.Open(path)
+	file, err := utilities.OpenFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open %s: %w", path, err)
 	}
@@ -74,7 +73,7 @@ func SaveDefaultConfigToFile(configDir string) error {
 		return fmt.Errorf("unable to calculate the path to your config file: %w", err)
 	}
 
-	file, err := os.Create(path)
+	file, err := utilities.CreateFile(path)
 	if err != nil {
 		return fmt.Errorf("unable to create the file at %s: %w", path, err)
 	}

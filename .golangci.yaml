@@ -34,6 +34,7 @@ linters:
   - execinquery
   - exhaustruct
   - gomnd
+  - gosec
   - mnd
   - tagliatelle
   fast: false
