@@ -12,12 +12,7 @@ import (
 func TestCredentialsFile(t *testing.T) {
 	t.Log("Testing saving and loading credentials from file")
 
-	projectDir, err := projectRoot()
-	if err != nil {
-		t.Fatalf("Unable to get the project root directory: %v", err)
-	}
-
-	credentialsFile := filepath.Join(projectDir, "test", "config", "credentials.json")
+	credentialsFile := filepath.Join("testdata", "config", "credentials.json")
 
 	credentialsMap := map[string]config.Credentials{
 		"admin": {

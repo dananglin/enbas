@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,12 +11,7 @@ import (
 func TestConfigFile(t *testing.T) {
 	t.Log("Testing saving and loading the configuration")
 
-	projectDir, err := projectRoot()
-	if err != nil {
-		t.Fatalf("Unable to get the project root directory: %v", err)
-	}
-
-	configDir := filepath.Join(projectDir, "test", "config")
+	configDir := filepath.Join("testdata", "config")
 
 	t.Run("Save the default configuration to file", testSaveDefaultConfigToFile(configDir))
 	t.Run("Load the configuration from file", testLoadConfigFromFile(configDir))
@@ -71,13 +65,4 @@ func testLoadConfigFromFile(configDir string) func(t *testing.T) {
 			)
 		}
 	}
-}
-
-func projectRoot() (string, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", fmt.Errorf("unable to get the current working directory, %w", err)
-	}
-
-	return filepath.Join(cwd, "..", ".."), nil
 }

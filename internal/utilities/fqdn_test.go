@@ -1,13 +1,14 @@
 package utilities_test
 
 import (
+	"slices"
 	"testing"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 func TestGetFQDN(t *testing.T) {
-	cases := []struct {
+	testCases := []struct {
 		instance string
 		want     string
 	}{
@@ -25,12 +26,12 @@ func TestGetFQDN(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		got := utilities.GetFQDN(c.instance)
-		if c.want != got {
-			t.Errorf("Unexpected result: want %s, got %s", c.want, got)
+	for _, tc := range slices.All(testCases) {
+		got := utilities.GetFQDN(tc.instance)
+		if tc.want != got {
+			t.Errorf("Unexpected result received: want %q, got %q", tc.want, got)
 		} else {
-			t.Logf("Expected result: got %s", got)
+			t.Logf("Expected result received: got %q", got)
 		}
 	}
 }

@@ -17,6 +17,7 @@ path = [
     ".forgejo/workflows/*.yaml",
     ".forgejo/actions/**/action.yaml",
     ".forgejo/actions/**/Dockerfile",
+    "internal/utilities/testdata/statuses/*.txt",
 ]
 precedence              = "override"
 SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"

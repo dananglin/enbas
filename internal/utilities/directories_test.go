@@ -10,38 +10,52 @@ import (
 func TestDirectoryCalculations(t *testing.T) {
 	t.Log("Testing the directory calculations")
 
-	projectDir, err := projectRoot()
-	if err != nil {
-		t.Fatalf("Unable to get the project root directory: %v", err)
-	}
-
 	t.Setenv("XDG_CACHE_HOME", "/home/enbas/.cache")
 	t.Setenv("XDG_CONFIG_HOME", "/home/enbas/.config")
 
-	t.Run("Media Cache Directory Calculation", testCalculateMediaCacheDir(projectDir))
+	t.Run("Media Cache Directory Calculation", testCalculateMediaCacheDir)
 	t.Run("Media Cache Directory Calculation (with XDG_CACHE_HOME)", testCalculateMediaCacheDirWithXDG)
-	t.Run("Statuses Cache Directory Calculation", testCalculateStatusesCacheDir(projectDir))
-	t.Run("Configuration Directory Calculation", testCalculateConfigDir(projectDir))
+	t.Run("Statuses Cache Directory Calculation", testCalculateStatusesCacheDir)
+	t.Run("Configuration Directory Calculation", testCalculateConfigDir)
 	t.Run("Configuration Directory Calculation (with XDG_CONFIG_HOME)", testCalculateConfigCacheDirWithXDG)
 }
 
-func testCalculateMediaCacheDir(projectDir string) func(t *testing.T) {
-	return func(t *testing.T) {
-		cacheRoot := filepath.Join(projectDir, "test", "cache")
-		instance := "http://gotosocial.yellow-desert.social"
+func testCalculateMediaCacheDir(t *testing.T) {
+	cacheRoot := filepath.Join("testdata", "test", "cache")
 
-		got, err := utilities.CalculateMediaCacheDir(cacheRoot, instance)
-		if err != nil {
-			t.Fatalf("Unable to calculate the media cache directory: %v", err)
-		}
+	absCacheRoot, err := utilities.AbsolutePath(cacheRoot)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the absolute path of the root cache directory: %v",
+			t.Name(),
+			err,
+		)
+	} else {
+		t.Logf("Absolute path of cache root: %s", absCacheRoot)
+	}
 
-		want := projectDir + "/test/cache/gotosocial.yellow-desert.social/media"
+	instance := "http://gotosocial.yellow-desert.social"
 
-		if got != want {
-			t.Errorf("Unexpected media cache directory calculated: want %s, got %s", want, got)
-		} else {
-			t.Logf("Expected media cache directory calculated: got %s", got)
-		}
+	got, err := utilities.CalculateMediaCacheDir(absCacheRoot, instance)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the media cache directory: %v",
+			t.Name(),
+			err,
+		)
+	}
+
+	want := absCacheRoot + "/gotosocial.yellow-desert.social/media"
+
+	if got != want {
+		t.Errorf(
+			"FAILED test %s: Unexpected media cache directory calculated: want %s, got %s",
+			t.Name(),
+			want,
+			got,
+		)
+	} else {
+		t.Logf("Expected media cache directory calculated: got %s", got)
 	}
 }
 
@@ -63,42 +77,77 @@ func testCalculateMediaCacheDirWithXDG(t *testing.T) {
 	}
 }
 
-func testCalculateStatusesCacheDir(projectDir string) func(t *testing.T) {
-	return func(t *testing.T) {
-		cacheRoot := filepath.Join(projectDir, "test", "cache")
-		instance := "https://fedi.blue-mammoth.party"
+func testCalculateStatusesCacheDir(t *testing.T) {
+	cacheRoot := filepath.Join("testdata", "test", "cache")
 
-		got, err := utilities.CalculateStatusesCacheDir(cacheRoot, instance)
-		if err != nil {
-			t.Fatalf("Unable to calculate the statuses cache directory: %v", err)
-		}
+	absCacheRoot, err := utilities.AbsolutePath(cacheRoot)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the absolute path of the root cache directory: %v",
+			t.Name(),
+			err,
+		)
+	} else {
+		t.Logf("Absolute path of cache root: %s", absCacheRoot)
+	}
 
-		want := projectDir + "/test/cache/fedi.blue-mammoth.party/statuses"
+	instance := "https://fedi.blue-mammoth.party"
 
-		if got != want {
-			t.Errorf("Unexpected statuses cache directory calculated: want %s, got %s", want, got)
-		} else {
-			t.Logf("Expected statuses cache directory calculated: got %s", got)
-		}
+	got, err := utilities.CalculateStatusesCacheDir(absCacheRoot, instance)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the statuses cache directory: %v",
+			t.Name(),
+			err,
+		)
+	}
+
+	want := absCacheRoot + "/fedi.blue-mammoth.party/statuses"
+
+	if got != want {
+		t.Errorf(
+			"FAILED test %s: Unexpected statuses cache directory calculated: want %s, got %s",
+			t.Name(),
+			want,
+			got,
+		)
+	} else {
+		t.Logf("Expected statuses cache directory calculated: got %s", got)
 	}
 }
 
-func testCalculateConfigDir(projectDir string) func(t *testing.T) {
-	return func(t *testing.T) {
-		configDir := filepath.Join(projectDir, "test", "config")
+func testCalculateConfigDir(t *testing.T) {
+	configDir := filepath.Join("testdata", "test", "config")
 
-		got, err := utilities.CalculateConfigDir(configDir)
-		if err != nil {
-			t.Fatalf("Unable to calculate the config directory: %v", err)
-		}
+	absConfigDirPath, err := utilities.AbsolutePath(configDir)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the absolute path of the config directory: %v",
+			t.Name(),
+			err,
+		)
+	} else {
+		t.Logf("Absolute path of the config directory: %s", absConfigDirPath)
+	}
 
-		want := projectDir + "/test/config"
+	got, err := utilities.CalculateConfigDir(absConfigDirPath)
+	if err != nil {
+		t.Fatalf(
+			"FAILED test %s: Unable to calculate the config directory: %v",
+			t.Name(),
+			err,
+		)
+	}
 
-		if got != want {
-			t.Errorf("Unexpected config directory calculated: want %s, got %s", want, got)
-		} else {
-			t.Logf("Expected config directory calculated: got %s", got)
-		}
+	if got != absConfigDirPath {
+		t.Errorf(
+			"FAILED test %s: Unexpected config directory calculated: want %s, got %s",
+			t.Name(),
+			absConfigDirPath,
+			got,
+		)
+	} else {
+		t.Logf("Expected config directory calculated: got %s", got)
 	}
 }
 
