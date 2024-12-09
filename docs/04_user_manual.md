@@ -1,70 +1,11 @@
-# User Manual
-
-## Table of Contents
-
-- [Global flags](#global-flags)
-- [Version](#version)
-  - [Print the application version](#print-the-application-version)
-- [Init](#init)
-- [Authentication](#authentication)
-  - [Logging into an account](#logging-into-an-account)
-  - [Switch between accounts](#switch-between-accounts)
-  - [See the account that you are currently logged in as](#see-the-account-that-you-are-currently-logged-in-as)
-- [Accounts](#accounts)
-  - [View account information](#view-account-information)
-  - [Follow an account](#follow-an-account)
-  - [Unfollow an account](#unfollow-an-account)
-  - [Show an account's followers](#show-an-accounts-followers)
-  - [Show account's followings](#show-accounts-followings)
-  - [Block an account](#block-an-account)
-  - [Unblock an account](#unblock-an-account)
-  - [View blocked accounts](#view-blocked-accounts)
-  - [Mute an account](#mute-an-account)
-  - [Unmute an account](#unmute-an-account)
-  - [View muted accounts](#view-muted-accounts)
-  - [Add a private note to an account](#add-a-private-note-to-an-account)
-  - [Remove the private note from an account](#remove-the-private-note-from-an-account)
-- [Follow requests](#follow-requests)
-  - [View your follow requests](#view-your-follow-requests)
-  - [Accept a follow request](#accept-a-follow-request)
-  - [Reject a follow request](#reject-a-follow-request)
-- [Media Attachments](#media-attachments)
-  - [Create a media attachment](#create-a-media-attachment)
-  - [Edit a media attachment](#edit-a-media-attachment)
-  - [View a media attachment](#view-a-media-attachment)
-- [Statuses](#statuses)
-  - [View a status](#view-a-status)
-  - [Create a status](#create-a-status)
-  - [Delete a status](#delete-a-status)
-  - [Boost (Repost) a status](#boost-repost-a-status)
-  - [Un-boost (Un-repost) a status](#un-boost-un-repost-a-status)
-  - [Like a status](#like-a-status)
-  - [Unlike a status](#unlike-a-status)
-  - [View a list of statuses that you've liked](#view-a-list-of-statuses-that-youve-liked)
-  - [Mute a status](#mute-a-status)
-  - [Unmute a status](#unmute-a-status)
-  - [Vote in a poll within a status](#vote-in-a-poll-within-a-status)
-- [Polls](#polls)
-  - [Create a poll](#create-a-poll)
-  - [View a poll](#view-a-poll)
-  - [Vote in a poll](#vote-in-a-poll)
-- [Lists](#lists)
-  - [Create a list](#create-a-list)
-  - [View a list of your lists](#view-a-list-of-your-lists)
-  - [View a specific list](#view-a-specific-list)
-  - [Edit a list](#edit-a-list)
-  - [Delete a list](#delete-a-list)
-  - [Add accounts to a list](#add-accounts-to-a-list)
-  - [Remove accounts from a list](#remove-accounts-from-a-list)
-- [Timelines](#timelines)
-  - [View a timeline](#view-a-timeline)
-- [Media](#media)
-  - [View media from a status](#view-media-from-a-status)
-- [Bookmarks](#bookmarks)
-  - [View your bookmarks](#view-your-bookmarks)
-  - [Add a status to your bookmarks](#add-a-status-to-your-bookmarks)
-  - [Remove a status from your bookmarks](#remove-a-status-from-your-bookmarks)
-- [Notifications](#notifications)
++++
+title = "User manual"
+description = "The user manual."
+weight = 4
+slug = "user-manual"
+template = "project-page.html"
++++
+# User manual
 
 ## Global flags
 
@@ -443,7 +384,7 @@ Prints information of a status on screen.
 If the `--browser` flag is used, the link to the status is opened instead.
 To enable browser support you must specify the browser in your configuration.
 
-See the [configuration reference page](configuration.md#integration) on how to set up integration with
+See the [configuration reference page](@/projects/enbas/03_configuration.md#integrations) on how to set up integration with
 your browser if you have not done so already.
 
 ```
@@ -810,7 +751,7 @@ The media is downloaded to your cache directory before Enbas opens it with your 
 In order to view images and videos, you must specify your image viewer and
 video player in your configuration file respectively.
 
-See the [configuration reference page](configuration.md#integration) on how to set up integration with
+See the [configuration reference page](@/projects/enbas/03_configuration.md#integrations) on how to set up integration with
 your media players.
 
 - View a specific media attachment from a specific status

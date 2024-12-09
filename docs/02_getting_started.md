@@ -1,4 +1,12 @@
-# Getting Started
++++
+title = "Getting started"
+description = "A guide to help you get started on using Enbas."
+weight = 2
+slug = "getting-started"
+template = "project-page.html"
++++
+
+# Getting started
 
 ## Summary
 
@@ -35,7 +43,7 @@ enbas --config-dir ./config init
 
 You should now see a file called `config.json` in your configuration directory.
 Feel free to edit the file to your preferences. 
-The [configuration reference page](./configuration.md) should help you with this.
+The [configuration reference page](@/projects/enbas/03_configuration.md) should help you with this.
 
 For this 'Getting Started' guide you may want to specify your preferred browser in the configuration to allow
 Enbas to open the link to your instance's authorisation page.
@@ -45,11 +53,15 @@ If you prefer to open the link manually then you can leave it blank.
 
 Enbas uses the Oauth2 authentication flow to log into your account on GoToSocial.
 
-> [!WARNING]
-> As of writing GoToSocial does not currently support scoped authorization tokens so even if we request read-only
-> tokens, the application will be able to perform any actions within the limitations of your account
-> (including admin actions if you are an admin).
-> You can read more about this [here](https://docs.gotosocial.org/en/latest/api/authentication/).
+<details>
+    <summary style="color: Orange; font-weight: bold"><span>&#9888;</span> Warning</summary>
+    <p>
+        As of writing GoToSocial does not currently support scoped authorization tokens so even if
+        we request read-only tokens, the application will be able to perform any actions within the
+        limitations of your account (including admin actions if you are an admin).
+        You can read more about this <a href="https://docs.gotosocial.org/en/latest/api/authentication/">here</a>.
+    </p>
+</details>
 
 Follow the below steps to log into your account:
 
@@ -73,7 +85,7 @@ Follow the below steps to log into your account:
 4. Once you've signed into GoToSocial on your browser,
    you will be informed that Enbas would like to perform actions on your behalf.
    If you're happy with this then click on the `Allow` button.
-   ![A screenshot of the consent form](../assets/images/consent_form.png "Consent Form")
+   ![A screenshot of the consent form](/projects/enbas/consent_form.png "Consent Form")
 
 5. The `out-of-band` token from your instance will be displayed to you in your browser.
    Copy it and return to your terminal.
@@ -149,4 +161,4 @@ ACCOUNT URL:
 https://gts.enbas-demo.private/@percy
 ```
 
-Now that you have successfully logged into your account proceed to the [user manual](./manual.md).
+Now that you have successfully logged into your account proceed to the [user manual](@/projects/enbas/04_user_manual.md).

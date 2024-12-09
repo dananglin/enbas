@@ -1,3 +1,10 @@
++++
+title = "Configuration reference"
+description = "The configuration reference documentation."
+weight = 3
+slug = "configuration-reference"
+template = "project-page.html"
++++
 # Configuration reference
 
 ## Config

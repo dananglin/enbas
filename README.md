@@ -7,7 +7,6 @@ in [Go](https://go.dev).
 
 The project is in its early stages of development so expect bugs, breaking changes and limited
 functionality.
-At this time it is not recommended for use this with your production GoToSocial instances.
 
 ### Repository mirrors
 

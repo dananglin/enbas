@@ -1,4 +1,11 @@
-# Tips and Tricks
++++
+title = "Tips and tricks"
+description = "Additional tips and tricks."
+weight = 5
+slug = "tips-and-tricks"
+template = "project-page.html"
++++
+# Tips and tricks
 
 ## The time duration value
 

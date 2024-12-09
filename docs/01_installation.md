@@ -1,4 +1,11 @@
-# Installation Guide
++++
+title = "Installation guide"
+description = "A guide for installing Enbas on your machine."
+weight = 1
+slug = "installation-guide"
+template = "project-page.html"
++++
+# Installation guide
 
 ## Download
 
@@ -115,4 +122,4 @@ Go version: go1.23.0
 Build date: 2024-08-29T07:24:53Z
 ```
 
-Once you have completed the installation proceed to the [Getting Started guide](./getting_started.md).
+Once you have completed the installation proceed to the [Getting Started guide](@/projects/enbas/02_getting_started.md).
