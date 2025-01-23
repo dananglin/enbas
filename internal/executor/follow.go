@@ -3,6 +3,7 @@ package executor
 import (
 	"fmt"
 	"net/rpc"
+	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
@@ -11,6 +12,7 @@ import (
 func (f *FollowExecutor) Execute() error {
 	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: f.followAccount,
+		resourceTag:     f.followTag,
 	}
 
 	doFunc, ok := funcMap[f.resourceType]
@@ -46,6 +48,22 @@ func (f *FollowExecutor) followAccount(client *rpc.Client) error {
 	}
 
 	f.printer.PrintSuccess("Successfully sent the follow request.")
+
+	return nil
+}
+
+func (f *FollowExecutor) followTag(client *rpc.Client) error {
+	if f.tag == "" {
+		return Error{"please provide the name of the tag"}
+	}
+
+	tag := strings.TrimLeft(f.tag, "#")
+
+	if err := client.Call("GTSClient.FollowTag", tag, nil); err != nil {
+		return fmt.Errorf("error following the tag: %w", err)
+	}
+
+	f.printer.PrintSuccess("You are now following '" + tag + "'.")
 
 	return nil
 }

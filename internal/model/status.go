@@ -91,12 +91,6 @@ type StatusReblogged struct {
 	Visibility         StatusVisibility `json:"visibility"`
 }
 
-type Tag struct {
-	History []any  `json:"history"`
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-}
-
 type Attachment struct {
 	Meta             MediaMeta `json:"meta"`
 	Blurhash         string    `json:"blurhash"`

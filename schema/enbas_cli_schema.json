@@ -340,6 +340,7 @@
         { "flag": "account-name" },
         { "flag": "notify", "default": "false" },
         { "flag": "show-reposts", "default": "true" },
+        { "flag": "tag", "default": ""},
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Follow a resource (e.g. an account)",
@@ -469,6 +470,7 @@
       ],
       "flags": [
         { "flag": "account-name" },
+        { "flag": "tag", "default": ""},
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Unfollows a resource (e.g. an account)",

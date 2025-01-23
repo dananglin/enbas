@@ -3,6 +3,7 @@ package executor
 import (
 	"fmt"
 	"net/rpc"
+	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
@@ -10,6 +11,7 @@ import (
 func (f *UnfollowExecutor) Execute() error {
 	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: f.unfollowAccount,
+		resourceTag:     f.unfollowTag,
 	}
 
 	doFunc, ok := funcMap[f.resourceType]
@@ -37,6 +39,22 @@ func (f *UnfollowExecutor) unfollowAccount(client *rpc.Client) error {
 	}
 
 	f.printer.PrintSuccess("Successfully unfollowed the account.")
+
+	return nil
+}
+
+func (f *UnfollowExecutor) unfollowTag(client *rpc.Client) error {
+	if f.tag == "" {
+		return Error{"please provide the name of the tag"}
+	}
+
+	tag := strings.TrimLeft(f.tag, "#")
+
+	if err := client.Call("GTSClient.UnfollowTag", tag, nil); err != nil {
+		return fmt.Errorf("unable to unfollow the tag: %w", err)
+	}
+
+	f.printer.PrintSuccess("Successfully unfollowed '" + tag + "'.")
 
 	return nil
 }

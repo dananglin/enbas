@@ -454,11 +454,11 @@ Creates a new status.
 | `content` | string | false | The content of the status.<br>To read the content from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@status.md`).| |
 | `content-type` | string | false | The format that the content is created in.<br>Valid values are `plain` and `markdown`. | plain |
 | `enable-reposts` | boolean | false | The status can be reposted (boosted) by others. | true |
-| `enable-federation` | boolean | false | The status can be federated beyond the local timelines. | true |
 | `enable-likes` | boolean | false | The status can be liked (favourtied). | true |
 | `enable-replies` | boolean | false | The status can be replied to. | true |
 | `in-reply-to` | string | false | The ID of the status that you want to reply to. | |
 | `language` | string | false | The ISO 639 language code that the status is written in.<br>If this is not specified then the default language from your posting preferences will be used. | |
+| `local-only` | bool | false | Set to `true` to **NOT** federate the status beyond the local timelines(s). | false|
 | `media-file` | string | false | The path to the media file.<br>Use this flag multiple times to upload multiple media files. | |
 | `media-description` | string | false | The description of the media attachment which will be used as the media's alt-text.<br>To use a description from a text file, use the `flag@` prefix followed by the path to the file (e.g. `file@description.txt`)<br>Use this flag multiple times to set multiple descriptions.| |
 | `media-focus` | string | false | The media's focus values. This should be in the form of two comma-separated numbers between -1 and 1 (e.g. 0.25,-0.34).<br>Use this flag multiple times to set multiple focus values. | |
@@ -810,6 +810,48 @@ enbas remove --type status --status-id 01J17FH1KD9CN6J9Q01011NE0D --from bookmar
 | `type` | string | true | The resource you want to remove.<br>Here this should be `status`. | |
 | `status-id` | string | true | The ID of the status. | |
 | `from` | string | true | The resource you want to remove the status to.<br>Here this should be `bookmarks`. | |
+
+## Tags
+
+### View the tags that your are following
+
+```
+enbas show --type followed-tags
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `limit` | integer | false | The maximum number of tags to show. | 20 |
+
+### View the details of a tag
+
+```
+enbas show --type tag --tag example
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `tag` | string | true | The hashtag you want to view. | |
+
+### Follow a tag
+
+```
+enbas follow --type tag --tag example
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `tag` | string | true | The hashtag you want to follow. | |
+
+### Unfollow a tag
+
+```
+enbas unfollow --type tag --tag example
+```
+
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `tag` | string | true | The hashtag you want to unfollow. | |
 
 ## Notifications
 

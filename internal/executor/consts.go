@@ -12,6 +12,7 @@ const (
 	resourceFollowers       string = "followers"
 	resourceFollowing       string = "following"
 	resourceFollowRequest   string = "follow-request"
+	resourceFollowedTags    string = "followed-tags"
 	resourceInstance        string = "instance"
 	resourceLike            string = "like"
 	resourceLiked           string = "liked"
@@ -24,6 +25,7 @@ const (
 	resourceStatus          string = "status"
 	resourceStar            string = "star"
 	resourceStarred         string = "starred"
+	resourceTag             string = "tag"
 	resourceTimeline        string = "timeline"
 	resourceVote            string = "vote"
 )

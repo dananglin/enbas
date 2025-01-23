@@ -32,6 +32,8 @@ func (s *ShowExecutor) Execute() error {
 		resourceMutedAccounts:   s.showMutedAccounts,
 		resourceMedia:           s.showMedia,
 		resourceMediaAttachment: s.showMediaAttachment,
+		resourceFollowedTags:    s.showFollowedTags,
+		resourceTag:             s.showTag,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -550,6 +552,36 @@ func (s *ShowExecutor) showMediaFromStatus(client *rpc.Client) error {
 		if err := utilities.OpenMedia(s.config.Integrations.VideoPlayer, videoFiles); err != nil {
 			return fmt.Errorf("unable to open the video player: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showTag(client *rpc.Client) error {
+	if s.tag == "" {
+		return Error{"please provide the name of the tag"}
+	}
+
+	var tag model.Tag
+	if err := client.Call("GTSClient.GetTag", s.tag, &tag); err != nil {
+		return fmt.Errorf("unable to get the details of the tag: %w", err)
+	}
+
+	s.printer.PrintTag(tag)
+
+	return nil
+}
+
+func (s *ShowExecutor) showFollowedTags(client *rpc.Client) error {
+	var list model.TagList
+	if err := client.Call("GTSClient.GetFollowedTags", s.limit, &list); err != nil {
+		return fmt.Errorf("unable to get the list of followed tags: %w", err)
+	}
+
+	if len(list.Tags) > 0 {
+		s.printer.PrintTagList(list)
+	} else {
+		s.printer.PrintInfo("This account is not following any tags.\n")
 	}
 
 	return nil

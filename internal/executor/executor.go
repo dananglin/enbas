@@ -534,6 +534,7 @@ type FollowExecutor struct {
 	accountName  internalFlag.StringSliceValue
 	notify       bool
 	showReposts  bool
+	tag          string
 	resourceType string
 	configDir    string
 }
@@ -557,6 +558,7 @@ func ExecuteFollowCommand(
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
 	exe.BoolVar(&exe.notify, "notify", false, "Get notifications from statuses from the account you want to follow")
 	exe.BoolVar(&exe.showReposts, "show-reposts", true, "Show reposts from the account you want to follow")
+	exe.StringVar(&exe.tag, "tag", "", "The name of the tag")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	// Parse the remaining arguments.
@@ -1183,6 +1185,7 @@ type UnfollowExecutor struct {
 	printer      *printer.Printer
 	config       *config.Config
 	accountName  internalFlag.StringSliceValue
+	tag          string
 	resourceType string
 	configDir    string
 }
@@ -1204,6 +1207,7 @@ func ExecuteUnfollowCommand(
 	exe.Usage = usage.ExecutorUsageFunc("unfollow", "Unfollows a resource (e.g. an account)", exe.FlagSet)
 
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
+	exe.StringVar(&exe.tag, "tag", "", "The name of the tag")
 	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
 
 	// Parse the remaining arguments.
