@@ -28,7 +28,7 @@ func TestConfigFile(t *testing.T) {
 
 func testSaveDefaultConfigToFile(configDir string) func(t *testing.T) {
 	return func(t *testing.T) {
-		if err := config.SaveDefaultConfigToFile(configDir); err != nil {
+		if err := config.SaveInitialConfigToFile(configDir); err != nil {
 			t.Fatalf("Unable to save the default configuration within %q: %v", configDir, err)
 		}
 
@@ -52,16 +52,16 @@ func testLoadConfigFromFile(configDir string) func(t *testing.T) {
 
 		expectedDefaultHTTPTimeout := 5
 
-		if config.HTTP.Timeout != expectedDefaultHTTPTimeout {
+		if config.GTSClient.Timeout != 5 {
 			t.Errorf(
 				"Unexpected HTTP Timeout settings loaded from the configuration: want %d, got %d",
 				expectedDefaultHTTPTimeout,
-				config.HTTP.Timeout,
+				config.GTSClient.Timeout,
 			)
 		} else {
 			t.Logf(
 				"Expected HTTP Timeout settings loaded from the configuration: got %d",
-				config.HTTP.Timeout,
+				config.GTSClient.Timeout,
 			)
 		}
 	}

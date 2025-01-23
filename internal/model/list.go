@@ -21,13 +21,13 @@ const (
 )
 
 func (l ListRepliesPolicy) String() string {
-	mapped := map[ListRepliesPolicy]string{
+	policyMap := map[ListRepliesPolicy]string{
 		ListRepliesPolicyFollowed: listRepliesPolicyFollowedValue,
 		ListRepliesPolicyList:     listRepliesPolicyListValue,
 		ListRepliesPolicyNone:     listRepliesPolicyNoneValue,
 	}
 
-	output, ok := mapped[l]
+	output, ok := policyMap[l]
 	if !ok {
 		return unknownValue
 	}
@@ -36,13 +36,13 @@ func (l ListRepliesPolicy) String() string {
 }
 
 func ParseListRepliesPolicy(value string) (ListRepliesPolicy, error) {
-	mapped := map[string]ListRepliesPolicy{
+	policyMap := map[string]ListRepliesPolicy{
 		listRepliesPolicyFollowedValue: ListRepliesPolicyFollowed,
 		listRepliesPolicyListValue:     ListRepliesPolicyList,
 		listRepliesPolicyNoneValue:     ListRepliesPolicyNone,
 	}
 
-	output, ok := mapped[value]
+	output, ok := policyMap[value]
 	if !ok {
 		return ListRepliesPolicyUnknown, InvalidListRepliesPolicyError{value}
 	}

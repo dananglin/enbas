@@ -2,9 +2,12 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 	"path/filepath"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -13,7 +16,7 @@ func (d *DeleteExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceList:   d.deleteList,
 		resourceStatus: d.deleteStatus,
 	}
@@ -23,15 +26,16 @@ func (d *DeleteExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: d.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(d.config.CredentialsFile)
+	client, err := server.Connect(d.config.Server, d.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
+func (d *DeleteExecutor) deleteList(client *rpc.Client) error {
 	if d.listID == "" {
 		return MissingIDError{
 			resource: resourceList,
@@ -39,7 +43,7 @@ func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 		}
 	}
 
-	if err := gtsClient.DeleteList(d.listID); err != nil {
+	if err := client.Call("GTSClient.DeleteList", d.listID, nil); err != nil {
 		return fmt.Errorf("unable to delete the list: %w", err)
 	}
 
@@ -48,7 +52,7 @@ func (d *DeleteExecutor) deleteList(gtsClient *client.Client) error {
 	return nil
 }
 
-func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
+func (d *DeleteExecutor) deleteStatus(client *rpc.Client) error {
 	if d.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -56,12 +60,12 @@ func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	status, err := gtsClient.GetStatus(d.statusID)
-	if err != nil {
-		return fmt.Errorf("unable to get the status: %w", err)
+	var status model.Status
+	if err := client.Call("GTSClient.GetStatus", d.statusID, &status); err != nil {
+		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -70,15 +74,20 @@ func (d *DeleteExecutor) deleteStatus(gtsClient *client.Client) error {
 		return Error{"unable to delete the status because the status does not belong to you"}
 	}
 
-	text, err := gtsClient.DeleteStatus(d.statusID)
-	if err != nil {
-		return fmt.Errorf("unable to delete the status: %w", err)
+	var text string
+	if err := client.Call("GTSClient.DeleteStatus", d.statusID, &text); err != nil {
+		return fmt.Errorf("error deleting the status: %w", err)
 	}
 
 	d.printer.PrintSuccess("The status was successfully deleted.")
 
 	if d.saveText {
-		cacheDir, err := utilities.CalculateStatusesCacheDir(d.config.CacheDirectory, gtsClient.Authentication.Instance)
+		var instanceURL string
+		if err := client.Call("GTSClient.GetInstanceURL", gtsclient.NoRPCArgs{}, &instanceURL); err != nil {
+			return fmt.Errorf("unable to get the instance URL: %w", err)
+		}
+
+		cacheDir, err := utilities.CalculateStatusesCacheDir(d.config.CacheDirectory, instanceURL)
 		if err != nil {
 			return fmt.Errorf("unable to get the cache directory for the status: %w", err)
 		}

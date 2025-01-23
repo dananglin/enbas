@@ -1,4 +1,4 @@
-package client
+package gtsclient
 
 import (
 	"bytes"
@@ -13,87 +13,87 @@ const (
 	baseListPath string = "/api/v1/lists"
 )
 
-func (g *Client) GetAllLists() ([]model.List, error) {
-	url := g.Authentication.Instance + baseListPath
-
-	var lists []model.List
-
+func (g *GTSClient) GetAllLists(_ string, lists *[]model.List) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath,
 		requestBody: nil,
 		contentType: "",
-		output:      &lists,
+		output:      lists,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the list of lists: %w",
 			err,
 		)
 	}
 
-	return lists, nil
+	return nil
 }
 
-func (g *Client) GetList(listID string) (model.List, error) {
-	url := g.Authentication.Instance + baseListPath + "/" + listID
-
-	var list model.List
-
+func (g *GTSClient) GetList(listID string, list *model.List) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath + "/" + listID,
 		requestBody: nil,
 		contentType: "",
-		output:      &list,
+		output:      list,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.List{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the list: %w",
 			err,
 		)
 	}
 
-	return list, nil
+	return nil
 }
 
-type CreateListForm struct {
-	Title         string                  `json:"title"`
-	RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
+type CreateListArgs struct {
+	Title         string
+	RepliesPolicy model.ListRepliesPolicy
+	Exclusive     bool
 }
 
-func (g *Client) CreateList(form CreateListForm) (model.List, error) {
+func (g *GTSClient) CreateList(args CreateListArgs, list *model.List) error {
+	form := struct {
+		Title         string                  `json:"title"`
+		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
+		Exclusive     bool                    `json:"exclusive"`
+	}{
+		Title:         args.Title,
+		RepliesPolicy: args.RepliesPolicy,
+		Exclusive:     args.Exclusive,
+	}
+
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the form: %w", err)
+		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseListPath
-
-	var list model.List
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
-		output:      &list,
+		output:      list,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.List{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to create the list: %w",
 			err,
 		)
 	}
 
-	return list, nil
+	return nil
 }
 
-func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
+func (g *GTSClient) UpdateList(listToUpdate model.List, updatedList *model.List) error {
 	form := struct {
 		Title         string                  `json:"title"`
 		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
@@ -104,38 +104,33 @@ func (g *Client) UpdateList(listToUpdate model.List) (model.List, error) {
 
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.List{}, fmt.Errorf("unable to marshal the form: %w", err)
+		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseListPath + "/" + listToUpdate.ID
-
-	var updatedList model.List
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath + "/" + listToUpdate.ID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
-		output:      &updatedList,
+		output:      updatedList,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.List{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to update the list: %w",
 			err,
 		)
 	}
 
-	return updatedList, nil
+	return nil
 }
 
-func (g *Client) DeleteList(listID string) error {
-	url := g.Authentication.Instance + baseListPath + "/" + listID
-
+func (g *GTSClient) DeleteList(listID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath + "/" + listID,
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -151,11 +146,16 @@ func (g *Client) DeleteList(listID string) error {
 	return nil
 }
 
-func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
+type AddAccountsToListArgs struct {
+	ListID     string
+	AccountIDs []string
+}
+
+func (g *GTSClient) AddAccountsToList(args AddAccountsToListArgs, _ *NoRPCResults) error {
 	form := struct {
 		AccountIDs []string `json:"account_ids"`
 	}{
-		AccountIDs: accountIDs,
+		AccountIDs: args.AccountIDs,
 	}
 
 	data, err := json.Marshal(form)
@@ -164,11 +164,10 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath + "/" + args.ListID + "/accounts",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -184,11 +183,16 @@ func (g *Client) AddAccountsToList(listID string, accountIDs []string) error {
 	return nil
 }
 
-func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) error {
+type RemoveAccountsFromListArgs struct {
+	ListID     string
+	AccountIDs []string
+}
+
+func (g *GTSClient) RemoveAccountsFromList(args RemoveAccountsFromListArgs, _ *NoRPCResults) error {
 	form := struct {
 		AccountIDs []string `json:"account_ids"`
 	}{
-		AccountIDs: accountIDs,
+		AccountIDs: args.AccountIDs,
 	}
 
 	data, err := json.Marshal(form)
@@ -197,11 +201,10 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseListPath + "/" + listID + "/accounts"
 
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         url,
+		url:         g.Authentication.Instance + baseListPath + "/" + args.ListID + "/accounts",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -217,26 +220,35 @@ func (g *Client) RemoveAccountsFromList(listID string, accountIDs []string) erro
 	return nil
 }
 
-func (g *Client) GetAccountsFromList(listID string, limit int) ([]model.Account, error) {
-	path := fmt.Sprintf("%s/%s/accounts?limit=%d", baseListPath, listID, limit)
-	url := g.Authentication.Instance + path
+type GetAccountsFromListArgs struct {
+	ListID string
+	Limit  int
+}
+
+func (g *GTSClient) GetAccountsFromList(args GetAccountsFromListArgs, list *model.AccountList) error {
+	path := fmt.Sprintf("%s/%s/accounts?limit=%d", baseListPath, args.ListID, args.Limit)
 
 	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + path,
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the accounts from the list: %w",
 			err,
 		)
 	}
 
-	return accounts, nil
+	*list = model.AccountList{
+		Type:     model.AccountListNormal,
+		Accounts: accounts,
+	}
+
+	return nil
 }

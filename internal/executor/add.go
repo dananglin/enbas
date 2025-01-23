@@ -2,8 +2,11 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (a *AddExecutor) Execute() error {
@@ -11,7 +14,7 @@ func (a *AddExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagTo}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceList:      a.addToList,
 		resourceAccount:   a.addToAccount,
 		resourceBookmarks: a.addToBookmarks,
@@ -23,15 +26,16 @@ func (a *AddExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: a.toResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(a.config.CredentialsFile)
+	client, err := server.Connect(a.config.Server, a.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (a *AddExecutor) addToList(gtsClient *client.Client) error {
+func (a *AddExecutor) addToList(client *rpc.Client) error {
 	if a.listID == "" {
 		return MissingIDError{
 			resource: resourceList,
@@ -39,7 +43,7 @@ func (a *AddExecutor) addToList(gtsClient *client.Client) error {
 		}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: a.addAccountsToList,
 	}
 
@@ -51,15 +55,15 @@ func (a *AddExecutor) addToList(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
+func (a *AddExecutor) addAccountsToList(client *rpc.Client) error {
 	if a.accountNames.Empty() {
 		return NoAccountSpecifiedError{}
 	}
 
-	accounts, err := getOtherAccounts(gtsClient, a.accountNames)
+	accounts, err := getOtherAccounts(client, a.accountNames)
 	if err != nil {
 		return fmt.Errorf("unable to get the accounts: %w", err)
 	}
@@ -67,8 +71,8 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 	accountIDs := make([]string, len(accounts))
 
 	for ind := range accounts {
-		relationship, err := gtsClient.GetAccountRelationship(accounts[ind].ID)
-		if err != nil {
+		var relationship model.AccountRelationship
+		if err := client.Call("GTSClient.GetAccountRelationship", accounts[ind].ID, &relationship); err != nil {
 			return fmt.Errorf("unable to get your relationship to %s: %w", accounts[ind].Acct, err)
 		}
 
@@ -79,7 +83,14 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 		accountIDs[ind] = accounts[ind].ID
 	}
 
-	if err := gtsClient.AddAccountsToList(a.listID, accountIDs); err != nil {
+	if err := client.Call(
+		"GTSClient.AddAccountsToList",
+		gtsclient.AddAccountsToListArgs{
+			ListID:     a.listID,
+			AccountIDs: accountIDs,
+		},
+		nil,
+	); err != nil {
 		return fmt.Errorf("unable to add the accounts to the list: %w", err)
 	}
 
@@ -88,8 +99,8 @@ func (a *AddExecutor) addAccountsToList(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
-	funcMap := map[string]func(*client.Client) error{
+func (a *AddExecutor) addToAccount(client *rpc.Client) error {
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceNote: a.addNoteToAccount,
 	}
 
@@ -101,11 +112,11 @@ func (a *AddExecutor) addToAccount(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, a.accountNames)
+func (a *AddExecutor) addNoteToAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, a.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -114,7 +125,14 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 		return Error{"please add content to the note you want to add"}
 	}
 
-	if err := gtsClient.SetPrivateNote(accountID, a.content); err != nil {
+	if err := client.Call(
+		"GTSClient.SetPrivateNote",
+		gtsclient.SetPrivateNoteArgs{
+			AccountID: accountID,
+			Note:      a.content,
+		},
+		nil,
+	); err != nil {
 		return fmt.Errorf("unable to add the private note to the account: %w", err)
 	}
 
@@ -123,8 +141,8 @@ func (a *AddExecutor) addNoteToAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addToBookmarks(gtsClient *client.Client) error {
-	funcMap := map[string]func(*client.Client) error{
+func (a *AddExecutor) addToBookmarks(client *rpc.Client) error {
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceStatus: a.addStatusToBookmarks,
 	}
 
@@ -136,10 +154,10 @@ func (a *AddExecutor) addToBookmarks(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
+func (a *AddExecutor) addStatusToBookmarks(client *rpc.Client) error {
 	if a.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -147,7 +165,7 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 		}
 	}
 
-	if err := gtsClient.AddStatusToBookmarks(a.statusID); err != nil {
+	if err := client.Call("GTSClient.AddStatusToBookmarks", a.statusID, nil); err != nil {
 		return fmt.Errorf("unable to add the status to your bookmarks: %w", err)
 	}
 
@@ -156,7 +174,7 @@ func (a *AddExecutor) addStatusToBookmarks(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
+func (a *AddExecutor) addToStatus(client *rpc.Client) error {
 	if a.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -164,7 +182,7 @@ func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceStar:  a.addStarToStatus,
 		resourceLike:  a.addStarToStatus,
 		resourceBoost: a.addBoostToStatus,
@@ -179,12 +197,12 @@ func (a *AddExecutor) addToStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (a *AddExecutor) addStarToStatus(gtsClient *client.Client) error {
-	if err := gtsClient.LikeStatus(a.statusID); err != nil {
-		return fmt.Errorf("unable to add the %s to the status: %w", a.resourceType, err)
+func (a *AddExecutor) addStarToStatus(client *rpc.Client) error {
+	if err := client.Call("GTSClient.LikeStatus", a.statusID, nil); err != nil {
+		return fmt.Errorf("error adding the %s to the status: %w", a.resourceType, err)
 	}
 
 	a.printer.PrintSuccess("Successfully added a " + a.resourceType + " to the status.")
@@ -192,8 +210,8 @@ func (a *AddExecutor) addStarToStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
-	if err := gtsClient.ReblogStatus(a.statusID); err != nil {
+func (a *AddExecutor) addBoostToStatus(client *rpc.Client) error {
+	if err := client.Call("GTSClient.ReblogStatus", a.statusID, nil); err != nil {
 		return fmt.Errorf("unable to add the boost to the status: %w", err)
 	}
 
@@ -202,13 +220,13 @@ func (a *AddExecutor) addBoostToStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
+func (a *AddExecutor) addVoteToStatus(client *rpc.Client) error {
 	if a.votes.Empty() {
 		return Error{"please add your vote(s) to the poll"}
 	}
 
-	status, err := gtsClient.GetStatus(a.statusID)
-	if err != nil {
+	var status model.Status
+	if err := client.Call("GTSClient.GetStatus", a.statusID, &status); err != nil {
 		return fmt.Errorf("unable to get the status: %w", err)
 	}
 
@@ -224,7 +242,7 @@ func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 		return Error{"this poll does not allow multiple choices"}
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -235,7 +253,14 @@ func (a *AddExecutor) addVoteToStatus(gtsClient *client.Client) error {
 
 	pollID := status.Poll.ID
 
-	if err := gtsClient.VoteInPoll(pollID, []int(a.votes)); err != nil {
+	if err := client.Call(
+		"GTSClient.VoteInPoll",
+		gtsclient.VoteInPollArgs{
+			PollID:  pollID,
+			Choices: a.votes,
+		},
+		nil,
+	); err != nil {
 		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
 	}
 

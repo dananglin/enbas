@@ -1,4 +1,4 @@
-package client
+package gtsclient
 
 import (
 	"bytes"
@@ -14,94 +14,101 @@ const (
 	baseFollowRequestsPath = "/api/v1/follow_requests"
 )
 
-func (g *Client) VerifyCredentials() (model.Account, error) {
-	url := g.Authentication.Instance + baseAccountsPath + "/verify_credentials"
-
-	var account model.Account
-
+func (g *GTSClient) VerifyCredentials(_ NoRPCArgs, account *model.Account) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/verify_credentials",
 		requestBody: nil,
 		contentType: "",
-		output:      &account,
+		output:      account,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.Account{}, fmt.Errorf("received an error after sending the request to verify the credentials: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to verify the credentials: %w",
+			err,
+		)
 	}
 
-	return account, nil
+	return nil
 }
 
-func (g *Client) GetAccount(accountURI string) (model.Account, error) {
-	url := g.Authentication.Instance + baseAccountsPath + "/lookup?acct=" + accountURI
-
-	var account model.Account
-
+func (g *GTSClient) GetAccount(accountURI string, account *model.Account) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/lookup?acct=" + accountURI,
 		requestBody: nil,
 		contentType: "",
-		output:      &account,
+		output:      account,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.Account{}, fmt.Errorf("received an error after sending the request to get the account information: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the account information: %w",
+			err,
+		)
 	}
 
-	return account, nil
+	return nil
 }
 
-func (g *Client) GetAccountRelationship(accountID string) (*model.AccountRelationship, error) {
-	url := g.Authentication.Instance + baseAccountsPath + "/relationships?id=" + accountID
-
+func (g *GTSClient) GetAccountRelationship(accountID string, relationship *model.AccountRelationship) error {
 	var relationships []model.AccountRelationship
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/relationships?id=" + accountID,
 		requestBody: nil,
 		contentType: "",
 		output:      &relationships,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the account relationship: %w",
 			err,
 		)
 	}
 
 	if len(relationships) != 1 {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"unexpected number of account relationships returned: want 1, got %d",
 			len(relationships),
 		)
 	}
 
-	return &relationships[0], nil
+	*relationship = relationships[0]
+
+	return nil
 }
 
-type FollowAccountForm struct {
-	AccountID   string `json:"id"`
-	ShowReposts bool   `json:"reblogs"`
-	Notify      bool   `json:"notify"`
+type FollowAccountArgs struct {
+	AccountID   string
+	ShowReposts bool
+	Notify      bool
 }
 
-func (g *Client) FollowAccount(form FollowAccountForm) error {
+func (g *GTSClient) FollowAccount(args FollowAccountArgs, _ *NoRPCResults) error {
+	form := struct {
+		AccountID   string `json:"id"`
+		ShowReposts bool   `json:"reblogs"`
+		Notify      bool   `json:"notify"`
+	}{
+		AccountID:   args.AccountID,
+		ShowReposts: args.ShowReposts,
+		Notify:      args.Notify,
+	}
+
 	data, err := json.Marshal(form)
 	if err != nil {
 		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseAccountsPath + "/" + form.AccountID + "/follow"
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + form.AccountID + "/follow",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -114,12 +121,10 @@ func (g *Client) FollowAccount(form FollowAccountForm) error {
 	return nil
 }
 
-func (g *Client) UnfollowAccount(accountID string) error {
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unfollow"
-
+func (g *GTSClient) UnfollowAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unfollow",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -132,62 +137,72 @@ func (g *Client) UnfollowAccount(accountID string) error {
 	return nil
 }
 
-func (g *Client) GetFollowers(accountID string, limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("%s/%s/followers?limit=%d", baseAccountsPath, accountID, limit)
+type GetFollowersArgs struct {
+	AccountID string
+	Limit     int
+}
 
-	accounts := make([]model.Account, limit)
+func (g *GTSClient) GetFollowers(args GetFollowersArgs, followers *model.AccountList) error {
+	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("%s/%s/followers?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followers: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the list of followers: %w",
+			err,
+		)
 	}
 
-	followers := model.AccountList{
+	*followers = model.AccountList{
 		Type:     model.AccountListFollowers,
 		Accounts: accounts,
 	}
 
-	return followers, nil
+	return nil
 }
 
-func (g *Client) GetFollowing(accountID string, limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("%s/%s/following?limit=%d", baseAccountsPath, accountID, limit)
+type GetFollowingsArgs struct {
+	AccountID string
+	Limit     int
+}
 
-	accounts := make([]model.Account, limit)
+func (g *GTSClient) GetFollowing(args GetFollowingsArgs, following *model.AccountList) error {
+	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("%s/%s/following?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of followed accounts: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the list of followed accounts: %w",
+			err,
+		)
 	}
 
-	following := model.AccountList{
+	*following = model.AccountList{
 		Type:     model.AccountListFollowing,
 		Accounts: accounts,
 	}
 
-	return following, nil
+	return nil
 }
 
-func (g *Client) BlockAccount(accountID string) error {
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/block"
-
+func (g *GTSClient) BlockAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/block",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -200,12 +215,10 @@ func (g *Client) BlockAccount(accountID string) error {
 	return nil
 }
 
-func (g *Client) UnblockAccount(accountID string) error {
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unblock"
-
+func (g *GTSClient) UnblockAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unblock",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -218,36 +231,42 @@ func (g *Client) UnblockAccount(accountID string) error {
 	return nil
 }
 
-func (g *Client) GetBlockedAccounts(limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/blocks?limit=%d", limit)
-
+func (g *GTSClient) GetBlockedAccounts(limit int, blocked *model.AccountList) error {
 	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/blocks?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of blocked accounts: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the list of blocked accounts: %w",
+			err,
+		)
 	}
 
-	blocked := model.AccountList{
+	*blocked = model.AccountList{
 		Type:     model.AccountListBlockedAccount,
 		Accounts: accounts,
 	}
 
-	return blocked, nil
+	return nil
 }
 
-func (g *Client) SetPrivateNote(accountID, note string) error {
+type SetPrivateNoteArgs struct {
+	AccountID string
+	Note      string
+}
+
+func (g *GTSClient) SetPrivateNote(args SetPrivateNoteArgs, _ *NoRPCResults) error {
 	form := struct {
 		Comment string `json:"comment"`
 	}{
-		Comment: note,
+		Comment: args.Note,
 	}
 
 	data, err := json.Marshal(form)
@@ -256,11 +275,10 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/note"
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + args.AccountID + "/note",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -273,37 +291,36 @@ func (g *Client) SetPrivateNote(accountID, note string) error {
 	return nil
 }
 
-func (g *Client) GetFollowRequests(limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("%s?limit=%d", baseFollowRequestsPath, limit)
-
+func (g *GTSClient) GetFollowRequests(limit int, requests *model.AccountList) error {
 	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("%s?limit=%d", baseFollowRequestsPath, limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of follow requests: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the list of follow requests: %w",
+			err,
+		)
 	}
 
-	requests := model.AccountList{
+	*requests = model.AccountList{
 		Type:     model.AccountListFollowRequests,
 		Accounts: accounts,
 	}
 
-	return requests, nil
+	return nil
 }
 
-func (g *Client) AcceptFollowRequest(accountID string) error {
-	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/authorize"
-
+func (g *GTSClient) AcceptFollowRequest(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/authorize",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -316,12 +333,10 @@ func (g *Client) AcceptFollowRequest(accountID string) error {
 	return nil
 }
 
-func (g *Client) RejectFollowRequest(accountID string) error {
-	url := g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/reject"
-
+func (g *GTSClient) RejectFollowRequest(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/reject",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -334,48 +349,57 @@ func (g *Client) RejectFollowRequest(accountID string) error {
 	return nil
 }
 
-func (g *Client) GetMutedAccounts(limit int) (model.AccountList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/mutes?limit=%d", limit)
-
+func (g *GTSClient) GetMutedAccounts(limit int, muted *model.AccountList) error {
 	var accounts []model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/mutes?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.AccountList{}, fmt.Errorf("received an error after sending the request to get the list of muted accounts: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the list of muted accounts: %w",
+			err,
+		)
 	}
 
-	muted := model.AccountList{
+	*muted = model.AccountList{
 		Type:     model.AccountListMuted,
 		Accounts: accounts,
 	}
 
-	return muted, nil
+	return nil
 }
 
-type MuteAccountForm struct {
-	Notifications bool `json:"notifications"`
-	Duration      int  `json:"duration"`
+type MuteAccountArgs struct {
+	AccountID     string
+	Notifications bool
+	Duration      int
 }
 
-func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
+func (g *GTSClient) MuteAccount(args MuteAccountArgs, _ *NoRPCResults) error {
+	form := struct {
+		Notifications bool `json:"notifications"`
+		Duration      int  `json:"duration"`
+	}{
+		Notifications: args.Notifications,
+		Duration:      args.Duration,
+	}
+
 	data, err := json.Marshal(form)
 	if err != nil {
 		return fmt.Errorf("unable to marshal the form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/mute"
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + args.AccountID + "/mute",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -388,12 +412,10 @@ func (g *Client) MuteAccount(accountID string, form MuteAccountForm) error {
 	return nil
 }
 
-func (g *Client) UnmuteAccount(accountID string) error {
-	url := g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unmute"
-
+func (g *GTSClient) UnmuteAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseAccountsPath + "/" + accountID + "/unmute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -406,7 +428,7 @@ func (g *Client) UnmuteAccount(accountID string) error {
 	return nil
 }
 
-type GetAccountStatusesForm struct {
+type GetAccountStatusesArgs struct {
 	AccountID      string
 	Limit          int
 	ExcludeReplies bool
@@ -416,37 +438,39 @@ type GetAccountStatusesForm struct {
 	OnlyPublic     bool
 }
 
-func (g *Client) GetAccountStatuses(form GetAccountStatusesForm) (*model.StatusList, error) {
-	path := baseAccountsPath + "/" + form.AccountID + "/statuses"
+func (g *GTSClient) GetAccountStatuses(args GetAccountStatusesArgs, statusList *model.StatusList) error {
+	path := baseAccountsPath + "/" + args.AccountID + "/statuses"
 	query := fmt.Sprintf(
 		"?limit=%d&exclude_replies=%t&exclude_reblogs=%t&pinned=%t&only_media=%t&only_public=%t",
-		form.Limit,
-		form.ExcludeReplies,
-		form.ExcludeReblogs,
-		form.Pinned,
-		form.OnlyMedia,
-		form.OnlyPublic,
+		args.Limit,
+		args.ExcludeReplies,
+		args.ExcludeReblogs,
+		args.Pinned,
+		args.OnlyMedia,
+		args.OnlyPublic,
 	)
-	url := g.Authentication.Instance + path + query
 
 	var statuses []model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + path + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return nil, fmt.Errorf("received an error after sending the request to get the account's statuses: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the account's statuses: %w",
+			err,
+		)
 	}
 
-	statusList := model.StatusList{
+	*statusList = model.StatusList{
 		Name:     "STATUSES:",
 		Statuses: statuses,
 	}
 
-	return &statusList, nil
+	return nil
 }

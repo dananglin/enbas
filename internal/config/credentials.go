@@ -80,6 +80,7 @@ func SaveCredentials(filePath, username string, credentials Credentials) (string
 	return authenticationName, nil
 }
 
+// UpdateCurrentAccount updates the name of the current account in the credentials config file.
 func UpdateCurrentAccount(account string, filePath string) error {
 	credentialsConfig, err := NewCredentialsConfigFromFile(filePath)
 	if err != nil {

@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -16,27 +18,41 @@ func (l *LoginExecutor) Execute() error {
 		return Error{"please specify the instance that you want to log into"}
 	}
 
-	instance := l.instance
-
-	if !strings.HasPrefix(instance, "https") || !strings.HasPrefix(instance, "http") {
-		instance = "https://" + instance
+	if !strings.HasPrefix(l.instance, "https") || !strings.HasPrefix(l.instance, "http") {
+		l.instance = "https://" + l.instance
 	}
 
-	for strings.HasSuffix(instance, "/") {
-		instance = instance[:len(instance)-1]
+	for strings.HasSuffix(l.instance, "/") {
+		l.instance = l.instance[:len(l.instance)-1]
 	}
 
-	credentials := config.Credentials{
-		Instance: instance,
+	client, err := server.Connect(l.config.Server, l.configDir)
+	if err != nil {
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
+	}
+	defer client.Close()
+
+	// Update the GTSClient's auth details for the registration process.
+	auth := config.Credentials{
+		Instance:     l.instance,
+		ClientID:     "",
+		ClientSecret: "",
+		AccessToken:  "",
 	}
 
-	gtsClient := client.NewClient(credentials)
+	if err := client.Call("GTSClient.UpdateAuthentication", auth, nil); err != nil {
+		return fmt.Errorf("error updating the GTSClient's authentication details: %w", err)
+	}
 
-	if err := gtsClient.Register(); err != nil {
+	if err := client.Call("GTSClient.Register", gtsclient.NoRPCArgs{}, nil); err != nil {
 		return fmt.Errorf("unable to register the application: %w", err)
 	}
 
-	consentPageURL := gtsClient.AuthCodeURL()
+	var consentPageURL string
+
+	if err := client.Call("GTSClient.AuthCodeURL", gtsclient.NoRPCArgs{}, &consentPageURL); err != nil {
+		return fmt.Errorf("unable to get the URL of the consent page: %w", err)
+	}
 
 	_ = utilities.OpenLink(l.config.Integrations.Browser, consentPageURL)
 
@@ -56,16 +72,16 @@ func (l *LoginExecutor) Execute() error {
 		return fmt.Errorf("failed to read access code: %w", err)
 	}
 
-	if err := gtsClient.UpdateToken(code); err != nil {
+	if err := client.Call("GTSClient.UpdateToken", code, &auth); err != nil {
 		return fmt.Errorf("unable to update the client's access token: %w", err)
 	}
 
-	account, err := gtsClient.VerifyCredentials()
-	if err != nil {
+	var account model.Account
+	if err := client.Call("GTSClient.VerifyCredentials", gtsclient.NoRPCArgs{}, &account); err != nil {
 		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(l.config.CredentialsFile, account.Username, gtsClient.Authentication)
+	loginName, err := config.SaveCredentials(l.config.CredentialsFile, account.Username, auth)
 	if err != nil {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}

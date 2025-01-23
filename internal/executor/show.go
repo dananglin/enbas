@@ -2,10 +2,12 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/media"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -14,7 +16,7 @@ func (s *ShowExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceInstance:        s.showInstance,
 		resourceAccount:         s.showAccount,
 		resourceStatus:          s.showStatus,
@@ -37,17 +39,18 @@ func (s *ShowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: s.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(s.config.CredentialsFile)
+	client, err := server.Connect(s.config.Server, s.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
-	instance, err := gtsClient.GetInstance()
-	if err != nil {
+func (s *ShowExecutor) showInstance(client *rpc.Client) error {
+	var instance model.InstanceV2
+	if err := client.Call("GTSClient.GetInstance", gtsclient.NoRPCArgs{}, &instance); err != nil {
 		return fmt.Errorf("unable to retrieve the instance details: %w", err)
 	}
 
@@ -56,8 +59,8 @@ func (s *ShowExecutor) showInstance(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
-	account, err := getAccount(gtsClient, s.myAccount, s.accountName)
+func (s *ShowExecutor) showAccount(client *rpc.Client) error {
+	account, err := getAccount(client, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("unable to get the account information: %w", err)
 	}
@@ -78,24 +81,30 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	)
 
 	if !s.myAccount && !s.skipAccountRelationship {
-		relationship, err = gtsClient.GetAccountRelationship(account.ID)
-		if err != nil {
+		var result model.AccountRelationship
+		if err := client.Call("GTSClient.GetAccountRelationship", account.ID, &result); err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account: %w", err)
 		}
+
+		relationship = new(model.AccountRelationship)
+		*relationship = result
 	}
 
 	if s.myAccount {
 		myAccountID = account.ID
 		if s.showUserPreferences {
-			preferences, err = gtsClient.GetUserPreferences()
-			if err != nil {
+			var result model.Preferences
+			if err := client.Call("GTSClient.GetUserPreferences", gtsclient.NoRPCArgs{}, &result); err != nil {
 				return fmt.Errorf("unable to retrieve the user preferences: %w", err)
 			}
+
+			preferences = new(model.Preferences)
+			*preferences = result
 		}
 	}
 
 	if s.showStatuses {
-		form := client.GetAccountStatusesForm{
+		args := gtsclient.GetAccountStatusesArgs{
 			AccountID:      account.ID,
 			Limit:          s.limit,
 			ExcludeReplies: s.excludeReplies,
@@ -105,10 +114,13 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 			OnlyPublic:     s.onlyPublic,
 		}
 
-		statuses, err = gtsClient.GetAccountStatuses(form)
-		if err != nil {
+		var result model.StatusList
+		if err := client.Call("GTSClient.GetAccountStatuses", args, &result); err != nil {
 			return fmt.Errorf("unable to retrieve the account's statuses: %w", err)
 		}
+
+		statuses = new(model.StatusList)
+		*statuses = result
 	}
 
 	s.printer.PrintAccount(account, relationship, preferences, statuses, myAccountID)
@@ -116,7 +128,7 @@ func (s *ShowExecutor) showAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
+func (s *ShowExecutor) showStatus(client *rpc.Client) error {
 	if s.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -124,8 +136,8 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	status, err := gtsClient.GetStatus(s.statusID)
-	if err != nil {
+	var status model.Status
+	if err := client.Call("GTSClient.GetStatus", s.statusID, &status); err != nil {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
@@ -137,7 +149,7 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 		return nil
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -147,7 +159,7 @@ func (s *ShowExecutor) showStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
+func (s *ShowExecutor) showTimeline(client *rpc.Client) error {
 	var (
 		timeline model.StatusList
 		err      error
@@ -155,9 +167,9 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 
 	switch s.timelineCategory {
 	case model.TimelineCategoryHome:
-		timeline, err = gtsClient.GetHomeTimeline(s.limit)
+		err = client.Call("GTSClient.GetHomeTimeline", s.limit, &timeline)
 	case model.TimelineCategoryPublic:
-		timeline, err = gtsClient.GetPublicTimeline(s.limit)
+		err = client.Call("GTSClient.GetPublicTimeline", s.limit, &timeline)
 	case model.TimelineCategoryList:
 		if s.listID == "" {
 			return MissingIDError{
@@ -168,18 +180,32 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 
 		var list model.List
 
-		list, err = gtsClient.GetList(s.listID)
-		if err != nil {
+		if err := client.Call("GTSClient.GetList", s.listID, &list); err != nil {
 			return fmt.Errorf("unable to retrieve the list: %w", err)
 		}
 
-		timeline, err = gtsClient.GetListTimeline(list.ID, list.Title, s.limit)
+		err = client.Call(
+			"GTSClient.GetListTimeline",
+			gtsclient.GetListTimelineArgs{
+				ListID: list.ID,
+				Title:  list.Title,
+				Limit:  s.limit,
+			},
+			&timeline,
+		)
 	case model.TimelineCategoryTag:
 		if s.tag == "" {
 			return Error{"please provide the name of the tag"}
 		}
 
-		timeline, err = gtsClient.GetTagTimeline(s.tag, s.limit)
+		err = client.Call(
+			"GTSClient.GetTagTimeline",
+			gtsclient.GetTagTimelineArgs{
+				TagName: s.tag,
+				Limit:   s.limit,
+			},
+			&timeline,
+		)
 	default:
 		return model.InvalidTimelineCategoryError{Value: s.timelineCategory}
 	}
@@ -194,7 +220,7 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 		return nil
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -204,28 +230,24 @@ func (s *ShowExecutor) showTimeline(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showList(gtsClient *client.Client) error {
+func (s *ShowExecutor) showList(client *rpc.Client) error {
 	if s.listID == "" {
-		return s.showLists(gtsClient)
+		return s.showLists(client)
 	}
 
-	list, err := gtsClient.GetList(s.listID)
-	if err != nil {
+	var list model.List
+
+	if err := client.Call("GTSClient.GetList", s.listID, &list); err != nil {
 		return fmt.Errorf("unable to retrieve the list: %w", err)
 	}
 
-	accounts, err := gtsClient.GetAccountsFromList(s.listID, 0)
+	acctMap, err := getAccountsFromList(client, s.listID)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve the accounts from the list: %w", err)
+		return err
 	}
 
-	if len(accounts) > 0 {
-		accountMap := make(map[string]string)
-		for i := range accounts {
-			accountMap[accounts[i].Acct] = accounts[i].Username
-		}
-
-		list.Accounts = accountMap
+	if len(acctMap) > 0 {
+		list.Accounts = acctMap
 	}
 
 	s.printer.PrintList(list)
@@ -233,9 +255,9 @@ func (s *ShowExecutor) showList(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
-	lists, err := gtsClient.GetAllLists()
-	if err != nil {
+func (s *ShowExecutor) showLists(client *rpc.Client) error {
+	var lists []model.List
+	if err := client.Call("GTSClient.GetAllLists", "", &lists); err != nil {
 		return fmt.Errorf("unable to retrieve the lists: %w", err)
 	}
 
@@ -250,12 +272,12 @@ func (s *ShowExecutor) showLists(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
+func (s *ShowExecutor) showFollowers(client *rpc.Client) error {
 	if s.fromResourceType == "" {
 		return FlagNotSetError{flagText: flagFrom}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: s.showFollowersFromAccount,
 	}
 
@@ -267,17 +289,24 @@ func (s *ShowExecutor) showFollowers(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (s *ShowExecutor) showFollowersFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName)
+func (s *ShowExecutor) showFollowersFromAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	followers, err := gtsClient.GetFollowers(accountID, s.limit)
-	if err != nil {
+	var followers model.AccountList
+	if err := client.Call(
+		"GTSClient.GetFollowers",
+		gtsclient.GetFollowersArgs{
+			AccountID: accountID,
+			Limit:     s.limit,
+		},
+		&followers,
+	); err != nil {
 		return fmt.Errorf("unable to retrieve the list of followers: %w", err)
 	}
 
@@ -290,12 +319,12 @@ func (s *ShowExecutor) showFollowersFromAccount(gtsClient *client.Client) error 
 	return nil
 }
 
-func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
+func (s *ShowExecutor) showFollowing(client *rpc.Client) error {
 	if s.fromResourceType == "" {
 		return FlagNotSetError{flagText: flagFrom}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: s.showFollowingFromAccount,
 	}
 
@@ -307,22 +336,29 @@ func (s *ShowExecutor) showFollowing(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (s *ShowExecutor) showFollowingFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, s.myAccount, s.accountName)
+func (s *ShowExecutor) showFollowingFromAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, s.myAccount, s.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	following, err := gtsClient.GetFollowing(accountID, s.limit)
-	if err != nil {
+	var followings model.AccountList
+	if err := client.Call(
+		"GTSClient.GetFollowing",
+		gtsclient.GetFollowingsArgs{
+			AccountID: accountID,
+			Limit:     s.limit,
+		},
+		&followings,
+	); err != nil {
 		return fmt.Errorf("unable to retrieve the list of followed accounts: %w", err)
 	}
 
-	if len(following.Accounts) > 0 {
-		s.printer.PrintAccountList(following)
+	if len(followings.Accounts) > 0 {
+		s.printer.PrintAccountList(followings)
 	} else {
 		s.printer.PrintInfo("This account is not following anyone or the list is hidden.\n")
 	}
@@ -330,9 +366,9 @@ func (s *ShowExecutor) showFollowingFromAccount(gtsClient *client.Client) error 
 	return nil
 }
 
-func (s *ShowExecutor) showBlocked(gtsClient *client.Client) error {
-	blocked, err := gtsClient.GetBlockedAccounts(s.limit)
-	if err != nil {
+func (s *ShowExecutor) showBlocked(client *rpc.Client) error {
+	var blocked model.AccountList
+	if err := client.Call("GTSClient.GetBlockedAccounts", s.limit, &blocked); err != nil {
 		return fmt.Errorf("unable to retrieve the list of blocked accounts: %w", err)
 	}
 
@@ -345,14 +381,14 @@ func (s *ShowExecutor) showBlocked(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
-	bookmarks, err := gtsClient.GetBookmarks(s.limit)
-	if err != nil {
+func (s *ShowExecutor) showBookmarks(client *rpc.Client) error {
+	var bookmarks model.StatusList
+	if err := client.Call("GTSClient.GetBookmarks", s.limit, &bookmarks); err != nil {
 		return fmt.Errorf("unable to retrieve the list of bookmarks: %w", err)
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		myAccountID, err := getAccountID(gtsClient, true, nil)
+		myAccountID, err := getAccountID(client, true, nil)
 		if err != nil {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
@@ -365,14 +401,21 @@ func (s *ShowExecutor) showBookmarks(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
-	liked, err := gtsClient.GetLikedStatuses(s.limit, s.resourceType)
-	if err != nil {
+func (s *ShowExecutor) showLiked(client *rpc.Client) error {
+	var liked model.StatusList
+	if err := client.Call(
+		"GTSClient.GetLikedStatuses",
+		gtsclient.GetLikedStatusesArgs{
+			Limit:        s.limit,
+			ResourceType: s.resourceType,
+		},
+		&liked,
+	); err != nil {
 		return fmt.Errorf("unable to retrieve the list of your %s statuses: %w", s.resourceType, err)
 	}
 
 	if len(liked.Statuses) > 0 {
-		myAccountID, err := getAccountID(gtsClient, true, nil)
+		myAccountID, err := getAccountID(client, true, nil)
 		if err != nil {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
@@ -385,14 +428,14 @@ func (s *ShowExecutor) showLiked(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
-	accounts, err := gtsClient.GetFollowRequests(s.limit)
-	if err != nil {
+func (s *ShowExecutor) showFollowRequests(client *rpc.Client) error {
+	var requests model.AccountList
+	if err := client.Call("GTSClient.GetFollowRequests", s.limit, &requests); err != nil {
 		return fmt.Errorf("unable to retrieve the list of follow requests: %w", err)
 	}
 
-	if len(accounts.Accounts) > 0 {
-		s.printer.PrintAccountList(accounts)
+	if len(requests.Accounts) > 0 {
+		s.printer.PrintAccountList(requests)
 	} else {
 		s.printer.PrintInfo("You have no follow requests.\n")
 	}
@@ -400,9 +443,9 @@ func (s *ShowExecutor) showFollowRequests(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
-	muted, err := gtsClient.GetMutedAccounts(s.limit)
-	if err != nil {
+func (s *ShowExecutor) showMutedAccounts(client *rpc.Client) error {
+	var muted model.AccountList
+	if err := client.Call("GTSClient.GetMutedAccounts", s.limit, &muted); err != nil {
 		return fmt.Errorf("unable to retrieve the list of muted accounts: %w", err)
 	}
 
@@ -415,7 +458,7 @@ func (s *ShowExecutor) showMutedAccounts(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
+func (s *ShowExecutor) showMediaAttachment(client *rpc.Client) error {
 	if len(s.attachmentIDs) != 1 {
 		return fmt.Errorf(
 			"unexpected number of attachment IDs received: want 1, got %d",
@@ -423,8 +466,8 @@ func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
 		)
 	}
 
-	attachment, err := gtsClient.GetMediaAttachment(s.attachmentIDs[0])
-	if err != nil {
+	var attachment model.Attachment
+	if err := client.Call("GTSClient.GetMediaAttachment", s.attachmentIDs[0], &attachment); err != nil {
 		return fmt.Errorf("unable to retrieve the media attachment: %w", err)
 	}
 
@@ -433,12 +476,12 @@ func (s *ShowExecutor) showMediaAttachment(gtsClient *client.Client) error {
 	return nil
 }
 
-func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
+func (s *ShowExecutor) showMedia(client *rpc.Client) error {
 	if s.fromResourceType == "" {
 		return FlagNotSetError{flagText: flagFrom}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceStatus: s.showMediaFromStatus,
 	}
 
@@ -450,10 +493,10 @@ func (s *ShowExecutor) showMedia(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
+func (s *ShowExecutor) showMediaFromStatus(client *rpc.Client) error {
 	if s.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -461,14 +504,22 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	status, err := gtsClient.GetStatus(s.statusID)
-	if err != nil {
+	var (
+		status      model.Status
+		instanceURL string
+	)
+
+	if err := client.Call("GTSClient.GetStatus", s.statusID, &status); err != nil {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	cacheDir, err := utilities.CalculateMediaCacheDir(s.config.CacheDirectory, gtsClient.Authentication.Instance)
+	if err := client.Call("GTSClient.GetInstanceURL", gtsclient.NoRPCArgs{}, &instanceURL); err != nil {
+		return fmt.Errorf("unable to retrieve the instance URL: %w", err)
+	}
+
+	cacheDir, err := utilities.CalculateMediaCacheDir(s.config.CacheDirectory, instanceURL)
 	if err != nil {
-		return fmt.Errorf("unable to get the media cache directory: %w", err)
+		return fmt.Errorf("unable to calculate the media cache directory: %w", err)
 	}
 
 	if err := utilities.EnsureDirectory(cacheDir); err != nil {
@@ -483,7 +534,7 @@ func (s *ShowExecutor) showMediaFromStatus(gtsClient *client.Client) error {
 		s.attachmentIDs,
 	)
 
-	if err := mediaBundle.Download(gtsClient); err != nil {
+	if err := mediaBundle.Download(client); err != nil {
 		return fmt.Errorf("unable to download the media bundle: %w", err)
 	}
 

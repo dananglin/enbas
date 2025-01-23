@@ -1,10 +1,12 @@
-package client
+package gtsclient
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 )
 
 type tokenRequest struct {
@@ -22,7 +24,7 @@ type tokenResponse struct {
 	TokenType   string `json:"token_type"`
 }
 
-func (g *Client) UpdateToken(code string) error {
+func (g *GTSClient) UpdateToken(code string, auth *config.Credentials) error {
 	tokenReq := tokenRequest{
 		RedirectURI:  redirectURI,
 		ClientID:     g.Authentication.ClientID,
@@ -58,6 +60,8 @@ func (g *Client) UpdateToken(code string) error {
 	}
 
 	g.Authentication.AccessToken = response.AccessToken
+
+	*auth = g.Authentication
 
 	return nil
 }

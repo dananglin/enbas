@@ -81,6 +81,7 @@ const (
 	AccountListBlockedAccount
 	AccountListFollowRequests
 	AccountListMuted
+	AccountListNormal
 )
 
 type AccountList struct {

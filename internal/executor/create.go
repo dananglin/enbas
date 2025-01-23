@@ -2,9 +2,11 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -13,12 +15,7 @@ func (c *CreateExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(c.config.CredentialsFile)
-	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
-	}
-
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceList:            c.createList,
 		resourceStatus:          c.createStatus,
 		resourceMediaAttachment: c.createMediaAttachment,
@@ -29,10 +26,16 @@ func (c *CreateExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: c.resourceType}
 	}
 
-	return doFunc(gtsClient)
+	client, err := server.Connect(c.config.Server, c.configDir)
+	if err != nil {
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
+	}
+	defer client.Close()
+
+	return doFunc(client)
 }
 
-func (c *CreateExecutor) createList(gtsClient *client.Client) error {
+func (c *CreateExecutor) createList(client *rpc.Client) error {
 	if c.listTitle == "" {
 		return Error{"please provide the title of the list that you want to create"}
 	}
@@ -42,13 +45,16 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 		return err //nolint:wrapcheck
 	}
 
-	form := client.CreateListForm{
-		Title:         c.listTitle,
-		RepliesPolicy: parsedListRepliesPolicy,
-	}
-
-	list, err := gtsClient.CreateList(form)
-	if err != nil {
+	var list model.List
+	if err := client.Call(
+		"GTSClient.CreateList",
+		gtsclient.CreateListArgs{
+			Title:         c.listTitle,
+			RepliesPolicy: parsedListRepliesPolicy,
+			Exclusive:     c.listExclusive,
+		},
+		&list,
+	); err != nil {
 		return fmt.Errorf("unable to create the list: %w", err)
 	}
 
@@ -58,7 +64,7 @@ func (c *CreateExecutor) createList(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
+func (c *CreateExecutor) createStatus(client *rpc.Client) error {
 	var (
 		err        error
 		language   string
@@ -102,7 +108,11 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 			for ind := range numMediaFiles {
 				mediaDesc, err := utilities.ReadContents(c.mediaDescriptions[ind])
 				if err != nil {
-					return fmt.Errorf("unable to read the contents from %s: %w", c.mediaDescriptions[ind], err)
+					return fmt.Errorf(
+						"unable to read the contents from %s: %w",
+						c.mediaDescriptions[ind],
+						err,
+					)
 				}
 
 				mediaDescriptions[ind] = mediaDesc
@@ -114,6 +124,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 				mediaFile   string
 				description string
 				focus       string
+				attachment model.Attachment
 			)
 
 			mediaFile = c.mediaFiles[ind]
@@ -126,12 +137,15 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 				focus = c.mediaFocusValues[ind]
 			}
 
-			attachment, err := gtsClient.CreateMediaAttachment(
-				mediaFile,
-				description,
-				focus,
-			)
-			if err != nil {
+			if err := client.Call(
+				"GTSClient.CreateMediaAttachment",
+				gtsclient.CreateMediaAttachmentArgs{
+					Path: mediaFile,
+					Description: description,
+					Focus: focus,
+				},
+				&attachment,
+			); err != nil {
 				return fmt.Errorf("unable to create the media attachment for %s: %w", mediaFile, err)
 			}
 
@@ -154,8 +168,8 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		return Error{"attaching media to a poll is not allowed"}
 	}
 
-	preferences, err := gtsClient.GetUserPreferences()
-	if err != nil {
+	var preferences model.Preferences
+	if err := client.Call("GTSClient.GetUserPreferences", gtsclient.NoRPCArgs{}, &preferences); err != nil {
 		c.printer.PrintInfo("WARNING: Unable to get your posting preferences: " + err.Error() + ".\n")
 	}
 
@@ -187,13 +201,13 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		return err //nolint:wrapcheck
 	}
 
-	form := client.CreateStatusForm{
+	form := gtsclient.CreateStatusForm{
 		Content:       content,
 		ContentType:   parsedContentType,
 		Language:      language,
 		SpoilerText:   c.summary,
 		Boostable:     c.boostable,
-		Federated:     c.federated,
+		LocalOnly:     c.localOnly,
 		InReplyTo:     c.inReplyTo,
 		Likeable:      c.likeable,
 		Replyable:     c.replyable,
@@ -212,7 +226,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 			return Error{"no options were provided for this poll"}
 		}
 
-		poll := client.CreateStatusPollForm{
+		poll := gtsclient.CreateStatusPollForm{
 			Options:    c.pollOptions,
 			Multiple:   c.pollAllowsMultipleChoices,
 			HideTotals: c.pollHidesVoteCounts,
@@ -222,9 +236,9 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 		form.Poll = &poll
 	}
 
-	status, err := gtsClient.CreateStatus(form)
-	if err != nil {
-		return fmt.Errorf("unable to create the status: %w", err)
+	var status model.Status
+	if err := client.Call("GTSClient.CreateStatus", form, &status); err != nil {
+		return fmt.Errorf("error creating the status: %w", err)
 	}
 
 	c.printer.PrintSuccess("Successfully created the status with ID: " + status.ID)
@@ -232,7 +246,7 @@ func (c *CreateExecutor) createStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (c *CreateExecutor) createMediaAttachment(gtsClient *client.Client) error {
+func (c *CreateExecutor) createMediaAttachment(client *rpc.Client) error {
 	expectedNumValues := 1
 
 	if !c.mediaFiles.ExpectedLength(expectedNumValues) {
@@ -278,12 +292,16 @@ func (c *CreateExecutor) createMediaAttachment(gtsClient *client.Client) error {
 		focus = c.mediaFocusValues[0]
 	}
 
-	attachment, err := gtsClient.CreateMediaAttachment(
-		c.mediaFiles[0],
-		description,
-		focus,
-	)
-	if err != nil {
+	var attachment model.Attachment
+	if err := client.Call(
+		"GTSClient.CreateMediaAttachment",
+		gtsclient.CreateMediaAttachmentArgs{
+			Path: c.mediaFiles[0],
+			Description: description,
+			Focus: focus,
+		},
+		&attachment,
+	); err != nil {
 		return fmt.Errorf("unable to create the media attachment: %w", err)
 	}
 

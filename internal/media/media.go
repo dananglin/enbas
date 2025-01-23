@@ -2,10 +2,11 @@ package media
 
 import (
 	"fmt"
+	"net/rpc"
 	"path/filepath"
 	"strings"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -21,7 +22,7 @@ type media struct {
 	mediaType   string
 }
 
-func (m *media) download(gtsClient *client.Client) error {
+func (m *media) download(client *rpc.Client) error {
 	fileExists, err := utilities.FileExists(m.destination)
 	if err != nil {
 		return fmt.Errorf(
@@ -35,7 +36,14 @@ func (m *media) download(gtsClient *client.Client) error {
 		return nil
 	}
 
-	if err := gtsClient.DownloadMedia(m.source, m.destination); err != nil {
+	if err := client.Call(
+		"GTSClient.DownloadMedia",
+		gtsclient.DownloadMediaArgs{
+			URL:  m.source,
+			Path: m.destination,
+		},
+		nil,
+	); err != nil {
 		return fmt.Errorf(
 			"downloading %s -> %s failed: %w",
 			m.source,
@@ -127,15 +135,15 @@ func NewBundle(
 	}
 }
 
-func (m *Bundle) Download(gtsClient *client.Client) error {
+func (m *Bundle) Download(client *rpc.Client) error {
 	for ind := range m.images {
-		if err := m.images[ind].download(gtsClient); err != nil {
+		if err := m.images[ind].download(client); err != nil {
 			return fmt.Errorf("received an error trying to download the image files: %w", err)
 		}
 	}
 
 	for ind := range m.videos {
-		if err := m.videos[ind].download(gtsClient); err != nil {
+		if err := m.videos[ind].download(client); err != nil {
 			return fmt.Errorf("received an error trying to download the video files: %w", err)
 		}
 	}

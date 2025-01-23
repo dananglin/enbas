@@ -2,12 +2,14 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (f *FollowExecutor) Execute() error {
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: f.followAccount,
 	}
 
@@ -16,28 +18,31 @@ func (f *FollowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: f.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(f.config.CredentialsFile)
+	client, err := server.Connect(f.config.Server, f.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (f *FollowExecutor) followAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, f.accountName)
+func (f *FollowExecutor) followAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, f.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	form := client.FollowAccountForm{
-		AccountID:   accountID,
-		ShowReposts: f.showReposts,
-		Notify:      f.notify,
-	}
-
-	if err := gtsClient.FollowAccount(form); err != nil {
-		return fmt.Errorf("unable to follow the account: %w", err)
+	if err := client.Call(
+		"GTSClient.FollowAccount",
+		gtsclient.FollowAccountArgs{
+			AccountID:   accountID,
+			ShowReposts: f.showReposts,
+			Notify:      f.notify,
+		},
+		nil,
+	); err != nil {
+		return fmt.Errorf("error following the account: %w", err)
 	}
 
 	f.printer.PrintSuccess("Successfully sent the follow request.")

@@ -1,43 +1,41 @@
-package client
+package gtsclient
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-type registerRequest struct {
-	ClientName   string `json:"client_name"`
-	RedirectUris string `json:"redirect_uris"`
-	Scopes       string `json:"scopes"`
-	Website      string `json:"website"`
-}
-
-func (g *Client) Register() error {
-	registerParams := registerRequest{
+func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
+	form := struct {
+		ClientName   string `json:"client_name"`
+		RedirectUris string `json:"redirect_uris"`
+		Scopes       string `json:"scopes"`
+		Website      string `json:"website"`
+	}{
 		ClientName:   info.ApplicationName,
 		RedirectUris: redirectURI,
 		Scopes:       "read write",
 		Website:      info.ApplicationWebsite,
 	}
 
-	data, err := json.Marshal(registerParams)
+	data, err := json.Marshal(form)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the request body: %w", err)
+		return fmt.Errorf("error marshalling the request body: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + "/api/v1/apps"
 
 	var app model.Application
 
 	requestParams := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + "/api/v1/apps",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      &app,
@@ -49,6 +47,19 @@ func (g *Client) Register() error {
 
 	g.Authentication.ClientID = app.ClientID
 	g.Authentication.ClientSecret = app.ClientSecret
+
+	return nil
+}
+
+func (g *GTSClient) AuthCodeURL(_ NoRPCArgs, authCodeURL *string) error {
+	escapedRedirectURI := url.QueryEscape(redirectURI)
+
+	*authCodeURL = fmt.Sprintf(
+		authCodeURLFormat,
+		g.Authentication.Instance,
+		g.Authentication.ClientID,
+		escapedRedirectURI,
+	)
 
 	return nil
 }

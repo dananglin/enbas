@@ -2,9 +2,11 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -13,7 +15,7 @@ func (e *EditExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagType}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceList:            e.editList,
 		resourceMediaAttachment: e.editMediaAttachment,
 	}
@@ -23,15 +25,16 @@ func (e *EditExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: e.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(e.config.CredentialsFile)
+	client, err := server.Connect(e.config.Server, e.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (e *EditExecutor) editList(gtsClient *client.Client) error {
+func (e *EditExecutor) editList(client *rpc.Client) error {
 	if e.listID == "" {
 		return MissingIDError{
 			resource: resourceList,
@@ -39,13 +42,13 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 		}
 	}
 
-	list, err := gtsClient.GetList(e.listID)
-	if err != nil {
+	var listToUpdate model.List
+	if err := client.Call("GTSClient.GetList", e.listID, &listToUpdate); err != nil {
 		return fmt.Errorf("unable to get the list: %w", err)
 	}
 
 	if e.listTitle != "" {
-		list.Title = e.listTitle
+		listToUpdate.Title = e.listTitle
 	}
 
 	if e.listRepliesPolicy != "" {
@@ -54,12 +57,21 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 			return err
 		}
 
-		list.RepliesPolicy = parsedListRepliesPolicy
+		listToUpdate.RepliesPolicy = parsedListRepliesPolicy
 	}
 
-	updatedList, err := gtsClient.UpdateList(list)
+	var updatedList model.List
+	if err := client.Call("GTSClient.UpdateList", listToUpdate, &updatedList); err != nil {
+		return fmt.Errorf("error updating the list: %w", err)
+	}
+
+	acctMap, err := getAccountsFromList(client, updatedList.ID)
 	if err != nil {
-		return fmt.Errorf("unable to update the list: %w", err)
+		return err
+	}
+
+	if len(acctMap) > 0 {
+		updatedList.Accounts = acctMap
 	}
 
 	e.printer.PrintSuccess("Successfully edited the list.")
@@ -68,28 +80,26 @@ func (e *EditExecutor) editList(gtsClient *client.Client) error {
 	return nil
 }
 
-func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
-	expectedNumValues := 1
-
-	if !e.attachmentIDs.ExpectedLength(expectedNumValues) {
+func (e *EditExecutor) editMediaAttachment(client *rpc.Client) error {
+	if !e.attachmentIDs.ExpectedLength(1) {
 		return UnexpectedNumValuesError{
 			name:     "media attachment IDs",
-			expected: expectedNumValues,
+			expected: 1,
 			actual:   len(e.attachmentIDs),
 		}
 	}
 
-	attachment, err := gtsClient.GetMediaAttachment(e.attachmentIDs[0])
-	if err != nil {
+	var attachment model.Attachment
+	if err := client.Call("GTSClient.GetMediaAttachment", e.attachmentIDs[0], &attachment); err != nil {
 		return fmt.Errorf("unable to get the media attachment: %w", err)
 	}
 
 	description := attachment.Description
 	if !e.mediaDescriptions.Empty() {
-		if !e.mediaDescriptions.ExpectedLength(expectedNumValues) {
+		if !e.mediaDescriptions.ExpectedLength(1) {
 			return UnexpectedNumValuesError{
 				name:     "media description",
-				expected: expectedNumValues,
+				expected: 1,
 				actual:   len(e.mediaDescriptions),
 			}
 		}
@@ -108,10 +118,10 @@ func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
 
 	focus := fmt.Sprintf("%f,%f", attachment.Meta.Focus.X, attachment.Meta.Focus.Y)
 	if !e.mediaFocusValues.Empty() {
-		if !e.mediaFocusValues.ExpectedLength(expectedNumValues) {
+		if !e.mediaFocusValues.ExpectedLength(1) {
 			return UnexpectedNumValuesError{
 				name:     "media focus values",
-				expected: expectedNumValues,
+				expected: 1,
 				actual:   len(e.mediaFocusValues),
 			}
 		}
@@ -119,8 +129,17 @@ func (e *EditExecutor) editMediaAttachment(gtsClient *client.Client) error {
 		focus = e.mediaFocusValues[0]
 	}
 
-	if _, err = gtsClient.UpdateMediaAttachment(attachment.ID, description, focus); err != nil {
-		return fmt.Errorf("unable to update the media attachment: %w", err)
+	var updatedAttachment model.Attachment
+	if err := client.Call(
+		"GTSClient.UpdateMediaAttachment",
+		gtsclient.UpdateMediaAttachmentArgs{
+			MediaAttachmentID: attachment.ID,
+			Description: description,
+			Focus: focus,
+		},
+		&updatedAttachment,
+	); err != nil {
+		return fmt.Errorf("error updating the media attachment: %w", err)
 	}
 
 	e.printer.PrintSuccess("Successfully edited the media attachment.")

@@ -25,7 +25,7 @@ func (i *InitExecutor) Execute() error {
 		return nil
 	}
 
-	if err := config.SaveDefaultConfigToFile(i.configDir); err != nil {
+	if err := config.SaveInitialConfigToFile(i.configDir); err != nil {
 		return fmt.Errorf("unable to create a new configuration file in %s: %w", i.configDir, err)
 	}
 

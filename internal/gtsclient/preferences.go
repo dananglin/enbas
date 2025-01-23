@@ -1,4 +1,4 @@
-package client
+package gtsclient
 
 import (
 	"fmt"
@@ -7,25 +7,23 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (g *Client) GetUserPreferences() (*model.Preferences, error) {
-	url := g.Authentication.Instance + "/api/v1/preferences"
+const preferencesPath = "/api/v1/preferences"
 
-	var preferences model.Preferences
-
+func (g *GTSClient) GetUserPreferences(_ NoRPCArgs, preferences *model.Preferences) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + preferencesPath,
 		requestBody: nil,
 		contentType: "",
-		output:      &preferences,
+		output:      preferences,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the user preferences: %w",
 			err,
 		)
 	}
 
-	return &preferences, nil
+	return nil
 }

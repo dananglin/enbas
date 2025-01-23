@@ -2,8 +2,10 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (r *RemoveExecutor) Execute() error {
@@ -11,7 +13,7 @@ func (r *RemoveExecutor) Execute() error {
 		return FlagNotSetError{flagText: flagFrom}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceList:      r.removeFromList,
 		resourceAccount:   r.removeFromAccount,
 		resourceBookmarks: r.removeFromBookmarks,
@@ -23,16 +25,17 @@ func (r *RemoveExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: r.fromResourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(r.config.CredentialsFile)
+	client, err := server.Connect(r.config.Server, r.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (r *RemoveExecutor) removeFromList(gtsClient *client.Client) error {
-	funcMap := map[string]func(*client.Client) error{
+func (r *RemoveExecutor) removeFromList(client *rpc.Client) error {
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: r.removeAccountsFromList,
 	}
 
@@ -44,10 +47,10 @@ func (r *RemoveExecutor) removeFromList(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error {
+func (r *RemoveExecutor) removeAccountsFromList(client *rpc.Client) error {
 	if r.listID == "" {
 		return MissingIDError{
 			resource: resourceList,
@@ -59,7 +62,7 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 		return NoAccountSpecifiedError{}
 	}
 
-	accounts, err := getOtherAccounts(gtsClient, r.accountNames)
+	accounts, err := getOtherAccounts(client, r.accountNames)
 	if err != nil {
 		return fmt.Errorf("unable to get the accounts: %w", err)
 	}
@@ -70,8 +73,15 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 		accountIDs[ind] = accounts[ind].ID
 	}
 
-	if err := gtsClient.RemoveAccountsFromList(r.listID, accountIDs); err != nil {
-		return fmt.Errorf("unable to remove the accounts from the list: %w", err)
+	if err := client.Call(
+		"GTSClient.RemoveAccountsFromList",
+		gtsclient.RemoveAccountsFromListArgs{
+			ListID:     r.listID,
+			AccountIDs: accountIDs,
+		},
+		nil,
+	); err != nil {
+		return fmt.Errorf("error removing the accounts from the list: %w", err)
 	}
 
 	r.printer.PrintSuccess("Successfully removed the account(s) from the list.")
@@ -79,8 +89,8 @@ func (r *RemoveExecutor) removeAccountsFromList(gtsClient *client.Client) error 
 	return nil
 }
 
-func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
-	funcMap := map[string]func(*client.Client) error{
+func (r *RemoveExecutor) removeFromAccount(client *rpc.Client) error {
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceNote: r.removeNoteFromAccount,
 	}
 
@@ -92,16 +102,23 @@ func (r *RemoveExecutor) removeFromAccount(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, r.accountNames)
+func (r *RemoveExecutor) removeNoteFromAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, r.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	if err := gtsClient.SetPrivateNote(accountID, ""); err != nil {
+	if err := client.Call(
+		"GTSClient.SetPrivateNote",
+		gtsclient.SetPrivateNoteArgs{
+			AccountID: accountID,
+			Note:      "",
+		},
+		nil,
+	); err != nil {
 		return fmt.Errorf("unable to remove the private note from the account: %w", err)
 	}
 
@@ -110,8 +127,8 @@ func (r *RemoveExecutor) removeNoteFromAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (r *RemoveExecutor) removeFromBookmarks(gtsClient *client.Client) error {
-	funcMap := map[string]func(*client.Client) error{
+func (r *RemoveExecutor) removeFromBookmarks(client *rpc.Client) error {
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceStatus: r.removeStatusFromBookmarks,
 	}
 
@@ -123,10 +140,10 @@ func (r *RemoveExecutor) removeFromBookmarks(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) error {
+func (r *RemoveExecutor) removeStatusFromBookmarks(client *rpc.Client) error {
 	if r.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -134,8 +151,8 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 		}
 	}
 
-	if err := gtsClient.RemoveStatusFromBookmarks(r.statusID); err != nil {
-		return fmt.Errorf("unable to remove the status from your bookmarks: %w", err)
+	if err := client.Call("GTSClient.RemoveStatusFromBookmarks", r.statusID, nil); err != nil {
+		return fmt.Errorf("error removing the status from your bookmarks: %w", err)
 	}
 
 	r.printer.PrintSuccess("Successfully removed the status from your bookmarks.")
@@ -143,7 +160,7 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(gtsClient *client.Client) err
 	return nil
 }
 
-func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
+func (r *RemoveExecutor) removeFromStatus(client *rpc.Client) error {
 	if r.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -151,7 +168,7 @@ func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceStar:  r.removeStarFromStatus,
 		resourceLike:  r.removeStarFromStatus,
 		resourceBoost: r.removeBoostFromStatus,
@@ -165,12 +182,12 @@ func (r *RemoveExecutor) removeFromStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (r *RemoveExecutor) removeStarFromStatus(gtsClient *client.Client) error {
-	if err := gtsClient.UnlikeStatus(r.statusID); err != nil {
-		return fmt.Errorf("unable to remove the %s from the status: %w", r.resourceType, err)
+func (r *RemoveExecutor) removeStarFromStatus(client *rpc.Client) error {
+	if err := client.Call("GTSClient.UnlikeStatus", r.statusID, nil); err != nil {
+		return fmt.Errorf("error removing the %s from the status: %w", r.resourceType, err)
 	}
 
 	r.printer.PrintSuccess("Successfully removed the " + r.resourceType + " from the status.")
@@ -178,8 +195,8 @@ func (r *RemoveExecutor) removeStarFromStatus(gtsClient *client.Client) error {
 	return nil
 }
 
-func (r *RemoveExecutor) removeBoostFromStatus(gtsClient *client.Client) error {
-	if err := gtsClient.UnreblogStatus(r.statusID); err != nil {
+func (r *RemoveExecutor) removeBoostFromStatus(client *rpc.Client) error {
+	if err := client.Call("GTSClient.UnreblogStatus", r.statusID, nil); err != nil {
 		return fmt.Errorf("unable to remove the boost from the status: %w", err)
 	}
 

@@ -60,6 +60,8 @@ func calculateCacheDir(cacheRoot, instance string) (string, error) {
 	return filepath.Join(cacheRoot, info.ApplicationName, fqdn), nil
 }
 
+// EnsureDirectory checks to see if the specified directory is present.
+// If it is not present then an attempt is made to create it.
 func EnsureDirectory(dir string) error {
 	if _, err := os.Stat(dir); err != nil {
 		if errors.Is(err, os.ErrNotExist) {

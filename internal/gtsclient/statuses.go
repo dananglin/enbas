@@ -1,4 +1,4 @@
-package client
+package gtsclient
 
 import (
 	"bytes"
@@ -9,32 +9,25 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-const (
-	baseStatusesPath string = "/api/v1/statuses"
-)
+const baseStatusesPath string = "/api/v1/statuses"
 
-func (g *Client) GetStatus(statusID string) (model.Status, error) {
-	path := baseStatusesPath + "/" + statusID
-	url := g.Authentication.Instance + path
-
-	var status model.Status
-
+func (g *GTSClient) GetStatus(statusID string, status *model.Status) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
-		output:      &status,
+		output:      status,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.Status{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the status information: %w",
 			err,
 		)
 	}
 
-	return status, nil
+	return nil
 }
 
 type CreateStatusForm struct {
@@ -43,7 +36,7 @@ type CreateStatusForm struct {
 	Language      string                  `json:"language"`
 	SpoilerText   string                  `json:"spoiler_text"`
 	Boostable     bool                    `json:"boostable"`
-	Federated     bool                    `json:"federated"`
+	LocalOnly     bool                    `json:"local_only"`
 	Likeable      bool                    `json:"likeable"`
 	Replyable     bool                    `json:"replyable"`
 	Sensitive     bool                    `json:"sensitive"`
@@ -60,69 +53,64 @@ type CreateStatusPollForm struct {
 	HideTotals bool     `json:"hide_totals"`
 }
 
-func (g *Client) CreateStatus(form CreateStatusForm) (model.Status, error) {
+func (g *GTSClient) CreateStatus(form CreateStatusForm, status *model.Status) error {
 	data, err := json.Marshal(form)
 	if err != nil {
-		return model.Status{}, fmt.Errorf("unable to create the JSON form: %w", err)
+		return fmt.Errorf("unable to create the JSON form: %w", err)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + baseStatusesPath
-
-	var status model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
-		output:      &status,
+		output:      status,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.Status{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to create the status: %w",
 			err,
 		)
 	}
 
-	return status, nil
+	return nil
 }
 
-func (g *Client) GetBookmarks(limit int) (model.StatusList, error) {
+func (g *GTSClient) GetBookmarks(limit int, bookmarks *model.StatusList) error {
 	path := fmt.Sprintf("/api/v1/bookmarks?limit=%d", limit)
-	url := g.Authentication.Instance + path
 
-	bookmarks := model.StatusList{
-		Name:     "Your Bookmarks",
-		Statuses: nil,
-	}
+	var statuses []model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + path,
 		requestBody: nil,
 		contentType: "",
-		output:      &bookmarks.Statuses,
+		output:      &statuses,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return bookmarks, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the bookmarks: %w",
 			err,
 		)
 	}
 
-	return bookmarks, nil
+	*bookmarks = model.StatusList{
+		Name:     "Your Bookmarks",
+		Statuses: statuses,
+	}
+
+	return nil
 }
 
-func (g *Client) AddStatusToBookmarks(statusID string) error {
-	path := fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID)
-	url := g.Authentication.Instance + path
-
+func (g *GTSClient) AddStatusToBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -138,13 +126,10 @@ func (g *Client) AddStatusToBookmarks(statusID string) error {
 	return nil
 }
 
-func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
-	path := fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID)
-	url := g.Authentication.Instance + path
-
+func (g *GTSClient) RemoveStatusFromBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -160,12 +145,10 @@ func (g *Client) RemoveStatusFromBookmarks(statusID string) error {
 	return nil
 }
 
-func (g *Client) LikeStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite"
-
+func (g *GTSClient) LikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -181,12 +164,10 @@ func (g *Client) LikeStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) UnlikeStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite"
-
+func (g *GTSClient) UnlikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -202,38 +183,41 @@ func (g *Client) UnlikeStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) GetLikedStatuses(limit int, resourceName string) (model.StatusList, error) {
-	url := g.Authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", limit)
+type GetLikedStatusesArgs struct {
+	Limit        int
+	ResourceType string
+}
 
-	liked := model.StatusList{
-		Name:     "Your " + resourceName + " statuses",
-		Statuses: nil,
-	}
+func (g *GTSClient) GetLikedStatuses(args GetLikedStatusesArgs, liked *model.StatusList) error {
+	var statuses []model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         url,
+		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", args.Limit),
 		requestBody: nil,
 		contentType: "",
-		output:      &liked.Statuses,
+		output:      &statuses,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return model.StatusList{}, fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to get the list of statuses: %w",
 			err,
 		)
 	}
 
-	return liked, nil
+	*liked = model.StatusList{
+		Name:     "Your " + args.ResourceType + " statuses",
+		Statuses: statuses,
+	}
+
+	return nil
 }
 
-func (g *Client) ReblogStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog"
-
+func (g *GTSClient) ReblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -249,12 +233,10 @@ func (g *Client) ReblogStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) UnreblogStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog"
-
+func (g *GTSClient) UnreblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -270,12 +252,10 @@ func (g *Client) UnreblogStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) MuteStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/mute"
-
+func (g *GTSClient) MuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/mute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -291,12 +271,10 @@ func (g *Client) MuteStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) UnmuteStatus(statusID string) error {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute"
-
+func (g *GTSClient) UnmuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -312,25 +290,25 @@ func (g *Client) UnmuteStatus(statusID string) error {
 	return nil
 }
 
-func (g *Client) DeleteStatus(statusID string) (string, error) {
-	url := g.Authentication.Instance + baseStatusesPath + "/" + statusID
-
+func (g *GTSClient) DeleteStatus(statusID string, text *string) error {
 	var status model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         url,
+		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
 		output:      &status,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return "", fmt.Errorf(
+		return fmt.Errorf(
 			"received an error after sending the request to delete the status: %w",
 			err,
 		)
 	}
 
-	return status.Text, nil
+	*text = status.Text
+
+	return nil
 }

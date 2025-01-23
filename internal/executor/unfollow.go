@@ -2,12 +2,13 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (f *UnfollowExecutor) Execute() error {
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: f.unfollowAccount,
 	}
 
@@ -16,21 +17,22 @@ func (f *UnfollowExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: f.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(f.config.CredentialsFile)
+	client, err := server.Connect(f.config.Server, f.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (f *UnfollowExecutor) unfollowAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, f.accountName)
+func (f *UnfollowExecutor) unfollowAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, f.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	if err := gtsClient.UnfollowAccount(accountID); err != nil {
+	if err := client.Call("GTSClient.UnfollowAccount", accountID, nil); err != nil {
 		return fmt.Errorf("unable to unfollow the account: %w", err)
 	}
 

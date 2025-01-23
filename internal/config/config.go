@@ -1,32 +1,43 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
 	configFileName string = "config.json"
 
-	defaultHTTPTimeout      int = 5
-	defaultHTTPMediaTimeout int = 30
-	defaultLineWrapMaxWidth int = 80
+	defaultHTTPTimeout       int = 5
+	defaultHTTPMediaTimeout  int = 30
+	defaultLineWrapMaxWidth  int = 80
+	defaultServerIdleTimeout int = 300
 )
 
 type Config struct {
 	CredentialsFile  string       `json:"credentialsFile"`
 	CacheDirectory   string       `json:"cacheDirectory"`
 	LineWrapMaxWidth int          `json:"lineWrapMaxWidth"`
-	HTTP             HTTPConfig   `json:"http"`
+	GTSClient        GTSClient    `json:"gtsClient"`
+	Server           Server       `json:"server"`
 	Integrations     Integrations `json:"integrations"`
 }
 
-type HTTPConfig struct {
+type GTSClient struct {
 	Timeout      int `json:"timeout"`
 	MediaTimeout int `json:"mediaTimeout"`
+}
+
+type Server struct {
+	SocketPath  string `json:"socketPath"`
+	IdleTimeout int    `json:"idleTimeout"`
 }
 
 type Integrations struct {
@@ -67,7 +78,7 @@ func FileExists(configDir string) (bool, error) {
 	return utilities.FileExists(path)
 }
 
-func SaveDefaultConfigToFile(configDir string) error {
+func SaveInitialConfigToFile(configDir string) error {
 	path, err := configPath(configDir)
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to your config file: %w", err)
@@ -79,14 +90,20 @@ func SaveDefaultConfigToFile(configDir string) error {
 	}
 	defer file.Close()
 
-	config := defaultConfig()
+	config := initialConfig()
 
 	credentialsFilePath, err := defaultCredentialsConfigFile(configDir)
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to the credentials file: %w", err)
 	}
 
+	socketPath, err := createSocketPath()
+	if err != nil {
+		return fmt.Errorf("unable to calculate the path to the socket file: %w", err)
+	}
+
 	config.CredentialsFile = credentialsFilePath
+	config.Server.SocketPath = socketPath
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "    ")
@@ -107,13 +124,41 @@ func configPath(configDir string) (string, error) {
 	return filepath.Join(configDir, configFileName), nil
 }
 
-func defaultConfig() Config {
+func createSocketPath() (string, error) {
+	runtimeDir := os.Getenv("XDG_RUNTIME_DIR")
+	if runtimeDir == "" {
+		return "", nil
+	}
+
+	randBytes := make([]byte, 4)
+
+	if _, err := rand.Read(randBytes); err != nil {
+		return "", fmt.Errorf("unable to create random bytes: %w", err)
+	}
+
+	path, err := utilities.AbsolutePath(filepath.Join(
+		runtimeDir,
+		info.ApplicationName,
+		"server."+hex.EncodeToString(randBytes)+".socket",
+	))
+	if err != nil {
+		return "", fmt.Errorf("unable to calculate the absolute path to the socket file: %w", err)
+	}
+
+	return path, nil
+}
+
+func initialConfig() Config {
 	return Config{
 		CredentialsFile: "",
 		CacheDirectory:  "",
-		HTTP: HTTPConfig{
+		GTSClient: GTSClient{
 			Timeout:      defaultHTTPTimeout,
 			MediaTimeout: defaultHTTPMediaTimeout,
+		},
+		Server: Server{
+			SocketPath:  "",
+			IdleTimeout: defaultServerIdleTimeout,
 		},
 		LineWrapMaxWidth: defaultLineWrapMaxWidth,
 		Integrations: Integrations{

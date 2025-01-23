@@ -57,6 +57,7 @@ func Execute() error {
 		"mute":     ExecuteMuteCommand,
 		"reject":   ExecuteRejectCommand,
 		"remove":   ExecuteRemoveCommand,
+		"server":   ExecuteServerCommand,
 		"show":     ExecuteShowCommand,
 		"switch":   ExecuteSwitchCommand,
 		"unblock":  ExecuteUnblockCommand,
@@ -283,12 +284,13 @@ type CreateExecutor struct {
 	attachmentIDs             internalFlag.StringSliceValue
 	content                   string
 	contentType               string
-	federated                 bool
+	localOnly                 bool
 	likeable                  bool
 	replyable                 bool
 	boostable                 bool
 	inReplyTo                 string
 	language                  string
+	listExclusive             bool
 	listRepliesPolicy         string
 	listTitle                 string
 	mediaDescriptions         internalFlag.StringSliceValue
@@ -331,12 +333,13 @@ func ExecuteCreateCommand(
 	exe.Var(&exe.attachmentIDs, "attachment-id", "The ID of the media attachment")
 	exe.StringVar(&exe.content, "content", "", "The content of the created resource")
 	exe.StringVar(&exe.contentType, "content-type", "plain", "The type that the contents should be parsed from (valid values are plain and markdown)")
-	exe.BoolVar(&exe.federated, "enable-federation", true, "Set to true to federate the status beyond the local timelines")
+	exe.BoolVar(&exe.localOnly, "local-only", false, "Set to true to NOT federate the status beyond the local timeline(s)")
 	exe.BoolVar(&exe.likeable, "enable-likes", true, "Set to true to allow the status to be liked (favourited)")
 	exe.BoolVar(&exe.replyable, "enable-replies", true, "Set to true to allow viewers to reply to the status")
 	exe.BoolVar(&exe.boostable, "enable-reposts", true, "Set to true to allow the status to be reposted (boosted) by others")
 	exe.StringVar(&exe.inReplyTo, "in-reply-to", "", "The ID of the status that you want to reply to")
 	exe.StringVar(&exe.language, "language", "", "The ISO 639 language code for this status")
+	exe.BoolVar(&exe.listExclusive, "list-exclusive", false, "Set to true to hide posts from members of this list from your home timeline")
 	exe.StringVar(&exe.listRepliesPolicy, "list-replies-policy", "list", "The replies policy of the list")
 	exe.StringVar(&exe.listTitle, "list-title", "", "The title of the list")
 	exe.Var(&exe.mediaDescriptions, "media-description", "The description of the media attachment which will be used as the alt-text")
@@ -883,6 +886,65 @@ func ExecuteRemoveCommand(
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
 		exe.printer.PrintFailure("(remove) execution error: " + err.Error() + ".")
+
+		return err
+	}
+
+	return nil
+}
+
+// ServerExecutor is the executor for the server command.
+type ServerExecutor struct {
+	*flag.FlagSet
+	printer       *printer.Printer
+	config        *config.Config
+	noIdleTimeout bool
+	configDir     string
+}
+
+// ExecuteServerCommand initialises and runs the executor for the server command.
+func ExecuteServerCommand(
+	configDir string,
+	noColor bool,
+	args []string,
+) error {
+	exe := ServerExecutor{
+		FlagSet:   flag.NewFlagSet("server", flag.ExitOnError),
+		printer:   nil,
+		config:    nil,
+		configDir: configDir,
+	}
+
+	exe.Usage = usage.ExecutorUsageFunc("server", "Runs Enbas in server mode", exe.FlagSet)
+
+	exe.BoolVar(&exe.noIdleTimeout, "no-idle-timeout", false, "Set to true to run the server without a timeout")
+
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(server) flag parsing error: " + err.Error() + ".")
+
+		return err
+	}
+
+	// Load the configuration from file.
+	exeConfig, err := config.NewConfigFromFile(exe.configDir)
+	if err != nil {
+		printer.NewPrinter(noColor, "", 0).PrintFailure("(server) unable to load configuration: " + err.Error() + ".")
+
+		return err
+	}
+	exe.config = exeConfig
+
+	// Create the printer for the executor.
+	exe.printer = printer.NewPrinter(
+		noColor,
+		exe.config.Integrations.Pager,
+		exe.config.LineWrapMaxWidth,
+	)
+
+	// Run the executor.
+	if err := exe.Execute(); err != nil {
+		exe.printer.PrintFailure("(server) execution error: " + err.Error() + ".")
 
 		return err
 	}

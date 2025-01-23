@@ -2,18 +2,19 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
 	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
 func getAccountID(
-	gtsClient *client.Client,
+	client *rpc.Client,
 	myAccount bool,
 	accountNames internalFlag.StringSliceValue,
 ) (string, error) {
-	account, err := getAccount(gtsClient, myAccount, accountNames)
+	account, err := getAccount(client, myAccount, accountNames)
 	if err != nil {
 		return "", fmt.Errorf("unable to get the account information: %w", err)
 	}
@@ -22,7 +23,7 @@ func getAccountID(
 }
 
 func getAccount(
-	gtsClient *client.Client,
+	client *rpc.Client,
 	myAccount bool,
 	accountNames internalFlag.StringSliceValue,
 ) (model.Account, error) {
@@ -33,12 +34,12 @@ func getAccount(
 
 	switch {
 	case myAccount:
-		account, err = getMyAccount(gtsClient)
+		account, err = getMyAccount(client)
 		if err != nil {
 			return account, fmt.Errorf("unable to get your account ID: %w", err)
 		}
 	case !accountNames.Empty():
-		account, err = getOtherAccount(gtsClient, accountNames)
+		account, err = getOtherAccount(client, accountNames)
 		if err != nil {
 			return account, fmt.Errorf("unable to get the account ID: %w", err)
 		}
@@ -49,16 +50,16 @@ func getAccount(
 	return account, nil
 }
 
-func getMyAccount(gtsClient *client.Client) (model.Account, error) {
-	account, err := gtsClient.VerifyCredentials()
-	if err != nil {
+func getMyAccount(client *rpc.Client) (model.Account, error) {
+	var account model.Account
+	if err := client.Call("GTSClient.VerifyCredentials", gtsclient.NoRPCArgs{}, &account); err != nil {
 		return model.Account{}, fmt.Errorf("unable to retrieve your account: %w", err)
 	}
 
 	return account, nil
 }
 
-func getOtherAccount(gtsClient *client.Client, accountNames internalFlag.StringSliceValue) (model.Account, error) {
+func getOtherAccount(client *rpc.Client, accountNames internalFlag.StringSliceValue) (model.Account, error) {
 	expectedNumAccountNames := 1
 	if !accountNames.ExpectedLength(expectedNumAccountNames) {
 		return model.Account{}, fmt.Errorf(
@@ -67,26 +68,57 @@ func getOtherAccount(gtsClient *client.Client, accountNames internalFlag.StringS
 		)
 	}
 
-	account, err := gtsClient.GetAccount(accountNames[0])
-	if err != nil {
+	var account model.Account
+	if err := client.Call("GTSClient.GetAccount", accountNames[0], &account); err != nil {
 		return model.Account{}, fmt.Errorf("unable to retrieve the account details: %w", err)
 	}
 
 	return account, nil
 }
 
-func getOtherAccounts(gtsClient *client.Client, accountNames internalFlag.StringSliceValue) ([]model.Account, error) {
+func getOtherAccounts(client *rpc.Client, accountNames internalFlag.StringSliceValue) ([]model.Account, error) {
 	numAccountNames := len(accountNames)
 	accounts := make([]model.Account, numAccountNames)
 
 	for ind := range numAccountNames {
-		var err error
+		var account model.Account
 
-		accounts[ind], err = gtsClient.GetAccount(accountNames[ind])
-		if err != nil {
-			return nil, fmt.Errorf("unable to retrieve the account information for %s: %w", accountNames[ind], err)
+		if err := client.Call("GTSClient.GetAccount", accountNames[ind], &account); err != nil {
+			return nil, fmt.Errorf(
+				"unable to retrieve the account information for %s: %w",
+				accountNames[ind],
+				err,
+			)
 		}
+
+		accounts[ind] = account
 	}
 
 	return accounts, nil
+}
+
+func getAccountsFromList(client *rpc.Client, listID string) (map[string]string, error) {
+	var acctList model.AccountList
+	if err := client.Call(
+		"GTSClient.GetAccountsFromList",
+		gtsclient.GetAccountsFromListArgs{
+			ListID: listID,
+			Limit:  0,
+		},
+		&acctList,
+	); err != nil {
+		return map[string]string{}, fmt.Errorf("unable to retrieve the accounts from the list: %w", err)
+	}
+
+	if len(acctList.Accounts) == 0 {
+		return map[string]string{}, nil
+	}
+
+	acctMap := make(map[string]string)
+
+	for i := range acctList.Accounts {
+		acctMap[acctList.Accounts[i].Acct] = acctList.Accounts[i].Username
+	}
+
+	return acctMap, nil
 }

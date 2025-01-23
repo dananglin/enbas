@@ -2,12 +2,14 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (m *UnmuteExecutor) Execute() error {
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: m.unmuteAccount,
 		resourceStatus:  m.unmuteStatus,
 	}
@@ -17,22 +19,23 @@ func (m *UnmuteExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: m.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(m.config.CredentialsFile)
+	client, err := server.Connect(m.config.Server, m.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (m *UnmuteExecutor) unmuteAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, m.accountName)
+func (m *UnmuteExecutor) unmuteAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, m.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	if err := gtsClient.UnmuteAccount(accountID); err != nil {
-		return fmt.Errorf("unable to unmute the account: %w", err)
+	if err := client.Call("GTSClient.UnmuteAccount", accountID, nil); err != nil {
+		return fmt.Errorf("error unmuting the account: %w", err)
 	}
 
 	m.printer.PrintSuccess("Successfully unmuted the account.")
@@ -40,7 +43,7 @@ func (m *UnmuteExecutor) unmuteAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
+func (m *UnmuteExecutor) unmuteStatus(client *rpc.Client) error {
 	if m.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -48,12 +51,12 @@ func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	status, err := gtsClient.GetStatus(m.statusID)
-	if err != nil {
+	var status model.Status
+	if err := client.Call("GTSClient.GetStatus", m.statusID, &status); err != nil {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -76,8 +79,8 @@ func (m *UnmuteExecutor) unmuteStatus(gtsClient *client.Client) error {
 		return Error{"unable to unmute the status because the status does not belong to you nor are you mentioned in it"}
 	}
 
-	if err := gtsClient.UnmuteStatus(m.statusID); err != nil {
-		return fmt.Errorf("unable to unmute the status: %w", err)
+	if err := client.Call("GTSClient.UnmuteStatus", m.statusID, nil); err != nil {
+		return fmt.Errorf("error unmuting the status: %w", err)
 	}
 
 	m.printer.PrintSuccess("Successfully unmuted the status.")

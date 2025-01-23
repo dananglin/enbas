@@ -2,12 +2,15 @@ package executor
 
 import (
 	"fmt"
+	"net/rpc"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/client"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
 func (m *MuteExecutor) Execute() error {
-	funcMap := map[string]func(*client.Client) error{
+	funcMap := map[string]func(*rpc.Client) error{
 		resourceAccount: m.muteAccount,
 		resourceStatus:  m.muteStatus,
 	}
@@ -17,27 +20,31 @@ func (m *MuteExecutor) Execute() error {
 		return UnsupportedTypeError{resourceType: m.resourceType}
 	}
 
-	gtsClient, err := client.NewClientFromFile(m.config.CredentialsFile)
+	client, err := server.Connect(m.config.Server, m.configDir)
 	if err != nil {
-		return fmt.Errorf("unable to create the GoToSocial client: %w", err)
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
+	defer client.Close()
 
-	return doFunc(gtsClient)
+	return doFunc(client)
 }
 
-func (m *MuteExecutor) muteAccount(gtsClient *client.Client) error {
-	accountID, err := getAccountID(gtsClient, false, m.accountName)
+func (m *MuteExecutor) muteAccount(client *rpc.Client) error {
+	accountID, err := getAccountID(client, false, m.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
 
-	form := client.MuteAccountForm{
-		Notifications: m.muteNotifications,
-		Duration:      int(m.muteDuration.Duration.Seconds()),
-	}
-
-	if err := gtsClient.MuteAccount(accountID, form); err != nil {
-		return fmt.Errorf("unable to mute the account: %w", err)
+	if err := client.Call(
+		"GTSClient.MuteAccount",
+		gtsclient.MuteAccountArgs{
+			AccountID:     accountID,
+			Notifications: m.muteNotifications,
+			Duration:      int(m.muteDuration.Duration.Seconds()),
+		},
+		nil,
+	); err != nil {
+		return fmt.Errorf("error muting the account: %w", err)
 	}
 
 	m.printer.PrintSuccess("Successfully muted the account.")
@@ -45,7 +52,7 @@ func (m *MuteExecutor) muteAccount(gtsClient *client.Client) error {
 	return nil
 }
 
-func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
+func (m *MuteExecutor) muteStatus(client *rpc.Client) error {
 	if m.statusID == "" {
 		return MissingIDError{
 			resource: resourceStatus,
@@ -53,12 +60,12 @@ func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
 		}
 	}
 
-	status, err := gtsClient.GetStatus(m.statusID)
-	if err != nil {
+	var status model.Status
+	if err := client.Call("GTSClient.GetStatus", m.statusID, &status); err != nil {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	myAccountID, err := getAccountID(gtsClient, true, nil)
+	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
@@ -81,8 +88,8 @@ func (m *MuteExecutor) muteStatus(gtsClient *client.Client) error {
 		return Error{"unable to mute the status because the status does not belong to you nor are you mentioned in it"}
 	}
 
-	if err := gtsClient.MuteStatus(m.statusID); err != nil {
-		return fmt.Errorf("unable to mute the status: %w", err)
+	if err := client.Call("GTSClient.MuteStatus", m.statusID, nil); err != nil {
+		return fmt.Errorf("error muting the status: %w", err)
 	}
 
 	m.printer.PrintSuccess("Successfully muted the status.")

@@ -32,9 +32,9 @@
       "type": "string",
       "description": "The type that the contents should be parsed from (valid values are plain and markdown)"
     },
-    "enable-federation": {
+    "local-only": {
       "type": "bool",
-      "description": "Set to true to federate the status beyond the local timelines"
+      "description": "Set to true to NOT federate the status beyond the local timeline(s)"
     },
     "enable-likes": {
       "type": "bool",
@@ -80,6 +80,10 @@
       "type": "int",
       "description": "Specify the limit of items to display"
     },
+    "list-exclusive": {
+      "type": "bool",
+      "description": "Set to true to hide posts from members of this list from your home timeline"
+    },
     "list-id": {
       "type": "string",
       "description": "The ID of the list in question"
@@ -115,6 +119,10 @@
     "my-account": {
       "type": "bool",
       "description": "Set to true to specify your account"
+    },
+    "no-idle-timeout": {
+      "type": "bool",
+      "description": "Set to true to run the server without a timeout"
     },
     "notify": {
       "type": "bool",
@@ -257,12 +265,13 @@
         { "flag": "attachment-id", "fieldName": "attachmentIDs" },
         { "flag": "content", "default": "" },
         { "flag": "content-type", "default": "plain" },
-        { "flag": "enable-federation", "fieldName": "federated", "default": "true" },
+        { "flag": "local-only", "default": "false" },
         { "flag": "enable-likes", "fieldName": "likeable", "default": "true" },
         { "flag": "enable-replies", "fieldName": "replyable", "default": "true" },
         { "flag": "enable-reposts", "fieldName": "boostable", "default": "true" },
         { "flag": "in-reply-to", "default": "" },
         { "flag": "language", "default": "" },
+        { "flag": "list-exclusive", "default": "false" },
         { "flag": "list-replies-policy", "default": "list" },
         { "flag": "list-title", "default": "" },
         { "flag": "media-description", "fieldName": "mediaDescriptions" },
@@ -278,6 +287,17 @@
         { "flag": "visibility", "default": "" }
       ],
       "summary": "Creates a specific resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "server": {
+      "additionalFields": [
+        { "name": "configDir", "type": "string"}
+      ],
+      "flags": [
+        { "flag": "no-idle-timeout", "default": "false"}
+      ],
+      "summary": "Runs Enbas in server mode",
       "useConfig": true,
       "usePrinter": true
     },
