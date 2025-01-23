@@ -9,22 +9,25 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
 const (
-	app    = "enbas"
-	binary = "./__build/" + app
-
+	projectName          = "enbas"
+	defaultAppName       = projectName
 	defaultInstallPrefix = "/usr/local"
-	envInstallPrefix     = "ENBAS_INSTALL_PREFIX"
-	envTestVerbose       = "ENBAS_TEST_VERBOSE"
-	envTestCover         = "ENBAS_TEST_COVER"
-	envBuildRebuildAll   = "ENBAS_BUILD_REBUILD_ALL"
-	envBuildVerbose      = "ENBAS_BUILD_VERBOSE"
-	envFailOnFormatting  = "ENBAS_FAIL_ON_FORMATTING"
+
+	envInstallPrefix    = "ENBAS_INSTALL_PREFIX"
+	envTestVerbose      = "ENBAS_TEST_VERBOSE"
+	envTestCover        = "ENBAS_TEST_COVER"
+	envBuildRebuildAll  = "ENBAS_BUILD_REBUILD_ALL"
+	envBuildVerbose     = "ENBAS_BUILD_VERBOSE"
+	envFailOnFormatting = "ENBAS_FAIL_ON_FORMATTING"
+	envAppName          = "ENBAS_APP_NAME"
+	envAppVersion       = "ENBAS_APP_VERSION"
 )
 
 var Default = Build
@@ -99,10 +102,12 @@ func Govet() error {
 // To rebuild packages that are already up-to-date set ENBAS_BUILD_REBUILD_ALL=1
 // To enable verbose mode set ENBAS_BUILD_VERBOSE=1
 func Build() error {
-	main := "./cmd/" + app
+	fmt.Println("Building the binary...")
+
+	main := "./cmd/" + projectName
 	flags := ldflags()
 	build := sh.RunCmd("go", "build")
-	args := []string{"-ldflags=" + flags, "-o", binary}
+	args := []string{"-ldflags=" + flags, "-o", binary()}
 
 	if os.Getenv(envBuildRebuildAll) == "1" {
 		args = append(args, "-a")
@@ -114,7 +119,11 @@ func Build() error {
 
 	args = append(args, main)
 
-	return build(args...)
+	if err := build(args...); err != nil {
+		return fmt.Errorf("error building the binary: %w", err)
+	}
+
+	return nil
 }
 
 // Install install the executable.
@@ -122,6 +131,8 @@ func Install() error {
 	mg.Deps(Build)
 
 	installPrefix := os.Getenv(envInstallPrefix)
+	app := appName()
+	binary := binary()
 
 	if installPrefix == "" {
 		installPrefix = defaultInstallPrefix
@@ -129,18 +140,22 @@ func Install() error {
 
 	dest := filepath.Join(installPrefix, "bin", app)
 
+	fmt.Println("Installing the binary to", dest)
+
 	if err := sh.Copy(dest, binary); err != nil {
 		return fmt.Errorf("unable to install %s; %w", dest, err)
 	}
 
-	fmt.Printf("%s successfully installed to %s\n", app, dest)
+	fmt.Printf("Successfully installed %s to %s\n", projectName, dest)
 
 	return nil
 }
 
 // Clean clean the workspace.
 func Clean() error {
-	if err := sh.Rm(binary); err != nil {
+	fmt.Println("Cleaning the workspace...")
+
+	if err := sh.Rm(binary()); err != nil {
 		return err
 	}
 
@@ -148,36 +163,53 @@ func Clean() error {
 		return err
 	}
 
+	fmt.Println("Workspace cleaned.")
+
 	return nil
 }
 
 // ldflags returns the build flags.
 func ldflags() string {
-	versionPackage := "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
-	binaryVersionVar := versionPackage + "." + "BinaryVersion"
-	gitCommitVar := versionPackage + "." + "GitCommit"
-	goVersionVar := versionPackage + "." + "GoVersion"
-	buildTimeVar := versionPackage + "." + "BuildTime"
-	ldflagsfmt := "-s -w -X %s=%s -X %s=%s -X %s=%s -X %s=%s"
-	buildTime := time.Now().UTC().Format(time.RFC3339)
+	var (
+		infoPackage              = "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
+		binaryVersionVar         = infoPackage + "." + "BinaryVersion"
+		gitCommitVar             = infoPackage + "." + "GitCommit"
+		goVersionVar             = infoPackage + "." + "GoVersion"
+		buildTimeVar             = infoPackage + "." + "BuildTime"
+		applicationNameVar       = infoPackage + "." + "ApplicationName"
+		applicationTitledNameVar = infoPackage + "." + "ApplicationTitledName"
+
+		ldflagsfmt = "-s -w -X %s=%s -X %s=%s -X %s=%s -X %s=%s -X %s=%s -X %s=%s"
+		buildTime  = time.Now().UTC().Format(time.RFC3339)
+	)
 
 	return fmt.Sprintf(
 		ldflagsfmt,
-		binaryVersionVar, version(),
+		binaryVersionVar, binaryVersion(),
 		gitCommitVar, gitCommit(),
 		goVersionVar, runtime.Version(),
 		buildTimeVar, buildTime,
+		applicationNameVar, appName(),
+		applicationTitledNameVar, appTitledName(),
 	)
 }
 
-// version returns the latest git tag using git describe.
-func version() string {
-	version, err := sh.Output("git", "describe", "--tags")
-	if err != nil {
-		version = "N/A"
+// binaryVersion returns the version of the binary.
+// If ENBAS_APP_VERSION is set, the value of that is returned, otherwise
+// the latest git tag (using git describe) is returned.
+func binaryVersion() string {
+	ver := os.Getenv(envAppVersion)
+	if ver != "" {
+		return ver
 	}
 
-	return version
+	ver, err := sh.Output("git", "describe", "--tags")
+	if err != nil {
+		fmt.Printf("WARNING: error getting the binary version: %v.\n", err)
+		return "N/A"
+	}
+
+	return ver
 }
 
 // gitCommit returns the current git commit
@@ -188,4 +220,28 @@ func gitCommit() string {
 	}
 
 	return commit
+}
+
+// appName returns the application's name.
+// The value of ENBAS_APP_NAME is return if the environment variable is set
+// otherwise the default name is returned.
+func appName() string {
+	appName := os.Getenv(envAppName)
+
+	if appName == "" {
+		return defaultAppName
+	}
+
+	return appName
+}
+
+func binary() string {
+	return filepath.Join("./__build", appName())
+}
+
+func appTitledName() string {
+	runes := []rune(appName())
+	runes[0] = unicode.ToUpper(runes[0])
+
+	return string(runes)
 }

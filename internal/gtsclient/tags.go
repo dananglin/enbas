@@ -17,7 +17,7 @@ func (g *GTSClient) GetFollowedTags(limit int, list *model.TagList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + fmt.Sprintf("%s?limit=%d", followedTagsPath, limit),
+		url:         g.authentication.Instance + fmt.Sprintf("%s?limit=%d", followedTagsPath, limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &tags,
@@ -41,7 +41,7 @@ func (g *GTSClient) GetFollowedTags(limit int, list *model.TagList) error {
 func (g *GTSClient) GetTag(name string, tag *model.Tag) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + baseTagsPath + "/" + name,
+		url:         g.authentication.Instance + baseTagsPath + "/" + name,
 		contentType: "",
 		requestBody: nil,
 		output:      tag,
@@ -60,7 +60,7 @@ func (g *GTSClient) GetTag(name string, tag *model.Tag) error {
 func (g *GTSClient) FollowTag(name string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseTagsPath + "/" + name + "/follow",
+		url:         g.authentication.Instance + baseTagsPath + "/" + name + "/follow",
 		contentType: "",
 		requestBody: nil,
 		output:      nil,
@@ -80,7 +80,7 @@ func (g *GTSClient) FollowTag(name string, _ *NoRPCResults) error {
 func (g *GTSClient) UnfollowTag(name string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseTagsPath + "/" + name + "/unfollow",
+		url:         g.authentication.Instance + baseTagsPath + "/" + name + "/unfollow",
 		contentType: "",
 		requestBody: nil,
 		output:      nil,

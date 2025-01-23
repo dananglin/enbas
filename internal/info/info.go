@@ -1,13 +1,13 @@
 package info
 
-const (
-	ApplicationName    string = "enbas"
-	ApplicationWebsite string = "https://codeflow.dananglin.me.uk/apollo/enbas"
-)
+const ApplicationWebsite string = "https://dananglin.me.uk/projects/enbas/"
 
 var (
-	BinaryVersion string //nolint:gochecknoglobals
-	BuildTime     string //nolint:gochecknoglobals
-	GoVersion     string //nolint:gochecknoglobals
-	GitCommit     string //nolint:gochecknoglobals
+	ApplicationName       = "enbas"      //nolint:gochecknoglobals
+	ApplicationTitledName = "Enbas"      //nolint:gochecknoglobals
+	BinaryVersion         = "v0.3.0-dev" //nolint:gochecknoglobals
+
+	BuildTime string //nolint:gochecknoglobals
+	GoVersion string //nolint:gochecknoglobals
+	GitCommit string //nolint:gochecknoglobals
 )

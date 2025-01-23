@@ -35,7 +35,7 @@ func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
 
 	requestParams := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + "/api/v1/apps",
+		url:         g.authentication.Instance + "/api/v1/apps",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      &app,
@@ -45,8 +45,8 @@ func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
 		return fmt.Errorf("received an error after sending the registration request: %w", err)
 	}
 
-	g.Authentication.ClientID = app.ClientID
-	g.Authentication.ClientSecret = app.ClientSecret
+	g.authentication.ClientID = app.ClientID
+	g.authentication.ClientSecret = app.ClientSecret
 
 	return nil
 }
@@ -56,8 +56,8 @@ func (g *GTSClient) AuthCodeURL(_ NoRPCArgs, authCodeURL *string) error {
 
 	*authCodeURL = fmt.Sprintf(
 		authCodeURLFormat,
-		g.Authentication.Instance,
-		g.Authentication.ClientID,
+		g.authentication.Instance,
+		g.authentication.ClientID,
 		escapedRedirectURI,
 	)
 

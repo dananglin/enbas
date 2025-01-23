@@ -17,7 +17,7 @@ type requestParameters struct {
 }
 
 func (g *GTSClient) sendRequest(params requestParameters) error {
-	ctx, cancel := context.WithTimeout(context.Background(), g.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
 
 	request, err := http.NewRequestWithContext(ctx, params.httpMethod, params.url, params.requestBody)
@@ -30,13 +30,13 @@ func (g *GTSClient) sendRequest(params requestParameters) error {
 	}
 
 	request.Header.Set("Accept", applicationJSON)
-	request.Header.Set("User-Agent", userAgent)
+	request.Header.Set("User-Agent", g.userAgent)
 
-	if len(g.Authentication.AccessToken) > 0 {
-		request.Header.Set("Authorization", "Bearer "+g.Authentication.AccessToken)
+	if len(g.authentication.AccessToken) > 0 {
+		request.Header.Set("Authorization", "Bearer "+g.authentication.AccessToken)
 	}
 
-	response, err := g.HTTPClient.Do(request)
+	response, err := g.httpClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("received an error after sending the request: %w", err)
 	}

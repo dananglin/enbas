@@ -27,8 +27,8 @@ type tokenResponse struct {
 func (g *GTSClient) UpdateToken(code string, auth *config.Credentials) error {
 	tokenReq := tokenRequest{
 		RedirectURI:  redirectURI,
-		ClientID:     g.Authentication.ClientID,
-		ClientSecret: g.Authentication.ClientSecret,
+		ClientID:     g.authentication.ClientID,
+		ClientSecret: g.authentication.ClientSecret,
 		GrantType:    "authorization_code",
 		Code:         code,
 	}
@@ -39,7 +39,7 @@ func (g *GTSClient) UpdateToken(code string, auth *config.Credentials) error {
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.Authentication.Instance + "/oauth/token"
+	url := g.authentication.Instance + "/oauth/token"
 
 	var response tokenResponse
 
@@ -59,9 +59,9 @@ func (g *GTSClient) UpdateToken(code string, auth *config.Credentials) error {
 		return Error{"received an empty access token"}
 	}
 
-	g.Authentication.AccessToken = response.AccessToken
+	g.authentication.AccessToken = response.AccessToken
 
-	*auth = g.Authentication
+	*auth = g.authentication
 
 	return nil
 }

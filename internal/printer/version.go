@@ -9,14 +9,14 @@ import (
 
 func (p Printer) PrintVersion(showFullVersion bool) {
 	if !showFullVersion {
-		printToStdout("Enbas " + info.BinaryVersion + "\n")
+		printToStdout(info.ApplicationTitledName + " " + info.BinaryVersion + "\n")
 
 		return
 	}
 
 	var builder strings.Builder
 
-	builder.WriteString(p.headerFormat("Enbas") + "\n\n")
+	builder.WriteString(p.headerFormat(info.ApplicationTitledName) + "\n\n")
 
 	tableWriter := tabwriter.NewWriter(&builder, 0, 4, 1, ' ', 0)
 

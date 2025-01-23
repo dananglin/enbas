@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
 	applicationJSON   string = "application/json; charset=utf-8"
 	redirectURI       string = "urn:ietf:wg:oauth:2.0:oob"
-	userAgent         string = "Enbas/0.2.0"
 	authCodeURLFormat string = "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code"
 )
 
@@ -21,10 +21,11 @@ type (
 	NoRPCResults struct{}
 
 	GTSClient struct {
-		Authentication config.Credentials
-		HTTPClient     http.Client
-		Timeout        time.Duration
-		MediaTimeout   time.Duration
+		authentication config.Credentials
+		httpClient     http.Client
+		timeout        time.Duration
+		mediaTimeout   time.Duration
+		userAgent      string
 	}
 )
 
@@ -54,10 +55,11 @@ func NewGTSClient(cfg *config.Config) (*GTSClient, error) {
 	}
 
 	gtsClient := GTSClient{
-		Authentication: auth,
-		HTTPClient:     http.Client{},
-		Timeout:        time.Duration(cfg.GTSClient.Timeout) * time.Second,
-		MediaTimeout:   time.Duration(cfg.GTSClient.MediaTimeout) * time.Second,
+		authentication: auth,
+		httpClient:     http.Client{},
+		timeout:        time.Duration(cfg.GTSClient.Timeout) * time.Second,
+		mediaTimeout:   time.Duration(cfg.GTSClient.MediaTimeout) * time.Second,
+		userAgent:      info.ApplicationTitledName + "/" + info.BinaryVersion,
 	}
 
 	return &gtsClient, nil
@@ -79,7 +81,7 @@ func authFromFile(path string) (config.Credentials, error) {
 
 // UpdateAuthentication updates the authentication details for the GTSClient.
 func (g *GTSClient) UpdateAuthentication(auth config.Credentials, _ *NoRPCResults) error {
-	g.Authentication = auth
+	g.authentication = auth
 
 	return nil
 }

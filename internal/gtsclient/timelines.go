@@ -67,7 +67,7 @@ func (g *GTSClient) getTimeline(path string, timeline *model.StatusList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + path,
+		url:         g.authentication.Instance + path,
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,

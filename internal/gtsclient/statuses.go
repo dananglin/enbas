@@ -14,7 +14,7 @@ const baseStatusesPath string = "/api/v1/statuses"
 func (g *GTSClient) GetStatus(statusID string, status *model.Status) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID,
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
 		output:      status,
@@ -63,7 +63,7 @@ func (g *GTSClient) CreateStatus(form CreateStatusForm, status *model.Status) er
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath,
+		url:         g.authentication.Instance + baseStatusesPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      status,
@@ -86,7 +86,7 @@ func (g *GTSClient) GetBookmarks(limit int, bookmarks *model.StatusList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + path,
+		url:         g.authentication.Instance + path,
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
@@ -110,7 +110,7 @@ func (g *GTSClient) GetBookmarks(limit int, bookmarks *model.StatusList) error {
 func (g *GTSClient) AddStatusToBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID),
+		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -129,7 +129,7 @@ func (g *GTSClient) AddStatusToBookmarks(statusID string, _ *NoRPCResults) error
 func (g *GTSClient) RemoveStatusFromBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID),
+		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -148,7 +148,7 @@ func (g *GTSClient) RemoveStatusFromBookmarks(statusID string, _ *NoRPCResults) 
 func (g *GTSClient) LikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -167,7 +167,7 @@ func (g *GTSClient) LikeStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnlikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -193,7 +193,7 @@ func (g *GTSClient) GetLikedStatuses(args GetLikedStatusesArgs, liked *model.Sta
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", args.Limit),
+		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", args.Limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
@@ -217,7 +217,7 @@ func (g *GTSClient) GetLikedStatuses(args GetLikedStatusesArgs, liked *model.Sta
 func (g *GTSClient) ReblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -236,7 +236,7 @@ func (g *GTSClient) ReblogStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnreblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -255,7 +255,7 @@ func (g *GTSClient) UnreblogStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) MuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/mute",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/mute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -274,7 +274,7 @@ func (g *GTSClient) MuteStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnmuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute",
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -295,7 +295,7 @@ func (g *GTSClient) DeleteStatus(statusID string, text *string) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.Authentication.Instance + baseStatusesPath + "/" + statusID,
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
 		output:      &status,

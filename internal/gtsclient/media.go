@@ -21,7 +21,7 @@ const (
 func (g *GTSClient) GetMediaAttachment(mediaAttachmentID string, attachment *model.Attachment) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.Authentication.Instance + baseMediaPath + "/" + mediaAttachmentID,
+		url:         g.authentication.Instance + baseMediaPath + "/" + mediaAttachmentID,
 		requestBody: nil,
 		contentType: "",
 		output:      attachment,
@@ -102,7 +102,7 @@ func (g *GTSClient) CreateMediaAttachment(args CreateMediaAttachmentArgs, attach
 		return fmt.Errorf("unable to close the writer: %w", err)
 	}
 
-	url := g.Authentication.Instance + baseMediaPath
+	url := g.authentication.Instance + baseMediaPath
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
@@ -146,7 +146,7 @@ func (g *GTSClient) UpdateMediaAttachment(args UpdateMediaAttachmentArgs, update
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         g.Authentication.Instance + baseMediaPath + "/" + args.MediaAttachmentID,
+		url:         g.authentication.Instance + baseMediaPath + "/" + args.MediaAttachmentID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      updated,
@@ -168,7 +168,7 @@ type DownloadMediaArgs struct {
 }
 
 func (g *GTSClient) DownloadMedia(args DownloadMediaArgs, _ *NoRPCResults) error {
-	ctx, cancel := context.WithTimeout(context.Background(), g.MediaTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), g.mediaTimeout)
 	defer cancel()
 
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, args.URL, nil)
@@ -176,9 +176,9 @@ func (g *GTSClient) DownloadMedia(args DownloadMediaArgs, _ *NoRPCResults) error
 		return fmt.Errorf("unable to create the HTTP request: %w", err)
 	}
 
-	request.Header.Set("User-Agent", userAgent)
+	request.Header.Set("User-Agent", g.userAgent)
 
-	response, err := g.HTTPClient.Do(request)
+	response, err := g.httpClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("received an error after attempting the download: %w", err)
 	}
@@ -204,7 +204,7 @@ func (g *GTSClient) DownloadMedia(args DownloadMediaArgs, _ *NoRPCResults) error
 }
 
 func (g *GTSClient) GetInstanceURL(_ NoRPCArgs, url *string) error {
-	*url = g.Authentication.Instance
+	*url = g.authentication.Instance
 
 	return nil
 }
