@@ -4,13 +4,17 @@
       "type": "StringSliceValue",
       "description": "The name of the account"
     },
+    "all-audio": {
+      "type": "bool",
+      "description": "Set to true to play all audio files from the status"
+    },
     "all-images": {
       "type": "bool",
-      "description": "Set to true to show all images from a status"
+      "description": "Set to true to show all images from the status"
     },
     "all-videos": {
       "type": "bool",
-      "description": "Set to true to show all videos from a status"
+      "description": "Set to true to play all videos from the status"
     },
     "attachment-id": {
       "type": "StringSliceValue",
@@ -415,6 +419,7 @@
       ],
       "flags": [
         { "flag": "account-name" },
+        { "flag": "all-audio", "fieldName": "getAllAudio", "default": "false" },
         { "flag": "all-images", "fieldName": "getAllImages", "default": "false" },
         { "flag": "all-videos", "fieldName": "getAllVideos", "default": "false" },
         { "flag": "attachment-id", "fieldName": "attachmentIDs" },

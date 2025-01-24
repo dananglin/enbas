@@ -960,6 +960,7 @@ type ShowExecutor struct {
 	printer                 *printer.Printer
 	config                  *config.Config
 	accountName             internalFlag.StringSliceValue
+	getAllAudio             bool
 	getAllImages            bool
 	getAllVideos            bool
 	attachmentIDs           internalFlag.StringSliceValue
@@ -1001,8 +1002,9 @@ func ExecuteShowCommand(
 	exe.Usage = usage.ExecutorUsageFunc("show", "Shows details about a specified resource", exe.FlagSet)
 
 	exe.Var(&exe.accountName, "account-name", "The name of the account")
-	exe.BoolVar(&exe.getAllImages, "all-images", false, "Set to true to show all images from a status")
-	exe.BoolVar(&exe.getAllVideos, "all-videos", false, "Set to true to show all videos from a status")
+	exe.BoolVar(&exe.getAllAudio, "all-audio", false, "Set to true to play all audio files from the status")
+	exe.BoolVar(&exe.getAllImages, "all-images", false, "Set to true to show all images from the status")
+	exe.BoolVar(&exe.getAllVideos, "all-videos", false, "Set to true to play all videos from the status")
 	exe.Var(&exe.attachmentIDs, "attachment-id", "The ID of the media attachment")
 	exe.BoolVar(&exe.showInBrowser, "browser", false, "Set to true to view in the your favourite browser")
 	exe.BoolVar(&exe.excludeBoosts, "exclude-boosts", false, "Set to true to exclude statuses that are boosts of another status")

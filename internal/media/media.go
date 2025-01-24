@@ -14,6 +14,7 @@ import (
 const (
 	mediaTypeImage string = "image"
 	mediaTypeVideo string = "video"
+	mediaTypeAudio string = "audio"
 )
 
 type media struct {
@@ -72,11 +73,13 @@ func newMediaHashmap(cacheDir string, attachments []model.Attachment) map[string
 type Bundle struct {
 	images []media
 	videos []media
+	audio  []media
 }
 
 func NewBundle(
 	cacheDir string,
 	attachments []model.Attachment,
+	getAllAudio bool,
 	getAllImages bool,
 	getAllVideos bool,
 	attachmentIDs []string,
@@ -84,15 +87,17 @@ func NewBundle(
 	mediaHashmap := newMediaHashmap(cacheDir, attachments)
 	images := make([]media, 0)
 	videos := make([]media, 0)
+	audio := make([]media, 0)
 
-	if !getAllImages && !getAllVideos && len(attachmentIDs) == 0 {
+	if !getAllImages && !getAllVideos && !getAllAudio && len(attachmentIDs) == 0 {
 		return Bundle{
 			images: images,
 			videos: videos,
+			audio:  audio,
 		}
 	}
 
-	if getAllImages || getAllVideos {
+	if getAllImages || getAllVideos || getAllAudio {
 		if getAllImages {
 			for _, m := range mediaHashmap {
 				if m.mediaType == mediaTypeImage {
@@ -109,9 +114,18 @@ func NewBundle(
 			}
 		}
 
+		if getAllAudio {
+			for _, m := range mediaHashmap {
+				if m.mediaType == mediaTypeAudio {
+					audio = append(audio, m)
+				}
+			}
+		}
+
 		return Bundle{
 			images: images,
 			videos: videos,
+			audio:  audio,
 		}
 	}
 
@@ -126,12 +140,15 @@ func NewBundle(
 			images = append(images, obj)
 		case mediaTypeVideo:
 			videos = append(videos, obj)
+		case mediaTypeAudio:
+			audio = append(audio, obj)
 		}
 	}
 
 	return Bundle{
 		images: images,
 		videos: videos,
+		audio:  audio,
 	}
 }
 
@@ -145,6 +162,12 @@ func (m *Bundle) Download(client *rpc.Client) error {
 	for ind := range m.videos {
 		if err := m.videos[ind].download(client); err != nil {
 			return fmt.Errorf("received an error trying to download the video files: %w", err)
+		}
+	}
+
+	for ind := range m.audio {
+		if err := m.audio[ind].download(client); err != nil {
+			return fmt.Errorf("received an error trying to download the audio files: %w", err)
 		}
 	}
 
@@ -166,6 +189,16 @@ func (m *Bundle) VideoFiles() []string {
 
 	for ind := range m.videos {
 		filepaths[ind] = m.videos[ind].destination
+	}
+
+	return filepaths
+}
+
+func (m *Bundle) AudioFiles() []string {
+	filepaths := make([]string, len(m.audio))
+
+	for ind := range m.audio {
+		filepaths[ind] = m.audio[ind].destination
 	}
 
 	return filepaths

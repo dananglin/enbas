@@ -46,6 +46,7 @@ type Integrations struct {
 	Pager       string `json:"pager"`
 	ImageViewer string `json:"imageViewer"`
 	VideoPlayer string `json:"videoPlayer"`
+	AudioPlayer string `json:"audioPlayer"`
 }
 
 func NewConfigFromFile(configDir string) (*Config, error) {

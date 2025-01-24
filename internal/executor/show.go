@@ -531,6 +531,7 @@ func (s *ShowExecutor) showMediaFromStatus(client *rpc.Client) error {
 	mediaBundle := media.NewBundle(
 		cacheDir,
 		status.MediaAttachments,
+		s.getAllAudio,
 		s.getAllImages,
 		s.getAllVideos,
 		s.attachmentIDs,
@@ -551,6 +552,13 @@ func (s *ShowExecutor) showMediaFromStatus(client *rpc.Client) error {
 	if len(videoFiles) > 0 {
 		if err := utilities.OpenMedia(s.config.Integrations.VideoPlayer, videoFiles); err != nil {
 			return fmt.Errorf("unable to open the video player: %w", err)
+		}
+	}
+
+	audioFiles := mediaBundle.AudioFiles()
+	if len(audioFiles) > 0 {
+		if err := utilities.OpenMedia(s.config.Integrations.AudioPlayer, audioFiles); err != nil {
+			return fmt.Errorf("unable to open the audio player: %w", err)
 		}
 	}
 
