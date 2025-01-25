@@ -24,6 +24,10 @@
       "type": "bool",
       "description": "Set to true to add a poll when creating a status"
     },
+    "boosted-by": {
+      "type": "bool",
+      "description": "Set to true to see the accounts who boosted the status"
+    },
     "browser": {
       "type": "bool",
       "description": "Set to true to view in the your favourite browser"
@@ -35,10 +39,6 @@
     "content-type": {
       "type": "string",
       "description": "The type that the contents should be parsed from (valid values are plain and markdown)"
-    },
-    "local-only": {
-      "type": "bool",
-      "description": "Set to true to NOT federate the status beyond the local timeline(s)"
     },
     "enable-likes": {
       "type": "bool",
@@ -80,6 +80,10 @@
       "type": "string",
       "description": "The ISO 639 language code for this status"
     },
+    "liked-by": {
+      "type": "bool",
+      "description": "Set to true to see the accounts who liked (favourited) the status"
+    },
     "limit": {
       "type": "int",
       "description": "Specify the limit of items to display"
@@ -99,6 +103,10 @@
     "list-replies-policy": {
       "type": "string",
       "description": "The replies policy of the list"
+    },
+    "local-only": {
+      "type": "bool",
+      "description": "Set to true to NOT federate the status beyond the local timeline(s)"
     },
     "media-description": {
       "type": "StringSliceValue",
@@ -423,10 +431,12 @@
         { "flag": "all-images", "fieldName": "getAllImages", "default": "false" },
         { "flag": "all-videos", "fieldName": "getAllVideos", "default": "false" },
         { "flag": "attachment-id", "fieldName": "attachmentIDs" },
+        { "flag": "boosted-by", "default": "false" },
         { "flag": "browser", "fieldName": "showInBrowser", "default": "false" },
         { "flag": "exclude-boosts", "default": "false" },
         { "flag": "exclude-replies", "default": "false" },
         { "flag": "from", "fieldName": "fromResourceType", "default": "" },
+        { "flag": "liked-by", "default": "false" },
         { "flag": "limit", "default": "20" },
         { "flag": "list-id", "fieldName": "listID", "default": "" },
         { "flag": "my-account", "default": "false" },

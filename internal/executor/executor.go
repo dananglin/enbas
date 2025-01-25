@@ -964,10 +964,12 @@ type ShowExecutor struct {
 	getAllImages            bool
 	getAllVideos            bool
 	attachmentIDs           internalFlag.StringSliceValue
+	boostedBy               bool
 	showInBrowser           bool
 	excludeBoosts           bool
 	excludeReplies          bool
 	fromResourceType        string
+	likedBy                 bool
 	limit                   int
 	listID                  string
 	myAccount               bool
@@ -1006,10 +1008,12 @@ func ExecuteShowCommand(
 	exe.BoolVar(&exe.getAllImages, "all-images", false, "Set to true to show all images from the status")
 	exe.BoolVar(&exe.getAllVideos, "all-videos", false, "Set to true to play all videos from the status")
 	exe.Var(&exe.attachmentIDs, "attachment-id", "The ID of the media attachment")
+	exe.BoolVar(&exe.boostedBy, "boosted-by", false, "Set to true to see the accounts who boosted the status")
 	exe.BoolVar(&exe.showInBrowser, "browser", false, "Set to true to view in the your favourite browser")
 	exe.BoolVar(&exe.excludeBoosts, "exclude-boosts", false, "Set to true to exclude statuses that are boosts of another status")
 	exe.BoolVar(&exe.excludeReplies, "exclude-replies", false, "Set to true to exclude statuses that are a reply to another status")
 	exe.StringVar(&exe.fromResourceType, "from", "", "The resource type to action the target resource from (e.g. status)")
+	exe.BoolVar(&exe.likedBy, "liked-by", false, "Set to true to see the accounts who liked (favourited) the status")
 	exe.IntVar(&exe.limit, "limit", 20, "Specify the limit of items to display")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.BoolVar(&exe.myAccount, "my-account", false, "Set to true to specify your account")

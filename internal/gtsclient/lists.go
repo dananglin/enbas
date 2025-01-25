@@ -246,8 +246,9 @@ func (g *GTSClient) GetAccountsFromList(args GetAccountsFromListArgs, list *mode
 	}
 
 	*list = model.AccountList{
-		Type:     model.AccountListNormal,
-		Accounts: accounts,
+		Label:           "Accounts",
+		Accounts:        accounts,
+		BlockedAccounts: false,
 	}
 
 	return nil

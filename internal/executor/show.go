@@ -134,9 +134,14 @@ func (s *ShowExecutor) showStatus(client *rpc.Client) error {
 		}
 	}
 
-	var status model.Status
+	var (
+		status    model.Status
+		boostedBy model.AccountList
+		likedBy   model.AccountList
+	)
+
 	if err := client.Call("GTSClient.GetStatus", s.statusID, &status); err != nil {
-		return fmt.Errorf("unable to retrieve the status: %w", err)
+		return fmt.Errorf("error retrieving the status: %w", err)
 	}
 
 	if s.showInBrowser {
@@ -147,12 +152,38 @@ func (s *ShowExecutor) showStatus(client *rpc.Client) error {
 		return nil
 	}
 
+	boostedBy.Accounts = nil
+	likedBy.Accounts = nil
+
+	if s.boostedBy {
+		if err := client.Call("GTSClient.GetAccountsWhoRebloggedStatus", s.statusID, &boostedBy); err != nil {
+			return fmt.Errorf(
+				"error retrieving the list of accounts that boosted the status: %w",
+				err,
+			)
+		}
+	}
+
+	if s.likedBy {
+		if err := client.Call("GTSClient.GetAccountsWhoLikedStatus", s.statusID, &likedBy); err != nil {
+			return fmt.Errorf(
+				"error retrieving the list of accounts that liked the status: %w",
+				err,
+			)
+		}
+	}
+
 	myAccountID, err := getAccountID(client, true, nil)
 	if err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
-	s.printer.PrintStatus(status, myAccountID)
+	s.printer.PrintStatus(
+		status,
+		myAccountID,
+		boostedBy,
+		likedBy,
+	)
 
 	return nil
 }

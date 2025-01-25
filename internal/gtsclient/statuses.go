@@ -312,3 +312,57 @@ func (g *GTSClient) DeleteStatus(statusID string, text *string) error {
 
 	return nil
 }
+
+func (g *GTSClient) GetAccountsWhoLikedStatus(statusID string, list *model.AccountList) error {
+	var accounts []model.Account
+
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/favourited_by",
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"recevied an error after sending the request to retrieve the accounts that liked the status: %w",
+			err,
+		)
+	}
+
+	*list = model.AccountList{
+		Label:           "LIKED BY",
+		Accounts:        accounts,
+		BlockedAccounts: false,
+	}
+
+	return nil
+}
+
+func (g *GTSClient) GetAccountsWhoRebloggedStatus(statusID string, list *model.AccountList) error {
+	var accounts []model.Account
+
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/reblogged_by",
+		requestBody: nil,
+		contentType: "",
+		output:      &accounts,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to retrieve the accounts that reblogged the status: %w",
+			err,
+		)
+	}
+
+	*list = model.AccountList{
+		Label:           "BOOSTED BY",
+		Accounts:        accounts,
+		BlockedAccounts: false,
+	}
+
+	return nil
+}

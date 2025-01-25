@@ -74,18 +74,8 @@ type AccountRelationship struct {
 	ShowingReblogs      bool   `json:"showing_reblogs"`
 }
 
-type AccountListType int
-
-const (
-	AccountListFollowers AccountListType = iota
-	AccountListFollowing
-	AccountListBlockedAccount
-	AccountListFollowRequests
-	AccountListMuted
-	AccountListNormal
-)
-
 type AccountList struct {
-	Type     AccountListType
-	Accounts []Account
+	Label           string
+	Accounts        []Account
+	BlockedAccounts bool
 }

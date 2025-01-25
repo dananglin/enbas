@@ -109,36 +109,23 @@ func (p Printer) userPreferences(preferences model.Preferences) string {
 }
 
 func (p Printer) PrintAccountList(list model.AccountList) {
+	p.print("\n" + p.accountList(list) + "\n")
+}
+
+func (p Printer) accountList(list model.AccountList) string {
 	var builder strings.Builder
 
-	builder.WriteString("\n")
+	builder.WriteString(p.headerFormat(list.Label + ":"))
 
-	switch list.Type {
-	case model.AccountListFollowers:
-		builder.WriteString(p.headerFormat("Followed by:"))
-	case model.AccountListFollowing:
-		builder.WriteString(p.headerFormat("Following:"))
-	case model.AccountListBlockedAccount:
-		builder.WriteString(p.headerFormat("Blocked accounts:"))
-	case model.AccountListFollowRequests:
-		builder.WriteString(p.headerFormat("Accounts that have requested to follow you:"))
-	case model.AccountListMuted:
-		builder.WriteString(p.headerFormat("Muted accounts:"))
-	default:
-		builder.WriteString(p.headerFormat("Accounts:"))
-	}
-
-	if list.Type == model.AccountListBlockedAccount {
-		for ind := range list.Accounts {
-			builder.WriteString("\n" + symbolBullet + " " + list.Accounts[ind].Acct + " (" + list.Accounts[ind].ID + ")")
+	if list.BlockedAccounts {
+		for i := range list.Accounts {
+			builder.WriteString("\n" + symbolBullet + " " + list.Accounts[i].Acct + " (" + list.Accounts[i].ID + ")")
 		}
 	} else {
-		for ind := range list.Accounts {
-			builder.WriteString("\n" + symbolBullet + " " + p.fullDisplayNameFormat(list.Accounts[ind].DisplayName, list.Accounts[ind].Acct))
+		for i := range list.Accounts {
+			builder.WriteString("\n" + symbolBullet + " " + p.fullDisplayNameFormat(list.Accounts[i].DisplayName, list.Accounts[i].Acct))
 		}
 	}
 
-	builder.WriteString("\n")
-
-	p.print(builder.String())
+	return builder.String()
 }

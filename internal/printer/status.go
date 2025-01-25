@@ -8,7 +8,12 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (p Printer) PrintStatus(status model.Status, userAccountID string) {
+func (p Printer) PrintStatus(
+	status model.Status,
+	userAccountID string,
+	boostedBy model.AccountList,
+	likedBy model.AccountList,
+) {
 	var builder strings.Builder
 
 	// The account information
@@ -81,6 +86,17 @@ func (p Printer) PrintStatus(status model.Status, userAccountID string) {
 	// Status URL
 	builder.WriteString("\n\n" + p.headerFormat("URL:"))
 	builder.WriteString("\n" + status.URL)
+
+	// List of accounts that has boosted the status
+	if boostedBy.Accounts != nil {
+		builder.WriteString("\n\n" + p.accountList(boostedBy))
+	}
+
+	// List of accounts that have liked/starred the status
+	if likedBy.Accounts != nil {
+		builder.WriteString("\n\n" + p.accountList(likedBy))
+	}
+
 	builder.WriteString("\n\n")
 
 	p.print(builder.String())

@@ -124,7 +124,7 @@ func (c *CreateExecutor) createStatus(client *rpc.Client) error {
 				mediaFile   string
 				description string
 				focus       string
-				attachment model.Attachment
+				attachment  model.Attachment
 			)
 
 			mediaFile = c.mediaFiles[ind]
@@ -140,9 +140,9 @@ func (c *CreateExecutor) createStatus(client *rpc.Client) error {
 			if err := client.Call(
 				"GTSClient.CreateMediaAttachment",
 				gtsclient.CreateMediaAttachmentArgs{
-					Path: mediaFile,
+					Path:        mediaFile,
 					Description: description,
-					Focus: focus,
+					Focus:       focus,
 				},
 				&attachment,
 			); err != nil {
@@ -296,9 +296,9 @@ func (c *CreateExecutor) createMediaAttachment(client *rpc.Client) error {
 	if err := client.Call(
 		"GTSClient.CreateMediaAttachment",
 		gtsclient.CreateMediaAttachmentArgs{
-			Path: c.mediaFiles[0],
+			Path:        c.mediaFiles[0],
 			Description: description,
-			Focus: focus,
+			Focus:       focus,
 		},
 		&attachment,
 	); err != nil {

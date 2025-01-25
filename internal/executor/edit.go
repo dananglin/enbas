@@ -134,8 +134,8 @@ func (e *EditExecutor) editMediaAttachment(client *rpc.Client) error {
 		"GTSClient.UpdateMediaAttachment",
 		gtsclient.UpdateMediaAttachmentArgs{
 			MediaAttachmentID: attachment.ID,
-			Description: description,
-			Focus: focus,
+			Description:       description,
+			Focus:             focus,
 		},
 		&updatedAttachment,
 	); err != nil {

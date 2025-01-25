@@ -161,8 +161,9 @@ func (g *GTSClient) GetFollowers(args GetFollowersArgs, followers *model.Account
 	}
 
 	*followers = model.AccountList{
-		Type:     model.AccountListFollowers,
-		Accounts: accounts,
+		Label:           "Followed by",
+		Accounts:        accounts,
+		BlockedAccounts: false,
 	}
 
 	return nil
@@ -192,8 +193,9 @@ func (g *GTSClient) GetFollowing(args GetFollowingsArgs, following *model.Accoun
 	}
 
 	*following = model.AccountList{
-		Type:     model.AccountListFollowing,
-		Accounts: accounts,
+		Label:           "Following",
+		Accounts:        accounts,
+		BlockedAccounts: false,
 	}
 
 	return nil
@@ -250,8 +252,9 @@ func (g *GTSClient) GetBlockedAccounts(limit int, blocked *model.AccountList) er
 	}
 
 	*blocked = model.AccountList{
-		Type:     model.AccountListBlockedAccount,
-		Accounts: accounts,
+		Label:           "Blocked accounts",
+		Accounts:        accounts,
+		BlockedAccounts: true,
 	}
 
 	return nil
@@ -310,8 +313,9 @@ func (g *GTSClient) GetFollowRequests(limit int, requests *model.AccountList) er
 	}
 
 	*requests = model.AccountList{
-		Type:     model.AccountListFollowRequests,
-		Accounts: accounts,
+		Label:           "Accounts that have requested to follow you",
+		Accounts:        accounts,
+		BlockedAccounts: false,
 	}
 
 	return nil
@@ -368,8 +372,9 @@ func (g *GTSClient) GetMutedAccounts(limit int, muted *model.AccountList) error 
 	}
 
 	*muted = model.AccountList{
-		Type:     model.AccountListMuted,
-		Accounts: accounts,
+		Label:           "Muted accounts",
+		Accounts:        accounts,
+		BlockedAccounts: false,
 	}
 
 	return nil
