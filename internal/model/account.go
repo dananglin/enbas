@@ -57,6 +57,7 @@ type Field struct {
 }
 
 type AccountRelationship struct {
+	Print               bool   `json:"-"`
 	ID                  string `json:"id"`
 	PrivateNote         string `json:"note"`
 	BlockedBy           bool   `json:"blocked_by"`

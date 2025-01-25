@@ -9,9 +9,9 @@ import (
 
 func (p Printer) PrintAccount(
 	account model.Account,
-	relationship *model.AccountRelationship,
-	preferences *model.Preferences,
-	statuses *model.StatusList,
+	relationship model.AccountRelationship,
+	preferences model.Preferences,
+	statusList model.StatusList,
 	userAccountID string,
 ) {
 	var builder strings.Builder
@@ -39,16 +39,16 @@ func (p Printer) PrintAccount(
 	builder.WriteString("\n\n" + p.headerFormat("ACCOUNT URL:"))
 	builder.WriteString("\n" + account.URL)
 
-	if relationship != nil {
+	if relationship.Print {
 		builder.WriteString(p.accountRelationship(relationship))
 	}
 
-	if preferences != nil {
+	if preferences.Print {
 		builder.WriteString(p.userPreferences(preferences))
 	}
 
-	if statuses != nil {
-		builder.WriteString("\n\n" + p.statusList(*statuses, userAccountID))
+	if statusList.Statuses != nil {
+		builder.WriteString("\n\n" + p.statusList(statusList, userAccountID))
 	}
 
 	builder.WriteString("\n\n")
@@ -56,7 +56,7 @@ func (p Printer) PrintAccount(
 	p.print(builder.String())
 }
 
-func (p Printer) accountRelationship(relationship *model.AccountRelationship) string {
+func (p Printer) accountRelationship(relationship model.AccountRelationship) string {
 	var builder strings.Builder
 
 	builder.WriteString("\n\n" + p.headerFormat("YOUR RELATIONSHIP WITH THIS ACCOUNT:"))
@@ -91,7 +91,7 @@ func (p Printer) accountRelationship(relationship *model.AccountRelationship) st
 	return builder.String()
 }
 
-func (p Printer) userPreferences(preferences *model.Preferences) string {
+func (p Printer) userPreferences(preferences model.Preferences) string {
 	var builder strings.Builder
 
 	builder.WriteString("\n\n" + p.headerFormat("YOUR PREFERENCES:"))

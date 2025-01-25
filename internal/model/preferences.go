@@ -1,6 +1,7 @@
 package model
 
 type Preferences struct {
+	Print                    bool   `json:"-"`
 	PostingDefaultVisibility string `json:"posting:default:visibility"`
 	PostingDefaultSensitive  bool   `json:"posting:default:sensitive"`
 	PostingDefaultLanguage   string `json:"posting:default:language"`

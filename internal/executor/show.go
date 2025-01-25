@@ -76,32 +76,32 @@ func (s *ShowExecutor) showAccount(client *rpc.Client) error {
 	}
 
 	var (
-		relationship *model.AccountRelationship
-		preferences  *model.Preferences
-		statuses     *model.StatusList
+		relationship model.AccountRelationship
+		preferences  model.Preferences
+		statusList   model.StatusList
 		myAccountID  string
 	)
 
+	relationship.Print = false
+	preferences.Print = false
+	statusList.Statuses = nil
+
 	if !s.myAccount && !s.skipAccountRelationship {
-		var result model.AccountRelationship
-		if err := client.Call("GTSClient.GetAccountRelationship", account.ID, &result); err != nil {
+		if err := client.Call("GTSClient.GetAccountRelationship", account.ID, &relationship); err != nil {
 			return fmt.Errorf("unable to retrieve the relationship to this account: %w", err)
 		}
 
-		relationship = new(model.AccountRelationship)
-		*relationship = result
+		relationship.Print = true
 	}
 
 	if s.myAccount {
 		myAccountID = account.ID
 		if s.showUserPreferences {
-			var result model.Preferences
-			if err := client.Call("GTSClient.GetUserPreferences", gtsclient.NoRPCArgs{}, &result); err != nil {
+			if err := client.Call("GTSClient.GetUserPreferences", gtsclient.NoRPCArgs{}, &preferences); err != nil {
 				return fmt.Errorf("unable to retrieve the user preferences: %w", err)
 			}
 
-			preferences = new(model.Preferences)
-			*preferences = result
+			preferences.Print = true
 		}
 	}
 
@@ -116,16 +116,12 @@ func (s *ShowExecutor) showAccount(client *rpc.Client) error {
 			OnlyPublic:     s.onlyPublic,
 		}
 
-		var result model.StatusList
-		if err := client.Call("GTSClient.GetAccountStatuses", args, &result); err != nil {
+		if err := client.Call("GTSClient.GetAccountStatuses", args, &statusList); err != nil {
 			return fmt.Errorf("unable to retrieve the account's statuses: %w", err)
 		}
-
-		statuses = new(model.StatusList)
-		*statuses = result
 	}
 
-	s.printer.PrintAccount(account, relationship, preferences, statuses, myAccountID)
+	s.printer.PrintAccount(account, relationship, preferences, statusList, myAccountID)
 
 	return nil
 }
