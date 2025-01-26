@@ -26,6 +26,7 @@ const (
 	resourceStar            string = "star"
 	resourceStarred         string = "starred"
 	resourceTag             string = "tag"
+	resourceThread          string = "thread"
 	resourceTimeline        string = "timeline"
 	resourceVote            string = "vote"
 )

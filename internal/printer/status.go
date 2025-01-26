@@ -2,6 +2,7 @@ package printer
 
 import (
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -102,121 +103,135 @@ func (p Printer) PrintStatus(
 	p.print(builder.String())
 }
 
+// PrintStatusList prints a drawn list of statuses.
 func (p Printer) PrintStatusList(list model.StatusList, userAccountID string) {
 	p.print(p.statusList(list, userAccountID))
 }
 
+// statusList draws a list of 'cards' from a list of statuses.
 func (p Printer) statusList(list model.StatusList, userAccountID string) string {
 	var builder strings.Builder
 
 	builder.WriteString(p.headerFormat(list.Name) + "\n")
 
-	for _, status := range list.Statuses {
-		statusID := status.ID
-		statusOwnerID := status.Account.ID
-		createdAt := p.formatDateTime(status.CreatedAt)
-		boostedAt := ""
-		content := status.Content
-		poll := status.Poll
-		mediaAttachments := status.MediaAttachments
-		summary := status.SpoilerText
-
-		switch {
-		case status.Reblog != nil:
-			builder.WriteString("\n" + p.wrapLines(
-				p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
-					" boosted this status from "+
-					p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct)+
-					":",
-				0,
-			))
-
-			statusID = status.Reblog.ID
-			statusOwnerID = status.Reblog.Account.ID
-			createdAt = p.formatDateTime(status.Reblog.CreatedAt)
-			boostedAt = p.formatDateTime(status.CreatedAt)
-			content = status.Reblog.Content
-			poll = status.Reblog.Poll
-			mediaAttachments = status.Reblog.MediaAttachments
-			summary = status.Reblog.SpoilerText
-
-		case status.InReplyToID != "":
-			builder.WriteString("\n" + p.wrapLines(
-				p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
-					" posted in reply to "+
-					status.InReplyToID+
-					":",
-				0,
-			))
-		default:
-			builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct) + " posted:")
-		}
-
-		if summary != "" {
-			builder.WriteString("\n\n" + p.bold(p.wrapLines(summary, 0)))
-		}
-
-		builder.WriteString("\n" + p.convertHTMLToText(content, true))
-
-		if poll != nil {
-			pollOwner := false
-			if statusOwnerID == userAccountID {
-				pollOwner = true
-			}
-
-			builder.WriteString(p.pollDetails(*poll, pollOwner))
-		}
-
-		for _, media := range mediaAttachments {
-			builder.WriteString("\n\n" + symbolImage + " " + p.fieldFormat("Media attachment: ") + media.ID)
-			builder.WriteString("\n  " + p.fieldFormat("Media type: ") + media.Type + "\n")
-
-			description := "  " + p.fieldFormat("Description: ")
-
-			if media.Description == "" {
-				description += noMediaDescription
-			} else {
-				description += media.Description
-			}
-
-			builder.WriteString(p.wrapLines(description, 2))
-		}
-
-		boosted := symbolBoosted
-		if status.Reblogged {
-			boosted = p.theme.boldyellow + symbolBoosted + p.theme.reset
-		}
-
-		liked := symbolNotLiked
-		if status.Favourited {
-			liked = p.theme.boldyellow + symbolLiked + p.theme.reset
-		}
-
-		bookmarked := symbolNotBookmarked
-		if status.Bookmarked {
-			bookmarked = p.theme.boldyellow + symbolBookmarked + p.theme.reset
-		}
-
-		builder.WriteString("\n\n" + boosted + " " + p.fieldFormat("boosted: ") + strconv.FormatBool(status.Reblogged))
-		builder.WriteString("\n" + liked + " " + p.fieldFormat("liked: ") + strconv.FormatBool(status.Favourited))
-		builder.WriteString("\n" + bookmarked + " " + p.fieldFormat("bookmarked: ") + strconv.FormatBool(status.Bookmarked))
-
-		builder.WriteString(
-			"\n\n" +
-				p.fieldFormat("Status ID: ") + statusID +
-				"\n" + p.fieldFormat("Created at: ") + createdAt,
-		)
-
-		if boostedAt != "" {
-			builder.WriteString("\n" + p.fieldFormat("Boosted at: ") + boostedAt)
-		}
-
-		builder.WriteString("\n" + p.statusSeparator + "\n")
+	for _, status := range slices.All(list.Statuses) {
+		builder.WriteString(p.statusCard(status, userAccountID))
 	}
 
 	return builder.String()
 }
 
+// statusCard draws a 'card' from a single service.
+func (p Printer) statusCard(status model.Status, userAccountID string) string {
+	var builder strings.Builder
+
+	statusID := status.ID
+	statusOwnerID := status.Account.ID
+	createdAt := p.formatDateTime(status.CreatedAt)
+	boostedAt := ""
+	content := status.Content
+	poll := status.Poll
+	mediaAttachments := status.MediaAttachments
+	summary := status.SpoilerText
+
+	switch {
+	case status.Reblog != nil:
+		builder.WriteString("\n" + p.wrapLines(
+			p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
+				" boosted this status from "+
+				p.fullDisplayNameFormat(status.Reblog.Account.DisplayName, status.Reblog.Account.Acct)+
+				":",
+			0,
+		))
+
+		statusID = status.Reblog.ID
+		statusOwnerID = status.Reblog.Account.ID
+		createdAt = p.formatDateTime(status.Reblog.CreatedAt)
+		boostedAt = p.formatDateTime(status.CreatedAt)
+		content = status.Reblog.Content
+		poll = status.Reblog.Poll
+		mediaAttachments = status.Reblog.MediaAttachments
+		summary = status.Reblog.SpoilerText
+
+	case status.InReplyToID != "":
+		builder.WriteString("\n" + p.wrapLines(
+			p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct)+
+				" posted in reply to "+
+				status.InReplyToID+
+				":",
+			0,
+		))
+	default:
+		builder.WriteString("\n" + p.fullDisplayNameFormat(status.Account.DisplayName, status.Account.Acct) + " posted:")
+	}
+
+	if summary != "" {
+		builder.WriteString("\n\n" + p.bold(p.wrapLines(summary, 0)))
+	}
+
+	builder.WriteString("\n" + p.convertHTMLToText(content, true))
+
+	// draw the poll if it exists
+	if poll != nil {
+		pollOwner := false
+		if statusOwnerID == userAccountID {
+			pollOwner = true
+		}
+
+		builder.WriteString(p.pollDetails(*poll, pollOwner))
+	}
+
+	// draw the media attachments
+	for _, media := range mediaAttachments {
+		builder.WriteString("\n\n" + symbolImage + " " + p.fieldFormat("Media attachment: ") + media.ID)
+		builder.WriteString("\n  " + p.fieldFormat("Media type: ") + media.Type + "\n")
+
+		description := "  " + p.fieldFormat("Description: ")
+
+		if media.Description == "" {
+			description += noMediaDescription
+		} else {
+			description += media.Description
+		}
+
+		builder.WriteString(p.wrapLines(description, 2))
+	}
+
+	boosted := symbolBoosted
+	if status.Reblogged {
+		boosted = p.theme.boldyellow + symbolBoosted + p.theme.reset
+	}
+
+	liked := symbolNotLiked
+	if status.Favourited {
+		liked = p.theme.boldyellow + symbolLiked + p.theme.reset
+	}
+
+	bookmarked := symbolNotBookmarked
+	if status.Bookmarked {
+		bookmarked = p.theme.boldyellow + symbolBookmarked + p.theme.reset
+	}
+
+	builder.WriteString("\n\n" + boosted + " " + p.fieldFormat("boosted: ") + strconv.FormatBool(status.Reblogged))
+	builder.WriteString("\n" + liked + " " + p.fieldFormat("liked: ") + strconv.FormatBool(status.Favourited))
+	builder.WriteString("\n" + bookmarked + " " + p.fieldFormat("bookmarked: ") + strconv.FormatBool(status.Bookmarked))
+
+	builder.WriteString(
+		"\n\n" +
+			p.fieldFormat("Status ID: ") + statusID +
+			"\n" + p.fieldFormat("Created at: ") + createdAt,
+	)
+
+	if boostedAt != "" {
+		builder.WriteString("\n" + p.fieldFormat("Boosted at: ") + boostedAt)
+	}
+
+	builder.WriteString("\n" + p.statusSeparator + "\n")
+
+	return builder.String()
+}
+
+// pollDetails draws the details of the poll.
 func (p Printer) pollDetails(poll model.Poll, owner bool) string {
 	var builder strings.Builder
 
@@ -268,6 +283,7 @@ func (p Printer) pollDetails(poll model.Poll, owner bool) string {
 	return builder.String()
 }
 
+// pollMeter draws the poll meter.
 func (p Printer) pollMeter(votage float64) string {
 	numVoteBlocks := int(math.Floor(float64(p.lineWrapCharacterLimit) * votage))
 	numBackgroundBlocks := p.lineWrapCharacterLimit - numVoteBlocks

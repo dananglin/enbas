@@ -34,6 +34,7 @@ func (s *ShowExecutor) Execute() error {
 		resourceMediaAttachment: s.showMediaAttachment,
 		resourceFollowedTags:    s.showFollowedTags,
 		resourceTag:             s.showTag,
+		resourceThread:          s.showThread,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -618,6 +619,54 @@ func (s *ShowExecutor) showFollowedTags(client *rpc.Client) error {
 	} else {
 		s.printer.PrintInfo("This account is not following any tags.\n")
 	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showThread(client *rpc.Client) error {
+	if s.fromResourceType == "" {
+		return FlagNotSetError{flagText: flagFrom}
+	}
+
+	funcMap := map[string]func(*rpc.Client) error{
+		resourceStatus: s.showThreadFromStatus,
+	}
+
+	doFunc, ok := funcMap[s.fromResourceType]
+	if !ok {
+		return UnsupportedShowOperationError{
+			resourceType:         s.resourceType,
+			showFromResourceType: s.fromResourceType,
+		}
+	}
+
+	return doFunc(client)
+}
+
+func (s *ShowExecutor) showThreadFromStatus(client *rpc.Client) error {
+	if s.statusID == "" {
+		return MissingIDError{
+			resource: resourceStatus,
+			action:   "view the media from",
+		}
+	}
+
+	myAccountID, err := getAccountID(client, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	var thread model.Thread
+	if err := client.Call("GTSClient.GetThread", s.statusID, &thread); err != nil {
+		return fmt.Errorf("error retrieving the thread: %w", err)
+	}
+
+	if err := client.Call("GTSClient.GetStatus", s.statusID, &thread.Context); err != nil {
+		return fmt.Errorf("error retrieving the status in context: %w", err)
+	}
+
+	// Print the thread
+	s.printer.PrintThread(thread, myAccountID)
 
 	return nil
 }

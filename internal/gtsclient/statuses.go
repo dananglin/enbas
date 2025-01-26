@@ -366,3 +366,41 @@ func (g *GTSClient) GetAccountsWhoRebloggedStatus(statusID string, list *model.A
 
 	return nil
 }
+
+func (g *GTSClient) GetThread(statusID string, thread *model.Thread) error {
+	obj := struct {
+		Ancestors   []model.Status `json:"ancestors"`
+		Descendants []model.Status `json:"descendants"`
+	}{
+		Ancestors:   nil,
+		Descendants: nil,
+	}
+
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/context",
+		requestBody: nil,
+		contentType: "",
+		output:      &obj,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to retrieve the status thread: %w",
+			err,
+		)
+	}
+
+	*thread = model.Thread{
+		Ancestors: model.StatusList{
+			Name:     "Ancestors",
+			Statuses: obj.Ancestors,
+		},
+		Descendants: model.StatusList{
+			Name:     "Descendants",
+			Statuses: obj.Descendants,
+		},
+	}
+
+	return nil
+}
