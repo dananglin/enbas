@@ -599,7 +599,7 @@ enbas add --type vote --to status --status-id 01J55XVV2MM6MKQ7QHFBAVAE8R --vote 
 |------|------|----------|-------------|---------|
 | `type` | string | true | The resource you want to add.<br>Here this should be `vote`. | |
 | `to` | string | true | The resource you want to add the vote to.<br>Here this should be `status`. | |
-| `status-id` | string | true | The ID of the poll you want to add the votes to. | |
+| `status-id` | string | true | The ID of the status you want to add the votes to. | |
 | `vote` | int | true | The ID of the option that you want to vote for.<br>You can use this flag multiple times to vote for more than one option if the poll allows multiple choices. | |
 
 ## Polls
@@ -615,6 +615,21 @@ You can view a poll within a [status](#view-a-status) or within a [timeline](#vi
 ### Vote in a poll
 
 See [Vote in a poll within a status](#vote-in-a-poll-within-a-status)
+
+## Threads
+
+### View a thread from a status
+
+View a thread around a specified status.
+
+```
+enbas show --type thread --from status --status-id 01J55XVV2MM6MKQ7QHFBAVAE8R
+
+```
+| flag | type | required | description | default |
+|------|------|----------|-------------|---------|
+| `type` | string | true | The resource you want to view.<br>Here this should be `thread`. | |
+| `status-id` | string | true | The ID of the status to view the thread around. | |
 
 ## Lists
 
