@@ -9,13 +9,16 @@ import (
 func (p Printer) PrintThread(thread model.Thread, userAccountID string) {
 	var builder strings.Builder
 
-	builder.WriteString(p.statusList(thread.Ancestors, userAccountID))
+	if len(thread.Ancestors.Statuses) > 0 {
+		builder.WriteString(p.statusList(thread.Ancestors, userAccountID))
+	}
 
 	builder.WriteString(p.headerFormat("Context") + "\n")
-
 	builder.WriteString(p.statusCard(thread.Context, userAccountID))
 
-	builder.WriteString(p.statusList(thread.Descendants, userAccountID))
+	if len(thread.Descendants.Statuses) > 0 {
+		builder.WriteString(p.statusList(thread.Descendants, userAccountID))
+	}
 
 	p.print(builder.String())
 }
