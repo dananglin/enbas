@@ -142,14 +142,6 @@ func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
 	return builder.String()
 }
 
-func (p Printer) formatDate(date time.Time) string {
-	return date.Local().Format(dateFormat) //nolint:gosmopolitan
-}
-
-func (p Printer) formatDateTime(date time.Time) string {
-	return date.Local().Format(dateTimeFormat) //nolint:gosmopolitan
-}
-
 func (p Printer) print(text string) {
 	if p.pager == "" {
 		printToStdout(text)
@@ -159,32 +151,47 @@ func (p Printer) print(text string) {
 
 	cmdSplit := strings.Split(p.pager, " ")
 
-	pager := new(exec.Cmd)
-
-	if len(cmdSplit) == 1 {
-		pager = exec.Command(cmdSplit[0]) // #nosec G204 -- External command call defined in user's configuration file.
-	} else {
-		pager = exec.Command(cmdSplit[0], cmdSplit[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
-	}
-
-	pipe, err := pager.StdinPipe()
+	binary, err := exec.LookPath(cmdSplit[0])
 	if err != nil {
 		printToStdout(text)
 
 		return
 	}
 
+	var pager *exec.Cmd
+
+	if len(cmdSplit) == 1 {
+		pager = exec.Command(binary) // #nosec G204 -- External command call defined in user's configuration file.
+	} else {
+		pager = exec.Command(binary, cmdSplit[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
+	}
+
+	// Write the text data to the pipe.
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		printToStdout(text)
+
+		return
+	}
+	defer reader.Close()
+
+	if _, err = writer.WriteString(text); err != nil {
+		printToStdout(text)
+
+		return
+	}
+
+	if err := writer.Close(); err != nil {
+		printToStdout(text)
+
+		return
+	}
+
+	// Pipe the text data to the pager.
+	pager.Stdin = reader
 	pager.Stdout = os.Stdout
-	pager.Stderr = os.Stderr
 
-	_ = pager.Start()
-
-	defer func() {
-		_ = pipe.Close()
-		_ = pager.Wait()
-	}()
-
-	_, _ = pipe.Write([]byte(text))
+	_ = pager.Run()
 }
 
 func printToStdout(text string) {
@@ -193,4 +200,12 @@ func printToStdout(text string) {
 
 func printToStderr(text string) {
 	_, _ = os.Stderr.WriteString(text)
+}
+
+func formatDate(date time.Time) string {
+	return date.Local().Format(dateFormat) //nolint:gosmopolitan
+}
+
+func formatDateTime(date time.Time) string {
+	return date.Local().Format(dateTimeFormat) //nolint:gosmopolitan
 }

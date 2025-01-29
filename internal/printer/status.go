@@ -65,7 +65,7 @@ func (p Printer) PrintStatus(
 
 	// Status creation time
 	builder.WriteString("\n\n" + p.headerFormat("CREATED AT:"))
-	builder.WriteString("\n" + p.formatDateTime(status.CreatedAt))
+	builder.WriteString("\n" + formatDateTime(status.CreatedAt))
 
 	// Status stats
 	builder.WriteString("\n\n" + p.headerFormat("STATS:"))
@@ -127,7 +127,7 @@ func (p Printer) statusCard(status model.Status, userAccountID string) string {
 
 	statusID := status.ID
 	statusOwnerID := status.Account.ID
-	createdAt := p.formatDateTime(status.CreatedAt)
+	createdAt := formatDateTime(status.CreatedAt)
 	boostedAt := ""
 	content := status.Content
 	poll := status.Poll
@@ -146,8 +146,8 @@ func (p Printer) statusCard(status model.Status, userAccountID string) string {
 
 		statusID = status.Reblog.ID
 		statusOwnerID = status.Reblog.Account.ID
-		createdAt = p.formatDateTime(status.Reblog.CreatedAt)
-		boostedAt = p.formatDateTime(status.CreatedAt)
+		createdAt = formatDateTime(status.Reblog.CreatedAt)
+		boostedAt = formatDateTime(status.CreatedAt)
 		content = status.Reblog.Content
 		poll = status.Reblog.Poll
 		mediaAttachments = status.Reblog.MediaAttachments
@@ -276,7 +276,7 @@ func (p Printer) pollDetails(poll model.Poll, owner bool) string {
 		pollStatusField = "Poll was closed on: "
 	}
 
-	builder.WriteString("\n\n" + p.fieldFormat(pollStatusField) + p.formatDateTime(poll.ExpiredAt))
+	builder.WriteString("\n\n" + p.fieldFormat(pollStatusField) + formatDateTime(poll.ExpiredAt))
 	builder.WriteString("\n" + p.fieldFormat("Total votes: ") + strconv.Itoa(poll.VotesCount))
 	builder.WriteString("\n" + p.fieldFormat("Multiple choices allowed: ") + strconv.FormatBool(poll.Multiple))
 

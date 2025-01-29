@@ -20,7 +20,7 @@ func (p Printer) PrintAccount(
 	builder.WriteString("\n\n" + p.headerFormat("ACCOUNT ID:"))
 	builder.WriteString("\n" + account.ID)
 	builder.WriteString("\n\n" + p.headerFormat("JOINED ON:"))
-	builder.WriteString("\n" + p.formatDate(account.CreatedAt))
+	builder.WriteString("\n" + formatDate(account.CreatedAt))
 	builder.WriteString("\n\n" + p.headerFormat("STATS:"))
 	builder.WriteString("\n" + p.fieldFormat("Followers:"))
 	builder.WriteString(" " + strconv.Itoa(account.FollowersCount))
