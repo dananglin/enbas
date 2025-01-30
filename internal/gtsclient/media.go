@@ -18,7 +18,7 @@ const (
 	baseMediaPath string = "/api/v1/media"
 )
 
-func (g *GTSClient) GetMediaAttachment(mediaAttachmentID string, attachment *model.Attachment) error {
+func (g *GTSClient) GetMediaAttachment(mediaAttachmentID string, attachment *model.MediaAttachment) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
 		url:         g.authentication.Instance + baseMediaPath + "/" + mediaAttachmentID,
@@ -40,7 +40,7 @@ type CreateMediaAttachmentArgs struct {
 	Focus       string
 }
 
-func (g *GTSClient) CreateMediaAttachment(args CreateMediaAttachmentArgs, attachment *model.Attachment) error {
+func (g *GTSClient) CreateMediaAttachment(args CreateMediaAttachmentArgs, attachment *model.MediaAttachment) error {
 	file, err := utilities.OpenFile(args.Path)
 	if err != nil {
 		return fmt.Errorf("unable to open the file: %w", err)
@@ -128,7 +128,7 @@ type UpdateMediaAttachmentArgs struct {
 	Focus             string
 }
 
-func (g *GTSClient) UpdateMediaAttachment(args UpdateMediaAttachmentArgs, updated *model.Attachment) error {
+func (g *GTSClient) UpdateMediaAttachment(args UpdateMediaAttachmentArgs, updated *model.MediaAttachment) error {
 	form := struct {
 		Description string `json:"description"`
 		Focus       string `json:"focus"`

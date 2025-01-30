@@ -99,5 +99,6 @@ type List struct {
 	ID            string            `json:"id"`
 	RepliesPolicy ListRepliesPolicy `json:"replies_policy"`
 	Title         string            `json:"title"`
-	Accounts      map[string]string
+	Exclusive     bool              `json:"exclusive"`
+	Accounts      map[string]string `json:"-"`
 }

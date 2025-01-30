@@ -496,7 +496,7 @@ func (s *ShowExecutor) showMediaAttachment(client *rpc.Client) error {
 		)
 	}
 
-	var attachment model.Attachment
+	var attachment model.MediaAttachment
 	if err := client.Call("GTSClient.GetMediaAttachment", s.attachmentIDs[0], &attachment); err != nil {
 		return fmt.Errorf("unable to retrieve the media attachment: %w", err)
 	}

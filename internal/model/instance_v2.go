@@ -23,6 +23,7 @@ type InstanceConfiguration struct {
 	Accounts         InstanceConfigurationAccounts         `json:"accounts"`
 	Emojis           InstanceConfigurationEmojis           `json:"emojis"`
 	MediaAttachments InstanceConfigurationMediaAttachments `json:"media_attachments"`
+	OIDCEnabled      bool                                  `json:"oidc_enabled"`
 	Polls            InstanceConfigurationPolls            `json:"polls"`
 	Statuses         InstanceConfigurationStatuses         `json:"statuses"`
 	Translation      InstanceV2ConfigurationTranslation    `json:"translation"`
@@ -88,7 +89,9 @@ type InstanceRule struct {
 
 type InstanceV2Thumbnail struct {
 	BlurHash             string                      `json:"blurhash"`
+	StaticURL            string                      `json:"static_url"`
 	ThumbnailDescription string                      `json:"thumbnail_description"`
+	ThumbnailStaticType  string                      `json:"thumbnail_static_type"`
 	ThumbnailType        string                      `json:"thumbnail_type"`
 	URL                  string                      `json:"url"`
 	Versions             InstanceV2ThumbnailVersions `json:"versions"`

@@ -56,7 +56,7 @@ func (m *media) download(client *rpc.Client) error {
 	return nil
 }
 
-func newMediaHashmap(cacheDir string, attachments []model.Attachment) map[string]media {
+func newMediaHashmap(cacheDir string, attachments []model.MediaAttachment) map[string]media {
 	hashmap := make(map[string]media)
 
 	for ind := range attachments {
@@ -78,7 +78,7 @@ type Bundle struct {
 
 func NewBundle(
 	cacheDir string,
-	attachments []model.Attachment,
+	attachments []model.MediaAttachment,
 	getAllAudio bool,
 	getAllImages bool,
 	getAllVideos bool,

@@ -7,7 +7,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (p Printer) PrintMediaAttachment(attachement model.Attachment) {
+func (p Printer) PrintMediaAttachment(attachement model.MediaAttachment) {
 	var builder strings.Builder
 
 	// The ID of the media attachment

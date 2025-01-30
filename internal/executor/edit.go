@@ -89,7 +89,7 @@ func (e *EditExecutor) editMediaAttachment(client *rpc.Client) error {
 		}
 	}
 
-	var attachment model.Attachment
+	var attachment model.MediaAttachment
 	if err := client.Call("GTSClient.GetMediaAttachment", e.attachmentIDs[0], &attachment); err != nil {
 		return fmt.Errorf("unable to get the media attachment: %w", err)
 	}
@@ -129,7 +129,7 @@ func (e *EditExecutor) editMediaAttachment(client *rpc.Client) error {
 		focus = e.mediaFocusValues[0]
 	}
 
-	var updatedAttachment model.Attachment
+	var updatedAttachment model.MediaAttachment
 	if err := client.Call(
 		"GTSClient.UpdateMediaAttachment",
 		gtsclient.UpdateMediaAttachmentArgs{
