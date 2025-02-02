@@ -19,7 +19,7 @@ type htmlConvertState struct {
 	orderedListIndex int
 }
 
-func (p Printer) convertHTMLToText(text string, wrapLines bool) string {
+func convertHTMLToText(text string) string {
 	var builder strings.Builder
 
 	state := htmlConvertState{
@@ -33,10 +33,6 @@ func (p Printer) convertHTMLToText(text string, wrapLines bool) string {
 		tt := token.Next()
 		switch tt {
 		case html.ErrorToken:
-			if wrapLines {
-				return p.wrapLines(builder.String(), 0)
-			}
-
 			return builder.String()
 		case html.TextToken:
 			text := token.Token().Data

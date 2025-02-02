@@ -1,0 +1,175 @@
+{{- define "statusDoc" -}}
+{{ print "" }}
+{{ fullDisplayNameFormat .Status.Account.DisplayName .Status.Account.Acct }}
+{{ print "" }}
+{{ headerFormat "STATUS ID:" }}
+{{ .Status.ID }}
+{{ print "" }}
+{{ print "" }}
+{{- if ne .Status.SpoilerText "" -}}
+{{ headerFormat "SUMMARY:" }}
+{{ boldFormat .Status.SpoilerText }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+{{ headerFormat "CONTENT:" }}
+{{- wrapLines (convertHTMLToText .Status.Content) 0 -}}
+{{- if gt (len .Status.MediaAttachments) 0 -}}
+{{ print "" }}
+{{ headerFormat "MEDIA ATTACHMENTS:" }}
+{{- range $media := .Status.MediaAttachments -}}
+{{ template "mediaAttachment" $media }}
+{{ print "" }}
+{{- end -}}
+{{- end -}}
+{{- if .Status.Poll -}}
+{{ print "" }}
+{{ headerFormat "POLL:" }}
+{{ print "" }}
+{{- if showPollResults .Status.ID .Status.Poll.Expired .Status.Poll.Voted }}
+{{ template "pollResults" .Status.Poll }}
+{{- else -}}
+{{ template "pollOptions" .Status.Poll.Options }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+{{ template "pollDetails" .Status.Poll }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ headerFormat "CREATED AT:" }}
+{{ formatDateTime .Status.CreatedAt }}
+{{ print "" }}
+{{ headerFormat "STATS:" }}
+{{ fieldFormat "Boosts" }} {{ .Status.ReblogsCount }}
+{{ fieldFormat "Likes" }} {{ .Status.FavouritesCount }}
+{{ fieldFormat "Replies" }} {{ .Status.RepliesCount }}
+{{ print "" }}
+{{ headerFormat "YOUR ACTIONS:" }}
+{{ fieldFormat "Boosted" }} {{ .Status.Reblogged }}
+{{ fieldFormat "Liked" }} {{ .Status.Favourited }}
+{{ fieldFormat "Bookmarked" }} {{ .Status.Bookmarked }}
+{{ fieldFormat "Muted" }} {{ .Status.Muted }}
+{{ print "" }}
+{{ headerFormat "VISIBILITY:" }}
+{{ .Status.Visibility }}
+{{ print "" }}
+{{ headerFormat "URL:" }}
+{{ .Status.URL }}
+{{- if gt (len .BoostedBy.Accounts) 0 -}}
+{{ print "" }}
+{{ template "accountList" .BoostedBy }}
+{{- end -}}
+{{- if gt (len .LikedBy.Accounts) 0 -}}
+{{ print "" }}
+{{ template "accountList" .LikedBy }}
+{{- end -}}
+{{- end -}}
+
+{{- define "statusList" -}}
+{{ headerFormat .Name }}
+{{ print "" }}
+{{- range .Statuses -}}
+{{ template "statusCard" . }}
+{{- end -}}
+{{- end -}}
+
+{{ define "statusCard" }}
+{{- if .Reblog -}}
+{{ print "" }}
+{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} boosted this status from {{ fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct }}{{- ":" -}}
+{{ template "statusCardBody" .Reblog }}
+{{- fieldFormat "Boosted at" }} {{ formatDateTime .CreatedAt }}
+{{ print "" }}
+{{- else if ne .InReplyToID "" -}}
+{{ print "" }}
+{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} posted in reply to {{ .InReplyToID }}{{- ":" -}}
+{{ template "statusCardBody" . }}
+{{- else -}}
+{{ print "" }}
+{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} posted{{- ":" -}}
+{{ template "statusCardBody" . }}
+{{- end -}}
+{{ print "" }}
+{{- drawStatusCardSeparator -}}
+{{ print "" }}
+{{ end }}
+
+{{- define "statusCardBody" -}}
+{{- if ne .SpoilerText "" -}}
+{{ print "" }}
+{{ print "" }}
+{{ boldFormat .SpoilerText }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{- wrapLines (convertHTMLToText .Content) 0 -}}
+{{- if .Poll -}}
+{{ print "" }}
+{{- if showPollResults .ID .Poll.Expired .Poll.Voted }}
+{{ template "pollResults" .Poll }}
+{{- else -}}
+{{ template "pollOptions" .Poll.Options }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+{{ template "pollDetails" .Poll }}
+{{- end -}}
+{{- range .MediaAttachments -}}
+{{ print "" }}
+{{ template "mediaAttachment" . }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ drawBoostSymbol .Reblogged }} {{ fieldFormat "Boosted" }}    {{ printf "%5t" .Reblogged }}          {{ fieldFormat "Boosts" }}  {{ printf "%d" .ReblogsCount }}
+{{ drawLikeSymbol .Favourited }} {{ fieldFormat "Liked" }}      {{ printf "%5t" .Favourited }}          {{ fieldFormat "Likes" }}   {{ printf "%d" .FavouritesCount }}
+{{ drawBookmarkSymbol .Bookmarked }} {{ fieldFormat "Bookmarked" }} {{ printf "%5t" .Bookmarked }}          {{ fieldFormat "Replies" }} {{ printf "%d" .RepliesCount }}
+{{ print "" }}
+{{ fieldFormat "Status ID" }}  {{ .ID }}
+{{ fieldFormat "Created at" }} {{ formatDateTime .CreatedAt }}
+{{ print "" }}
+{{- end -}}
+
+{{- define "mediaAttachment" -}}
+{{ print "" }}
+{{ "\uf03e" }} {{ fieldFormat "Media attachment ID" }} {{ .ID }}
+{{ fieldFormat "  Media type" }} {{ .Type }}
+{{- if ne .Description "" -}}
+{{ print "" }}
+{{ with $desc := printf "%s %s" (fieldFormat "  Description") .Description }}{{ wrapLines $desc 2 }}{{end}}
+{{- else -}}
+{{ print "" }}
+{{ fieldFormat "  Description" }} This media attachment has no description.
+{{- end -}}
+{{- end -}}
+
+{{- define "pollOptions" -}}
+{{- range $ind, $option := . -}}
+{{ print "" }}
+[{{ $ind }}] {{ $option.Title }}
+{{- end -}}
+{{- end -}}
+
+{{- define "pollResults" -}}
+{{- $totalVotes := .VotesCount -}}
+{{- $myVotes := .OwnVotes -}}
+{{- range $ind, $option := .Options -}}
+{{- $details := getPollOptionDetails .VotesCount $totalVotes $ind $myVotes -}}
+[{{ $ind }}] {{ $option.Title }}{{ if $details.Voted }}{{ " \u2714" }}{{ end }}
+{{ $details.Meter }}
+    {{ .VotesCount }} votes ({{ $details.Percentage }}%)
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "pollDetails" -}}
+{{- if .Expired -}}
+{{ fieldFormat "Poll was closed on" }} {{ formatDateTime .ExpiredAt }}
+{{- else -}}
+{{ fieldFormat "Poll is open until" }} {{ formatDateTime .ExpiredAt }}
+{{- end -}}
+{{ print "" }}
+{{ fieldFormat "Total votes" }} {{ .VotesCount }}
+{{ fieldFormat "Multiple choices allowed" }} {{ .Multiple }}
+{{- end -}}

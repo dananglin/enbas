@@ -1,0 +1,23 @@
+{{- define "tag" -}}
+{{ print "" }}
+{{ headerFormat "TAG NAME:" }}
+{{ .Name }}
+{{ print "" }}
+{{ headerFormat "URL:" }}
+{{ .URL }}
+{{ print "" }}
+{{ headerFormat "FOLLOWING:" }}
+{{ .Following }}
+{{ print "" }}
+{{ end -}}
+
+{{- define "tagList" -}}
+{{ print "" }}
+{{ headerFormat .Name }}
+{{- range $tag := .Tags -}}
+{{ print "" }}
+{{ "\u2022" }} {{ $tag.Name }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ end -}}

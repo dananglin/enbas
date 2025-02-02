@@ -1,0 +1,85 @@
+{{ define "account" }}
+{{ headerFormat "ACCOUNT ID:" }}
+{{ .Account.ID }}
+{{ print "" }}
+{{ headerFormat "JOINED ON:" }}
+{{ formatDate .Account.CreatedAt }}
+{{ print "" }}
+{{ headerFormat "STATS:" }}
+{{ fieldFormat "Followers" }} {{ .Account.FollowersCount }}
+{{ fieldFormat "Following" }} {{ .Account.FollowingCount }}
+{{ fieldFormat "Statuses" }} {{ .Account.StatusCount }}
+{{ print "" }}
+{{ headerFormat "BIOGRAPHY:" }}
+{{- wrapLines (convertHTMLToText .Account.Note) 0 -}}
+{{ print "" }}
+{{ headerFormat "METADATA:" }}
+{{ print "" }}
+{{- range $field := .Account.Fields -}}
+{{ fieldFormat $field.Name }} {{ $field.Value }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ headerFormat "ACCOUNT URL:" }}
+{{ .Account.URL }}
+{{ print "" }}
+{{- if .Relationship.Print -}}
+{{ template "accountRelationship" .Relationship }}
+{{ print "" }}
+{{- end -}}
+{{- if .Preferences.Print -}}
+{{ template "userPreferences" .Preferences }}
+{{ print "" }}
+{{- end -}}
+{{- if gt (len .StatusList.Statuses) 0 -}}
+{{ template "statusList" .StatusList }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ end }}
+
+{{ define "accountRelationship" }}
+{{ headerFormat "YOUR RELATIONSHIP WITH THIS ACCOUNT:" }}
+{{ fieldFormat "Following" }} {{ .Following }}
+{{ fieldFormat "Is following you" }} {{ .FollowedBy }}
+{{ fieldFormat "A follow request was sent and is pending" }} {{ .FollowRequested }}
+{{ fieldFormat "Received a pending follow request" }} {{ .FollowRequestedBy }}
+{{ fieldFormat "Endorsed" }} {{ .Endorsed }}
+{{ fieldFormat "Showing Reposts (boosts)" }} {{ .ShowingReblogs }}
+{{ fieldFormat "Muted" }} {{ .Muting }}
+{{ fieldFormat "Notifications muted" }} {{ .MutingNotifications }}
+{{ fieldFormat "Blocking" }} {{ .Blocking }}
+{{ fieldFormat "Is blocking you" }} {{ .BlockedBy }}
+{{ fieldFormat "Blocking account's domain" }} {{ .DomainBlocking }}
+{{- if ne .PrivateNote "" -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:" }}
+{{ .Relationship.PrivateNote }}
+{{- end -}}
+{{ end }}
+
+{{ define "userPreferences" }}
+{{ headerFormat "YOUR PREFERENCES:" }}
+{{ fieldFormat "Default post language" }} {{ .PostingDefaultLanguage }}
+{{ fieldFormat "Default post visibility" }} {{ .PostingDefaultVisibility }}
+{{ fieldFormat "Mark posts as sensitive by default" }} {{ .PostingDefaultSensitive }}
+{{ end }}
+
+{{- define "accountList" -}}
+{{ print "" }}
+{{ headerFormat (printf "%s:" .Label) }}
+{{- range $account := .Accounts -}}
+{{ print "" }}
+{{ "\u2022" }} {{ fullDisplayNameFormat $account.DisplayName $account.Acct }}
+{{- end -}}
+{{- end -}}
+
+{{- define "blockedAccounts" -}}
+{{ print "" }}
+{{ headerFormat (printf "%s:" .Label) }}
+{{- range $account := .Accounts -}}
+{{ print "" }}
+{{ "\u2022" }} {{ $account.Acct }} ({{ .ID }})
+{{- end -}}
+{{- end -}}

@@ -57,7 +57,9 @@ func (s *ShowExecutor) showInstance(client *rpc.Client) error {
 		return fmt.Errorf("unable to retrieve the instance details: %w", err)
 	}
 
-	s.printer.PrintInstance(instance)
+	if err := s.printer.PrintInstance(instance); err != nil {
+		return fmt.Errorf("error printing the instance details: %w", err)
+	}
 
 	return nil
 }
@@ -122,7 +124,15 @@ func (s *ShowExecutor) showAccount(client *rpc.Client) error {
 		}
 	}
 
-	s.printer.PrintAccount(account, relationship, preferences, statusList, myAccountID)
+	if err := s.printer.PrintAccount(
+		account,
+		relationship,
+		preferences,
+		statusList,
+		myAccountID,
+	); err != nil {
+		return fmt.Errorf("error printing the account: %w", err)
+	}
 
 	return nil
 }
@@ -179,12 +189,14 @@ func (s *ShowExecutor) showStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
-	s.printer.PrintStatus(
+	if err := s.printer.PrintStatus(
 		status,
 		myAccountID,
 		boostedBy,
 		likedBy,
-	)
+	); err != nil {
+		return fmt.Errorf("error printing the status: %w", err)
+	}
 
 	return nil
 }
@@ -255,7 +267,9 @@ func (s *ShowExecutor) showTimeline(client *rpc.Client) error {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
-	s.printer.PrintStatusList(timeline, myAccountID)
+	if err := s.printer.PrintStatusList(timeline, myAccountID); err != nil {
+		return fmt.Errorf("error printing the timeline: %w", err)
+	}
 
 	return nil
 }
@@ -341,7 +355,9 @@ func (s *ShowExecutor) showFollowersFromAccount(client *rpc.Client) error {
 	}
 
 	if len(followers.Accounts) > 0 {
-		s.printer.PrintAccountList(followers)
+		if err := s.printer.PrintAccountList(followers); err != nil {
+			return fmt.Errorf("error printing the list of followers: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("There are no followers for this account (or the list is hidden).\n")
 	}
@@ -384,11 +400,13 @@ func (s *ShowExecutor) showFollowingFromAccount(client *rpc.Client) error {
 		},
 		&followings,
 	); err != nil {
-		return fmt.Errorf("unable to retrieve the list of followed accounts: %w", err)
+		return fmt.Errorf("unable to retrieve the list of accounts that you are following: %w", err)
 	}
 
 	if len(followings.Accounts) > 0 {
-		s.printer.PrintAccountList(followings)
+		if err := s.printer.PrintAccountList(followings); err != nil {
+			return fmt.Errorf("error printing the list of accounts that you are following: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("This account is not following anyone or the list is hidden.\n")
 	}
@@ -403,7 +421,9 @@ func (s *ShowExecutor) showBlocked(client *rpc.Client) error {
 	}
 
 	if len(blocked.Accounts) > 0 {
-		s.printer.PrintAccountList(blocked)
+		if err := s.printer.PrintAccountList(blocked); err != nil {
+			return fmt.Errorf("error printing the list of blocked accounts: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("You have no blocked accounts.\n")
 	}
@@ -414,7 +434,7 @@ func (s *ShowExecutor) showBlocked(client *rpc.Client) error {
 func (s *ShowExecutor) showBookmarks(client *rpc.Client) error {
 	var bookmarks model.StatusList
 	if err := client.Call("GTSClient.GetBookmarks", s.limit, &bookmarks); err != nil {
-		return fmt.Errorf("unable to retrieve the list of bookmarks: %w", err)
+		return fmt.Errorf("error retrieving the list of your bookmarks: %w", err)
 	}
 
 	if len(bookmarks.Statuses) > 0 {
@@ -423,7 +443,9 @@ func (s *ShowExecutor) showBookmarks(client *rpc.Client) error {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
 
-		s.printer.PrintStatusList(bookmarks, myAccountID)
+		if err := s.printer.PrintStatusList(bookmarks, myAccountID); err != nil {
+			return fmt.Errorf("error printing the list of your bookmarks: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("You have no bookmarks.\n")
 	}
@@ -450,7 +472,9 @@ func (s *ShowExecutor) showLiked(client *rpc.Client) error {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
 
-		s.printer.PrintStatusList(liked, myAccountID)
+		if err := s.printer.PrintStatusList(liked, myAccountID); err != nil {
+			return fmt.Errorf("error printing the list of your %s statuses: %w", s.resourceType, err)
+		}
 	} else {
 		s.printer.PrintInfo("You have no " + s.resourceType + " statuses.\n")
 	}
@@ -465,7 +489,9 @@ func (s *ShowExecutor) showFollowRequests(client *rpc.Client) error {
 	}
 
 	if len(requests.Accounts) > 0 {
-		s.printer.PrintAccountList(requests)
+		if err := s.printer.PrintAccountList(requests); err != nil {
+			return fmt.Errorf("error printing the list of follow requests: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("You have no follow requests.\n")
 	}
@@ -480,7 +506,9 @@ func (s *ShowExecutor) showMutedAccounts(client *rpc.Client) error {
 	}
 
 	if len(muted.Accounts) > 0 {
-		s.printer.PrintAccountList(muted)
+		if err := s.printer.PrintAccountList(muted); err != nil {
+			return fmt.Errorf("error printing the list of muted accounts: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("You have not muted any accounts.\n")
 	}
@@ -501,7 +529,9 @@ func (s *ShowExecutor) showMediaAttachment(client *rpc.Client) error {
 		return fmt.Errorf("unable to retrieve the media attachment: %w", err)
 	}
 
-	s.printer.PrintMediaAttachment(attachment)
+	if err := s.printer.PrintMediaAttachment(attachment); err != nil {
+		return fmt.Errorf("error printing the media attachment details: %w", err)
+	}
 
 	return nil
 }
@@ -603,7 +633,9 @@ func (s *ShowExecutor) showTag(client *rpc.Client) error {
 		return fmt.Errorf("unable to get the details of the tag: %w", err)
 	}
 
-	s.printer.PrintTag(tag)
+	if err := s.printer.PrintTag(tag); err != nil {
+		return fmt.Errorf("error printing the tag details: %w", err)
+	}
 
 	return nil
 }
@@ -615,7 +647,9 @@ func (s *ShowExecutor) showFollowedTags(client *rpc.Client) error {
 	}
 
 	if len(list.Tags) > 0 {
-		s.printer.PrintTagList(list)
+		if err := s.printer.PrintTagList(list); err != nil {
+			return fmt.Errorf("error printing the list of followed tags: %w", err)
+		}
 	} else {
 		s.printer.PrintInfo("This account is not following any tags.\n")
 	}
@@ -666,7 +700,9 @@ func (s *ShowExecutor) showThreadFromStatus(client *rpc.Client) error {
 	}
 
 	// Print the thread
-	s.printer.PrintThread(thread, myAccountID)
+	if err := s.printer.PrintThread(thread, myAccountID); err != nil {
+		return fmt.Errorf("error printing the thread: %w", err)
+	}
 
 	return nil
 }

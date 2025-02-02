@@ -1,46 +1,22 @@
 package printer
 
 import (
+	"embed"
+	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-const (
-	minTerminalWidth    = 40
-	noMediaDescription  = "This media attachment has no description."
-	symbolBullet        = "\u2022"
-	symbolPollMeter     = "\u2501"
-	symbolCheckMark     = "\u2714"
-	symbolFailure       = "\u2717"
-	symbolImage         = "\uf03e"
-	symbolLiked         = "\uf51f"
-	symbolNotLiked      = "\uf41e"
-	symbolBookmarked    = "\uf47a"
-	symbolNotBookmarked = "\uf461"
-	symbolBoosted       = "\u2BAD"
-	dateFormat          = "02 Jan 2006"
-	dateTimeFormat      = "02 Jan 2006, 15:04 (MST)"
-)
-
-type theme struct {
-	reset       string
-	bold        string
-	boldblue    string
-	boldmagenta string
-	green       string
-	boldgreen   string
-	grey        string
-	red         string
-	boldred     string
-	yellow      string
-	boldyellow  string
-}
+//go:embed templates/*
+var templatesFS embed.FS
 
 type Printer struct {
-	theme                  theme
 	noColor                bool
 	lineWrapCharacterLimit int
 	pager                  string
@@ -52,26 +28,11 @@ func NewPrinter(
 	pager string,
 	lineWrapCharacterLimit int,
 ) *Printer {
-	theme := theme{
-		reset:       "\033[0m",
-		bold:        "\033[1m",
-		boldblue:    "\033[34;1m",
-		boldmagenta: "\033[35;1m",
-		green:       "\033[32m",
-		boldgreen:   "\033[32;1m",
-		grey:        "\033[90m",
-		red:         "\033[31m",
-		boldred:     "\033[31;1m",
-		yellow:      "\033[33m",
-		boldyellow:  "\033[33;1m",
-	}
-
 	if lineWrapCharacterLimit < minTerminalWidth {
 		lineWrapCharacterLimit = minTerminalWidth
 	}
 
 	return &Printer{
-		theme:                  theme,
 		noColor:                noColor,
 		lineWrapCharacterLimit: lineWrapCharacterLimit,
 		pager:                  pager,
@@ -80,7 +41,7 @@ func NewPrinter(
 }
 
 func (p Printer) PrintSuccess(text string) {
-	success := p.theme.boldgreen + symbolCheckMark + p.theme.reset
+	success := boldgreen + symbolCheckMark + reset
 	if p.noColor {
 		success = symbolCheckMark
 	}
@@ -89,7 +50,7 @@ func (p Printer) PrintSuccess(text string) {
 }
 
 func (p Printer) PrintFailure(text string) {
-	failure := p.theme.boldred + symbolFailure + p.theme.reset
+	failure := boldred + symbolFailure + reset
 	if p.noColor {
 		failure = symbolFailure
 	}
@@ -101,28 +62,134 @@ func (p Printer) PrintInfo(text string) {
 	printToStdout(text)
 }
 
+func (p Printer) PrintAccount(
+	account model.Account,
+	relationship model.AccountRelationship,
+	preferences model.Preferences,
+	statusList model.StatusList,
+	myAccountID string,
+) error {
+	data := struct {
+		Account      model.Account
+		Relationship model.AccountRelationship
+		Preferences  model.Preferences
+		StatusList   model.StatusList
+	}{
+		Account:      account,
+		Relationship: relationship,
+		Preferences:  preferences,
+		StatusList:   statusList,
+	}
+
+	return p.renderTemplateToPager("account", myAccountID, data)
+}
+
+func (p Printer) PrintAccountList(list model.AccountList) error {
+	if list.BlockedAccounts {
+		return p.renderTemplateToPager("blockedAccounts", "", list)
+	}
+
+	return p.renderTemplateToPager("accountList", "", list)
+}
+
+func (p Printer) PrintStatus(
+	status model.Status,
+	myAccountID string,
+	boostedBy model.AccountList,
+	likedBy model.AccountList,
+) error {
+	data := struct {
+		Status    model.Status
+		BoostedBy model.AccountList
+		LikedBy   model.AccountList
+	}{
+		Status:    status,
+		BoostedBy: boostedBy,
+		LikedBy:   likedBy,
+	}
+
+	return p.renderTemplateToPager("statusDoc", myAccountID, data)
+}
+
+// PrintStatusList prints a drawn list of statuses.
+func (p Printer) PrintStatusList(list model.StatusList, myAccountID string) error {
+	return p.renderTemplateToPager("statusList", myAccountID, list)
+}
+
+func (p Printer) PrintInstance(instance model.InstanceV2) error {
+	return p.renderTemplateToPager("instance", "", instance)
+}
+
+func (p Printer) PrintMediaAttachment(attachement model.MediaAttachment) error {
+	return p.renderTemplateToPager("mediaAttachmentDoc", "", attachement)
+}
+
+func (p Printer) PrintTag(tag model.Tag) error {
+	return p.renderTemplateToPager("tag", "", tag)
+}
+
+func (p Printer) PrintTagList(list model.TagList) error {
+	return p.renderTemplateToPager("tagList", "", list)
+}
+
+func (p Printer) PrintThread(thread model.Thread, myAccountID string) error {
+	return p.renderTemplateToPager("thread", myAccountID, thread)
+}
+
+func (p Printer) PrintList(list model.List) error {
+	return p.renderTemplateToPager("list", "", list)
+}
+
+func (p Printer) PrintLists(lists []model.List) error {
+	return p.renderTemplateToPager("listOflist", "", lists)
+}
+
 func (p Printer) headerFormat(text string) string {
 	if p.noColor {
 		return text
 	}
 
-	return p.theme.boldblue + text + p.theme.reset
+	return boldblue + text + reset
 }
 
 func (p Printer) fieldFormat(text string) string {
 	if p.noColor {
-		return text
+		return text + ":"
 	}
 
-	return p.theme.green + text + p.theme.reset
+	return green + text + reset + ":"
 }
 
-func (p Printer) bold(text string) string {
+func (p Printer) boldFormat(text string) string {
 	if p.noColor {
 		return text
 	}
 
-	return p.theme.bold + text + p.theme.reset
+	return bold + text + reset
+}
+
+func (p Printer) drawBoostSymbol(boosted bool) string {
+	if boosted && !p.noColor {
+		return boldyellow + symbolBoosted + reset
+	}
+
+	return symbolBoosted
+}
+
+func (p Printer) drawLikeSymbol(liked bool) string {
+	if liked && !p.noColor {
+		return boldyellow + symbolLiked + reset
+	}
+
+	return symbolNotLiked
+}
+
+func (p Printer) drawBookmarkSymbol(bookmarked bool) string {
+	if bookmarked && !p.noColor {
+		return boldyellow + symbolBookmarked + reset
+	}
+
+	return symbolNotBookmarked
 }
 
 func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
@@ -134,7 +201,7 @@ func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
 	if p.noColor {
 		builder.WriteString(pattern.ReplaceAllString(displayName, ""))
 	} else {
-		builder.WriteString(p.theme.boldmagenta + pattern.ReplaceAllString(displayName, "") + p.theme.reset)
+		builder.WriteString(boldmagenta + pattern.ReplaceAllString(displayName, "") + reset)
 	}
 
 	builder.WriteString(" (@" + acct + ")")
@@ -142,56 +209,69 @@ func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
 	return builder.String()
 }
 
-func (p Printer) print(text string) {
-	if p.pager == "" {
-		printToStdout(text)
+func (p Printer) drawStatusCardSeparator() string {
+	return p.statusSeparator
+}
 
-		return
-	}
-
+func (p Printer) renderTemplateToPager(templateName, myAccountID string, data any) error {
 	cmdSplit := strings.Split(p.pager, " ")
 
 	binary, err := exec.LookPath(cmdSplit[0])
 	if err != nil {
-		printToStdout(text)
-
-		return
+		return fmt.Errorf("unable to perform the lookup for %q, %w", cmdSplit[0], err)
 	}
 
-	var pager *exec.Cmd
+	var pagerCmd *exec.Cmd
 
 	if len(cmdSplit) == 1 {
-		pager = exec.Command(binary) // #nosec G204 -- External command call defined in user's configuration file.
+		pagerCmd = exec.Command(binary) // #nosec G204 -- External command call defined in user's configuration file.
 	} else {
-		pager = exec.Command(binary, cmdSplit[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
+		pagerCmd = exec.Command(binary, cmdSplit[1:]...) // #nosec G204 -- External command call defined in user's configuration file.
 	}
 
-	// Write the text data to the pipe.
+	// Render the template to the pipe.
 	reader, writer, err := os.Pipe()
 	if err != nil {
-		printToStdout(text)
-
-		return
+		return fmt.Errorf("error creating the pipe: %w", err)
 	}
+
 	defer reader.Close()
 
-	if _, err = writer.WriteString(text); err != nil {
-		printToStdout(text)
-
-		return
+	funcMap := template.FuncMap{
+		"convertHTMLToText":       convertHTMLToText,
+		"formatDate":              formatDate,
+		"formatDateTime":          formatDateTime,
+		"headerFormat":            p.headerFormat,
+		"fieldFormat":             p.fieldFormat,
+		"fullDisplayNameFormat":   p.fullDisplayNameFormat,
+		"boldFormat":              p.boldFormat,
+		"drawStatusCardSeparator": p.drawStatusCardSeparator,
+		"drawBoostSymbol":         p.drawBoostSymbol,
+		"drawLikeSymbol":          p.drawLikeSymbol,
+		"drawBookmarkSymbol":      p.drawBookmarkSymbol,
+		"wrapLines":               p.wrapLines,
+		"showPollResults":         showPollResults(myAccountID),
+		"getPollOptionDetails":    p.getPollOptionDetails,
 	}
 
-	if err := writer.Close(); err != nil {
-		printToStdout(text)
-
-		return
+	tmpl, err := template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*")
+	if err != nil {
+		return fmt.Errorf("error parsing the templates: %w", err)
 	}
+
+	if err := tmpl.ExecuteTemplate(writer, templateName, data); err != nil {
+		return fmt.Errorf("error executing the %q template: %w", templateName, err)
+	}
+
+	_ = writer.Close()
 
 	// Pipe the text data to the pager.
-	pager.Stdin = reader
-	pager.Stdout = os.Stdout
+	pagerCmd.Stdin = reader
+	pagerCmd.Stdout = os.Stdout
 
-	_ = pager.Run()
+	_ = pagerCmd.Run()
+
+	return nil
 }
 
 func printToStdout(text string) {
@@ -203,9 +283,15 @@ func printToStderr(text string) {
 }
 
 func formatDate(date time.Time) string {
-	return date.Local().Format(dateFormat) //nolint:gosmopolitan
+	return date.Local().Format("02 Jan 2006") //nolint:gosmopolitan
 }
 
 func formatDateTime(date time.Time) string {
-	return date.Local().Format(dateTimeFormat) //nolint:gosmopolitan
+	return date.Local().Format("02 Jan 2006, 15:04 (MST)") //nolint:gosmopolitan
+}
+
+func showPollResults(myAccountID string) func(string, bool, bool) bool {
+	return func(statusOwnerID string, expired, voted bool) bool {
+		return (myAccountID == statusOwnerID) || expired || voted
+	}
 }

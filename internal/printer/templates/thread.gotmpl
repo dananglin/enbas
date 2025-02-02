@@ -1,0 +1,10 @@
+{{- define "thread" -}}
+{{- if gt (len .Ancestors.Statuses) 0 -}}
+{{ template "statusList" .Ancestors }}
+{{- end -}}
+{{ headerFormat "Context" }}
+{{ template "statusCard" .Context }}
+{{- if gt (len .Descendants.Statuses) 0 -}}
+{{ template "statusList" .Descendants }}
+{{- end -}}
+{{- end -}}

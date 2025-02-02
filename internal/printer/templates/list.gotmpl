@@ -1,0 +1,35 @@
+{{- define "list" -}}
+{{ print "" }}
+{{ headerFormat "LIST TITLE:" }}
+{{ .Title }}
+{{ print "" }}
+{{ headerFormat "LIST ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "REPLIES POLICY:" }}
+{{ .RepliesPolicy }}
+{{ print "" }}
+{{ headerFormat "ADDED ACCOUNTS:" }}
+{{- if gt (len .Accounts) 0 -}}
+{{- range $acct, $name := .Accounts -}}
+{{ print "" }}
+{{ "\u2022" }} {{ fullDisplayNameFormat $name $acct }}
+{{- end -}}
+{{- else -}}
+{{ print "" }}
+None
+{{- end }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+
+{{- define "listOflist" -}}
+{{ print "" }}
+{{ headerFormat "LISTS:" }}
+{{- range . -}}
+{{ print "" }}
+{{ "\u2022" }} {{ .Title }} ({{ .ID }})
+{{- end }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}

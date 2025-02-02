@@ -1,0 +1,29 @@
+{{- define "mediaAttachmentDoc" -}}
+{{ print "" }}
+{{ headerFormat "MEDIA ATTACHMENT ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "MEDIA TYPE:" }}
+{{ .Type }}
+{{ print "" }}
+{{ headerFormat "DESCRIPTION:" }}
+{{- if ne .Description "" -}}
+{{ print "" }}
+{{ .Description }}
+{{- else -}}
+{{ print "" }}
+This media attachment has no description.
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "ORIGINAL SIZE:" }}
+{{ .Meta.Original.Size }}
+{{ print "" }}
+{{ headerFormat "FOCUS:" }}
+{{ fieldFormat "x" }} {{ printf "%.1f" .Meta.Focus.X }}
+{{ fieldFormat "y" }} {{ printf "%.1f" .Meta.Focus.Y }} 
+{{ print "" }}
+{{ headerFormat "URL:" }}
+{{ .URL }}
+{{ print "" }}
+{{- end -}}

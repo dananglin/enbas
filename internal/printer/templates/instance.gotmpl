@@ -1,0 +1,68 @@
+{{- define "instance" -}}
+{{ print "" }}
+{{ headerFormat "INSTANCE TITLE:" }}
+{{ .Title }}
+{{ print "" }}
+{{ headerFormat "DOMAIN:" }}
+{{ .Domain }}
+{{ print "" }}
+{{ headerFormat "ABOUT THE INSTANCE:" }}
+{{- if ne .DescriptionText "" -}}
+{{ print "" }}
+{{ wrapLines .DescriptionText 0 }}
+{{- else -}}
+{{ print "" }}
+This instance has no description.
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "ADMIN CONTACT:" }}
+{{ fieldFormat "Name" }}     {{ .Contact.Account.DisplayName }}
+{{ fieldFormat "Username" }} {{ .Contact.Account.Acct }}
+{{ fieldFormat "Email" }}    {{ .Contact.Email }}
+{{ print "" }}
+{{ headerFormat "INSTANCE FEATURES:" }}
+{{ "\u2022" }} Statuses can contain up to {{ .Configuration.Statuses.MaxCharacters }} characters, and {{ .Configuration.Statuses.MaxMediaAttachments }} media attachments.
+{{ "\u2022" }} Polls can have up to {{ .Configuration.Polls.MaxOptions }} options, with {{ .Configuration.Polls.MaxCharactersPerOption }} characters per option.
+{{- if .Configuration.Accounts.AllowCustomCSS -}}
+{{ print "" }}
+{{ "\u2022" }} Custom CSS is enabled on account profiles.
+{{- else -}}
+{{ print "" }}
+{{ "\u2022" }} Custom CSS is disabled on account profiles.
+{{- end -}}
+{{- if gt (len .Languages) 0 -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "LANGUAGES:" }}
+{{- range $language := .Languages -}}
+{{ print "" }}
+{{ "\u2022" }} {{ $language }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len .Languages) 0 -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "INSTANCE RULES:" }}
+{{- range $ind, $rule := .Rules -}}
+{{ print "" }}
+{{ "\u2022" }} {{ $rule.Text }}
+{{- end -}}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "TERMS AND CONDITIONS:" }}
+{{- if ne .TermsText "" -}}
+{{ print "" }}
+{{ .TermsText }}
+{{- else -}}
+{{ print "" }}
+This instance has no terms and conditions.
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "VERSION:" }}
+Running GoToSocial {{ .Version }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
