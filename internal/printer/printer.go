@@ -194,6 +194,15 @@ func PrintLists(settings Settings, lists []model.List) error {
 }
 
 func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
+	if settings.pager == "" {
+		return renderTemplateToStdout(
+			settings,
+			templateName,
+			myAccountID,
+			data,
+		)
+	}
+
 	cmdSplit := strings.Split(settings.pager, " ")
 
 	binary, err := exec.LookPath(cmdSplit[0])
