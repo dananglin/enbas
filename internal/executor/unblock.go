@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/rpc"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -36,7 +37,7 @@ func (b *UnblockExecutor) unblockAccount(client *rpc.Client) error {
 		return fmt.Errorf("unable to unblock the account: %w", err)
 	}
 
-	b.printer.PrintSuccess("Successfully unblocked the account.")
+	printer.PrintSuccess(b.printSettings, "Successfully unblocked the account.")
 
 	return nil
 }

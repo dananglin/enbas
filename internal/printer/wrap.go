@@ -11,45 +11,47 @@ type extraIndentConditiion struct {
 	indent  string
 }
 
-func (p Printer) wrapLines(text string, nIndent int) string {
-	if nIndent >= p.lineWrapCharacterLimit {
-		nIndent = 0
-	}
-
-	separator := "\n" + strings.Repeat(" ", nIndent)
-
-	lines := strings.Split(text, "\n")
-
-	if len(lines) == 1 {
-		return wrapLine(lines[0], separator, p.lineWrapCharacterLimit-nIndent)
-	}
-
-	var builder strings.Builder
-
-	extraIndentConditions := []extraIndentConditiion{
-		{
-			pattern: regexp.MustCompile(`^[-*` + symbolBullet + `]\s.*$`),
-			indent:  "  ",
-		},
-		{
-			pattern: regexp.MustCompile(`^[0-9]{1}\.\s.*$`),
-			indent:  "   ",
-		},
-		{
-			pattern: regexp.MustCompile(`^[0-9]{2}\.\s.*$`),
-			indent:  "    ",
-		},
-	}
-
-	for ind, line := range lines {
-		builder.WriteString(wrapLine(line, separator+extraIndent(line, extraIndentConditions), p.lineWrapCharacterLimit-nIndent))
-
-		if ind < len(lines)-1 {
-			builder.WriteString(separator)
+func wrapLines(charLimit int) func(string, int) string {
+	return func(text string, nIndent int) string {
+		if nIndent >= charLimit {
+			nIndent = 0
 		}
-	}
 
-	return builder.String()
+		separator := "\n" + strings.Repeat(" ", nIndent)
+
+		lines := strings.Split(text, "\n")
+
+		if len(lines) == 1 {
+			return wrapLine(lines[0], separator, charLimit-nIndent)
+		}
+
+		var builder strings.Builder
+
+		extraIndentConditions := []extraIndentConditiion{
+			{
+				pattern: regexp.MustCompile(`^[-*` + symbolBullet + `]\s.*$`),
+				indent:  "  ",
+			},
+			{
+				pattern: regexp.MustCompile(`^[0-9]{1}\.\s.*$`),
+				indent:  "   ",
+			},
+			{
+				pattern: regexp.MustCompile(`^[0-9]{2}\.\s.*$`),
+				indent:  "    ",
+			},
+		}
+
+		for ind, line := range lines {
+			builder.WriteString(wrapLine(line, separator+extraIndent(line, extraIndentConditions), charLimit-nIndent))
+
+			if ind < len(lines)-1 {
+				builder.WriteString(separator)
+			}
+		}
+
+		return builder.String()
+	}
 }
 
 func wrapLine(line, separator string, charLimit int) string {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/rpc"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -36,7 +37,7 @@ func (r *RejectExecutor) rejectFollowRequest(client *rpc.Client) error {
 		return fmt.Errorf("unable to reject the follow request: %w", err)
 	}
 
-	r.printer.PrintSuccess("Successfully rejected the follow request.")
+	printer.PrintSuccess(r.printSettings, "Successfully rejected the follow request.")
 
 	return nil
 }

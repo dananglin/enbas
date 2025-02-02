@@ -56,7 +56,10 @@ func Execute() error {
 	executorFunc, ok := executorMap[command]
 	if !ok {
 		err := UnknownCommandError{command: command}
-		printer.NewPrinter(noColor, "", 0).PrintFailure("Error: "+err.Error())
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"Error: "+err.Error(),
+		)
 
 		return err
 	}
@@ -71,7 +74,7 @@ func Execute() error {
 // {{ $struct_name }} is the executor for the {{ $name }} command.
 type {{ $struct_name }} struct {
 	*flag.FlagSet
-	printer *printer.Printer
+	printSettings printer.Settings
 	config *config.Config
 	{{- range $flag := $command.Flags -}}
 	{{- $flag_type := getFlagType $flag.Flag -}}
@@ -98,7 +101,7 @@ func {{ $execute_command_function_name }}(
 ) error {
 	exe := {{ $struct_name }}{
 		FlagSet: flag.NewFlagSet({{ printf "%q" $name }}, flag.ExitOnError),
-		printer: nil,
+		printSettings: printer.Settings{},
 		config: nil,
 		configDir: configDir,
 		{{- range $flag := $command.Flags -}}
@@ -133,7 +136,10 @@ func {{ $execute_command_function_name }}(
 	{{ print "" }}
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("({{ $name }}) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"({{ $name }}) flag parsing error: " + err.Error() + ".",
+		)
 
 		return err
 	}
@@ -143,14 +149,17 @@ func {{ $execute_command_function_name }}(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("({{ $name }}) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"({{ $name }}) unable to load configuration: " + err.Error() + ".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -159,13 +168,16 @@ func {{ $execute_command_function_name }}(
 	{{ print "" }}
 	{{ print "" }}
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(noColor, "", 0)
+	exe.printSettings = printer.NewSettings(noColor, "", 0)
 	{{- end -}}
 	{{ print "" }}
 	{{ print "" }}
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("({{ $name }}) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"({{ $name }}) execution error: " + err.Error() + ".",
+		)
 
 		return err
 	}

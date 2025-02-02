@@ -3,6 +3,7 @@ package printer
 import (
 	"embed"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -10,59 +11,97 @@ import (
 	"text/template"
 	"time"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
 //go:embed templates/*
 var templatesFS embed.FS
 
-type Printer struct {
+type Settings struct {
 	noColor                bool
 	lineWrapCharacterLimit int
 	pager                  string
-	statusSeparator        string
 }
 
-func NewPrinter(
+func NewSettings(
 	noColor bool,
 	pager string,
 	lineWrapCharacterLimit int,
-) *Printer {
+) Settings {
 	if lineWrapCharacterLimit < minTerminalWidth {
 		lineWrapCharacterLimit = minTerminalWidth
 	}
 
-	return &Printer{
+	return Settings{
 		noColor:                noColor,
 		lineWrapCharacterLimit: lineWrapCharacterLimit,
 		pager:                  pager,
-		statusSeparator:        strings.Repeat("\u2501", lineWrapCharacterLimit),
 	}
 }
 
-func (p Printer) PrintSuccess(text string) {
-	success := boldgreen + symbolCheckMark + reset
-	if p.noColor {
-		success = symbolCheckMark
+// PrintSuccess prints the successful message to standard output.
+func PrintSuccess(settings Settings, text string) {
+	const icon = "\u2714"
+
+	success := boldgreen + icon + reset
+	if settings.noColor {
+		success = icon
 	}
 
 	printToStdout(success + " " + text + "\n")
 }
 
-func (p Printer) PrintFailure(text string) {
-	failure := boldred + symbolFailure + reset
-	if p.noColor {
-		failure = symbolFailure
+// PrintFailure prints the failure message to standard error.
+func PrintFailure(settings Settings, text string) {
+	const icon = "\u2717"
+
+	failure := boldred + icon + reset
+	if settings.noColor {
+		failure = icon
 	}
 
 	printToStderr(failure + " " + text + "\n")
 }
 
-func (p Printer) PrintInfo(text string) {
+// PrintInfo prints the message to standard output.
+func PrintInfo(text string) {
 	printToStdout(text)
 }
 
-func (p Printer) PrintAccount(
+// PrintVersion prints the binary build information.
+func PrintVersion(settings Settings, showFullVersion bool) error {
+	if !showFullVersion {
+		printToStdout(info.ApplicationTitledName + " " + info.BinaryVersion + "\n")
+
+		return nil
+	}
+
+	data := struct {
+		Name          string
+		BinaryVersion string
+		GitCommit     string
+		GoVersion     string
+		BuildTime     string
+	}{
+		Name:          info.ApplicationTitledName,
+		BinaryVersion: info.BinaryVersion,
+		GitCommit:     info.GitCommit,
+		GoVersion:     info.GoVersion,
+		BuildTime:     info.BuildTime,
+	}
+
+	return renderTemplateToStdout(
+		settings,
+		"version",
+		"",
+		data,
+	)
+}
+
+// PrintAccount prints the account details to the pager.
+func PrintAccount(
+	settings Settings,
 	account model.Account,
 	relationship model.AccountRelationship,
 	preferences model.Preferences,
@@ -81,18 +120,21 @@ func (p Printer) PrintAccount(
 		StatusList:   statusList,
 	}
 
-	return p.renderTemplateToPager("account", myAccountID, data)
+	return renderTemplateToPager(settings, "account", myAccountID, data)
 }
 
-func (p Printer) PrintAccountList(list model.AccountList) error {
+// PrintAccountList prints the list of accounts to the pager.
+func PrintAccountList(settings Settings, list model.AccountList) error {
 	if list.BlockedAccounts {
-		return p.renderTemplateToPager("blockedAccounts", "", list)
+		return renderTemplateToPager(settings, "blockedAccounts", "", list)
 	}
 
-	return p.renderTemplateToPager("accountList", "", list)
+	return renderTemplateToPager(settings, "accountList", "", list)
 }
 
-func (p Printer) PrintStatus(
+// PrintStatus prints the status to the pager.
+func PrintStatus(
+	settings Settings,
 	status model.Status,
 	myAccountID string,
 	boostedBy model.AccountList,
@@ -108,113 +150,51 @@ func (p Printer) PrintStatus(
 		LikedBy:   likedBy,
 	}
 
-	return p.renderTemplateToPager("statusDoc", myAccountID, data)
+	return renderTemplateToPager(settings, "statusDoc", myAccountID, data)
 }
 
-// PrintStatusList prints a drawn list of statuses.
-func (p Printer) PrintStatusList(list model.StatusList, myAccountID string) error {
-	return p.renderTemplateToPager("statusList", myAccountID, list)
+// PrintStatusList prints a list of status cards to the pager.
+func PrintStatusList(settings Settings, list model.StatusList, myAccountID string) error {
+	return renderTemplateToPager(settings, "statusList", myAccountID, list)
 }
 
-func (p Printer) PrintInstance(instance model.InstanceV2) error {
-	return p.renderTemplateToPager("instance", "", instance)
+// PrintInstance prints the instance information to the pager.
+func PrintInstance(settings Settings, instance model.InstanceV2) error {
+	return renderTemplateToPager(settings, "instance", "", instance)
 }
 
-func (p Printer) PrintMediaAttachment(attachement model.MediaAttachment) error {
-	return p.renderTemplateToPager("mediaAttachmentDoc", "", attachement)
+// PrintMediaAttachment prints the details of the media attachment to the pager.
+func PrintMediaAttachment(settings Settings, attachement model.MediaAttachment) error {
+	return renderTemplateToPager(settings, "mediaAttachmentDoc", "", attachement)
 }
 
-func (p Printer) PrintTag(tag model.Tag) error {
-	return p.renderTemplateToPager("tag", "", tag)
+// PrintTag prints the details of the tag to the pager.
+func PrintTag(settings Settings, tag model.Tag) error {
+	return renderTemplateToPager(settings, "tag", "", tag)
 }
 
-func (p Printer) PrintTagList(list model.TagList) error {
-	return p.renderTemplateToPager("tagList", "", list)
+// PrintTagList prints the list of tags to the pager.
+func PrintTagList(settings Settings, list model.TagList) error {
+	return renderTemplateToPager(settings, "tagList", "", list)
 }
 
-func (p Printer) PrintThread(thread model.Thread, myAccountID string) error {
-	return p.renderTemplateToPager("thread", myAccountID, thread)
+// PrintThread prints the thread to the pager.
+func PrintThread(settings Settings, thread model.Thread, myAccountID string) error {
+	return renderTemplateToPager(settings, "thread", myAccountID, thread)
 }
 
-func (p Printer) PrintList(list model.List) error {
-	return p.renderTemplateToPager("list", "", list)
+// PrintList prints the details of the list to the pager.
+func PrintList(settings Settings, list model.List) error {
+	return renderTemplateToPager(settings, "list", "", list)
 }
 
-func (p Printer) PrintLists(lists []model.List) error {
-	return p.renderTemplateToPager("listOflist", "", lists)
+// PrintLists prints the set of lists to the pager.
+func PrintLists(settings Settings, lists []model.List) error {
+	return renderTemplateToPager(settings, "listOflist", "", lists)
 }
 
-func (p Printer) headerFormat(text string) string {
-	if p.noColor {
-		return text
-	}
-
-	return boldblue + text + reset
-}
-
-func (p Printer) fieldFormat(text string) string {
-	if p.noColor {
-		return text + ":"
-	}
-
-	return green + text + reset + ":"
-}
-
-func (p Printer) boldFormat(text string) string {
-	if p.noColor {
-		return text
-	}
-
-	return bold + text + reset
-}
-
-func (p Printer) drawBoostSymbol(boosted bool) string {
-	if boosted && !p.noColor {
-		return boldyellow + symbolBoosted + reset
-	}
-
-	return symbolBoosted
-}
-
-func (p Printer) drawLikeSymbol(liked bool) string {
-	if liked && !p.noColor {
-		return boldyellow + symbolLiked + reset
-	}
-
-	return symbolNotLiked
-}
-
-func (p Printer) drawBookmarkSymbol(bookmarked bool) string {
-	if bookmarked && !p.noColor {
-		return boldyellow + symbolBookmarked + reset
-	}
-
-	return symbolNotBookmarked
-}
-
-func (p Printer) fullDisplayNameFormat(displayName, acct string) string {
-	// use this pattern to remove all emoji strings
-	pattern := regexp.MustCompile(`\s:[A-Za-z0-9_]*:`)
-
-	var builder strings.Builder
-
-	if p.noColor {
-		builder.WriteString(pattern.ReplaceAllString(displayName, ""))
-	} else {
-		builder.WriteString(boldmagenta + pattern.ReplaceAllString(displayName, "") + reset)
-	}
-
-	builder.WriteString(" (@" + acct + ")")
-
-	return builder.String()
-}
-
-func (p Printer) drawStatusCardSeparator() string {
-	return p.statusSeparator
-}
-
-func (p Printer) renderTemplateToPager(templateName, myAccountID string, data any) error {
-	cmdSplit := strings.Split(p.pager, " ")
+func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
+	cmdSplit := strings.Split(settings.pager, " ")
 
 	binary, err := exec.LookPath(cmdSplit[0])
 	if err != nil {
@@ -237,21 +217,64 @@ func (p Printer) renderTemplateToPager(templateName, myAccountID string, data an
 
 	defer reader.Close()
 
+	if err := renderTemplate(
+		writer,
+		settings,
+		templateName,
+		myAccountID,
+		data,
+	); err != nil {
+		return fmt.Errorf("error rendering the template: %w", err)
+	}
+
+	_ = writer.Close()
+
+	// Pipe the text data to the pager.
+	pagerCmd.Stdin = reader
+	pagerCmd.Stdout = os.Stdout
+
+	_ = pagerCmd.Run()
+
+	return nil
+}
+
+func renderTemplateToStdout(
+	settings Settings,
+	templateName string,
+	myAccountID string,
+	data any,
+) error {
+	return renderTemplate(
+		os.Stdout,
+		settings,
+		templateName,
+		myAccountID,
+		data,
+	)
+}
+
+func renderTemplate(
+	writer io.Writer,
+	settings Settings,
+	templateName string,
+	myAccountID string,
+	data any,
+) error {
 	funcMap := template.FuncMap{
 		"convertHTMLToText":       convertHTMLToText,
 		"formatDate":              formatDate,
 		"formatDateTime":          formatDateTime,
-		"headerFormat":            p.headerFormat,
-		"fieldFormat":             p.fieldFormat,
-		"fullDisplayNameFormat":   p.fullDisplayNameFormat,
-		"boldFormat":              p.boldFormat,
-		"drawStatusCardSeparator": p.drawStatusCardSeparator,
-		"drawBoostSymbol":         p.drawBoostSymbol,
-		"drawLikeSymbol":          p.drawLikeSymbol,
-		"drawBookmarkSymbol":      p.drawBookmarkSymbol,
-		"wrapLines":               p.wrapLines,
+		"headerFormat":            headerFormat(settings.noColor),
+		"fieldFormat":             fieldFormat(settings.noColor),
+		"fullDisplayNameFormat":   fullDisplayNameFormat(settings.noColor),
+		"boldFormat":              boldFormat(settings.noColor),
+		"drawStatusCardSeparator": drawStatusCardSeparator(settings.lineWrapCharacterLimit),
+		"drawBoostSymbol":         drawBoostSymbol(settings.noColor),
+		"drawLikeSymbol":          drawLikeSymbol(settings.noColor),
+		"drawBookmarkSymbol":      drawBookmarkSymbol(settings.noColor),
+		"wrapLines":               wrapLines(settings.lineWrapCharacterLimit),
 		"showPollResults":         showPollResults(myAccountID),
-		"getPollOptionDetails":    p.getPollOptionDetails,
+		"getPollOptionDetails":    getPollOptionDetails(settings.noColor, settings.lineWrapCharacterLimit),
 	}
 
 	tmpl, err := template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*")
@@ -262,14 +285,6 @@ func (p Printer) renderTemplateToPager(templateName, myAccountID string, data an
 	if err := tmpl.ExecuteTemplate(writer, templateName, data); err != nil {
 		return fmt.Errorf("error executing the %q template: %w", templateName, err)
 	}
-
-	_ = writer.Close()
-
-	// Pipe the text data to the pager.
-	pagerCmd.Stdin = reader
-	pagerCmd.Stdout = os.Stdout
-
-	_ = pagerCmd.Run()
 
 	return nil
 }
@@ -293,5 +308,96 @@ func formatDateTime(date time.Time) string {
 func showPollResults(myAccountID string) func(string, bool, bool) bool {
 	return func(statusOwnerID string, expired, voted bool) bool {
 		return (myAccountID == statusOwnerID) || expired || voted
+	}
+}
+
+func headerFormat(noColor bool) func(string) string {
+	return func(text string) string {
+		if noColor {
+			return text
+		}
+
+		return boldblue + text + reset
+	}
+}
+
+func fieldFormat(noColor bool) func(string) string {
+	return func(text string) string {
+		if noColor {
+			return text + ":"
+		}
+
+		return green + text + reset + ":"
+	}
+}
+
+func boldFormat(noColor bool) func(string) string {
+	return func(text string) string {
+		if noColor {
+			return text
+		}
+
+		return bold + text + reset
+	}
+}
+
+func fullDisplayNameFormat(noColor bool) func(string, string) string {
+	return func(displayName, acct string) string {
+		// use this pattern to remove all emoji strings
+		pattern := regexp.MustCompile(`\s:[A-Za-z0-9_]*:`)
+
+		var builder strings.Builder
+
+		if noColor {
+			builder.WriteString(pattern.ReplaceAllString(displayName, ""))
+		} else {
+			builder.WriteString(boldmagenta + pattern.ReplaceAllString(displayName, "") + reset)
+		}
+
+		builder.WriteString(" (@" + acct + ")")
+
+		return builder.String()
+	}
+}
+
+func drawStatusCardSeparator(charLimit int) func() string {
+	separator := strings.Repeat("\u2501", charLimit)
+
+	return func() string {
+		return separator
+	}
+}
+
+func drawBoostSymbol(noColor bool) func(bool) string {
+	return func(boosted bool) string {
+		if boosted && !noColor {
+			return boldyellow + "\u2BAD" + reset
+		}
+
+		return "\u2BAD"
+	}
+}
+
+func drawLikeSymbol(noColor bool) func(bool) string {
+	return func(liked bool) string {
+		if liked && !noColor {
+			return boldyellow + "\uf51f" + reset
+		} else if liked && noColor {
+			return "\uf51f"
+		}
+
+		return "\uf41e"
+	}
+}
+
+func drawBookmarkSymbol(noColor bool) func(bool) string {
+	return func(bookmarked bool) string {
+		if bookmarked && !noColor {
+			return boldyellow + "\uf47a" + reset
+		} else if bookmarked && noColor {
+			return "\uf47a"
+		}
+
+		return "\uf461"
 	}
 }

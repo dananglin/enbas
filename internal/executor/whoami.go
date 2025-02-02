@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -25,7 +26,7 @@ func (w *WhoamiExecutor) Execute() error {
 		return fmt.Errorf("error getting the instance URL: %w", err)
 	}
 
-	w.printer.PrintInfo("You are logged in as '" + account.Username + "@" + utilities.GetFQDN(instanceURL) + "'.\n")
+	printer.PrintInfo("You are logged in as '" + account.Username + "@" + utilities.GetFQDN(instanceURL) + "'.\n")
 
 	return nil
 }

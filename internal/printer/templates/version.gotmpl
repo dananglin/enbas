@@ -1,0 +1,10 @@
+{{- define "version" -}}
+{{ print "" }}
+{{ headerFormat .Name }}
+{{ print "" }}
+{{ fieldFormat "Version" }}    {{ .BinaryVersion }}
+{{ fieldFormat "Git commit" }} {{ .GitCommit }}
+{{ fieldFormat "Go version" }} {{ .GoVersion }}
+{{ fieldFormat "Build date" }} {{ .BuildTime }}
+{{ print "" }}
+{{ end -}}

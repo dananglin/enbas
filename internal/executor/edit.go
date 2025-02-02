@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -74,8 +75,8 @@ func (e *EditExecutor) editList(client *rpc.Client) error {
 		updatedList.Accounts = acctMap
 	}
 
-	e.printer.PrintSuccess("Successfully edited the list.")
-	e.printer.PrintList(updatedList)
+	printer.PrintSuccess(e.printSettings, "Successfully edited the list.")
+	printer.PrintList(e.printSettings, updatedList)
 
 	return nil
 }
@@ -142,7 +143,7 @@ func (e *EditExecutor) editMediaAttachment(client *rpc.Client) error {
 		return fmt.Errorf("error updating the media attachment: %w", err)
 	}
 
-	e.printer.PrintSuccess("Successfully edited the media attachment.")
+	printer.PrintSuccess(e.printSettings, "Successfully edited the media attachment.")
 
 	return nil
 }

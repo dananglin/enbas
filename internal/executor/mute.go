@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -47,7 +48,7 @@ func (m *MuteExecutor) muteAccount(client *rpc.Client) error {
 		return fmt.Errorf("error muting the account: %w", err)
 	}
 
-	m.printer.PrintSuccess("Successfully muted the account.")
+	printer.PrintSuccess(m.printSettings, "Successfully muted the account.")
 
 	return nil
 }
@@ -92,7 +93,7 @@ func (m *MuteExecutor) muteStatus(client *rpc.Client) error {
 		return fmt.Errorf("error muting the status: %w", err)
 	}
 
-	m.printer.PrintSuccess("Successfully muted the status.")
+	printer.PrintSuccess(m.printSettings, "Successfully muted the status.")
 
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -47,7 +48,7 @@ func (d *DeleteExecutor) deleteList(client *rpc.Client) error {
 		return fmt.Errorf("unable to delete the list: %w", err)
 	}
 
-	d.printer.PrintSuccess("The list was successfully deleted.")
+	printer.PrintSuccess(d.printSettings, "The list was successfully deleted.")
 
 	return nil
 }
@@ -79,7 +80,7 @@ func (d *DeleteExecutor) deleteStatus(client *rpc.Client) error {
 		return fmt.Errorf("error deleting the status: %w", err)
 	}
 
-	d.printer.PrintSuccess("The status was successfully deleted.")
+	printer.PrintSuccess(d.printSettings, "The status was successfully deleted.")
 
 	if d.saveText {
 		var instanceURL string
@@ -102,7 +103,7 @@ func (d *DeleteExecutor) deleteStatus(client *rpc.Client) error {
 			return fmt.Errorf("unable to save the text to %q: %w", path, err)
 		}
 
-		d.printer.PrintSuccess("The text was successfully saved to '" + path + "'.")
+		printer.PrintSuccess(d.printSettings, "The text was successfully saved to '"+path+"'.")
 	}
 
 	return nil

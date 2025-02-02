@@ -24,7 +24,7 @@ var (
 )
 
 func Run(
-	printer *printer.Printer,
+	printSettings printer.Settings,
 	client *gtsclient.GTSClient,
 	socketPath string,
 	noIdleTimeout bool,
@@ -68,7 +68,7 @@ func Run(
 	// Run the server without a timer.
 	if noIdleTimeout {
 		return runWithoutIdleTimeout(
-			printer,
+			printSettings,
 			server,
 			socketPath,
 			shutdown,
@@ -77,7 +77,7 @@ func Run(
 
 	// Run the server with a timer.
 	return runWithIdleTimeout(
-		printer,
+		printSettings,
 		server,
 		socketPath,
 		idleTimeout,
@@ -88,7 +88,7 @@ func Run(
 // runWithIdleTimeout runs the RPC server. The server closes after a specified amount of idle time or when the
 // shutdown signal is received.
 func runWithIdleTimeout(
-	printer *printer.Printer,
+	printSettings printer.Settings,
 	server *rpc.Server,
 	socketPath string,
 	idleTimeout int,
@@ -121,7 +121,10 @@ func runWithIdleTimeout(
 					return
 				}
 
-				printer.PrintFailure("Error accepting the connection: " + err.Error() + ".")
+				printer.PrintFailure(
+					printSettings,
+					"Error accepting the connection: "+err.Error()+".",
+				)
 
 				os.Exit(1)
 			}
@@ -146,7 +149,7 @@ func runWithIdleTimeout(
 
 // runWithoutIdleTimeout runs the RPC server. The server closes when the shutdown signal is received.
 func runWithoutIdleTimeout(
-	printer *printer.Printer,
+	printSettings printer.Settings,
 	server *rpc.Server,
 	socketPath string,
 	shutdown <-chan os.Signal,
@@ -170,7 +173,10 @@ func runWithoutIdleTimeout(
 					return
 				}
 
-				printer.PrintFailure("Error accepting the connection: " + err.Error() + ".")
+				printer.PrintFailure(
+					printSettings,
+					"Error accepting the connection: "+err.Error()+".",
+				)
 
 				os.Exit(1)
 			}

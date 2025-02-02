@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -58,8 +59,8 @@ func (c *CreateExecutor) createList(client *rpc.Client) error {
 		return fmt.Errorf("unable to create the list: %w", err)
 	}
 
-	c.printer.PrintSuccess("Successfully created the following list:")
-	c.printer.PrintList(list)
+	printer.PrintSuccess(c.printSettings, "Successfully created the following list:")
+	printer.PrintList(c.printSettings, list)
 
 	return nil
 }
@@ -170,7 +171,7 @@ func (c *CreateExecutor) createStatus(client *rpc.Client) error {
 
 	var preferences model.Preferences
 	if err := client.Call("GTSClient.GetUserPreferences", gtsclient.NoRPCArgs{}, &preferences); err != nil {
-		c.printer.PrintInfo("WARNING: Unable to get your posting preferences: " + err.Error() + ".\n")
+		printer.PrintInfo("WARNING: Unable to get your posting preferences: " + err.Error() + ".\n")
 	}
 
 	if c.language != "" {
@@ -241,7 +242,7 @@ func (c *CreateExecutor) createStatus(client *rpc.Client) error {
 		return fmt.Errorf("error creating the status: %w", err)
 	}
 
-	c.printer.PrintSuccess("Successfully created the status with ID: " + status.ID)
+	printer.PrintSuccess(c.printSettings, "Successfully created the status with ID: "+status.ID)
 
 	return nil
 }
@@ -305,7 +306,7 @@ func (c *CreateExecutor) createMediaAttachment(client *rpc.Client) error {
 		return fmt.Errorf("unable to create the media attachment: %w", err)
 	}
 
-	c.printer.PrintSuccess("Successfully created the media attachment with ID: " + attachment.ID)
+	printer.PrintSuccess(c.printSettings, "Successfully created the media attachment with ID: "+attachment.ID)
 
 	return nil
 }

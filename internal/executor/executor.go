@@ -70,7 +70,10 @@ func Execute() error {
 	executorFunc, ok := executorMap[command]
 	if !ok {
 		err := UnknownCommandError{command: command}
-		printer.NewPrinter(noColor, "", 0).PrintFailure("Error: " + err.Error())
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"Error: "+err.Error(),
+		)
 
 		return err
 	}
@@ -81,11 +84,11 @@ func Execute() error {
 // AcceptExecutor is the executor for the accept command.
 type AcceptExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteAcceptCommand initialises and runs the executor for the accept command.
@@ -95,11 +98,11 @@ func ExecuteAcceptCommand(
 	args []string,
 ) error {
 	exe := AcceptExecutor{
-		FlagSet:     flag.NewFlagSet("accept", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("accept", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("accept", "Accepts a request (e.g. a follow request)", exe.FlagSet)
@@ -109,7 +112,10 @@ func ExecuteAcceptCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(accept) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(accept) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -117,14 +123,17 @@ func ExecuteAcceptCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(accept) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(accept) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -132,7 +141,10 @@ func ExecuteAcceptCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(accept) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(accept) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -143,7 +155,7 @@ func ExecuteAcceptCommand(
 // AddExecutor is the executor for the add command.
 type AddExecutor struct {
 	*flag.FlagSet
-	printer        *printer.Printer
+	printSettings  printer.Settings
 	config         *config.Config
 	accountNames   internalFlag.StringSliceValue
 	content        string
@@ -162,12 +174,12 @@ func ExecuteAddCommand(
 	args []string,
 ) error {
 	exe := AddExecutor{
-		FlagSet:      flag.NewFlagSet("add", flag.ExitOnError),
-		printer:      nil,
-		config:       nil,
-		configDir:    configDir,
-		accountNames: internalFlag.NewStringSliceValue(),
-		votes:        internalFlag.NewIntSliceValue(),
+		FlagSet:       flag.NewFlagSet("add", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountNames:  internalFlag.NewStringSliceValue(),
+		votes:         internalFlag.NewIntSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("add", "Adds a resource to another resource", exe.FlagSet)
@@ -182,7 +194,10 @@ func ExecuteAddCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(add) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(add) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -190,14 +205,17 @@ func ExecuteAddCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(add) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(add) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -205,7 +223,10 @@ func ExecuteAddCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(add) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(add) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -216,11 +237,11 @@ func ExecuteAddCommand(
 // BlockExecutor is the executor for the block command.
 type BlockExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteBlockCommand initialises and runs the executor for the block command.
@@ -230,11 +251,11 @@ func ExecuteBlockCommand(
 	args []string,
 ) error {
 	exe := BlockExecutor{
-		FlagSet:     flag.NewFlagSet("block", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("block", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("block", "Blocks a resource (e.g. an account)", exe.FlagSet)
@@ -244,7 +265,10 @@ func ExecuteBlockCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(block) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(block) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -252,14 +276,17 @@ func ExecuteBlockCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(block) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(block) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -267,7 +294,10 @@ func ExecuteBlockCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(block) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(block) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -278,7 +308,7 @@ func ExecuteBlockCommand(
 // CreateExecutor is the executor for the create command.
 type CreateExecutor struct {
 	*flag.FlagSet
-	printer                   *printer.Printer
+	printSettings             printer.Settings
 	config                    *config.Config
 	addPoll                   bool
 	attachmentIDs             internalFlag.StringSliceValue
@@ -315,7 +345,7 @@ func ExecuteCreateCommand(
 ) error {
 	exe := CreateExecutor{
 		FlagSet:           flag.NewFlagSet("create", flag.ExitOnError),
-		printer:           nil,
+		printSettings:     printer.Settings{},
 		config:            nil,
 		configDir:         configDir,
 		attachmentIDs:     internalFlag.NewStringSliceValue(),
@@ -356,7 +386,10 @@ func ExecuteCreateCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(create) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(create) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -364,14 +397,17 @@ func ExecuteCreateCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(create) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(create) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -379,7 +415,10 @@ func ExecuteCreateCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(create) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(create) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -390,13 +429,13 @@ func ExecuteCreateCommand(
 // DeleteExecutor is the executor for the delete command.
 type DeleteExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	listID       string
-	saveText     bool
-	statusID     string
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	listID        string
+	saveText      bool
+	statusID      string
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteDeleteCommand initialises and runs the executor for the delete command.
@@ -406,10 +445,10 @@ func ExecuteDeleteCommand(
 	args []string,
 ) error {
 	exe := DeleteExecutor{
-		FlagSet:   flag.NewFlagSet("delete", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("delete", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("delete", "Deletes a specific resource", exe.FlagSet)
@@ -421,7 +460,10 @@ func ExecuteDeleteCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(delete) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(delete) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -429,14 +471,17 @@ func ExecuteDeleteCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(delete) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(delete) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -444,7 +489,10 @@ func ExecuteDeleteCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(delete) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(delete) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -455,7 +503,7 @@ func ExecuteDeleteCommand(
 // EditExecutor is the executor for the edit command.
 type EditExecutor struct {
 	*flag.FlagSet
-	printer           *printer.Printer
+	printSettings     printer.Settings
 	config            *config.Config
 	attachmentIDs     internalFlag.StringSliceValue
 	listID            string
@@ -475,7 +523,7 @@ func ExecuteEditCommand(
 ) error {
 	exe := EditExecutor{
 		FlagSet:           flag.NewFlagSet("edit", flag.ExitOnError),
-		printer:           nil,
+		printSettings:     printer.Settings{},
 		config:            nil,
 		configDir:         configDir,
 		attachmentIDs:     internalFlag.NewStringSliceValue(),
@@ -495,7 +543,10 @@ func ExecuteEditCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(edit) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(edit) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -503,14 +554,17 @@ func ExecuteEditCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(edit) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(edit) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -518,7 +572,10 @@ func ExecuteEditCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(edit) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(edit) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -529,14 +586,14 @@ func ExecuteEditCommand(
 // FollowExecutor is the executor for the follow command.
 type FollowExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	notify       bool
-	showReposts  bool
-	tag          string
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	notify        bool
+	showReposts   bool
+	tag           string
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteFollowCommand initialises and runs the executor for the follow command.
@@ -546,11 +603,11 @@ func ExecuteFollowCommand(
 	args []string,
 ) error {
 	exe := FollowExecutor{
-		FlagSet:     flag.NewFlagSet("follow", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("follow", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("follow", "Follow a resource (e.g. an account)", exe.FlagSet)
@@ -563,7 +620,10 @@ func ExecuteFollowCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(follow) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(follow) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -571,14 +631,17 @@ func ExecuteFollowCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(follow) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(follow) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -586,7 +649,10 @@ func ExecuteFollowCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(follow) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(follow) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -597,9 +663,9 @@ func ExecuteFollowCommand(
 // InitExecutor is the executor for the init command.
 type InitExecutor struct {
 	*flag.FlagSet
-	printer   *printer.Printer
-	config    *config.Config
-	configDir string
+	printSettings printer.Settings
+	config        *config.Config
+	configDir     string
 }
 
 // ExecuteInitCommand initialises and runs the executor for the init command.
@@ -609,27 +675,33 @@ func ExecuteInitCommand(
 	args []string,
 ) error {
 	exe := InitExecutor{
-		FlagSet:   flag.NewFlagSet("init", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("init", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("init", "Creates a new configuration file in the specified configuration directory", exe.FlagSet)
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(init) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(init) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(noColor, "", 0)
+	exe.printSettings = printer.NewSettings(noColor, "", 0)
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(init) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(init) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -640,10 +712,10 @@ func ExecuteInitCommand(
 // LoginExecutor is the executor for the login command.
 type LoginExecutor struct {
 	*flag.FlagSet
-	printer   *printer.Printer
-	config    *config.Config
-	instance  string
-	configDir string
+	printSettings printer.Settings
+	config        *config.Config
+	instance      string
+	configDir     string
 }
 
 // ExecuteLoginCommand initialises and runs the executor for the login command.
@@ -653,10 +725,10 @@ func ExecuteLoginCommand(
 	args []string,
 ) error {
 	exe := LoginExecutor{
-		FlagSet:   flag.NewFlagSet("login", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("login", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("login", "Logs into an account on GoToSocial", exe.FlagSet)
@@ -665,7 +737,10 @@ func ExecuteLoginCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(login) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(login) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -673,14 +748,17 @@ func ExecuteLoginCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(login) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(login) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -688,7 +766,10 @@ func ExecuteLoginCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(login) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(login) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -699,7 +780,7 @@ func ExecuteLoginCommand(
 // MuteExecutor is the executor for the mute command.
 type MuteExecutor struct {
 	*flag.FlagSet
-	printer           *printer.Printer
+	printSettings     printer.Settings
 	config            *config.Config
 	accountName       internalFlag.StringSliceValue
 	muteDuration      internalFlag.TimeDurationValue
@@ -716,12 +797,12 @@ func ExecuteMuteCommand(
 	args []string,
 ) error {
 	exe := MuteExecutor{
-		FlagSet:      flag.NewFlagSet("mute", flag.ExitOnError),
-		printer:      nil,
-		config:       nil,
-		configDir:    configDir,
-		accountName:  internalFlag.NewStringSliceValue(),
-		muteDuration: internalFlag.NewTimeDurationValue(),
+		FlagSet:       flag.NewFlagSet("mute", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
+		muteDuration:  internalFlag.NewTimeDurationValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("mute", "Mutes a specific resource (e.g. an account)", exe.FlagSet)
@@ -734,7 +815,10 @@ func ExecuteMuteCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(mute) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(mute) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -742,14 +826,17 @@ func ExecuteMuteCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(mute) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(mute) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -757,7 +844,10 @@ func ExecuteMuteCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(mute) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(mute) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -768,11 +858,11 @@ func ExecuteMuteCommand(
 // RejectExecutor is the executor for the reject command.
 type RejectExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteRejectCommand initialises and runs the executor for the reject command.
@@ -782,11 +872,11 @@ func ExecuteRejectCommand(
 	args []string,
 ) error {
 	exe := RejectExecutor{
-		FlagSet:     flag.NewFlagSet("reject", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("reject", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("reject", "Rejects a request (e.g. a follow request)", exe.FlagSet)
@@ -796,7 +886,10 @@ func ExecuteRejectCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(reject) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(reject) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -804,14 +897,17 @@ func ExecuteRejectCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(reject) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(reject) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -819,7 +915,10 @@ func ExecuteRejectCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(reject) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(reject) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -830,7 +929,7 @@ func ExecuteRejectCommand(
 // RemoveExecutor is the executor for the remove command.
 type RemoveExecutor struct {
 	*flag.FlagSet
-	printer          *printer.Printer
+	printSettings    printer.Settings
 	config           *config.Config
 	accountNames     internalFlag.StringSliceValue
 	fromResourceType string
@@ -847,11 +946,11 @@ func ExecuteRemoveCommand(
 	args []string,
 ) error {
 	exe := RemoveExecutor{
-		FlagSet:      flag.NewFlagSet("remove", flag.ExitOnError),
-		printer:      nil,
-		config:       nil,
-		configDir:    configDir,
-		accountNames: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("remove", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountNames:  internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("remove", "Removes a resource from another resource", exe.FlagSet)
@@ -864,7 +963,10 @@ func ExecuteRemoveCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(remove) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(remove) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -872,14 +974,17 @@ func ExecuteRemoveCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(remove) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(remove) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -887,7 +992,10 @@ func ExecuteRemoveCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(remove) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(remove) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -898,7 +1006,7 @@ func ExecuteRemoveCommand(
 // ServerExecutor is the executor for the server command.
 type ServerExecutor struct {
 	*flag.FlagSet
-	printer       *printer.Printer
+	printSettings printer.Settings
 	config        *config.Config
 	noIdleTimeout bool
 	configDir     string
@@ -911,10 +1019,10 @@ func ExecuteServerCommand(
 	args []string,
 ) error {
 	exe := ServerExecutor{
-		FlagSet:   flag.NewFlagSet("server", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("server", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("server", "Runs Enbas in server mode", exe.FlagSet)
@@ -923,7 +1031,10 @@ func ExecuteServerCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(server) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(server) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -931,14 +1042,17 @@ func ExecuteServerCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(server) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(server) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -946,7 +1060,10 @@ func ExecuteServerCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(server) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(server) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -957,7 +1074,7 @@ func ExecuteServerCommand(
 // ShowExecutor is the executor for the show command.
 type ShowExecutor struct {
 	*flag.FlagSet
-	printer                 *printer.Printer
+	printSettings           printer.Settings
 	config                  *config.Config
 	accountName             internalFlag.StringSliceValue
 	getAllAudio             bool
@@ -994,7 +1111,7 @@ func ExecuteShowCommand(
 ) error {
 	exe := ShowExecutor{
 		FlagSet:       flag.NewFlagSet("show", flag.ExitOnError),
-		printer:       nil,
+		printSettings: printer.Settings{},
 		config:        nil,
 		configDir:     configDir,
 		accountName:   internalFlag.NewStringSliceValue(),
@@ -1030,7 +1147,10 @@ func ExecuteShowCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(show) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(show) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1038,14 +1158,17 @@ func ExecuteShowCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(show) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(show) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1053,7 +1176,10 @@ func ExecuteShowCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(show) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(show) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1064,11 +1190,11 @@ func ExecuteShowCommand(
 // SwitchExecutor is the executor for the switch command.
 type SwitchExecutor struct {
 	*flag.FlagSet
-	printer     *printer.Printer
-	config      *config.Config
-	accountName internalFlag.StringSliceValue
-	to          string
-	configDir   string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	to            string
+	configDir     string
 }
 
 // ExecuteSwitchCommand initialises and runs the executor for the switch command.
@@ -1078,11 +1204,11 @@ func ExecuteSwitchCommand(
 	args []string,
 ) error {
 	exe := SwitchExecutor{
-		FlagSet:     flag.NewFlagSet("switch", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("switch", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("switch", "Performs a switch operation (e.g. switching between logged in accounts)", exe.FlagSet)
@@ -1092,7 +1218,10 @@ func ExecuteSwitchCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(switch) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(switch) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1100,14 +1229,17 @@ func ExecuteSwitchCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(switch) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(switch) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1115,7 +1247,10 @@ func ExecuteSwitchCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(switch) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(switch) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1126,11 +1261,11 @@ func ExecuteSwitchCommand(
 // UnblockExecutor is the executor for the unblock command.
 type UnblockExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteUnblockCommand initialises and runs the executor for the unblock command.
@@ -1140,11 +1275,11 @@ func ExecuteUnblockCommand(
 	args []string,
 ) error {
 	exe := UnblockExecutor{
-		FlagSet:     flag.NewFlagSet("unblock", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("unblock", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("unblock", "Unblocks a resource (e.g. an account)", exe.FlagSet)
@@ -1154,7 +1289,10 @@ func ExecuteUnblockCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unblock) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unblock) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1162,14 +1300,17 @@ func ExecuteUnblockCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unblock) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unblock) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1177,7 +1318,10 @@ func ExecuteUnblockCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(unblock) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(unblock) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1188,12 +1332,12 @@ func ExecuteUnblockCommand(
 // UnfollowExecutor is the executor for the unfollow command.
 type UnfollowExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	tag          string
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	tag           string
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteUnfollowCommand initialises and runs the executor for the unfollow command.
@@ -1203,11 +1347,11 @@ func ExecuteUnfollowCommand(
 	args []string,
 ) error {
 	exe := UnfollowExecutor{
-		FlagSet:     flag.NewFlagSet("unfollow", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("unfollow", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("unfollow", "Unfollows a resource (e.g. an account)", exe.FlagSet)
@@ -1218,7 +1362,10 @@ func ExecuteUnfollowCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unfollow) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unfollow) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1226,14 +1373,17 @@ func ExecuteUnfollowCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unfollow) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unfollow) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1241,7 +1391,10 @@ func ExecuteUnfollowCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(unfollow) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(unfollow) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1252,12 +1405,12 @@ func ExecuteUnfollowCommand(
 // UnmuteExecutor is the executor for the unmute command.
 type UnmuteExecutor struct {
 	*flag.FlagSet
-	printer      *printer.Printer
-	config       *config.Config
-	accountName  internalFlag.StringSliceValue
-	statusID     string
-	resourceType string
-	configDir    string
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	statusID      string
+	resourceType  string
+	configDir     string
 }
 
 // ExecuteUnmuteCommand initialises and runs the executor for the unmute command.
@@ -1267,11 +1420,11 @@ func ExecuteUnmuteCommand(
 	args []string,
 ) error {
 	exe := UnmuteExecutor{
-		FlagSet:     flag.NewFlagSet("unmute", flag.ExitOnError),
-		printer:     nil,
-		config:      nil,
-		configDir:   configDir,
-		accountName: internalFlag.NewStringSliceValue(),
+		FlagSet:       flag.NewFlagSet("unmute", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("unmute", "Umutes a specific resource (e.g. an account)", exe.FlagSet)
@@ -1282,7 +1435,10 @@ func ExecuteUnmuteCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unmute) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unmute) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1290,14 +1446,17 @@ func ExecuteUnmuteCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(unmute) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(unmute) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1305,7 +1464,10 @@ func ExecuteUnmuteCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(unmute) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(unmute) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1316,10 +1478,10 @@ func ExecuteUnmuteCommand(
 // VersionExecutor is the executor for the version command.
 type VersionExecutor struct {
 	*flag.FlagSet
-	printer   *printer.Printer
-	config    *config.Config
-	full      bool
-	configDir string
+	printSettings printer.Settings
+	config        *config.Config
+	full          bool
+	configDir     string
 }
 
 // ExecuteVersionCommand initialises and runs the executor for the version command.
@@ -1329,10 +1491,10 @@ func ExecuteVersionCommand(
 	args []string,
 ) error {
 	exe := VersionExecutor{
-		FlagSet:   flag.NewFlagSet("version", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("version", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("version", "Prints the application's version and build information", exe.FlagSet)
@@ -1341,17 +1503,23 @@ func ExecuteVersionCommand(
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(version) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(version) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(noColor, "", 0)
+	exe.printSettings = printer.NewSettings(noColor, "", 0)
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(version) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(version) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1362,9 +1530,9 @@ func ExecuteVersionCommand(
 // WhoamiExecutor is the executor for the whoami command.
 type WhoamiExecutor struct {
 	*flag.FlagSet
-	printer   *printer.Printer
-	config    *config.Config
-	configDir string
+	printSettings printer.Settings
+	config        *config.Config
+	configDir     string
 }
 
 // ExecuteWhoamiCommand initialises and runs the executor for the whoami command.
@@ -1374,17 +1542,20 @@ func ExecuteWhoamiCommand(
 	args []string,
 ) error {
 	exe := WhoamiExecutor{
-		FlagSet:   flag.NewFlagSet("whoami", flag.ExitOnError),
-		printer:   nil,
-		config:    nil,
-		configDir: configDir,
+		FlagSet:       flag.NewFlagSet("whoami", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("whoami", "Prints the account that you are currently logged into", exe.FlagSet)
 
 	// Parse the remaining arguments.
 	if err := exe.Parse(args); err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(whoami) flag parsing error: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(whoami) flag parsing error: "+err.Error()+".",
+		)
 
 		return err
 	}
@@ -1392,14 +1563,17 @@ func ExecuteWhoamiCommand(
 	// Load the configuration from file.
 	exeConfig, err := config.NewConfigFromFile(exe.configDir)
 	if err != nil {
-		printer.NewPrinter(noColor, "", 0).PrintFailure("(whoami) unable to load configuration: " + err.Error() + ".")
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(whoami) unable to load configuration: "+err.Error()+".",
+		)
 
 		return err
 	}
 	exe.config = exeConfig
 
 	// Create the printer for the executor.
-	exe.printer = printer.NewPrinter(
+	exe.printSettings = printer.NewSettings(
 		noColor,
 		exe.config.Integrations.Pager,
 		exe.config.LineWrapMaxWidth,
@@ -1407,7 +1581,10 @@ func ExecuteWhoamiCommand(
 
 	// Run the executor.
 	if err := exe.Execute(); err != nil {
-		exe.printer.PrintFailure("(whoami) execution error: " + err.Error() + ".")
+		printer.PrintFailure(
+			exe.printSettings,
+			"(whoami) execution error: "+err.Error()+".",
+		)
 
 		return err
 	}

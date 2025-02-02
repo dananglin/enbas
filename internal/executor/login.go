@@ -7,6 +7,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
@@ -64,7 +65,7 @@ func (l *LoginExecutor) Execute() error {
 	builder.WriteString("\n\n" + "Once you have the code please copy and paste it below.")
 	builder.WriteString("\n" + "Out-of-band token: ")
 
-	l.printer.PrintInfo(builder.String())
+	printer.PrintInfo(builder.String())
 
 	var code string
 
@@ -86,7 +87,7 @@ func (l *LoginExecutor) Execute() error {
 		return fmt.Errorf("unable to save the authentication details: %w", err)
 	}
 
-	l.printer.PrintSuccess("You have successfully logged as " + loginName + ".")
+	printer.PrintSuccess(l.printSettings, "You have successfully logged as " + loginName + ".")
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -84,7 +85,7 @@ func (r *RemoveExecutor) removeAccountsFromList(client *rpc.Client) error {
 		return fmt.Errorf("error removing the accounts from the list: %w", err)
 	}
 
-	r.printer.PrintSuccess("Successfully removed the account(s) from the list.")
+	printer.PrintSuccess(r.printSettings, "Successfully removed the account(s) from the list.")
 
 	return nil
 }
@@ -122,7 +123,7 @@ func (r *RemoveExecutor) removeNoteFromAccount(client *rpc.Client) error {
 		return fmt.Errorf("unable to remove the private note from the account: %w", err)
 	}
 
-	r.printer.PrintSuccess("Successfully removed the private note from the account.")
+	printer.PrintSuccess(r.printSettings, "Successfully removed the private note from the account.")
 
 	return nil
 }
@@ -155,7 +156,7 @@ func (r *RemoveExecutor) removeStatusFromBookmarks(client *rpc.Client) error {
 		return fmt.Errorf("error removing the status from your bookmarks: %w", err)
 	}
 
-	r.printer.PrintSuccess("Successfully removed the status from your bookmarks.")
+	printer.PrintSuccess(r.printSettings, "Successfully removed the status from your bookmarks.")
 
 	return nil
 }
@@ -190,7 +191,7 @@ func (r *RemoveExecutor) removeStarFromStatus(client *rpc.Client) error {
 		return fmt.Errorf("error removing the %s from the status: %w", r.resourceType, err)
 	}
 
-	r.printer.PrintSuccess("Successfully removed the " + r.resourceType + " from the status.")
+	printer.PrintSuccess(r.printSettings, "Successfully removed the "+r.resourceType+" from the status.")
 
 	return nil
 }
@@ -200,7 +201,7 @@ func (r *RemoveExecutor) removeBoostFromStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to remove the boost from the status: %w", err)
 	}
 
-	r.printer.PrintSuccess("Successfully removed the boost from the status.")
+	printer.PrintSuccess(r.printSettings, "Successfully removed the boost from the status.")
 
 	return nil
 }

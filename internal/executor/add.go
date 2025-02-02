@@ -6,6 +6,7 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -94,7 +95,7 @@ func (a *AddExecutor) addAccountsToList(client *rpc.Client) error {
 		return fmt.Errorf("unable to add the accounts to the list: %w", err)
 	}
 
-	a.printer.PrintSuccess("Successfully added the account(s) to the list.")
+	printer.PrintSuccess(a.printSettings, "Successfully added the account(s) to the list.")
 
 	return nil
 }
@@ -136,7 +137,7 @@ func (a *AddExecutor) addNoteToAccount(client *rpc.Client) error {
 		return fmt.Errorf("unable to add the private note to the account: %w", err)
 	}
 
-	a.printer.PrintSuccess("Successfully added the private note to the account.")
+	printer.PrintSuccess(a.printSettings, "Successfully added the private note to the account.")
 
 	return nil
 }
@@ -169,7 +170,7 @@ func (a *AddExecutor) addStatusToBookmarks(client *rpc.Client) error {
 		return fmt.Errorf("unable to add the status to your bookmarks: %w", err)
 	}
 
-	a.printer.PrintSuccess("Successfully added the status to your bookmarks.")
+	printer.PrintSuccess(a.printSettings, "Successfully added the status to your bookmarks.")
 
 	return nil
 }
@@ -205,7 +206,7 @@ func (a *AddExecutor) addStarToStatus(client *rpc.Client) error {
 		return fmt.Errorf("error adding the %s to the status: %w", a.resourceType, err)
 	}
 
-	a.printer.PrintSuccess("Successfully added a " + a.resourceType + " to the status.")
+	printer.PrintSuccess(a.printSettings, "Successfully added a "+a.resourceType+" to the status.")
 
 	return nil
 }
@@ -215,7 +216,7 @@ func (a *AddExecutor) addBoostToStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to add the boost to the status: %w", err)
 	}
 
-	a.printer.PrintSuccess("Successfully added the boost to the status.")
+	printer.PrintSuccess(a.printSettings, "Successfully added the boost to the status.")
 
 	return nil
 }
@@ -264,7 +265,7 @@ func (a *AddExecutor) addVoteToStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to add your vote(s) to the poll: %w", err)
 	}
 
-	a.printer.PrintSuccess("Successfully added your vote(s) to the poll.")
+	printer.PrintSuccess(a.printSettings, "Successfully added your vote(s) to the poll.")
 
 	return nil
 }

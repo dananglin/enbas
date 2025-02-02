@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -47,7 +48,7 @@ func (f *FollowExecutor) followAccount(client *rpc.Client) error {
 		return fmt.Errorf("error following the account: %w", err)
 	}
 
-	f.printer.PrintSuccess("Successfully sent the follow request.")
+	printer.PrintSuccess(f.printSettings, "Successfully sent the follow request.")
 
 	return nil
 }
@@ -63,7 +64,7 @@ func (f *FollowExecutor) followTag(client *rpc.Client) error {
 		return fmt.Errorf("error following the tag: %w", err)
 	}
 
-	f.printer.PrintSuccess("You are now following '" + tag + "'.")
+	printer.PrintSuccess(f.printSettings, "You are now following '"+tag+"'.")
 
 	return nil
 }

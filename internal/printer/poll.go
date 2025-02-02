@@ -11,50 +11,57 @@ type PollOptionDetails struct {
 	Voted      bool
 }
 
-func (p Printer) getPollOptionDetails(numVotesForOption, totalVotes, optionID int, ownVotes []int) PollOptionDetails {
-	var (
-		votage     float64
-		percentage int
-	)
+func getPollOptionDetails(
+	noColor bool,
+	charLimit int,
+) func(int, int, int, []int) PollOptionDetails {
+	return func(numVotesForOption, totalVotes, optionID int, ownVotes []int) PollOptionDetails {
+		const symbolPollMeter = "\u2501"
 
-	if totalVotes > 0 {
-		votage = float64(numVotesForOption) / float64(totalVotes)
-		percentage = int(math.Floor(100 * votage))
-	}
+		var (
+			votage     float64
+			percentage int
+		)
 
-	numVoteBlocks := int(math.Floor(float64(p.lineWrapCharacterLimit) * votage))
-	numBackgroundBlocks := p.lineWrapCharacterLimit - numVoteBlocks
-
-	voteBlockColour := boldgreen
-	backgroundBlockColor := grey
-
-	if p.noColor {
-		voteBlockColour = reset
-
-		if numVoteBlocks == 0 {
-			numVoteBlocks = 1
+		if totalVotes > 0 {
+			votage = float64(numVotesForOption) / float64(totalVotes)
+			percentage = int(math.Floor(100 * votage))
 		}
-	}
 
-	meter := voteBlockColour + strings.Repeat(symbolPollMeter, numVoteBlocks) + reset
+		numVoteBlocks := int(math.Floor(float64(charLimit) * votage))
+		numBackgroundBlocks := charLimit - numVoteBlocks
 
-	if !p.noColor {
-		meter += backgroundBlockColor + strings.Repeat(symbolPollMeter, numBackgroundBlocks) + reset
-	}
+		voteBlockColour := boldgreen
+		backgroundBlockColor := grey
 
-	voted := false
+		if noColor {
+			voteBlockColour = reset
 
-	for _, vote := range ownVotes {
-		if vote == optionID {
-			voted = true
-
-			break
+			if numVoteBlocks == 0 {
+				numVoteBlocks = 1
+			}
 		}
-	}
 
-	return PollOptionDetails{
-		Percentage: percentage,
-		Meter:      meter,
-		Voted:      voted,
+		meter := voteBlockColour + strings.Repeat(symbolPollMeter, numVoteBlocks) + reset
+
+		if !noColor {
+			meter += backgroundBlockColor + strings.Repeat(symbolPollMeter, numBackgroundBlocks) + reset
+		}
+
+		voted := false
+
+		for _, vote := range ownVotes {
+			if vote == optionID {
+				voted = true
+
+				break
+			}
+		}
+
+		return PollOptionDetails{
+			Percentage: percentage,
+			Meter:      meter,
+			Voted:      voted,
+		}
 	}
 }

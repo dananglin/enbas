@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
@@ -12,7 +13,7 @@ func (i *InitExecutor) Execute() error {
 		return fmt.Errorf("unable to ensure that the configuration directory is present: %w", err)
 	}
 
-	i.printer.PrintSuccess("The configuration directory is present.")
+	printer.PrintSuccess(i.printSettings, "The configuration directory is present.")
 
 	fileExists, err := config.FileExists(i.configDir)
 	if err != nil {
@@ -20,7 +21,7 @@ func (i *InitExecutor) Execute() error {
 	}
 
 	if fileExists {
-		i.printer.PrintInfo("The configuration file is already present in " + i.configDir + "\n")
+		printer.PrintInfo("The configuration file is already present in " + i.configDir + "\n")
 
 		return nil
 	}
@@ -29,7 +30,7 @@ func (i *InitExecutor) Execute() error {
 		return fmt.Errorf("unable to create a new configuration file in %s: %w", i.configDir, err)
 	}
 
-	i.printer.PrintSuccess("Successfully created a new configuration file in " + i.configDir)
+	printer.PrintSuccess(i.printSettings, "Successfully created a new configuration file in "+i.configDir)
 
 	return nil
 }

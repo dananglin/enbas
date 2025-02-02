@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 	"strings"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -38,7 +39,7 @@ func (f *UnfollowExecutor) unfollowAccount(client *rpc.Client) error {
 		return fmt.Errorf("unable to unfollow the account: %w", err)
 	}
 
-	f.printer.PrintSuccess("Successfully unfollowed the account.")
+	printer.PrintSuccess(f.printSettings, "Successfully unfollowed the account.")
 
 	return nil
 }
@@ -54,7 +55,7 @@ func (f *UnfollowExecutor) unfollowTag(client *rpc.Client) error {
 		return fmt.Errorf("unable to unfollow the tag: %w", err)
 	}
 
-	f.printer.PrintSuccess("Successfully unfollowed '" + tag + "'.")
+	printer.PrintSuccess(f.printSettings, "Successfully unfollowed '"+tag+"'.")
 
 	return nil
 }

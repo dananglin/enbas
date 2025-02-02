@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -38,7 +39,7 @@ func (m *UnmuteExecutor) unmuteAccount(client *rpc.Client) error {
 		return fmt.Errorf("error unmuting the account: %w", err)
 	}
 
-	m.printer.PrintSuccess("Successfully unmuted the account.")
+	printer.PrintSuccess(m.printSettings, "Successfully unmuted the account.")
 
 	return nil
 }
@@ -83,7 +84,7 @@ func (m *UnmuteExecutor) unmuteStatus(client *rpc.Client) error {
 		return fmt.Errorf("error unmuting the status: %w", err)
 	}
 
-	m.printer.PrintSuccess("Successfully unmuted the status.")
+	printer.PrintSuccess(m.printSettings, "Successfully unmuted the status.")
 
 	return nil
 }

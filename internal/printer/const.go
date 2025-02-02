@@ -1,16 +1,8 @@
 package printer
 
 const (
-	minTerminalWidth    = 80
-	symbolBullet        = "\u2022"
-	symbolPollMeter     = "\u2501"
-	symbolCheckMark     = "\u2714"
-	symbolFailure       = "\u2717"
-	symbolLiked         = "\uf51f"
-	symbolNotLiked      = "\uf41e"
-	symbolBookmarked    = "\uf47a"
-	symbolNotBookmarked = "\uf461"
-	symbolBoosted       = "\u2BAD"
+	minTerminalWidth = 80
+	symbolBullet     = "\u2022"
 
 	reset       = "\033[0m"
 	bold        = "\033[1m"

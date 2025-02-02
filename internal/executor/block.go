@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/rpc"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -36,7 +37,7 @@ func (b *BlockExecutor) blockAccount(client *rpc.Client) error {
 		return fmt.Errorf("unable to block the account: %w", err)
 	}
 
-	b.printer.PrintSuccess("Successfully blocked the account.")
+	printer.PrintSuccess(b.printSettings, "Successfully blocked the account.")
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 )
 
@@ -50,7 +51,7 @@ func (s *SwitchExecutor) switchToAccount(client *rpc.Client) error {
 		return fmt.Errorf("error updating the credentials config file: %w", err)
 	}
 
-	s.printer.PrintSuccess("The current account is now set to '" + s.accountName[0] + "'.")
+	printer.PrintSuccess(s.printSettings, "The current account is now set to '" + s.accountName[0] + "'.")
 
 	return nil
 }

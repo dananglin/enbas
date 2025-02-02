@@ -14,7 +14,7 @@ func (s *ServerExecutor) Execute() error {
 	}
 
 	if err := server.Run(
-		s.printer,
+		s.printSettings,
 		gtsClient,
 		s.config.Server.SocketPath,
 		s.noIdleTimeout,
