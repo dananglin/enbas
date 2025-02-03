@@ -77,17 +77,17 @@
 {{ define "statusCard" }}
 {{- if .Reblog -}}
 {{ print "" }}
-{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} boosted this status from {{ fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct }}{{- ":" -}}
+{{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . 0 }}{{ end -}}
 {{ template "statusCardBody" .Reblog }}
 {{- fieldFormat "Boosted at" }} {{ formatDateTime .CreatedAt }}
 {{ print "" }}
 {{- else if ne .InReplyToID "" -}}
 {{ print "" }}
-{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} posted in reply to {{ .InReplyToID }}{{- ":" -}}
+{{ with printf "%s posted in reply to %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (.InReplyToID) }}{{ wrapLines . 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
 {{- else -}}
 {{ print "" }}
-{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }} posted{{- ":" -}}
+{{ with printf "%s posted:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ wrapLines . 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
 {{- end -}}
 {{ print "" }}
