@@ -49,7 +49,7 @@
 {{- end -}}
 {{ print "" }}
 {{ fieldFormat "Notification ID" }} {{ .ID}}
-{{ fieldFormat "Notified at" }} {{ .CreatedAt }}
+{{ fieldFormat "Notified at" }}     {{ formatDateTime .CreatedAt }}
 {{ print "" }}
 {{- drawCardSeparator -}}
 {{ print "" }}
@@ -72,5 +72,5 @@
 {{ print "" }}
 {{ end -}}
 {{ print "" }}
-{{ fieldFormat "Status ID" }} {{ .ID }}
+{{ fieldFormat "Status ID" }}       {{ .ID }}
 {{- end -}}
