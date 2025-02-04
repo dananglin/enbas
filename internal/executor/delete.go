@@ -18,8 +18,9 @@ func (d *DeleteExecutor) Execute() error {
 	}
 
 	funcMap := map[string]func(*rpc.Client) error{
-		resourceList:   d.deleteList,
-		resourceStatus: d.deleteStatus,
+		resourceList:          d.deleteList,
+		resourceStatus:        d.deleteStatus,
+		resourceNotifications: d.deleteNotifications,
 	}
 
 	doFunc, ok := funcMap[d.resourceType]
@@ -105,6 +106,16 @@ func (d *DeleteExecutor) deleteStatus(client *rpc.Client) error {
 
 		printer.PrintSuccess(d.printSettings, "The text was successfully saved to '"+path+"'.")
 	}
+
+	return nil
+}
+
+func (d *DeleteExecutor) deleteNotifications(client *rpc.Client) error {
+	if err := client.Call("GTSClient.DeleteNotifications", gtsclient.NoRPCArgs{}, nil); err != nil {
+		return fmt.Errorf("error deleting the notifications: %w", err)
+	}
+
+	printer.PrintSuccess(d.printSettings, "You have successfully deleted your notifications.")
 
 	return nil
 }

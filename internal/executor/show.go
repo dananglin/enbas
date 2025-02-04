@@ -36,6 +36,7 @@ func (s *ShowExecutor) Execute() error {
 		resourceFollowedTags:    s.showFollowedTags,
 		resourceTag:             s.showTag,
 		resourceThread:          s.showThread,
+		resourceNotifications:   s.showNotification,
 	}
 
 	doFunc, ok := funcMap[s.resourceType]
@@ -304,7 +305,7 @@ func (s *ShowExecutor) showList(client *rpc.Client) error {
 
 func (s *ShowExecutor) showLists(client *rpc.Client) error {
 	var lists []model.List
-	if err := client.Call("GTSClient.GetAllLists", "", &lists); err != nil {
+	if err := client.Call("GTSClient.GetAllLists", gtsclient.NoRPCArgs{}, &lists); err != nil {
 		return fmt.Errorf("unable to retrieve the lists: %w", err)
 	}
 
@@ -705,6 +706,81 @@ func (s *ShowExecutor) showThreadFromStatus(client *rpc.Client) error {
 	// Print the thread
 	if err := printer.PrintThread(s.printSettings, thread, myAccountID); err != nil {
 		return fmt.Errorf("error printing the thread: %w", err)
+	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showNotification(client *rpc.Client) error {
+	if s.notificationID == "" {
+		return s.showNotificationList(client)
+	}
+
+	myAccountID, err := getAccountID(client, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	var notification model.Notification
+	if err := client.Call(
+		"GTSClient.GetNotification",
+		s.notificationID,
+		&notification,
+	); err != nil {
+		return fmt.Errorf("error retrieving the notification: %w", err)
+	}
+
+	if err := printer.PrintNotification(s.printSettings, notification, myAccountID); err != nil {
+		return fmt.Errorf("error printing the notification: %w", err)
+	}
+
+	return nil
+}
+
+func (s *ShowExecutor) showNotificationList(client *rpc.Client) error {
+	for ind := range s.includeNotificationType {
+		if _, err := model.ParseNotificationType(s.includeNotificationType[ind]); err != nil {
+			return err
+		}
+	}
+
+	for ind := range s.excludeNotificationType {
+		if _, err := model.ParseNotificationType(s.excludeNotificationType[ind]); err != nil {
+			return err
+		}
+	}
+
+	myAccountID, err := getAccountID(client, true, nil)
+	if err != nil {
+		return fmt.Errorf("unable to get your account ID: %w", err)
+	}
+
+	var notificationList []model.Notification
+	if err := client.Call(
+		"GTSClient.GetNotificationList",
+		gtsclient.GetNotificationListArgs{
+			Limit:        s.limit,
+			IncludeTypes: []string(s.includeNotificationType),
+			ExcludeTypes: []string(s.excludeNotificationType),
+		},
+		&notificationList,
+	); err != nil {
+		return fmt.Errorf(
+			"error getting the list of notifications: %w",
+			err,
+		)
+	}
+
+	if len(notificationList) > 0 {
+		if err := printer.PrintNotificationList(
+			s.printSettings,
+			notificationList,
+			myAccountID,
+		); err != nil {
+			return fmt.Errorf("error printing the list of notifications: %w", err)
+		}
+	} else {
+		printer.PrintInfo("This account has no notifications.\n")
 	}
 
 	return nil

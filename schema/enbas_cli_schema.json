@@ -56,6 +56,10 @@
       "type": "bool",
       "description": "Set to true to exclude statuses that are boosts of another status"
     },
+    "exclude-notification-type": {
+      "type": "StringSliceValue",
+      "description": "The type of notifications to exclude from the output"
+    },
     "exclude-replies": {
       "type": "bool",
       "description": "Set to true to exclude statuses that are a reply to another status"
@@ -71,6 +75,10 @@
     "in-reply-to": {
       "type": "string",
       "description": "The ID of the status that you want to reply to"
+    },
+    "include-notification-type": {
+      "type": "StringSliceValue",
+      "description": "The type of notifications to include in the output"
     },
     "instance": {
       "type": "string",
@@ -135,6 +143,10 @@
     "no-idle-timeout": {
       "type": "bool",
       "description": "Set to true to run the server without a timeout"
+    },
+    "notification-id": {
+      "type": "string",
+      "description": "The ID of the notification"
     },
     "notify": {
       "type": "bool",
@@ -434,12 +446,15 @@
         { "flag": "boosted-by", "default": "false" },
         { "flag": "browser", "fieldName": "showInBrowser", "default": "false" },
         { "flag": "exclude-boosts", "default": "false" },
+        { "flag": "exclude-notification-type" },
         { "flag": "exclude-replies", "default": "false" },
         { "flag": "from", "fieldName": "fromResourceType", "default": "" },
+        { "flag": "include-notification-type" },
         { "flag": "liked-by", "default": "false" },
         { "flag": "limit", "default": "20" },
         { "flag": "list-id", "fieldName": "listID", "default": "" },
         { "flag": "my-account", "default": "false" },
+        { "flag": "notification-id", "fieldName": "notificationID", "default": "" },
         { "flag": "only-media", "default": "false" },
         { "flag": "only-pinned", "default": "false" },
         { "flag": "only-public", "default": "false" },

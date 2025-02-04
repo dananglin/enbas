@@ -193,6 +193,16 @@ func PrintLists(settings Settings, lists []model.List) error {
 	return renderTemplateToPager(settings, "listOflist", "", lists)
 }
 
+// PrintNotification prints the details of the notification to the pager.
+func PrintNotification(settings Settings, notification model.Notification, myAccountID string) error {
+	return renderTemplateToPager(settings, "notificationDoc", myAccountID, notification)
+}
+
+// PrintNotificationList prints the list of notifications to the pager.
+func PrintNotificationList(settings Settings, list []model.Notification, myAccountID string) error {
+	return renderTemplateToPager(settings, "notificationList", myAccountID, list)
+}
+
 func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
 	if settings.pager == "" {
 		return renderTemplateToStdout(
@@ -270,20 +280,21 @@ func renderTemplate(
 	data any,
 ) error {
 	funcMap := template.FuncMap{
-		"convertHTMLToText":       convertHTMLToText,
-		"formatDate":              formatDate,
-		"formatDateTime":          formatDateTime,
-		"headerFormat":            headerFormat(settings.noColor),
-		"fieldFormat":             fieldFormat(settings.noColor),
-		"fullDisplayNameFormat":   fullDisplayNameFormat(settings.noColor),
-		"boldFormat":              boldFormat(settings.noColor),
-		"drawStatusCardSeparator": drawStatusCardSeparator(settings.lineWrapCharacterLimit),
-		"drawBoostSymbol":         drawBoostSymbol(settings.noColor),
-		"drawLikeSymbol":          drawLikeSymbol(settings.noColor),
-		"drawBookmarkSymbol":      drawBookmarkSymbol(settings.noColor),
-		"wrapLines":               wrapLines(settings.lineWrapCharacterLimit),
-		"showPollResults":         showPollResults(myAccountID),
-		"getPollOptionDetails":    getPollOptionDetails(settings.noColor, settings.lineWrapCharacterLimit),
+		"convertHTMLToText":     convertHTMLToText,
+		"formatDate":            formatDate,
+		"formatDateTime":        formatDateTime,
+		"headerFormat":          headerFormat(settings.noColor),
+		"fieldFormat":           fieldFormat(settings.noColor),
+		"fullDisplayNameFormat": fullDisplayNameFormat(settings.noColor),
+		"boldFormat":            boldFormat(settings.noColor),
+		"drawCardSeparator":     drawCardSeparator(settings.lineWrapCharacterLimit),
+		"drawBoostSymbol":       drawBoostSymbol(settings.noColor),
+		"drawLikeSymbol":        drawLikeSymbol(settings.noColor),
+		"drawBookmarkSymbol":    drawBookmarkSymbol(settings.noColor),
+		"wrapLines":             wrapLines(settings.lineWrapCharacterLimit),
+		"showPollResults":       showPollResults(myAccountID),
+		"getPollOptionDetails":  getPollOptionDetails(settings.noColor, settings.lineWrapCharacterLimit),
+		"notificationSummary":   notificationSummary,
 	}
 
 	tmpl, err := template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*")
@@ -369,7 +380,7 @@ func fullDisplayNameFormat(noColor bool) func(string, string) string {
 	}
 }
 
-func drawStatusCardSeparator(charLimit int) func() string {
+func drawCardSeparator(charLimit int) func() string {
 	separator := strings.Repeat("\u2501", charLimit)
 
 	return func() string {
@@ -408,5 +419,55 @@ func drawBookmarkSymbol(noColor bool) func(bool) string {
 		}
 
 		return "\uf461"
+	}
+}
+
+type notificationSummaryDetails struct {
+	Header  string
+	Details string
+}
+
+func notificationSummary(notificationType model.NotificationType, fullDisplayName string) notificationSummaryDetails {
+	switch notificationType {
+	case model.NotificationTypeFollow:
+		return notificationSummaryDetails{
+			Header:  "SOMEONE FOLLOWED YOU:",
+			Details: fullDisplayName + " followed you.",
+		}
+	case model.NotificationTypeFollowRequest:
+		return notificationSummaryDetails{
+			Header:  "YOU'VE RECEIVED A FOLLOW REQUEST:",
+			Details: fullDisplayName + " sent you a follow request.",
+		}
+	case model.NotificationTypeMention:
+		return notificationSummaryDetails{
+			Header:  "SOMEONE MENTIONED YOU IN A STATUS:",
+			Details: fullDisplayName + " mentioned you in the below status.",
+		}
+	case model.NotificationTypeReblog:
+		return notificationSummaryDetails{
+			Header:  "SOMEONE BOOSTED YOUR STATUS:",
+			Details: fullDisplayName + " boosted your status.",
+		}
+	case model.NotificationTypeFavourite:
+		return notificationSummaryDetails{
+			Header:  "SOMEONE LIKED YOUR STATUS:",
+			Details: fullDisplayName + " liked your status.",
+		}
+	case model.NotificationTypePoll:
+		return notificationSummaryDetails{
+			Header:  "POLL CLOSED:",
+			Details: "The poll below has closed.",
+		}
+	case model.NotificationTypeStatus:
+		return notificationSummaryDetails{
+			Header:  "SOMEONE POSTED A STATUS:",
+			Details: fullDisplayName + " posted the status below.",
+		}
+	default:
+		return notificationSummaryDetails{
+			Header:  "UNKNOWN NOTIFICATION TYPE:",
+			Details: "Received a notification of an unknown type.",
+		}
 	}
 }

@@ -1,0 +1,76 @@
+{{- define "notificationDoc" -}}
+{{- $account := "" -}}
+{{- if .Account }}{{ $account = (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ end -}}
+{{- $summary := notificationSummary .Type $account -}}
+{{ print "" }}
+{{ headerFormat $summary.Header }}
+{{ $summary.Details }}
+{{ print "" }}
+{{ headerFormat "NOTIFICATION ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "NOTIFICATION TYPE:" }}
+{{ .Type }}
+{{ print "" }}
+{{ headerFormat "NOTIFIED AT:" }}
+{{ formatDateTime .CreatedAt }}
+{{- if .Status -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "STATUS PREVIEW:" }}
+{{ template "notificationStatusPreview" .Status }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ end -}}
+
+{{- define "notificationList" -}}
+{{ print "" }}
+{{ headerFormat "YOUR NOTIFICATIONS" }}
+{{ print "" }}
+{{- range . -}}
+{{ template "notificationCard" . }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+
+{{- define "notificationCard" -}}
+{{- $account := "" -}}
+{{- if .Account }}{{ $account = (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ end -}}
+{{- $summary := notificationSummary .Type $account -}}
+{{ print "" }}
+{{ wrapLines $summary.Details 0 }}
+{{- if .Status -}}
+{{ print "" }}
+{{ template "notificationStatusPreview" .Status }}
+{{- else }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ fieldFormat "Notification ID" }} {{ .ID}}
+{{ fieldFormat "Notified at" }} {{ .CreatedAt }}
+{{ print "" }}
+{{- drawCardSeparator -}}
+{{ print "" }}
+{{ end }}
+
+{{- define "notificationStatusPreview" -}}
+{{- if ne .SpoilerText "" -}}
+{{ print "" }}
+{{ boldFormat .SpoilerText }}
+{{ end -}}
+{{ wrapLines (convertHTMLToText .Content) 0 }}
+{{- if .Poll -}}
+{{ print "" }}
+{{- if showPollResults .ID .Poll.Expired .Poll.Voted }}
+{{ template "pollResults" .Poll -}}
+{{ .Poll.VotesCount }} vote(s){{ if .Poll.Expired }} {{ "\u2022" }} closed{{ end -}}
+{{- else -}}
+{{ template "pollOptions" .Poll.Options }}
+{{- end -}}
+{{ print "" }}
+{{ end -}}
+{{ print "" }}
+{{ fieldFormat "Status ID" }} {{ .ID }}
+{{- end -}}

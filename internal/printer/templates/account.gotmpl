@@ -16,7 +16,7 @@
 {{ headerFormat "METADATA:" }}
 {{ print "" }}
 {{- range $field := .Account.Fields -}}
-{{ fieldFormat $field.Name }} {{ $field.Value }}
+{{ fieldFormat $field.Name }} {{ convertHTMLToText $field.Value }}
 {{ print "" }}
 {{- end -}}
 {{ print "" }}
@@ -32,10 +32,9 @@
 {{ print "" }}
 {{- end -}}
 {{- if gt (len .StatusList.Statuses) 0 -}}
+{{ print "" }}
 {{ template "statusList" .StatusList }}
-{{ print "" }}
-{{- end -}}
-{{ print "" }}
+{{- end }}
 {{ end }}
 
 {{ define "accountRelationship" }}

@@ -1084,12 +1084,15 @@ type ShowExecutor struct {
 	boostedBy               bool
 	showInBrowser           bool
 	excludeBoosts           bool
+	excludeNotificationType internalFlag.StringSliceValue
 	excludeReplies          bool
 	fromResourceType        string
+	includeNotificationType internalFlag.StringSliceValue
 	likedBy                 bool
 	limit                   int
 	listID                  string
 	myAccount               bool
+	notificationID          string
 	onlyMedia               bool
 	onlyPinned              bool
 	onlyPublic              bool
@@ -1110,12 +1113,14 @@ func ExecuteShowCommand(
 	args []string,
 ) error {
 	exe := ShowExecutor{
-		FlagSet:       flag.NewFlagSet("show", flag.ExitOnError),
-		printSettings: printer.Settings{},
-		config:        nil,
-		configDir:     configDir,
-		accountName:   internalFlag.NewStringSliceValue(),
-		attachmentIDs: internalFlag.NewStringSliceValue(),
+		FlagSet:                 flag.NewFlagSet("show", flag.ExitOnError),
+		printSettings:           printer.Settings{},
+		config:                  nil,
+		configDir:               configDir,
+		accountName:             internalFlag.NewStringSliceValue(),
+		attachmentIDs:           internalFlag.NewStringSliceValue(),
+		excludeNotificationType: internalFlag.NewStringSliceValue(),
+		includeNotificationType: internalFlag.NewStringSliceValue(),
 	}
 
 	exe.Usage = usage.ExecutorUsageFunc("show", "Shows details about a specified resource", exe.FlagSet)
@@ -1128,12 +1133,15 @@ func ExecuteShowCommand(
 	exe.BoolVar(&exe.boostedBy, "boosted-by", false, "Set to true to see the accounts who boosted the status")
 	exe.BoolVar(&exe.showInBrowser, "browser", false, "Set to true to view in the your favourite browser")
 	exe.BoolVar(&exe.excludeBoosts, "exclude-boosts", false, "Set to true to exclude statuses that are boosts of another status")
+	exe.Var(&exe.excludeNotificationType, "exclude-notification-type", "The type of notifications to exclude from the output")
 	exe.BoolVar(&exe.excludeReplies, "exclude-replies", false, "Set to true to exclude statuses that are a reply to another status")
 	exe.StringVar(&exe.fromResourceType, "from", "", "The resource type to action the target resource from (e.g. status)")
+	exe.Var(&exe.includeNotificationType, "include-notification-type", "The type of notifications to include in the output")
 	exe.BoolVar(&exe.likedBy, "liked-by", false, "Set to true to see the accounts who liked (favourited) the status")
 	exe.IntVar(&exe.limit, "limit", 20, "Specify the limit of items to display")
 	exe.StringVar(&exe.listID, "list-id", "", "The ID of the list in question")
 	exe.BoolVar(&exe.myAccount, "my-account", false, "Set to true to specify your account")
+	exe.StringVar(&exe.notificationID, "notification-id", "", "The ID of the notification")
 	exe.BoolVar(&exe.onlyMedia, "only-media", false, "Set to true to show only the statuses with media attachments")
 	exe.BoolVar(&exe.onlyPinned, "only-pinned", false, "Set to true to show only the account's pinned statuses")
 	exe.BoolVar(&exe.onlyPublic, "only-public", false, "Set to true to show only the account's public posts")

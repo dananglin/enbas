@@ -51,7 +51,7 @@ func (s *SwitchExecutor) switchToAccount(client *rpc.Client) error {
 		return fmt.Errorf("error updating the credentials config file: %w", err)
 	}
 
-	printer.PrintSuccess(s.printSettings, "The current account is now set to '" + s.accountName[0] + "'.")
+	printer.PrintSuccess(s.printSettings, "The current account is now set to '"+s.accountName[0]+"'.")
 
 	return nil
 }

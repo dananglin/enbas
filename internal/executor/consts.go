@@ -21,6 +21,7 @@ const (
 	resourceMediaAttachment string = "media-attachment"
 	resourceMutedAccounts   string = "muted-accounts"
 	resourceNote            string = "note"
+	resourceNotifications   string = "notifications"
 	resourcePoll            string = "poll"
 	resourceStatus          string = "status"
 	resourceStar            string = "star"

@@ -13,7 +13,7 @@ const (
 	baseListPath string = "/api/v1/lists"
 )
 
-func (g *GTSClient) GetAllLists(_ string, lists *[]model.List) error {
+func (g *GTSClient) GetAllLists(_ NoRPCArgs, lists *[]model.List) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
 		url:         g.authentication.Instance + baseListPath,
