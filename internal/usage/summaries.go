@@ -18,6 +18,7 @@ var summaries = map[string]string{
 	"mute":     "Mutes a specific resource (e.g. an account)",
 	"reject":   "Rejects a request (e.g. a follow request)",
 	"remove":   "Removes a resource from another resource",
+	"search":   "Searches for accounts, statuses or hashtags",
 	"server":   "Runs Enbas in server mode",
 	"show":     "Shows details about a specified resource",
 	"switch":   "Performs a switch operation (e.g. switching between logged in accounts)",

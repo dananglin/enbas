@@ -9,9 +9,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-const (
-	baseListPath string = "/api/v1/lists"
-)
+const baseListPath string = "/api/v1/lists"
 
 func (g *GTSClient) GetAllLists(_ NoRPCArgs, lists *[]model.List) error {
 	params := requestParameters{

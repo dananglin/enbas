@@ -57,6 +57,7 @@ func Execute() error {
 		"mute":     ExecuteMuteCommand,
 		"reject":   ExecuteRejectCommand,
 		"remove":   ExecuteRemoveCommand,
+		"search":   ExecuteSearchCommand,
 		"server":   ExecuteServerCommand,
 		"show":     ExecuteShowCommand,
 		"switch":   ExecuteSwitchCommand,
@@ -995,6 +996,85 @@ func ExecuteRemoveCommand(
 		printer.PrintFailure(
 			exe.printSettings,
 			"(remove) execution error: "+err.Error()+".",
+		)
+
+		return err
+	}
+
+	return nil
+}
+
+// SearchExecutor is the executor for the search command.
+type SearchExecutor struct {
+	*flag.FlagSet
+	printSettings printer.Settings
+	config        *config.Config
+	accountName   internalFlag.StringSliceValue
+	following     bool
+	limit         int
+	query         string
+	resolve       bool
+	resourceType  string
+	configDir     string
+}
+
+// ExecuteSearchCommand initialises and runs the executor for the search command.
+func ExecuteSearchCommand(
+	configDir string,
+	noColor bool,
+	args []string,
+) error {
+	exe := SearchExecutor{
+		FlagSet:       flag.NewFlagSet("search", flag.ExitOnError),
+		printSettings: printer.Settings{},
+		config:        nil,
+		configDir:     configDir,
+		accountName:   internalFlag.NewStringSliceValue(),
+	}
+
+	exe.Usage = usage.ExecutorUsageFunc("search", "Searches for accounts, statuses or hashtags", exe.FlagSet)
+
+	exe.Var(&exe.accountName, "account-name", "The name of the account")
+	exe.BoolVar(&exe.following, "following", false, "Set to true to restrict the search for accounts that you are following")
+	exe.IntVar(&exe.limit, "limit", 20, "Specify the limit of items to display")
+	exe.StringVar(&exe.query, "query", "", "The search query string")
+	exe.BoolVar(&exe.resolve, "resolve", false, "Set to true to allow your instance to resolve the search by making calls to remote instances")
+	exe.StringVar(&exe.resourceType, "type", "", "The type of resource you want to action on (e.g. account, status)")
+
+	// Parse the remaining arguments.
+	if err := exe.Parse(args); err != nil {
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(search) flag parsing error: "+err.Error()+".",
+		)
+
+		return err
+	}
+
+	// Load the configuration from file.
+	exeConfig, err := config.NewConfigFromFile(exe.configDir)
+	if err != nil {
+		printer.PrintFailure(
+			printer.NewSettings(noColor, "", 0),
+			"(search) unable to load configuration: "+err.Error()+".",
+		)
+
+		return err
+	}
+	exe.config = exeConfig
+
+	// Create the printer for the executor.
+	exe.printSettings = printer.NewSettings(
+		noColor,
+		exe.config.Integrations.Pager,
+		exe.config.LineWrapMaxWidth,
+	)
+
+	// Run the executor.
+	if err := exe.Execute(); err != nil {
+		printer.PrintFailure(
+			exe.printSettings,
+			"(search) execution error: "+err.Error()+".",
 		)
 
 		return err

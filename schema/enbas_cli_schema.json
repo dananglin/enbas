@@ -64,6 +64,10 @@
       "type": "bool",
       "description": "Set to true to exclude statuses that are a reply to another status"
     },
+    "following": {
+      "type": "bool",
+      "description": "Set to true to restrict the search for accounts that you are following"
+    },
     "from": {
       "type": "string",
       "description": "The resource type to action the target resource from (e.g. status)"
@@ -179,6 +183,14 @@
     "poll-option": {
       "type": "StringSliceValue",
       "description": "A poll option. Use this multiple times to set multiple options"
+    },
+    "query": {
+      "type": "string",
+      "description": "The search query string"
+    },
+    "resolve": {
+      "type": "bool",
+      "description": "Set to true to allow your instance to resolve the search by making calls to remote instances"
     },
     "save-text": {
       "type": "bool",
@@ -430,6 +442,22 @@
         { "flag": "type", "fieldName": "resourceType", "default": "" }
       ],
       "summary": "Removes a resource from another resource",
+      "useConfig": true,
+      "usePrinter": true
+    },
+    "search": {
+      "additionalFields": [
+        { "name": "configDir", "type": "string"}
+      ],
+      "flags": [
+        { "flag": "account-name" },
+        { "flag": "following", "default": "false" },
+        { "flag": "limit", "default": "20" },
+        { "flag": "query", "default": "" },
+        { "flag": "resolve", "default": "false" },
+        { "flag": "type", "fieldName": "resourceType", "default": "" }
+      ],
+      "summary": "Searches for accounts, statuses or hashtags",
       "useConfig": true,
       "usePrinter": true
     },
