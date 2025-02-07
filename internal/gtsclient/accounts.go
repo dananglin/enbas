@@ -14,23 +14,47 @@ const (
 	baseFollowRequestsPath = "/api/v1/follow_requests"
 )
 
-func (g *GTSClient) VerifyCredentials(_ NoRPCArgs, account *model.Account) error {
+func (g *GTSClient) GetMyAccount(_ NoRPCArgs, account *model.Account) error {
+	var err error
+
+	*account, err = g.verifyCredentials()
+	if err != nil {
+		return fmt.Errorf("error getting the account information: %w", err)
+	}
+
+	return nil
+}
+
+func (g *GTSClient) GetMyAccountID(_ NoRPCArgs, accountID *string) error {
+	account, err := g.verifyCredentials()
+	if err != nil {
+		return fmt.Errorf("error getting the account information: %w", err)
+	}
+
+	*accountID = account.ID
+
+	return nil
+}
+
+func (g *GTSClient) verifyCredentials() (model.Account, error) {
+	var account model.Account
+
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
 		url:         g.authentication.Instance + baseAccountsPath + "/verify_credentials",
 		requestBody: nil,
 		contentType: "",
-		output:      account,
+		output:      &account,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return fmt.Errorf(
+		return model.Account{}, fmt.Errorf(
 			"received an error after sending the request to verify the credentials: %w",
 			err,
 		)
 	}
 
-	return nil
+	return account, nil
 }
 
 func (g *GTSClient) GetAccount(accountURI string, account *model.Account) error {

@@ -64,7 +64,7 @@ func (a *AddExecutor) addAccountsToList(client *rpc.Client) error {
 		return NoAccountSpecifiedError{}
 	}
 
-	accounts, err := getOtherAccounts(client, a.accountNames)
+	accounts, err := getMultipleAccounts(client, a.accountNames)
 	if err != nil {
 		return fmt.Errorf("unable to get the accounts: %w", err)
 	}
@@ -117,7 +117,7 @@ func (a *AddExecutor) addToAccount(client *rpc.Client) error {
 }
 
 func (a *AddExecutor) addNoteToAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, a.accountNames)
+	accountID, err := getAccountID(client, a.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -243,8 +243,8 @@ func (a *AddExecutor) addVoteToStatus(client *rpc.Client) error {
 		return Error{"this poll does not allow multiple choices"}
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 

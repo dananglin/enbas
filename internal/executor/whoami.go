@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
@@ -16,8 +17,8 @@ func (w *WhoamiExecutor) Execute() error {
 	}
 	defer client.Close()
 
-	account, err := getMyAccount(client)
-	if err != nil {
+	var account model.Account
+	if err := client.Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
 		return fmt.Errorf("error getting your account information: %w", err)
 	}
 

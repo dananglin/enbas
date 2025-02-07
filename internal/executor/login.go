@@ -78,7 +78,7 @@ func (l *LoginExecutor) Execute() error {
 	}
 
 	var account model.Account
-	if err := client.Call("GTSClient.VerifyCredentials", gtsclient.NoRPCArgs{}, &account); err != nil {
+	if err := client.Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
 		return fmt.Errorf("unable to verify the credentials: %w", err)
 	}
 

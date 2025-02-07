@@ -63,7 +63,7 @@ func (r *RemoveExecutor) removeAccountsFromList(client *rpc.Client) error {
 		return NoAccountSpecifiedError{}
 	}
 
-	accounts, err := getOtherAccounts(client, r.accountNames)
+	accounts, err := getMultipleAccounts(client, r.accountNames)
 	if err != nil {
 		return fmt.Errorf("unable to get the accounts: %w", err)
 	}
@@ -107,7 +107,7 @@ func (r *RemoveExecutor) removeFromAccount(client *rpc.Client) error {
 }
 
 func (r *RemoveExecutor) removeNoteFromAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, r.accountNames)
+	accountID, err := getAccountID(client, r.accountNames)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

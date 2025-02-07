@@ -9,12 +9,8 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func getAccountID(
-	client *rpc.Client,
-	myAccount bool,
-	accountNames internalFlag.StringSliceValue,
-) (string, error) {
-	account, err := getAccount(client, myAccount, accountNames)
+func getAccountID(client *rpc.Client, accountNames internalFlag.StringSliceValue) (string, error) {
+	account, err := getAccount(client, accountNames)
 	if err != nil {
 		return "", fmt.Errorf("unable to get the account information: %w", err)
 	}
@@ -22,49 +18,15 @@ func getAccountID(
 	return account.ID, nil
 }
 
-func getAccount(
-	client *rpc.Client,
-	myAccount bool,
-	accountNames internalFlag.StringSliceValue,
-) (model.Account, error) {
-	var (
-		account model.Account
-		err     error
-	)
-
-	switch {
-	case myAccount:
-		account, err = getMyAccount(client)
-		if err != nil {
-			return account, fmt.Errorf("unable to get your account ID: %w", err)
-		}
-	case !accountNames.Empty():
-		account, err = getOtherAccount(client, accountNames)
-		if err != nil {
-			return account, fmt.Errorf("unable to get the account ID: %w", err)
-		}
-	default:
-		return account, NoAccountSpecifiedError{}
+func getAccount(client *rpc.Client, accountNames internalFlag.StringSliceValue) (model.Account, error) {
+	if accountNames.Empty() {
+		return model.Account{}, NoAccountSpecifiedError{}
 	}
 
-	return account, nil
-}
-
-func getMyAccount(client *rpc.Client) (model.Account, error) {
-	var account model.Account
-	if err := client.Call("GTSClient.VerifyCredentials", gtsclient.NoRPCArgs{}, &account); err != nil {
-		return model.Account{}, fmt.Errorf("unable to retrieve your account: %w", err)
-	}
-
-	return account, nil
-}
-
-func getOtherAccount(client *rpc.Client, accountNames internalFlag.StringSliceValue) (model.Account, error) {
-	expectedNumAccountNames := 1
-	if !accountNames.ExpectedLength(expectedNumAccountNames) {
+	if !accountNames.ExpectedLength(1) {
 		return model.Account{}, fmt.Errorf(
-			"received an unexpected number of account names: want %d",
-			expectedNumAccountNames,
+			"received an unexpected number of account names: want 1, got %d",
+			len(accountNames),
 		)
 	}
 
@@ -76,7 +38,7 @@ func getOtherAccount(client *rpc.Client, accountNames internalFlag.StringSliceVa
 	return account, nil
 }
 
-func getOtherAccounts(client *rpc.Client, accountNames internalFlag.StringSliceValue) ([]model.Account, error) {
+func getMultipleAccounts(client *rpc.Client, accountNames internalFlag.StringSliceValue) ([]model.Account, error) {
 	numAccountNames := len(accountNames)
 	accounts := make([]model.Account, numAccountNames)
 

@@ -31,7 +31,7 @@ func (f *FollowExecutor) Execute() error {
 }
 
 func (f *FollowExecutor) followAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, f.accountName)
+	accountID, err := getAccountID(client, f.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

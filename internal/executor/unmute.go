@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/rpc"
 
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
@@ -30,7 +31,7 @@ func (m *UnmuteExecutor) Execute() error {
 }
 
 func (m *UnmuteExecutor) unmuteAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, m.accountName)
+	accountID, err := getAccountID(client, m.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}
@@ -57,8 +58,8 @@ func (m *UnmuteExecutor) unmuteStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 

@@ -67,8 +67,8 @@ func (d *DeleteExecutor) deleteStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to retrieve the status: %w", err)
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 

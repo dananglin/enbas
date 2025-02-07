@@ -28,7 +28,7 @@ func (b *UnblockExecutor) Execute() error {
 }
 
 func (b *UnblockExecutor) unblockAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, b.accountName)
+	accountID, err := getAccountID(client, b.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

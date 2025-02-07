@@ -28,7 +28,7 @@ func (r *RejectExecutor) Execute() error {
 }
 
 func (r *RejectExecutor) rejectFollowRequest(client *rpc.Client) error {
-	accountID, err := getAccountID(client, false, r.accountName)
+	accountID, err := getAccountID(client, r.accountName)
 	if err != nil {
 		return fmt.Errorf("received an error while getting the account ID: %w", err)
 	}

@@ -91,7 +91,7 @@ func (s *SearchExecutor) searchStatuses(client *rpc.Client) error {
 
 	accountID := ""
 	if !s.accountName.Empty() {
-		accountID, err = getAccountID(client, false, s.accountName)
+		accountID, err = getAccountID(client, s.accountName)
 		if err != nil {
 			return fmt.Errorf("unable to get the account ID: %w", err)
 		}
@@ -108,9 +108,9 @@ func (s *SearchExecutor) searchStatuses(client *rpc.Client) error {
 	); err != nil {
 		return fmt.Errorf("error searching for statuses: %w", err)
 	}
-
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+ 
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 

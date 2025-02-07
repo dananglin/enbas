@@ -67,9 +67,20 @@ func (s *ShowExecutor) showInstance(client *rpc.Client) error {
 }
 
 func (s *ShowExecutor) showAccount(client *rpc.Client) error {
-	account, err := getAccount(client, s.myAccount, s.accountName)
-	if err != nil {
-		return fmt.Errorf("unable to get the account information: %w", err)
+	var (
+		account model.Account
+		err     error
+	)
+
+	if s.myAccount {
+		if err := client.Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
+			return fmt.Errorf("unable to retrieve your account: %w", err)
+		}
+	} else {
+		account, err = getAccount(client, s.accountName)
+		if err != nil {
+			return fmt.Errorf("unable to get the account information: %w", err)
+		}
 	}
 
 	if s.showInBrowser {
@@ -187,8 +198,8 @@ func (s *ShowExecutor) showStatus(client *rpc.Client) error {
 		}
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
@@ -266,8 +277,8 @@ func (s *ShowExecutor) showTimeline(client *rpc.Client) error {
 		return nil
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
@@ -341,9 +352,20 @@ func (s *ShowExecutor) showFollowers(client *rpc.Client) error {
 }
 
 func (s *ShowExecutor) showFollowersFromAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, s.myAccount, s.accountName)
-	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID: %w", err)
+	var (
+		accountID string
+		err       error
+	)
+
+	if s.myAccount {
+		if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &accountID); err != nil {
+			return fmt.Errorf("unable to get your account ID: %w", err)
+		}
+	} else {
+		accountID, err = getAccountID(client, s.accountName)
+		if err != nil {
+			return fmt.Errorf("received an error while getting the account ID: %w", err)
+		}
 	}
 
 	var followers model.AccountList
@@ -390,9 +412,20 @@ func (s *ShowExecutor) showFollowing(client *rpc.Client) error {
 }
 
 func (s *ShowExecutor) showFollowingFromAccount(client *rpc.Client) error {
-	accountID, err := getAccountID(client, s.myAccount, s.accountName)
-	if err != nil {
-		return fmt.Errorf("received an error while getting the account ID: %w", err)
+	var (
+		accountID string
+		err       error
+	)
+
+	if s.myAccount {
+		if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &accountID); err != nil {
+			return fmt.Errorf("unable to get your account ID: %w", err)
+		}
+	} else {
+		accountID, err = getAccountID(client, s.accountName)
+		if err != nil {
+			return fmt.Errorf("received an error while getting the account ID: %w", err)
+		}
 	}
 
 	var followings model.AccountList
@@ -442,8 +475,8 @@ func (s *ShowExecutor) showBookmarks(client *rpc.Client) error {
 	}
 
 	if len(bookmarks.Statuses) > 0 {
-		myAccountID, err := getAccountID(client, true, nil)
-		if err != nil {
+		var myAccountID string
+		if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
 
@@ -471,8 +504,8 @@ func (s *ShowExecutor) showLiked(client *rpc.Client) error {
 	}
 
 	if len(liked.Statuses) > 0 {
-		myAccountID, err := getAccountID(client, true, nil)
-		if err != nil {
+		var myAccountID string
+		if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 			return fmt.Errorf("unable to get your account ID: %w", err)
 		}
 
@@ -689,8 +722,8 @@ func (s *ShowExecutor) showThreadFromStatus(client *rpc.Client) error {
 		}
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
@@ -716,8 +749,8 @@ func (s *ShowExecutor) showNotification(client *rpc.Client) error {
 		return s.showNotificationList(client)
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
@@ -750,8 +783,8 @@ func (s *ShowExecutor) showNotificationList(client *rpc.Client) error {
 		}
 	}
 
-	myAccountID, err := getAccountID(client, true, nil)
-	if err != nil {
+	var myAccountID string
+	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
 	}
 
