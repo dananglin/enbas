@@ -71,6 +71,11 @@ func authFromFile(path string) (config.Credentials, error) {
 		return config.Credentials{}, fmt.Errorf("error getting the credentials from the credentials file: %w", err)
 	}
 
+	// If the current account is not set, return a config with zero-valued fields.
+	if creds.CurrentAccount == "" {
+		return config.Credentials{}, nil
+	}
+
 	auth, ok := creds.Credentials[creds.CurrentAccount]
 	if !ok {
 		return config.Credentials{}, Error{"the authentication details seems to be missing for the current account (" + creds.CurrentAccount + ")"}
