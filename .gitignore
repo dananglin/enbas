@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-/environment/
+/.environment/
 /*.enbas
 /__build/*
 !__build/.gitkeep
