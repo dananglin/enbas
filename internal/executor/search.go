@@ -108,7 +108,7 @@ func (s *SearchExecutor) searchStatuses(client *rpc.Client) error {
 	); err != nil {
 		return fmt.Errorf("error searching for statuses: %w", err)
 	}
- 
+
 	var myAccountID string
 	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)

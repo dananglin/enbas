@@ -19,6 +19,7 @@ const (
 	projectName          = "enbas"
 	defaultAppName       = projectName
 	defaultInstallPrefix = "/usr/local"
+	toolsModFile         = "./tools/tools.mod"
 
 	envInstallPrefix    = "ENBAS_INSTALL_PREFIX"
 	envTestVerbose      = "ENBAS_TEST_VERBOSE"
@@ -58,12 +59,26 @@ func Lint() error {
 
 // Gosec runs gosec against the code.
 func Gosec() error {
-	return sh.RunV("gosec", "./...")
+	return sh.RunV(
+		"go",
+		"tool",
+		"--modfile",
+		toolsModFile,
+		"gosec",
+		"./...",
+	)
 }
 
 // Staticcheck runs staticcheck against the code.
 func Staticcheck() error {
-	return sh.RunV("staticcheck", "./...")
+	return sh.RunV(
+		"go",
+		"tool",
+		"--modfile",
+		toolsModFile,
+		"staticcheck",
+		"./...",
+	)
 }
 
 // Gofmt checks the code for formatting.
@@ -76,7 +91,7 @@ func Gofmt() error {
 
 	formattedFiles := ""
 
-	for _, file := range strings.Split(output, "\n") {
+	for file := range strings.SplitSeq(output, "\n") {
 		formattedFiles += "\n- " + file
 	}
 
@@ -87,7 +102,7 @@ func Gofmt() error {
 	}
 
 	if len(output) != 0 {
-		return fmt.Errorf("The following files needed to be formatted: %s", formattedFiles)
+		return fmt.Errorf("the following files needed to be formatted: %s", formattedFiles)
 	}
 
 	return nil
