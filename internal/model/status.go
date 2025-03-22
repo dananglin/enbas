@@ -25,7 +25,7 @@ type Status struct {
 	Muted              bool              `json:"muted"`
 	Pinned             bool              `json:"pinned"`
 	Poll               Poll              `json:"poll"`
-	Reblog             *StatusReblogged  `json:"reblog"`
+	Reblog             StatusReblogged   `json:"reblog"`
 	Reblogged          bool              `json:"reblogged"`
 	ReblogsCount       int               `json:"reblogs_count"`
 	RepliesCount       int               `json:"replies_count"`

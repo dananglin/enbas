@@ -75,7 +75,7 @@
 {{- end -}}
 
 {{ define "statusCard" }}
-{{- if .Reblog -}}
+{{- if ne .Reblog.ID "" -}}
 {{ print "" }}
 {{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . 0 }}{{ end -}}
 {{ template "statusCardBody" .Reblog }}
