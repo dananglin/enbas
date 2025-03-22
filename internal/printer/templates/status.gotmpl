@@ -22,7 +22,7 @@
 {{ print "" }}
 {{- end -}}
 {{- end -}}
-{{- if .Status.Poll -}}
+{{- if ne .Status.Poll.ID "" -}}
 {{ print "" }}
 {{ headerFormat "POLL:" }}
 {{ print "" }}
@@ -104,7 +104,7 @@
 {{ print "" }}
 {{ print "" }}
 {{- wrapLines (convertHTMLToText .Content) 0 -}}
-{{- if .Poll -}}
+{{- if ne .Poll.ID "" -}}
 {{ print "" }}
 {{- if showPollResults .ID .Poll.Expired .Poll.Voted }}
 {{ template "pollResults" .Poll }}

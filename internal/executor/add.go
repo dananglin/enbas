@@ -231,7 +231,7 @@ func (a *AddExecutor) addVoteToStatus(client *rpc.Client) error {
 		return fmt.Errorf("unable to get the status: %w", err)
 	}
 
-	if status.Poll == nil {
+	if status.Poll.ID == "" {
 		return Error{"this status does not have a poll"}
 	}
 
