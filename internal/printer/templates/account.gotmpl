@@ -11,7 +11,7 @@
 {{ fieldFormat "Statuses" }} {{ .Account.StatusCount }}
 {{ print "" }}
 {{ headerFormat "BIOGRAPHY:" }}
-{{- wrapLines (convertHTMLToText .Account.Note) 0 -}}
+{{- wrapLines (convertHTMLToText .Account.Note) "" 0 -}}
 {{ print "" }}
 {{ headerFormat "METADATA:" }}
 {{ print "" }}

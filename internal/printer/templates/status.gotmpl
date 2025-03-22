@@ -8,12 +8,12 @@
 {{ print "" }}
 {{- if ne .Status.SpoilerText "" -}}
 {{ headerFormat "SUMMARY:" }}
-{{ boldFormat .Status.SpoilerText }}
+{{ wrapLines .Status.SpoilerText "\033[1m" 0 }}
 {{ print "" }}
 {{ print "" }}
 {{- end -}}
 {{ headerFormat "CONTENT:" }}
-{{- wrapLines (convertHTMLToText .Status.Content) 0 -}}
+{{- wrapLines (convertHTMLToText .Status.Content) "" 0 -}}
 {{- if gt (len .Status.MediaAttachments) 0 -}}
 {{ print "" }}
 {{ headerFormat "MEDIA ATTACHMENTS:" }}
@@ -77,17 +77,17 @@
 {{ define "statusCard" }}
 {{- if ne .Reblog.ID "" -}}
 {{ print "" }}
-{{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . 0 }}{{ end -}}
+{{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" .Reblog }}
 {{- fieldFormat "Boosted at" }} {{ formatDateTime .CreatedAt }}
 {{ print "" }}
 {{- else if ne .InReplyToID "" -}}
 {{ print "" }}
-{{ with printf "%s posted in reply to %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (.InReplyToID) }}{{ wrapLines . 0 }}{{ end -}}
+{{ with printf "%s posted in reply to %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (.InReplyToID) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
 {{- else -}}
 {{ print "" }}
-{{ with printf "%s posted:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ wrapLines . 0 }}{{ end -}}
+{{ with printf "%s posted:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
 {{- end -}}
 {{ print "" }}
@@ -99,11 +99,11 @@
 {{- if ne .SpoilerText "" -}}
 {{ print "" }}
 {{ print "" }}
-{{ boldFormat .SpoilerText }}
+{{ wrapLines .SpoilerText "\033[1m" 0}}
 {{- end -}}
 {{ print "" }}
 {{ print "" }}
-{{- wrapLines (convertHTMLToText .Content) 0 -}}
+{{- wrapLines (convertHTMLToText .Content) "" 0 -}}
 {{- if ne .Poll.ID "" -}}
 {{ print "" }}
 {{- if showPollResults .ID .Poll.Expired .Poll.Voted }}
@@ -136,7 +136,7 @@
 {{ fieldFormat "  Media type" }} {{ .Type }}
 {{- if ne .Description "" -}}
 {{ print "" }}
-{{ with $desc := printf "%s %s" (fieldFormat "  Description") .Description }}{{ wrapLines $desc 2 }}{{end}}
+{{ with $desc := printf "%s %s" (fieldFormat "  Description") .Description }}{{ wrapLines $desc "" 2 }}{{end}}
 {{- else -}}
 {{ print "" }}
 {{ fieldFormat "  Description" }} This media attachment has no description.

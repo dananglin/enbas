@@ -11,8 +11,8 @@ type extraIndentConditiion struct {
 	indent  string
 }
 
-func wrapLines(charLimit int) func(string, int) string {
-	return func(text string, nIndent int) string {
+func wrapLines(charLimit int) func(string, string, int) string {
+	return func(text, lineStyle string, nIndent int) string {
 		if nIndent >= charLimit {
 			nIndent = 0
 		}
@@ -22,7 +22,12 @@ func wrapLines(charLimit int) func(string, int) string {
 		lines := strings.Split(text, "\n")
 
 		if len(lines) == 1 {
-			return wrapLine(lines[0], separator, charLimit-nIndent)
+			return wrapLine(
+				lines[0],
+				separator,
+				lineStyle,
+				charLimit-nIndent,
+			)
 		}
 
 		var builder strings.Builder
@@ -43,7 +48,7 @@ func wrapLines(charLimit int) func(string, int) string {
 		}
 
 		for ind, line := range lines {
-			builder.WriteString(wrapLine(line, separator+extraIndent(line, extraIndentConditions), charLimit-nIndent))
+			builder.WriteString(wrapLine(line, separator+extraIndent(line, extraIndentConditions), lineStyle, charLimit-nIndent))
 
 			if ind < len(lines)-1 {
 				builder.WriteString(separator)
@@ -54,8 +59,17 @@ func wrapLines(charLimit int) func(string, int) string {
 	}
 }
 
-func wrapLine(line, separator string, charLimit int) string {
+func wrapLine(
+	line string,
+	separator string,
+	lineStyle string,
+	charLimit int,
+) string {
 	if len(line) <= charLimit {
+		if lineStyle != "" {
+			return lineStyle + line + reset
+		}
+
 		return line
 	}
 
@@ -74,11 +88,20 @@ func wrapLine(line, separator string, charLimit int) string {
 			rightcursor = leftcursor + charLimit
 		}
 
-		builder.WriteString(line[leftcursor:rightcursor] + separator)
+		if lineStyle != "" {
+			builder.WriteString(lineStyle + line[leftcursor:rightcursor] + reset + separator)
+		} else {
+			builder.WriteString(line[leftcursor:rightcursor] + separator)
+		}
+
 		leftcursor = rightcursor
 	}
 
-	builder.WriteString(line[rightcursor:])
+	if lineStyle != "" {
+		builder.WriteString(lineStyle + line[rightcursor:] + reset)
+	} else {
+		builder.WriteString(line[rightcursor:])
+	}
 
 	return builder.String()
 }

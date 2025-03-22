@@ -9,7 +9,7 @@
 {{ headerFormat "ABOUT THE INSTANCE:" }}
 {{- if ne .DescriptionText "" -}}
 {{ print "" }}
-{{ wrapLines .DescriptionText 0 }}
+{{ wrapLines .DescriptionText "" 0 }}
 {{- else -}}
 {{ print "" }}
 This instance has no description.

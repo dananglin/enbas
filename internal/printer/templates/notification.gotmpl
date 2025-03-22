@@ -40,7 +40,7 @@
 {{- if .Account }}{{ $account = (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ end -}}
 {{- $summary := notificationSummary .Type $account -}}
 {{ print "" }}
-{{ wrapLines $summary.Details 0 }}
+{{ wrapLines $summary.Details "" 0 }}
 {{- if .Status -}}
 {{ print "" }}
 {{ template "notificationStatusPreview" .Status }}
@@ -60,7 +60,7 @@
 {{ print "" }}
 {{ boldFormat .SpoilerText }}
 {{ end -}}
-{{ wrapLines (convertHTMLToText .Content) 0 }}
+{{ wrapLines (convertHTMLToText .Content) "" 0 }}
 {{- if .Poll -}}
 {{ print "" }}
 {{- if showPollResults .ID .Poll.Expired .Poll.Voted }}
