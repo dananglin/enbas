@@ -3,38 +3,54 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
+version: "2"
 run:
   concurrency: 2
-  timeout: 1m
   issues-exit-code: 1
   tests: true
-
 output:
-  formats: colored-line-number
-  print-issues-lines: true
-  print-linter-name: true
-  uniq-by-line: true
-  sort-results: true
-
-linters-settings:
-  depguard:
-    rules:
-      main:
-        files:
-        - $all
-        allow:
-        - $gostd
-        - codeflow.dananglin.me.uk/apollo/enbas
-  lll:
-    line-length: 140
-
+  formats:
+    text:
+      path: stdout
+      print-linter-name: true
 linters:
-  enable-all: true
+  default: all
   disable:
-  - execinquery
   - exhaustruct
-  - gomnd
   - gosec
   - mnd
   - tagliatelle
-  fast: false
+  settings:
+    depguard:
+      rules:
+        main:
+          files:
+          - $all
+          allow:
+          - $gostd
+          - codeflow.dananglin.me.uk/apollo/enbas
+    lll:
+      line-length: 140
+  exclusions:
+    generated: lax
+    presets:
+    - comments
+    - common-false-positives
+    - legacy
+    - std-error-handling
+    paths:
+    - third_party$
+    - builtin$
+    - examples$
+formatters:
+  enable:
+  - gci
+  - gofmt
+  - gofumpt
+  - goimports
+  exclusions:
+    generated: lax
+    paths:
+    - third_party$
+    - builtin$
+    - examples$
