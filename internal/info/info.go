@@ -8,6 +8,5 @@ var (
 	BinaryVersion         = "v0.3.0-dev" //nolint:gochecknoglobals
 
 	BuildTime string //nolint:gochecknoglobals
-	GoVersion string //nolint:gochecknoglobals
 	GitCommit string //nolint:gochecknoglobals
 )

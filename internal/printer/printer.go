@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"text/template"
 	"time"
@@ -87,7 +88,7 @@ func PrintVersion(settings Settings, showFullVersion bool) error {
 		Name:          info.ApplicationTitledName,
 		BinaryVersion: info.BinaryVersion,
 		GitCommit:     info.GitCommit,
-		GoVersion:     info.GoVersion,
+		GoVersion:     runtime.Version(),
 		BuildTime:     info.BuildTime,
 	}
 

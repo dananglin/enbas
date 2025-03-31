@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 	"unicode"
@@ -189,12 +188,11 @@ func ldflags() string {
 		infoPackage              = "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 		binaryVersionVar         = infoPackage + "." + "BinaryVersion"
 		gitCommitVar             = infoPackage + "." + "GitCommit"
-		goVersionVar             = infoPackage + "." + "GoVersion"
 		buildTimeVar             = infoPackage + "." + "BuildTime"
 		applicationNameVar       = infoPackage + "." + "ApplicationName"
 		applicationTitledNameVar = infoPackage + "." + "ApplicationTitledName"
 
-		ldflagsfmt = "-s -w -X %s=%s -X %s=%s -X %s=%s -X %s=%s -X %s=%s -X %s=%s"
+		ldflagsfmt = "-s -w -X %s=%s -X %s=%s -X %s=%s -X %s=%s -X %s=%s"
 		buildTime  = time.Now().UTC().Format(time.RFC3339)
 	)
 
@@ -202,7 +200,6 @@ func ldflags() string {
 		ldflagsfmt,
 		binaryVersionVar, binaryVersion(),
 		gitCommitVar, gitCommit(),
-		goVersionVar, runtime.Version(),
 		buildTimeVar, buildTime,
 		applicationNameVar, appName(),
 		applicationTitledNameVar, appTitledName(),
