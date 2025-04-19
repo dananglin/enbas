@@ -402,24 +402,24 @@ func drawBoostSymbol(noColor bool) func(bool) string {
 func drawLikeSymbol(noColor bool) func(bool) string {
 	return func(liked bool) string {
 		if liked && !noColor {
-			return boldyellow + "\uf51f" + reset
+			return boldyellow + "\uF51F" + reset
 		} else if liked && noColor {
-			return "\uf51f"
+			return "\uF51F"
 		}
 
-		return "\uf41e"
+		return "\uF41E"
 	}
 }
 
 func drawBookmarkSymbol(noColor bool) func(bool) string {
 	return func(bookmarked bool) string {
 		if bookmarked && !noColor {
-			return boldyellow + "\uf47a" + reset
+			return boldyellow + "\uF47A" + reset
 		} else if bookmarked && noColor {
-			return "\uf47a"
+			return "\uF47A"
 		}
 
-		return "\uf461"
+		return "\uF461"
 	}
 }
 
