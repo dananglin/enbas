@@ -44,6 +44,10 @@ func (v IntSliceValue) Empty() bool {
 	return len(v) == 0
 }
 
+func (v IntSliceValue) Length() int {
+	return len(v)
+}
+
 func (v IntSliceValue) ExpectedLength(expectedLength int) bool {
-	return len(v) == expectedLength
+	return v.Length() == expectedLength
 }

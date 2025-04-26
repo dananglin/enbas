@@ -49,7 +49,7 @@ func Connect(cfg config.Server, cfgDir string) (*rpc.Client, error) {
 
 	// The socket file is not present so we will
 	// attempt to start a new server process.
-	server := exec.Command(os.Args[0], "--config-dir", cfgDir, "server")
+	server := exec.Command(os.Args[0], "--config-dir", cfgDir, "start", "server")
 
 	if err := server.Start(); err != nil {
 		return nil, fmt.Errorf("error starting the server: %w", err)

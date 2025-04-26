@@ -1,0 +1,189 @@
+package executor
+
+import (
+	"fmt"
+	"net/rpc"
+	"strings"
+
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
+)
+
+func tagFunc(
+	opts topLevelOpts,
+	cmd command.Command,
+) error {
+	// Load the configuration from file.
+	cfg, err := config.NewConfigFromFile(opts.configDir)
+	if err != nil {
+		return fmt.Errorf("unable to load configuration: %w", err)
+	}
+
+	// Create the print settings.
+	printSettings := printer.NewSettings(
+		opts.noColor,
+		cfg.Integrations.Pager,
+		cfg.LineWrapMaxWidth,
+	)
+
+	// Create the client to interact with the GoToSocial instance.
+	client, err := server.Connect(cfg.Server, opts.configDir)
+	if err != nil {
+		return fmt.Errorf("error creating the client for the daemon process: %w", err)
+	}
+	defer client.Close()
+
+	switch cmd.Action {
+	case cli.ActionFollow:
+		return tagFollow(client, printSettings, cmd.FocusedTargetFlags)
+	case cli.ActionUnfollow:
+		return tagUnfollow(client, printSettings, cmd.FocusedTargetFlags)
+	case cli.ActionShow:
+		return tagShow(client, printSettings, cmd.FocusedTargetFlags)
+	case cli.ActionFind:
+		return tagFind(client, printSettings, cmd.FocusedTargetFlags)
+	default:
+		return unsupportedActionError{action: cmd.Action, target: cli.TargetTag}
+	}
+}
+
+func tagFollow(
+	client *rpc.Client,
+	printSettings printer.Settings,
+	flags []string,
+) error {
+	var tagName string
+
+	// Parse the remaining flags.
+	if err := cli.ParseTagFollowFlags(
+		&tagName,
+		flags,
+	); err != nil {
+		return err
+	}
+
+	if tagName == "" {
+		return missingTagNameError{action: cli.ActionFollow}
+	}
+
+	tagName = strings.TrimLeft(tagName, "#")
+
+	if err := client.Call("GTSClient.FollowTag", tagName, nil); err != nil {
+		return fmt.Errorf("error following the tag: %w", err)
+	}
+
+	printer.PrintSuccess(printSettings, "You are now following '"+tagName+"'.")
+
+	return nil
+}
+
+func tagUnfollow(
+	client *rpc.Client,
+	printSettings printer.Settings,
+	flags []string,
+) error {
+	var tagName string
+
+	// Parse the remaining flags.
+	if err := cli.ParseTagUnfollowFlags(
+		&tagName,
+		flags,
+	); err != nil {
+		return err
+	}
+
+	if tagName == "" {
+		return missingTagNameError{action: cli.ActionUnfollow}
+	}
+
+	tagName = strings.TrimLeft(tagName, "#")
+
+	if err := client.Call("GTSClient.UnfollowTag", tagName, nil); err != nil {
+		return fmt.Errorf("error unfollowing the tag: %w", err)
+	}
+
+	printer.PrintSuccess(printSettings, "Successfully unfollowed '"+tagName+"'.")
+
+	return nil
+}
+
+func tagShow(
+	client *rpc.Client,
+	printSettings printer.Settings,
+	flags []string,
+) error {
+	var tagName string
+
+	// Parse the remaining flags.
+	if err := cli.ParseTagShowFlags(
+		&tagName,
+		flags,
+	); err != nil {
+		return err
+	}
+
+	if tagName == "" {
+		return missingTagNameError{action: cli.ActionShow}
+	}
+
+	tagName = strings.TrimLeft(tagName, "#")
+
+	var tag model.Tag
+	if err := client.Call("GTSClient.GetTag", tagName, &tag); err != nil {
+		return fmt.Errorf("error retrieving the details of the tag: %w", err)
+	}
+
+	if err := printer.PrintTag(printSettings, tag); err != nil {
+		return fmt.Errorf("error printing the tag details: %w", err)
+	}
+
+	return nil
+}
+
+func tagFind(
+	client *rpc.Client,
+	printSettings printer.Settings,
+	flags []string,
+) error {
+	var (
+		query string
+		limit int
+	)
+
+	// Parse the remaining flags.
+	if err := cli.ParseTagFindFlags(
+		&query,
+		&limit,
+		flags,
+	); err != nil {
+		return err
+	}
+
+	if query == "" {
+		return missingSearchQueryError{}
+	}
+
+	var results model.TagList
+
+	if err := client.Call(
+		"GTSClient.SearchTags",
+		gtsclient.SearchTagsArgs{
+			Limit: limit,
+			Query: query,
+		},
+		&results,
+	); err != nil {
+		return fmt.Errorf("error searching for tags: %w", err)
+	}
+
+	if err := printer.PrintTagList(printSettings, results); err != nil {
+		return fmt.Errorf("error printing the search result: %w", err)
+	}
+
+	return nil
+}

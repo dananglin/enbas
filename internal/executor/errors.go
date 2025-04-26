@@ -2,127 +2,207 @@ package executor
 
 import "fmt"
 
-type Error struct {
-	message string
+type unsupportedActionError struct {
+	action string
+	target string
 }
 
-func (e Error) Error() string {
-	return e.message
+func (e unsupportedActionError) Error() string {
+	return "unsupported action (" +
+		e.action +
+		") on target (" +
+		e.target +
+		")"
 }
 
-type FlagNotSetError struct {
-	flagText string
+type unrecognisedTargetError struct {
+	target string
 }
 
-func (e FlagNotSetError) Error() string {
-	return "please use the required --" + e.flagText + " flag"
+func (e unrecognisedTargetError) Error() string {
+	return "unrecognised target: " + e.target
 }
 
-type UnsupportedTypeError struct {
-	resourceType string
+type unrecognisedActionError struct {
+	action string
 }
 
-func (e UnsupportedTypeError) Error() string {
-	return "'" + e.resourceType + "' is not supported for this operation"
+func (e unrecognisedActionError) Error() string {
+	return "unrecognised action: " + e.action
 }
 
-type NoAccountSpecifiedError struct{}
-
-func (e NoAccountSpecifiedError) Error() string {
-	return "no account specified in this request"
+type missingIDError struct {
+	target string
+	action string
 }
 
-type UnsupportedAddOperationError struct {
-	resourceType      string
-	addToResourceType string
+func (e missingIDError) Error() string {
+	return "please provide the ID of the " + e.target + " you want to " + e.action
 }
 
-func (e UnsupportedAddOperationError) Error() string {
-	return "adding '" +
-		e.resourceType +
-		"' to '" +
-		e.addToResourceType +
-		"' is not supported"
+type noTargetProvidedError struct {
+	action string
 }
 
-type UnsupportedRemoveOperationError struct {
-	resourceType           string
-	removeFromResourceType string
+func (e noTargetProvidedError) Error() string {
+	return "no target provided for '" + e.action + "'"
 }
 
-func (e UnsupportedRemoveOperationError) Error() string {
-	return "removing '" +
-		e.resourceType +
-		"' from '" +
-		e.removeFromResourceType +
-		"' is not supported"
+type emptyContentError struct {
+	action string
+	target string
 }
 
-type UnsupportedShowOperationError struct {
-	resourceType         string
-	showFromResourceType string
+func (e emptyContentError) Error() string {
+	return "please specify the content of the " + e.target + " you want to " + e.action
 }
 
-func (e UnsupportedShowOperationError) Error() string {
-	return "showing '" +
-		e.resourceType +
-		"' from '" +
-		e.showFromResourceType +
-		"' is not supported"
+type unsupportedTargetToTargetError struct {
+	action        string
+	focusedTarget string
+	preposition   string
+	relatedTarget string
 }
 
-type UnknownCommandError struct {
-	command string
+func (e unsupportedTargetToTargetError) Error() string {
+	return "'" +
+		e.action + " " +
+		e.focusedTarget + " " +
+		e.preposition + " " +
+		e.relatedTarget +
+		"' is not a supported operation"
 }
 
-func (e UnknownCommandError) Error() string {
-	return "unknown command '" + e.command + "'"
+type missingTagNameError struct {
+	action string
 }
 
-type NotFollowingError struct {
+func (e missingTagNameError) Error() string {
+	return "please specify the name of the tag you want to " + e.action
+}
+
+type forbiddenActionOnStatusError struct {
+	action              string
+	includeNotMentioned bool
+}
+
+func (e forbiddenActionOnStatusError) Error() string {
+	msg := "unable to " + e.action + " the status because you are not the owner"
+
+	if e.includeNotMentioned {
+		msg += " and you are not mentioned in it"
+	}
+
+	return msg
+}
+
+type missingAccountNameError struct {
+	action string
+}
+
+func (e missingAccountNameError) Error() string {
+	return "please specify the name of the account you want to " + e.action
+}
+
+type missingAccountInCredentialsError struct{}
+
+func (e missingAccountInCredentialsError) Error() string {
+	return "this account is not present in the credentials file"
+}
+
+type zeroAccountNamesError struct {
+	action string
+}
+
+func (e zeroAccountNamesError) Error() string {
+	return "please specify one or more account(s) you want to " + e.action
+}
+
+type notFollowingError struct {
 	account string
 }
 
-func (e NotFollowingError) Error() string {
+func (e notFollowingError) Error() string {
 	return "you are not following " + e.account
 }
 
-type MismatchedNumMediaValuesError struct {
-	valueType     string
-	numValues     int
-	numMediaFiles int
+type zeroVotesError struct{}
+
+func (e zeroVotesError) Error() string {
+	return "please select one or more options in the poll to vote for"
 }
 
-func (e MismatchedNumMediaValuesError) Error() string {
+type loginNoInstanceError struct{}
+
+func (e loginNoInstanceError) Error() string {
+	return "please specify the instance that you want to log into"
+}
+
+type pollMissingError struct{}
+
+func (e pollMissingError) Error() string {
+	return "this status does not have a poll"
+}
+
+type pollClosedError struct{}
+
+func (e pollClosedError) Error() string {
+	return "this poll is closed"
+}
+
+type pollNoMultipleChoiceError struct{}
+
+func (e pollNoMultipleChoiceError) Error() string {
+	return "this poll does not allow multiple choices"
+}
+
+type voteInOwnPollError struct{}
+
+func (e voteInOwnPollError) Error() string {
+	return "you cannot vote in your own poll"
+}
+
+type noPollOptionsError struct{}
+
+func (e noPollOptionsError) Error() string {
+	return "no options were provided for this poll"
+}
+
+type missingSearchQueryError struct{}
+
+func (e missingSearchQueryError) Error() string {
+	return "please enter a search query"
+}
+
+type missingMediaFileError struct{}
+
+func (e missingMediaFileError) Error() string {
+	return "please provide the path to the media file"
+}
+
+type noContentOrMediaError struct{}
+
+func (e noContentOrMediaError) Error() string {
+	return "please add content or attach at least one media to the status that you want to create"
+}
+
+type statusHasPollAndMediaError struct{}
+
+func (e statusHasPollAndMediaError) Error() string {
+	return "you cannot create a status with both a poll and media attachments"
+}
+
+type mismatchedMediaFlagsError struct {
+	kind string
+	want int
+	got  int
+}
+
+func (e mismatchedMediaFlagsError) Error() string {
 	return fmt.Sprintf(
-		"unexpected number of %s: received %d media files but got %d %s",
-		e.valueType,
-		e.numMediaFiles,
-		e.numValues,
-		e.valueType,
+		"the number of %s provided does not match the number of media files provided: want %d, got %d",
+		e.kind,
+		e.want,
+		e.got,
 	)
-}
-
-type UnexpectedNumValuesError struct {
-	name     string
-	actual   int
-	expected int
-}
-
-func (e UnexpectedNumValuesError) Error() string {
-	return fmt.Sprintf(
-		"received an unexpected number of %s: received %d, expected %d",
-		e.name,
-		e.actual,
-		e.expected,
-	)
-}
-
-type MissingIDError struct {
-	resource string
-	action   string
-}
-
-func (e MissingIDError) Error() string {
-	return "please provide the ID of the " + e.resource + " you want to " + e.action
 }

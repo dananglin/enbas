@@ -14,9 +14,9 @@ type TimeDurationValue struct {
 	Duration time.Duration
 }
 
-func NewTimeDurationValue() TimeDurationValue {
+func NewTimeDurationValue(defaultDuration time.Duration) TimeDurationValue {
 	return TimeDurationValue{
-		Duration: time.Duration(0),
+		Duration: defaultDuration,
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
@@ -58,22 +59,80 @@ func (g *GTSClient) verifyCredentials() (model.Account, error) {
 }
 
 func (g *GTSClient) GetAccount(accountURI string, account *model.Account) error {
+	var err error
+
+	*account, err = g.getAccount(accountURI)
+	if err != nil {
+		return fmt.Errorf("error getting the account information: %w", err)
+	}
+
+	return nil
+}
+
+func (g *GTSClient) GetMultipleAccounts(accountURIs []string, accounts *[]model.Account) error {
+	output := make([]model.Account, len(accountURIs))
+
+	for idx, uri := range slices.All(accountURIs) {
+		acct, err := g.getAccount(uri)
+		if err != nil {
+			return fmt.Errorf("error retrieving the account details for %q: %w", uri, err)
+		}
+
+		output[idx] = acct
+	}
+
+	*accounts = output
+
+	return nil
+}
+
+func (g *GTSClient) GetAccountID(accountURI string, accountID *string) error {
+	account, err := g.getAccount(accountURI)
+	if err != nil {
+		return fmt.Errorf("error getting the account information: %w", err)
+	}
+
+	*accountID = account.ID
+
+	return nil
+}
+
+func (g *GTSClient) GetMultipleAccountIDs(accountURIs []string, accountIDs *[]string) error {
+	ids := make([]string, len(accountURIs))
+
+	for idx, uri := range slices.All(accountURIs) {
+		acct, err := g.getAccount(uri)
+		if err != nil {
+			return fmt.Errorf("error retrieving the account ID of %q: %w", uri, err)
+		}
+
+		ids[idx] = acct.ID
+	}
+
+	*accountIDs = ids
+
+	return nil
+}
+
+func (g *GTSClient) getAccount(accountURI string) (model.Account, error) {
+	var account model.Account
+
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
 		url:         g.authentication.Instance + baseAccountsPath + "/lookup?acct=" + accountURI,
 		requestBody: nil,
 		contentType: "",
-		output:      account,
+		output:      &account,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return fmt.Errorf(
+		return model.Account{}, fmt.Errorf(
 			"received an error after sending the request to get the account information: %w",
 			err,
 		)
 	}
 
-	return nil
+	return account, nil
 }
 
 func (g *GTSClient) GetAccountRelationship(accountID string, relationship *model.AccountRelationship) error {

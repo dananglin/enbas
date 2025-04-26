@@ -32,7 +32,7 @@ type (
 // NewGTSClient creates GTSClient value for connecting with the GoToSocial instance. If the credentials
 // file is present then the authentication details is retrieved for the current account in use.
 // If the file is not present then a zero-valued authentication value is used which must be updated later.
-func NewGTSClient(cfg *config.Config) (*GTSClient, error) {
+func NewGTSClient(cfg config.Config) (*GTSClient, error) {
 	var auth config.Credentials
 
 	exists, err := utilities.FileExists(cfg.CredentialsFile)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -178,6 +179,22 @@ func Clean() error {
 	}
 
 	fmt.Println("Workspace cleaned.")
+
+	return nil
+}
+
+func Codegen() error {
+	for _, pkg := range slices.All([]string{"executor", "cli"}) {
+		internalPkg := "./internal/" + pkg
+
+		fmt.Printf("Generating code for %q\n", internalPkg)
+
+		if err := sh.Run("go", "generate", internalPkg); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("Code successfully generated.")
 
 	return nil
 }

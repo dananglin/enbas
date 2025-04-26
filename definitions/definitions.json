@@ -1,0 +1,1297 @@
+{
+  "topLevelFlags": {
+    "config-dir": {
+      "description": "the path to the configuration directory",
+      "type": "string",
+      "default": "",
+      "required": false
+    },
+    "no-color": {
+      "description": "disables the ANSI colour output when displaying the text on screen",
+      "type": "internalFlag.BoolPtrValue",
+      "required": false
+    }
+  },
+  "flags": {
+    "account-name": "the name of the account to {action}",
+    "action": "the name of the action",
+    "add-poll": "add a poll to the new status",
+    "all-audio":  "play all audio files from the status",
+    "all-images": "show all image files from the status",
+    "all-videos": "play all video files from the status",
+    "attachment-id": "the ID of the media attachment",
+    "browser": "{action} the {target} in your favourite browser",
+    "duration": "how long the effect should last for (set to 0s to last indefinitely)",
+    "content": "the content of the {target}",
+    "content-type": "the type that the contents should be parsed from",
+    "exclude-reblogs": "exclude statuses that are reblogs (boosts) of other statuses",
+    "exclude-replies": "exclude statuses that are replies to other statuses",
+    "exclude-notification-type": "the type of notifications to exclude from the list",
+    "exclusive": "hide posts from members of this list from your home timeline",
+    "full": "print the application's full build information",
+    "in-reply-to": "the ID of the status that you want to reply to",
+    "include-notification-type": "the type of notifications to include in the list",
+    "language": "the ISO 639 language code for this {target}",
+    "limit": "the limit of items to display",
+    "list-id": "the ID of the list",
+    "local-only": "do not federate the status beyond the local timeline(s)",
+    "max-statuses": "the maximum number of statuses to display",
+    "media-description": "the description of the media attachment",
+    "media-file": "the path to the file of the media-attachment",
+    "media-focus": "the focus of the media-attachment",
+    "mute-notifications": "mute notifications as well as posts from the {target}",
+    "my-account": "specify your account to {action}",
+    "notification-id": "the ID of the notification to {action}",
+    "notify": "get notifications whenever the account you want to follow posts a status",
+    "not-boostable": "viewers will not be allowed to reblog (boost) the created status",
+    "not-likeable": "viewers will not be allowed to like (favourite) the created status",
+    "not-replyable": "viewers will not be allowed to reply to the created status",
+    "only-media": "only show the statuses with media attachments",
+    "only-pinned": "only show the account's pinned statuses",
+    "only-public": "only show the account's public posts",
+    "poll-allows-multiple-choices": "allow viewers to make multiple choices in the poll",
+    "poll-expires-in": "the duration in which the poll is open for",
+    "poll-hides-vote-counts": "hide the vote count until the poll is closed",
+    "poll-option": "a poll option (use this flag multiple times to set multiple poll options)",
+    "query": "the search query string",
+    "replies-policy": "the replies policy of the {target} to {action}",
+    "resolve": "allow your instance to resolve the search by making calls to remote instances",
+    "restrict-to-following": "restrict the search to accounts that you are following",
+    "save-text": "save the text of the deleted {target}",
+    "sensitive": "mark the {target} as sensitive",
+    "show-reblogs": "show reblogs (boosts) from the account you want to follow",
+    "show-statuses": "view the statuses from the {target} that you are viewing",
+    "skip-account-relationship": "don't show your relationship to the account that you are viewing",
+    "show-who-favourited": "show the accounts who favourited (liked) the {target}",
+    "show-who-reblogged": "show the accounts who reblogged (boosted) the {target}",
+    "skip-user-preferences": "don't show your posting preferences when viewing your account information",
+    "status-id": "the ID of the status",
+    "summary": "the summary of the status (a.k.a the subject, spoiler text or content warning)",
+    "tag-name": "the name of the (hash)tag",
+    "target": "the name of the target to {action}",
+    "timeline-category": "the category of the timeline to {action}",
+    "title": "the title of the {target} to {action}",
+    "url": "the URL of your GoToSocial instance",
+    "vote": "the option in the poll to vote for",
+    "visibility": "The visibility of the {target}",
+    "without-idle-timeout": "{action} the {target} without an idle timeout"
+  },
+  "actions": {
+    "accept": "accepts an existing {target}",
+    "add": "adds the {target} to an existing {relatedTarget}",
+    "block": "blocks an existing {target}",
+    "clear": "deletes all your {target}",
+    "create": "creates a new {target}",
+    "delete": "deletes an existing {target}",
+    "edit": "edits an existing {target}",
+    "favourite": "marks the {target} as a favourite {target}",
+    "find": "searches for {target}",
+    "follow": "follows an existing {target}",
+    "mute": "mutes an existing {target}",
+    "reblog": "reblogs an existing {target}",
+    "reject": "rejects an existing {target}",
+    "remove": "removes the {target} from an existing {relatedTarget}",
+    "show": "prints the details of the {target} to screen",
+    "start": "starts the {target}",
+    "switch": "switches from one {target} to another",
+    "unblock": "unblocks the {target} you've previously blocked",
+    "unfavourite": "unmarks the {target} as a favourite {target}",
+    "unfollow": "unfollows the {target} that you are following",
+    "unmute": "unmutes the {target} that you've muted",
+    "unreblog": "unreblogs the {target} that you've previously reblogged",
+    "verify": "verifies the {target}"
+  },
+  "targets": {
+    "access": {
+      "description": "your access to a GoToSocial instance",
+      "actions": {
+        "create": {
+          "flags": [
+            {
+              "name": "url",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "switch": {
+          "preposition": "to",
+          "relatedTargets": {
+            "account": {
+              "flags": [
+                {
+                  "name": "account-name",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "verify": {}
+      }
+    },
+    "account": {
+      "description": "a local or remote account",
+      "actions": {
+        "block": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "find": {
+          "flags": [
+            {
+              "name": "query",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            },
+            {
+              "name": "restrict-to-following",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "resolve",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "follow": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "notify",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "show-reblogs",
+              "type": "bool",
+              "default": "true",
+              "required": false
+            }
+          ]
+        },
+        "mute": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "duration",
+              "type": "internalFlag.TimeDurationValue",
+              "default": "0 (indefinitely)",
+              "required": false
+            },
+            {
+              "name": "mute-notifications",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "browser",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "exclude-reblogs",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "exclude-replies",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "max-statuses",
+              "type": "int",
+              "default": "20",
+              "required": false
+            },
+            {
+              "name": "my-account",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "only-media",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "only-pinned",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "only-public",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "skip-account-relationship",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "skip-user-preferences",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "show-statuses",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "unblock": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "unmute": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "unfollow": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "accounts": {
+      "description": "multiple accounts",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "list": {
+              "flags": [
+                {
+                  "name": "list-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "account-name",
+                  "type": "internalFlag.StringSliceValue",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "remove": {
+          "preposition": "from",
+          "relatedTargets": {
+            "list": {
+              "flags": [
+                {
+                  "name": "list-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "account-name",
+                  "type": "internalFlag.StringSliceValue",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "blocked-accounts": {
+      "description": "the accounts that are blocked by you",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "bookmarks": {
+      "description": "the statuses that you've bookmarked",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "config": {
+      "description": "your configuration for enbas",
+      "actions": {
+        "create": {}
+      }
+    },
+    "favourites": {
+      "description": "the statuses that you've favourited (liked)",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "follow-requests": {
+      "description": "the list of accounts that are currently requesting to follow you",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "follow-request": {
+      "description": "the account that is currently requesting to follow you",
+      "actions": {
+        "accept": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "reject": {
+          "flags": [
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "followers": {
+      "description": "the accounts who are following the specified account",
+      "actions": {
+        "show": {
+          "preposition": "from",
+          "relatedTargets": {
+            "account": {
+              "flags": [
+                {
+                  "name": "account-name",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "limit",
+                  "type": "int",
+                  "default": "20",
+                  "required": false
+                },
+                {
+                  "name": "my-account",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "followings": {
+      "description": "the accounts who the specified account is following",
+      "actions": {
+        "show": {
+          "preposition": "from",
+          "relatedTargets": {
+            "account": {
+              "flags": [
+                {
+                  "name": "account-name",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "limit",
+                  "type": "int",
+                  "default": "20",
+                  "required": false
+                },
+                {
+                  "name": "my-account",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "help": {
+      "description": "usage documentation",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "action",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "target",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "instance": {
+      "description": "the GoToSocial instance",
+      "actions": {
+        "show": {}
+      }
+    },
+    "list": {
+      "description": "a single list",
+      "actions": {
+        "create": {
+          "flags": [
+            {
+              "name": "exclusive",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "replies-policy",
+              "type": "string",
+              "default": "list",
+              "required": false
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "delete": {
+          "flags": [
+            {
+              "name": "list-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "edit": {
+          "flags": [
+            {
+              "name": "list-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "replies-policy",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "list-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "lists": {
+      "description": "multiple lists",
+      "actions": {
+        "show": {}
+      }
+    },
+    "media": {
+      "description": "the media attached to the specified status",
+      "actions": {
+        "show": {
+          "preposition": "from",
+          "relatedTargets": {
+            "status": {
+              "flags": [
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "attachment-id",
+                  "type": "internalFlag.StringSliceValue",
+                  "default": "",
+                  "required": false
+                },
+                {
+                  "name": "all-audio",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                },
+                {
+                  "name": "all-images",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                },
+                {
+                  "name": "all-videos",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "media-attachment": {
+      "description": "a media attachment that you own",
+      "actions": {
+        "create": {
+          "flags": [
+            {
+              "name": "media-description",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "media-file",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "media-focus",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        },
+        "edit": {
+          "flags": [
+            {
+              "name": "attachment-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "media-description",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "media-focus",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "attachment-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "muted-accounts": {
+      "description": "the accounts that are muted by you",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "note": {
+      "description": "your private note about an account",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "account": {
+              "flags": [
+                {
+                  "name": "account-name",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "content",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "remove": {
+          "preposition": "from",
+          "relatedTargets": {
+            "account": {
+              "flags": [
+                {
+                  "name": "account-name",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "notification": {
+      "description": "a single notification",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "notification-id",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "notifications": {
+      "description": "multiple notifications",
+      "actions": {
+        "clear": {},
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            },
+            {
+              "name": "exclude-notification-type",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "include-notification-type",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "server": {
+      "description": "the server mode",
+      "actions": {
+        "start": {
+          "flags": [
+            {
+              "name": "without-idle-timeout",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "status": {
+      "description": "a single status",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "bookmarks": {
+              "flags": [
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "create": {
+          "flags": [
+            {
+              "name": "add-poll",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "attachment-id",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "content-type",
+              "type": "string",
+              "default": "plain",
+              "required": false
+            },
+            {
+              "name": "in-reply-to",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "language",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "local-only",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "media-description",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "media-file",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "media-focus",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "not-boostable",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "not-likeable",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "not-replyable",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "poll-allows-multiple-choices",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "poll-expires-in",
+              "type": "internalFlag.TimeDurationValue",
+              "default": "24 hours",
+              "required": false
+            },
+            {
+              "name": "poll-hides-vote-counts",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "poll-option",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "sensitive",
+              "type": "internalFlag.BoolPtrValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "summary",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "visibility",
+              "type": "string",
+              "default": "",
+              "required": false
+            }
+          ]
+        },
+        "delete": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "save-text",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "favourite": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "find": {
+          "flags": [
+            {
+              "name": "query",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            },
+            {
+              "name": "account-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "mute": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "reblog": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "remove": {
+          "preposition": "from",
+          "relatedTargets": {
+            "bookmarks": {
+              "flags": [
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "browser",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "show-who-favourited",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            },
+            {
+              "name": "show-who-reblogged",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "unfavourite": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "unmute": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "unreblog": {
+          "flags": [
+            {
+              "name": "status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "tag": {
+      "description": "a single tag (hashtag)",
+      "actions": {
+        "find": {
+          "flags": [
+            {
+              "name": "query",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        },
+        "follow": {
+          "flags": [
+            {
+              "name": "tag-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "unfollow": {
+          "flags": [
+            {
+              "name": "tag-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "tag-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "tags": {
+      "description": "multiple tags (hashtags)",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "thread": {
+      "description": "a status thread",
+      "actions": {
+        "show": {
+          "flags": [],
+          "preposition": "from",
+          "relatedTargets": {
+            "status": {
+              "flags": [
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "description": "your timeline",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            },
+            {
+              "name": "list-id",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "tag-name",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "timeline-category",
+              "type": "string",
+              "default": "home",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "version": {
+      "description": "the application's build information",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "full",
+              "type": "bool",
+              "default": "false",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "votes": {
+      "description": "the votes(s) to the poll in a status",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "status": {
+              "flags": [
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "vote",
+                  "type": "internalFlag.IntSliceValue",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

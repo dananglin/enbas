@@ -27,7 +27,7 @@ func Run(
 	printSettings printer.Settings,
 	client *gtsclient.GTSClient,
 	socketPath string,
-	noIdleTimeout bool,
+	withoutIdleTimeout bool,
 	idleTimeout int,
 ) error {
 	if socketPath == "" {
@@ -66,7 +66,7 @@ func Run(
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 	// Run the server without a timer.
-	if noIdleTimeout {
+	if withoutIdleTimeout {
 		return runWithoutIdleTimeout(
 			printSettings,
 			server,

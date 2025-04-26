@@ -1,0 +1,23 @@
+{{- define "helpTarget" }}
+{{ headerFormat "SUMMARY:" }}
+  {{ .Target }} - {{ .Description }}.
+
+{{ headerFormat "USAGE:" }}
+  {{ .AppName }} [top-level-flags] <action> {{ .Target }} [flags]
+
+{{ headerFormat "AVAILABLE ACTIONS:" }}
+{{- range $name, $desc := .Actions -}}
+{{print "" }}
+  {{ fieldFormat $name }} {{ $desc }}
+{{- end }}
+
+{{ headerFormat "TOP-LEVEL FLAGS:" }}
+{{- range $name, $usage := .TopLevelFlags -}}
+{{ print "" }}
+{{ printf "  --%s" $name | fieldFormat }} {{ $usage }}
+{{- end }}
+
+Use "enbas show help --target {{ .Target }} --action <action>" for more information about the
+action and its available flags.
+
+{{ end -}}

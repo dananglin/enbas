@@ -49,25 +49,25 @@ type Integrations struct {
 	AudioPlayer string `json:"audioPlayer"`
 }
 
-func NewConfigFromFile(configDir string) (*Config, error) {
+func NewConfigFromFile(configDir string) (Config, error) {
 	path, err := configPath(configDir)
 	if err != nil {
-		return nil, fmt.Errorf("unable to calculate the path to your config file: %w", err)
+		return Config{}, fmt.Errorf("unable to calculate the path to your config file: %w", err)
 	}
 
 	file, err := utilities.OpenFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open %s: %w", path, err)
+		return Config{}, fmt.Errorf("unable to open %s: %w", path, err)
 	}
 	defer file.Close()
 
 	var config Config
 
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return nil, fmt.Errorf("unable to decode the JSON data: %w", err)
+		return Config{}, fmt.Errorf("unable to decode the JSON data: %w", err)
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 func FileExists(configDir string) (bool, error) {

@@ -183,17 +183,12 @@ func (g *GTSClient) UnlikeStatus(statusID string, _ *NoRPCResults) error {
 	return nil
 }
 
-type GetLikedStatusesArgs struct {
-	Limit        int
-	ResourceType string
-}
-
-func (g *GTSClient) GetLikedStatuses(args GetLikedStatusesArgs, liked *model.StatusList) error {
+func (g *GTSClient) GetFavourites(limit int, favourites *model.StatusList) error {
 	var statuses []model.Status
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", args.Limit),
+		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
@@ -206,8 +201,8 @@ func (g *GTSClient) GetLikedStatuses(args GetLikedStatusesArgs, liked *model.Sta
 		)
 	}
 
-	*liked = model.StatusList{
-		Name:     "Your " + args.ResourceType + " statuses",
+	*favourites = model.StatusList{
+		Name:     "Your favourite statuses",
 		Statuses: statuses,
 	}
 
