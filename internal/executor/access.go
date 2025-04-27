@@ -153,16 +153,28 @@ Out-of-band token: `
 		return fmt.Errorf("failed to read access code: %w", err)
 	}
 
-	if err := client.Call("GTSClient.UpdateToken", code, &auth); err != nil {
+	if err := client.Call(
+		"GTSClient.UpdateAccessToken",
+		code,
+		&auth,
+	); err != nil {
 		return fmt.Errorf("error updating the client's access token: %w", err)
 	}
 
 	var account model.Account
-	if err := client.Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
+	if err := client.Call(
+		"GTSClient.GetMyAccount",
+		gtsclient.NoRPCArgs{},
+		&account,
+	); err != nil {
 		return fmt.Errorf("error verifying the credentials: %w", err)
 	}
 
-	loginName, err := config.SaveCredentials(cfg.CredentialsFile, account.Username, auth)
+	loginName, err := config.SaveCredentials(
+		cfg.CredentialsFile,
+		account.Username,
+		auth,
+	)
 	if err != nil {
 		return fmt.Errorf("error saving the authentication details: %w", err)
 	}

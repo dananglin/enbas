@@ -16,6 +16,7 @@ const (
 	ActionFavourite   string = "favourite"
 	ActionFind        string = "find"
 	ActionFollow      string = "follow"
+	ActionInvalidate  string = "invalidate"
 	ActionMute        string = "mute"
 	ActionReblog      string = "reblog"
 	ActionReject      string = "reject"
@@ -52,6 +53,7 @@ func actionDescMap() map[string]string {
 		ActionFavourite:   "marks the {target} as a favourite {target}",
 		ActionFind:        "searches for {target}",
 		ActionFollow:      "follows an existing {target}",
+		ActionInvalidate:  "invalidates an existing {target}",
 		ActionMute:        "mutes an existing {target}",
 		ActionReblog:      "reblogs an existing {target}",
 		ActionReject:      "rejects an existing {target}",
@@ -120,6 +122,9 @@ func actionTargetsMap() map[string][]string {
 			TargetAccount,
 			TargetTag,
 		},
+		ActionInvalidate: {
+			TargetToken,
+		},
 		ActionMute: {
 			TargetAccount,
 			TargetStatus,
@@ -157,6 +162,8 @@ func actionTargetsMap() map[string][]string {
 			TargetTags,
 			TargetThread,
 			TargetTimeline,
+			TargetToken,
+			TargetTokens,
 			TargetVersion,
 		},
 		ActionStart: {

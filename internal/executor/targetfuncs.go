@@ -38,6 +38,8 @@ func targetFuncMap() map[string]targetFunc {
 		cli.TargetTags:            tagsFunc,
 		cli.TargetThread:          threadFunc,
 		cli.TargetTimeline:        timelineFunc,
+		cli.TargetToken:           tokenFunc,
+		cli.TargetTokens:          tokensFunc,
 		cli.TargetVersion:         versionFunc,
 		cli.TargetVotes:           votesFunc,
 	}

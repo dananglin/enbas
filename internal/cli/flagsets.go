@@ -930,6 +930,48 @@ func ParseTimelineShowFlags(
 	return nil
 }
 
+func ParseTokenInvalidateFlags(
+	tokenId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(tokenId, flagTokenId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseTokenShowFlags(
+	tokenId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(tokenId, flagTokenId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseTokensShowFlags(
+	limit *int,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.IntVar(limit, flagLimit, 20, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
 func ParseVersionShowFlags(
 	full *bool,
 	flags []string,

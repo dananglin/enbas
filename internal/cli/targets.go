@@ -35,6 +35,8 @@ const (
 	TargetTags            string = "tags"
 	TargetThread          string = "thread"
 	TargetTimeline        string = "timeline"
+	TargetToken           string = "token"
+	TargetTokens          string = "tokens"
 	TargetVersion         string = "version"
 	TargetVotes           string = "votes"
 )
@@ -81,6 +83,8 @@ func targetDescMap() map[string]string {
 		TargetTags:            "multiple tags (hashtags)",
 		TargetThread:          "a status thread",
 		TargetTimeline:        "your timeline",
+		TargetToken:           "details of an application token",
+		TargetTokens:          "a list of your tokens",
 		TargetVersion:         "the application's build information",
 		TargetVotes:           "the votes(s) to the poll in a status",
 	}
@@ -216,6 +220,13 @@ func targetActionsMap() map[string][]string {
 			ActionShow,
 		},
 		TargetTimeline: {
+			ActionShow,
+		},
+		TargetToken: {
+			ActionInvalidate,
+			ActionShow,
+		},
+		TargetTokens: {
 			ActionShow,
 		},
 		TargetVersion: {

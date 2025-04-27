@@ -1,0 +1,42 @@
+{{- define "tokenDoc" -}}
+{{ print "" }}
+{{ headerFormat "TOKEN ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "TOKEN CREATED AT:" }}
+{{ formatDateTime .CreatedAt }}
+{{ print "" }}
+{{ headerFormat "TOKEN LAST USED AT:" }}
+{{ formatDateTime .LastUsed }}
+{{ print "" }}
+{{ headerFormat "APPLICATION NAME:" }}
+{{ .Application.Name }}
+{{ print "" }}
+{{ headerFormat "APPLICATION WEBSITE:" }}
+{{ .Application.Website }}
+{{ print "" }}
+{{ headerFormat "SCOPE" }}
+{{ .Scope }}
+{{- end -}}
+
+{{- define "tokenList" -}}
+{{ headerFormat .Label }}
+{{ print "" }}
+{{- range .Tokens -}}
+{{ template "tokenCard" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "tokenCard" -}}
+{{ print "" }}
+{{ fieldFormat "Token ID" }}            {{ .ID }}
+{{ fieldFormat "Application name" }}    {{ .Application.Name }}
+{{ fieldFormat "Application website" }} {{ .Application.Website }}
+{{ fieldFormat "Scope" }}               {{ .Scope }}
+{{ fieldFormat "Created" }}             {{ formatDateTime .CreatedAt }}
+{{ fieldFormat "Last used" }}           {{ formatDateTime .LastUsed }}
+{{ print "" }}
+{{- drawCardSeparator -}}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}

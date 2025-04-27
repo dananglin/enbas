@@ -204,6 +204,16 @@ func PrintNotificationList(settings Settings, list []model.Notification, myAccou
 	return renderTemplateToPager(settings, "notificationList", myAccountID, list)
 }
 
+// PrintTokenList prints the list of tokens to the pager.
+func PrintTokenList(settings Settings, list model.TokenList) error {
+	return renderTemplateToPager(settings, "tokenList", "", list)
+}
+
+// PrintToken prints the details of the token.
+func PrintToken(settings Settings, token model.Token) error {
+	return renderTemplateToPager(settings, "tokenDoc", "", token)
+}
+
 func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
 	if settings.pager == "" {
 		return renderTemplateToStdout(

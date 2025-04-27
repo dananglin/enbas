@@ -81,6 +81,7 @@ const (
 	flagTarget                    string = "target"
 	flagTimelineCategory          string = "timeline-category"
 	flagTitle                     string = "title"
+	flagTokenId                   string = "token-id"
 	flagUrl                       string = "url"
 	flagVisibility                string = "visibility"
 	flagVote                      string = "vote"
@@ -150,6 +151,7 @@ func flagUsageMap() map[string]string {
 		flagTarget:                    "the name of the target to {action}",
 		flagTimelineCategory:          "the category of the timeline to {action}",
 		flagTitle:                     "the title of the {target} to {action}",
+		flagTokenId:                   "the ID of the token",
 		flagUrl:                       "the URL of your GoToSocial instance",
 		flagVisibility:                "The visibility of the {target}",
 		flagVote:                      "the option in the poll to vote for",
@@ -383,6 +385,15 @@ func targetActionFlagMap() map[string][]string {
 			flagListId,
 			flagTagName,
 			flagTimelineCategory,
+		},
+		TargetToken + "-" + ActionInvalidate: {
+			flagTokenId,
+		},
+		TargetToken + "-" + ActionShow: {
+			flagTokenId,
+		},
+		TargetTokens + "-" + ActionShow: {
+			flagLimit,
 		},
 		TargetVersion + "-" + ActionShow: {
 			flagFull,

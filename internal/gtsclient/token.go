@@ -1,67 +1,74 @@
 package gtsclient
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-type tokenRequest struct {
-	RedirectURI  string `json:"redirect_uri"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	GrantType    string `json:"grant_type"`
-	Code         string `json:"code"`
-}
+const baseTokenPath string = "/api/v1/tokens"
 
-type tokenResponse struct {
-	AccessToken string `json:"access_token"`
-	CreatedAt   int    `json:"created_at"`
-	Scope       string `json:"scope"`
-	TokenType   string `json:"token_type"`
-}
-
-func (g *GTSClient) UpdateToken(code string, auth *config.Credentials) error {
-	tokenReq := tokenRequest{
-		RedirectURI:  redirectURI,
-		ClientID:     g.authentication.ClientID,
-		ClientSecret: g.authentication.ClientSecret,
-		GrantType:    "authorization_code",
-		Code:         code,
-	}
-
-	data, err := json.Marshal(tokenReq)
-	if err != nil {
-		return fmt.Errorf("unable to marshal the request body: %w", err)
-	}
-
-	requestBody := bytes.NewBuffer(data)
-	url := g.authentication.Instance + "/oauth/token"
-
-	var response tokenResponse
+func (g *GTSClient) GetTokens(limit int, tokenList *model.TokenList) error {
+	var tokens []model.Token
 
 	params := requestParameters{
-		httpMethod:  http.MethodPost,
-		url:         url,
-		requestBody: requestBody,
-		contentType: applicationJSON,
-		output:      &response,
+		httpMethod:  http.MethodGet,
+		url:         g.authentication.Instance + fmt.Sprintf("%s?limit=%d", baseTokenPath, limit),
+		requestBody: nil,
+		contentType: "",
+		output:      &tokens,
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return fmt.Errorf("received an error after sending the token request: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the tokens: %w",
+			err,
+		)
 	}
 
-	if response.AccessToken == "" {
-		return Error{"received an empty access token"}
+	*tokenList = model.TokenList{
+		Label:  "Your tokens",
+		Tokens: tokens,
 	}
 
-	g.authentication.AccessToken = response.AccessToken
+	return nil
+}
 
-	*auth = g.authentication
+func (g *GTSClient) GetToken(tokenID string, token *model.Token) error {
+	params := requestParameters{
+		httpMethod:  http.MethodGet,
+		url:         g.authentication.Instance + baseTokenPath + "/" + tokenID,
+		requestBody: nil,
+		contentType: "",
+		output:      token,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to get the token: %w",
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (g *GTSClient) InvalidateToken(tokenID string, _ *NoRPCResults) error {
+	params := requestParameters{
+		httpMethod:  http.MethodPost,
+		url:         g.authentication.Instance + baseTokenPath + "/" + tokenID + "/invalidate",
+		requestBody: nil,
+		contentType: "",
+		output:      nil,
+	}
+
+	if err := g.sendRequest(params); err != nil {
+		return fmt.Errorf(
+			"received an error after sending the request to invalidate the token: %w",
+			err,
+		)
+	}
 
 	return nil
 }

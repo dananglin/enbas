@@ -72,6 +72,7 @@
     "target": "the name of the target to {action}",
     "timeline-category": "the category of the timeline to {action}",
     "title": "the title of the {target} to {action}",
+    "token-id": "the ID of the token",
     "url": "the URL of your GoToSocial instance",
     "vote": "the option in the poll to vote for",
     "visibility": "The visibility of the {target}",
@@ -88,6 +89,7 @@
     "favourite": "marks the {target} as a favourite {target}",
     "find": "searches for {target}",
     "follow": "follows an existing {target}",
+    "invalidate": "invalidates an existing {target}",
     "mute": "mutes an existing {target}",
     "reblog": "reblogs an existing {target}",
     "reject": "rejects an existing {target}",
@@ -1254,6 +1256,46 @@
               "type": "string",
               "default": "home",
               "required": false
+            }
+          ]
+        }
+      }
+    },
+    "tokens": {
+      "description": "a list of your tokens",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "20",
+              "required": false
+            }
+          ]
+        }
+      }
+    },
+    "token": {
+      "description": "details of an application token",
+      "actions": {
+        "invalidate": {
+          "flags": [
+            {
+              "name": "token-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "show": {
+          "flags": [
+            {
+              "name": "token-id",
+              "type": "string",
+              "default": "",
+              "required": true
             }
           ]
         }
