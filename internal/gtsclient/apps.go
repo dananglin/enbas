@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 )
 
-func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
+const baseAppsPath = "/api/v1/apps"
+
+func (g *GTSClient) RegisterApp(scopes []string, _ *NoRPCResults) error {
 	form := struct {
 		ClientName   string `json:"client_name"`
 		RedirectUris string `json:"redirect_uris"`
@@ -20,7 +23,7 @@ func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
 	}{
 		ClientName:   info.ApplicationName,
 		RedirectUris: redirectURI,
-		Scopes:       "read write",
+		Scopes:       strings.Join(scopes, " "),
 		Website:      info.ApplicationWebsite,
 	}
 
@@ -35,7 +38,7 @@ func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
 
 	requestParams := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + "/api/v1/apps",
+		url:         g.authentication.Instance + baseAppsPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      &app,
@@ -51,7 +54,7 @@ func (g *GTSClient) Register(_ NoRPCArgs, _ *NoRPCResults) error {
 	return nil
 }
 
-func (g *GTSClient) AuthCodeURL(_ NoRPCArgs, authCodeURL *string) error {
+func (g *GTSClient) AuthCodeURL(scopes []string, authCodeURL *string) error {
 	escapedRedirectURI := url.QueryEscape(redirectURI)
 
 	*authCodeURL = fmt.Sprintf(
@@ -59,6 +62,7 @@ func (g *GTSClient) AuthCodeURL(_ NoRPCArgs, authCodeURL *string) error {
 		g.authentication.Instance,
 		g.authentication.ClientID,
 		escapedRedirectURI,
+		strings.Join(scopes, "+"),
 	)
 
 	return nil

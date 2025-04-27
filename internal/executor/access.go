@@ -7,6 +7,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
@@ -67,12 +68,14 @@ func accessCreate(
 	flags []string,
 ) error {
 	var (
-		err error
-		url string
+		url    string
+		scopes = internalFlag.NewStringSliceValue()
+		err    error
 	)
 
 	// Parse the remaining flags.
 	if err := cli.ParseAccessCreateFlags(
+		&scopes,
 		&url,
 		flags,
 	); err != nil {
@@ -105,17 +108,29 @@ func accessCreate(
 		AccessToken:  "",
 	}
 
-	if err := client.Call("GTSClient.UpdateAuthentication", auth, nil); err != nil {
+	if err := client.Call(
+		"GTSClient.UpdateAuthentication",
+		auth,
+		nil,
+	); err != nil {
 		return fmt.Errorf("error updating the GTSClient's authentication details: %w", err)
 	}
 
-	if err := client.Call("GTSClient.Register", gtsclient.NoRPCArgs{}, nil); err != nil {
+	if err := client.Call(
+		"GTSClient.RegisterApp",
+		scopes,
+		nil,
+	); err != nil {
 		return fmt.Errorf("error registering the application: %w", err)
 	}
 
 	var consentPageURL string
 
-	if err := client.Call("GTSClient.AuthCodeURL", gtsclient.NoRPCArgs{}, &consentPageURL); err != nil {
+	if err := client.Call(
+		"GTSClient.AuthCodeURL",
+		scopes,
+		&consentPageURL,
+	); err != nil {
 		return fmt.Errorf("error retrieving the URL of the consent page: %w", err)
 	}
 

@@ -29,16 +29,16 @@ If this is not set, then:
 
 ## Generate your configuration file
 
-Run the `init` command to generate your configuration file.
+Run the following command to generate your configuration file.
 
 ```bash
-enbas init
+enbas create config
 ```
 
 Use the `--config-dir` flag if you want to generate it in a specific directory
 
 ```bash
-enbas --config-dir ./config init
+enbas --config-dir ./config create config
 ```
 
 You should now see a file called `config.json` in your configuration directory.
@@ -51,23 +51,13 @@ If you prefer to open the link manually then you can leave it blank.
 
 ## Log into your GoToSocial account
 
-Enbas uses the Oauth2 authentication flow to log into your account on GoToSocial.
+Enbas uses the Oauth2 authentication flow to log into your account on GoToSocial. Follow the below steps to log into your account:
 
-<details>
-    <summary style="color: Orange; font-weight: bold"><span>&#9888;</span> Warning</summary>
-    <p>
-        As of writing GoToSocial does not currently support scoped authorization tokens so even if
-        we request read-only tokens, the application will be able to perform any actions within the
-        limitations of your account (including admin actions if you are an admin).
-        You can read more about this <a href="https://docs.gotosocial.org/en/latest/api/authentication/">here</a>.
-    </p>
-</details>
-
-Follow the below steps to log into your account:
-
-1. Run the `login` command specifying the instance that you want to log into.
+1. Run the following command to begin the login process. Use the `--url` specifying the instance that you want to log into.
+   Use the `--url` flag to specify the URL of the instance you want to log into.
+   Use the `--scope` flag to specify the application scope(s) (e.g. read, write).
     ```bash
-    enbas login --instance gts.enbas-demo.private
+    enbas create access --url gts.enbas-demo.private --scope read --scope write
     ```
 
 2. Enbas will send a registration request to your instance and receive a new client ID and secret that it
@@ -100,12 +90,12 @@ Follow the below steps to log into your account:
 ### Example login flow
 
 ```
-$ enbas login --instance gts.enbas-demo.private
+$ enbas create access --url gts.enbas-demo.private --scope read --scope write
 
 You'll need to sign into your GoToSocial's consent page in order to generate the out-of-band token to continue with the application's login process.
 Your browser may have opened the link to the consent page already. If not, please copy and paste the link below to your browser:
 
-https://gts.enbas-demo.private/oauth/authorize?client_id=019RD0WVA903F773T5F9D9EYHP&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code
+https://gts.enbas-demo.private/oauth/authorize?client_id=019RD0WVA903F773T5F9D9EYHP&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code&scope=read+write
 
 Once you have the code please copy and paste it below.
 Out-of-band token: ZDRKOTE0NMUTZGVHZC0ZNJVJLWJINTMTMWE1M2UWYWFHOTQY
@@ -117,13 +107,13 @@ Out-of-band token: ZDRKOTE0NMUTZGVHZC0ZNJVJLWJINTMTMWE1M2UWYWFHOTQY
 You can verify that you have successfully logged in by viewing your account information.
 
 ```bash
-enbas show --type account --my-account
+enbas show account --my-account
 ```
 
 ### Example
 
 ```
-$ enbas show --type account --my-account
+$ enbas show account --my-account
 
 Percy Cade (@percy)
 

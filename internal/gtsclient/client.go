@@ -13,7 +13,7 @@ import (
 const (
 	applicationJSON   string = "application/json; charset=utf-8"
 	redirectURI       string = "urn:ietf:wg:oauth:2.0:oob"
-	authCodeURLFormat string = "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code"
+	authCodeURLFormat string = "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=%s"
 )
 
 type (

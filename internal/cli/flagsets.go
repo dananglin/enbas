@@ -35,10 +35,12 @@ func NewTopLevelFlagset(
 }
 
 func ParseAccessCreateFlags(
+	scope *internalFlag.StringSliceValue,
 	url *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
+	flagset.Var(scope, flagScope, "")
 	flagset.StringVar(url, flagUrl, "", "")
 
 	if err := flagset.Parse(flags); err != nil {

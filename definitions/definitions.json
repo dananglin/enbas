@@ -58,6 +58,7 @@
     "resolve": "allow your instance to resolve the search by making calls to remote instances",
     "restrict-to-following": "restrict the search to accounts that you are following",
     "save-text": "save the text of the deleted {target}",
+    "scope": "the scope of access to your GoToSocial instance (e.g. read)",
     "sensitive": "mark the {target} as sensitive",
     "show-reblogs": "show reblogs (boosts) from the account you want to follow",
     "show-statuses": "view the statuses from the {target} that you are viewing",
@@ -107,6 +108,12 @@
       "actions": {
         "create": {
           "flags": [
+            {
+              "name": "scope",
+              "type": "internalFlag.StringSliceValue",
+              "default": "",
+              "required": false
+            },
             {
               "name": "url",
               "type": "string",

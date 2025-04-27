@@ -67,6 +67,7 @@ const (
 	flagResolve                   string = "resolve"
 	flagRestrictToFollowing       string = "restrict-to-following"
 	flagSaveText                  string = "save-text"
+	flagScope                     string = "scope"
 	flagSensitive                 string = "sensitive"
 	flagShowReblogs               string = "show-reblogs"
 	flagShowStatuses              string = "show-statuses"
@@ -135,6 +136,7 @@ func flagUsageMap() map[string]string {
 		flagResolve:                   "allow your instance to resolve the search by making calls to remote instances",
 		flagRestrictToFollowing:       "restrict the search to accounts that you are following",
 		flagSaveText:                  "save the text of the deleted {target}",
+		flagScope:                     "the scope of access to your GoToSocial instance (e.g. read)",
 		flagSensitive:                 "mark the {target} as sensitive",
 		flagShowReblogs:               "show reblogs (boosts) from the account you want to follow",
 		flagShowStatuses:              "view the statuses from the {target} that you are viewing",
@@ -179,6 +181,7 @@ func TargetActionFlags(target, action string) (map[string]string, bool) {
 func targetActionFlagMap() map[string][]string {
 	return map[string][]string{
 		TargetAccess + "-" + ActionCreate: {
+			flagScope,
 			flagUrl,
 		},
 		TargetAccess + "-" + ActionSwitch: {},
