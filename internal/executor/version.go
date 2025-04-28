@@ -5,18 +5,17 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 // versionFunc is the function for the version target which
 // prints the application's build information.
 func versionFunc(
-	opts topLevelOpts,
+	_ config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	// Create the print settings
-	printSettings := printer.NewSettings(opts.noColor, "", 0)
-
 	switch cmd.Action {
 	case cli.ActionShow:
 		return versionShow(printSettings, cmd.FocusedTargetFlags)

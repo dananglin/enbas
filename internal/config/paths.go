@@ -16,6 +16,10 @@ const (
 	defaultCredentialsFileName string = "credentials.json"
 )
 
+func ConfigPath(configFilepath string) (string, error) {
+	return configPath(configFilepath)
+}
+
 func configPath(configFilepath string) (string, error) {
 	if configFilepath != "" {
 		return configFilepath, nil

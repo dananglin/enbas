@@ -5,31 +5,33 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
-type topLevelOpts struct {
-	configPath string
-	noColor    bool
-}
-
 // targetFunc is a type of function that performs the relevant operation
 // on a specific target.
-type targetFunc func(opts topLevelOpts, cmd command.Command) error
+type targetFunc func(cfg config.Config, printSettings printer.Settings, cmd command.Command) error
 
 func Execute() error {
 	var (
-		opts        topLevelOpts
 		noColorFlag internalFlag.BoolPtrValue
+		noColor     bool
+		configPath  string
 	)
 
-	errorPrintSettings := printer.NewSettings(opts.noColor, "", 0)
+	// Initialise the print settings.
+	printSettings := printer.NewSettings(
+		false,
+		"",
+		0,
+	)
 
-	flagset := cli.NewTopLevelFlagset(&opts.configPath, &noColorFlag)
+	flagset := cli.NewTopLevelFlagset(&configPath, &noColorFlag)
 	if err := flagset.Parse(os.Args[1:]); err != nil {
 		printer.PrintFailure(
-			errorPrintSettings,
+			printSettings,
 			"error parsing the top-level flags: "+err.Error()+".",
 		)
 
@@ -37,9 +39,56 @@ func Execute() error {
 	}
 
 	if noColorFlag.Value != nil {
-		opts.noColor = *noColorFlag.Value
+		noColor = *noColorFlag.Value
 	} else if os.Getenv("NO_COLOR") != "" {
-		opts.noColor = true
+		noColor = true
+	}
+
+	// Load the configuration if the configuration file
+	// is present.
+	var cfg config.Config
+	calculatedConfigPath, err := config.ConfigPath(configPath)
+	if err != nil {
+		printer.PrintFailure(
+			printSettings,
+			"error calculating the path to the configuration file: "+err.Error()+".",
+		)
+
+		return err
+	}
+
+	cfgFileExists, err := config.FileExists(calculatedConfigPath)
+	if err != nil {
+		printer.PrintFailure(
+			printSettings,
+			"error checking if the configuration file is present: "+err.Error()+".",
+		)
+
+		return err
+	}
+
+	if cfgFileExists {
+		cfg, err = config.NewConfigFromFile(calculatedConfigPath)
+		if err != nil {
+			printer.PrintFailure(
+				printSettings,
+				"error loading the configuration: "+err.Error()+".",
+			)
+
+			return err
+		}
+	} else {
+		cfg.Path = calculatedConfigPath
+	}
+
+	// Update the print settings if the configuration was
+	// successfully loaded from file.
+	if !cfg.IsZero() {
+		printSettings = printer.NewSettings(
+			noColor,
+			cfg.Integrations.Pager,
+			cfg.LineWrapMaxWidth,
+		)
 	}
 
 	var cmd command.Command
@@ -51,7 +100,7 @@ func Execute() error {
 		cmd, err = command.Parse(flagset.Args())
 		if err != nil {
 			printer.PrintFailure(
-				errorPrintSettings,
+				printSettings,
 				"error parsing the action and its arguments: "+err.Error()+".",
 			)
 
@@ -61,7 +110,7 @@ func Execute() error {
 
 	if err := cmd.Validate(); err != nil {
 		printer.PrintFailure(
-			errorPrintSettings,
+			printSettings,
 			"invalid command: "+err.Error()+".",
 		)
 		return err
@@ -74,16 +123,16 @@ func Execute() error {
 		err := unrecognisedTargetError{target: cmd.FocusedTarget}
 
 		printer.PrintFailure(
-			errorPrintSettings,
+			printSettings,
 			err.Error()+".",
 		)
 
 		return err
 	}
 
-	if err := targetFunc(opts, cmd); err != nil {
+	if err := targetFunc(cfg, printSettings, cmd); err != nil {
 		printer.PrintFailure(
-			errorPrintSettings,
+			printSettings,
 			err.Error()+".",
 		)
 

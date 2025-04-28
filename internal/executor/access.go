@@ -18,35 +18,25 @@ import (
 // accessFunc is the function for the access target for
 // managing the access to the GoToSocial instance.
 func accessFunc(
-	opts topLevelOpts,
+	cfg config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	// Load the configuration from file.
-	cfg, err := config.NewConfigFromFile(opts.configPath)
-	if err != nil {
-		return fmt.Errorf("unable to load configuration: %w", err)
+	if cfg.IsZero() {
+		return zeroConfigurationError{path: cfg.Path}
 	}
-
-	// Create the print settings.
-	printSettings := printer.NewSettings(
-		opts.noColor,
-		"",
-		cfg.LineWrapMaxWidth,
-	)
 
 	switch cmd.Action {
 	case cli.ActionCreate:
 		return accessCreate(
 			cfg,
 			printSettings,
-			opts.configPath,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionSwitch:
 		return accessSwitch(
 			cfg,
 			printSettings,
-			opts.configPath,
 			cmd.RelatedTarget,
 			cmd.RelatedTargetFlags,
 		)
@@ -54,7 +44,6 @@ func accessFunc(
 		return accessVerify(
 			cfg,
 			printSettings,
-			opts.configPath,
 		)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetAccess}
@@ -64,7 +53,6 @@ func accessFunc(
 func accessCreate(
 	cfg config.Config,
 	printSettings printer.Settings,
-	configDir string,
 	flags []string,
 ) error {
 	var (
@@ -94,7 +82,7 @@ func accessCreate(
 		url = url[:len(url)-1]
 	}
 
-	client, err := server.Connect(cfg.Server, configDir)
+	client, err := server.Connect(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
@@ -187,9 +175,8 @@ Out-of-band token: `
 func accessVerify(
 	cfg config.Config,
 	printSettings printer.Settings,
-	configDir string,
 ) error {
-	client, err := server.Connect(cfg.Server, configDir)
+	client, err := server.Connect(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
@@ -216,7 +203,6 @@ func accessVerify(
 func accessSwitch(
 	cfg config.Config,
 	printSettings printer.Settings,
-	configDir string,
 	relatedTarget string,
 	relatedTargetFlags []string,
 ) error {
@@ -225,7 +211,6 @@ func accessSwitch(
 		return accessSwitchToAccount(
 			cfg,
 			printSettings,
-			configDir,
 			relatedTargetFlags,
 		)
 	default:
@@ -244,7 +229,6 @@ func accessSwitch(
 func accessSwitchToAccount(
 	cfg config.Config,
 	printSettings printer.Settings,
-	configDir string,
 	flags []string,
 ) error {
 	var accountName string
@@ -262,7 +246,7 @@ func accessSwitchToAccount(
 	}
 
 	// Create the client to the backend enbas server
-	client, err := server.Connect(cfg.Server, configDir)
+	client, err := server.Connect(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}

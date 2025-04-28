@@ -12,15 +12,13 @@ import (
 // configFunc is the function for the config target which interacts with the
 // application's config file.
 func configFunc(
-	opts topLevelOpts,
+	cfg config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	// Create the print settings
-	printSettings := printer.NewSettings(opts.noColor, "", 0)
-
 	switch cmd.Action {
 	case cli.ActionCreate:
-		return configCreate(printSettings, opts.configPath)
+		return configCreate(printSettings, cfg.Path)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetConfig}
 	}

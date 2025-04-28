@@ -7,17 +7,17 @@ import (
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
 // helpFunc is the function for the help target for printing the
 // help documentation to the screen for the user.
 func helpFunc(
-	opts topLevelOpts,
+	_ config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	printSettings := printer.NewSettings(opts.noColor, "", 0)
-
 	switch cmd.Action {
 	case cli.ActionShow:
 		return helpShow(printSettings, cmd.FocusedTargetFlags)

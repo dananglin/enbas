@@ -16,12 +16,18 @@ const (
 )
 
 type Config struct {
+	populated        bool
+	Path             string       `json:"-"`
 	CredentialsFile  string       `json:"credentialsFile"`
 	CacheDirectory   string       `json:"cacheDirectory"`
 	LineWrapMaxWidth int          `json:"lineWrapMaxWidth"`
 	GTSClient        GTSClient    `json:"gtsClient"`
 	Server           Server       `json:"server"`
 	Integrations     Integrations `json:"integrations"`
+}
+
+func (c Config) IsZero() bool {
+	return !c.populated
 }
 
 type GTSClient struct {
@@ -51,15 +57,18 @@ func NewConfigFromFile(configFilepath string) (Config, error) {
 
 	file, err := utilities.OpenFile(path)
 	if err != nil {
-		return Config{}, fmt.Errorf("unable to open %s: %w", path, err)
+		return Config{}, fmt.Errorf("error opening %s: %w", path, err)
 	}
 	defer file.Close()
 
 	var config Config
 
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return Config{}, fmt.Errorf("unable to decode the JSON data: %w", err)
+		return Config{}, fmt.Errorf("error decoding the JSON data: %w", err)
 	}
+
+	config.Path = configFilepath
+	config.populated = true
 
 	return config, nil
 }
@@ -67,7 +76,7 @@ func NewConfigFromFile(configFilepath string) (Config, error) {
 func FileExists(configFilepath string) (bool, error) {
 	path, err := configPath(configFilepath)
 	if err != nil {
-		return false, fmt.Errorf("unable to calculate the path to your config file: %w", err)
+		return false, fmt.Errorf("error calculating the path to your config file: %w", err)
 	}
 
 	return utilities.FileExists(path)

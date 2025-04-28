@@ -12,21 +12,13 @@ import (
 )
 
 func serverFunc(
-	opts topLevelOpts,
+	cfg config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	// Load the configuration from file.
-	cfg, err := config.NewConfigFromFile(opts.configPath)
-	if err != nil {
-		return fmt.Errorf("unable to load configuration: %w", err)
+	if cfg.IsZero() {
+		return zeroConfigurationError{path: cfg.Path}
 	}
-
-	// Create the printer for the executor.
-	printSettings := printer.NewSettings(
-		opts.noColor,
-		"",
-		cfg.LineWrapMaxWidth,
-	)
 
 	switch cmd.Action {
 	case cli.ActionStart:

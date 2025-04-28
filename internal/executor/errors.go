@@ -206,3 +206,11 @@ func (e mismatchedMediaFlagsError) Error() string {
 		e.got,
 	)
 }
+
+type zeroConfigurationError struct {
+	path string
+}
+
+func (e zeroConfigurationError) Error() string {
+	return "configuration not set: please ensure that the configuration file is present at '" + e.path + "'"
+}

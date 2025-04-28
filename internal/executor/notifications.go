@@ -18,24 +18,16 @@ import (
 // notificationsFunc is the function for the notification target for
 // interacting with multiple notifications.
 func notificationsFunc(
-	opts topLevelOpts,
+	cfg config.Config,
+	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
-	// Load the configuration from file.
-	cfg, err := config.NewConfigFromFile(opts.configPath)
-	if err != nil {
-		return fmt.Errorf("unable to load configuration: %w", err)
+	if cfg.IsZero() {
+		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the print settings.
-	printSettings := printer.NewSettings(
-		opts.noColor,
-		cfg.Integrations.Pager,
-		cfg.LineWrapMaxWidth,
-	)
-
 	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, opts.configPath)
+	client, err := server.Connect(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
