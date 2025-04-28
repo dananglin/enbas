@@ -15,7 +15,7 @@ import (
 // the reference to the created RPC client. If the server is not
 // running then an attempt is made to run and connect to a
 // temporary server.
-func Connect(cfg config.Server, cfgDir string) (*rpc.Client, error) {
+func Connect(cfg config.Server, configPath string) (*rpc.Client, error) {
 	socketPath, err := utilities.AbsolutePath(cfg.SocketPath)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -49,7 +49,7 @@ func Connect(cfg config.Server, cfgDir string) (*rpc.Client, error) {
 
 	// The socket file is not present so we will
 	// attempt to start a new server process.
-	server := exec.Command(os.Args[0], "--config-dir", cfgDir, "start", "server")
+	server := exec.Command(os.Args[0], "--config", configPath, "start", "server")
 
 	if err := server.Start(); err != nil {
 		return nil, fmt.Errorf("error starting the server: %w", err)

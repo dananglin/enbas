@@ -1,7 +1,7 @@
 {
   "topLevelFlags": {
-    "config-dir": {
-      "description": "the path to the configuration directory",
+    "config": {
+      "description": "the path to your configuration file",
       "type": "string",
       "default": "",
       "required": false

@@ -1,20 +1,14 @@
 package config
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 const (
-	configFileName string = "config.json"
-
 	defaultHTTPTimeout       int = 5
 	defaultHTTPMediaTimeout  int = 30
 	defaultLineWrapMaxWidth  int = 80
@@ -49,10 +43,10 @@ type Integrations struct {
 	AudioPlayer string `json:"audioPlayer"`
 }
 
-func NewConfigFromFile(configDir string) (Config, error) {
-	path, err := configPath(configDir)
+func NewConfigFromFile(configFilepath string) (Config, error) {
+	path, err := configPath(configFilepath)
 	if err != nil {
-		return Config{}, fmt.Errorf("unable to calculate the path to your config file: %w", err)
+		return Config{}, fmt.Errorf("error calculating the path to your config file: %w", err)
 	}
 
 	file, err := utilities.OpenFile(path)
@@ -70,8 +64,8 @@ func NewConfigFromFile(configDir string) (Config, error) {
 	return config, nil
 }
 
-func FileExists(configDir string) (bool, error) {
-	path, err := configPath(configDir)
+func FileExists(configFilepath string) (bool, error) {
+	path, err := configPath(configFilepath)
 	if err != nil {
 		return false, fmt.Errorf("unable to calculate the path to your config file: %w", err)
 	}
@@ -79,8 +73,17 @@ func FileExists(configDir string) (bool, error) {
 	return utilities.FileExists(path)
 }
 
-func SaveInitialConfigToFile(configDir string) error {
-	path, err := configPath(configDir)
+func EnsureParentDir(configFilepath string) error {
+	path, err := configPath(configFilepath)
+	if err != nil {
+		return fmt.Errorf("error calculating the path to your config file: %w", err)
+	}
+
+	return utilities.EnsureDirectory(filepath.Dir(path))
+}
+
+func SaveInitialConfigToFile(configFilepath string) error {
+	path, err := configPath(configFilepath)
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to your config file: %w", err)
 	}
@@ -93,17 +96,23 @@ func SaveInitialConfigToFile(configDir string) error {
 
 	config := initialConfig()
 
-	credentialsFilePath, err := defaultCredentialsConfigFile(configDir)
+	credentialsFilePath, err := defaultCredentialsFilepath()
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to the credentials file: %w", err)
 	}
 
-	socketPath, err := createSocketPath()
+	cacheDirPath, err := defaultCacheDir()
+	if err != nil {
+		return fmt.Errorf("error retrieving the path to the default cache directory: %w", err)
+	}
+
+	socketPath, err := newSocketPath()
 	if err != nil {
 		return fmt.Errorf("unable to calculate the path to the socket file: %w", err)
 	}
 
 	config.CredentialsFile = credentialsFilePath
+	config.CacheDirectory = cacheDirPath
 	config.Server.SocketPath = socketPath
 
 	encoder := json.NewEncoder(file)
@@ -114,39 +123,6 @@ func SaveInitialConfigToFile(configDir string) error {
 	}
 
 	return nil
-}
-
-func configPath(configDir string) (string, error) {
-	configDir, err := utilities.CalculateConfigDir(configDir)
-	if err != nil {
-		return "", fmt.Errorf("unable to get the config directory: %w", err)
-	}
-
-	return filepath.Join(configDir, configFileName), nil
-}
-
-func createSocketPath() (string, error) {
-	runtimeDir := os.Getenv("XDG_RUNTIME_DIR")
-	if runtimeDir == "" {
-		return "", nil
-	}
-
-	randBytes := make([]byte, 4)
-
-	if _, err := rand.Read(randBytes); err != nil {
-		return "", fmt.Errorf("unable to create random bytes: %w", err)
-	}
-
-	path, err := utilities.AbsolutePath(filepath.Join(
-		runtimeDir,
-		info.ApplicationName,
-		"server."+hex.EncodeToString(randBytes)+".socket",
-	))
-	if err != nil {
-		return "", fmt.Errorf("unable to calculate the absolute path to the socket file: %w", err)
-	}
-
-	return path, nil
 }
 
 func initialConfig() Config {
@@ -168,6 +144,7 @@ func initialConfig() Config {
 			Pager:       "",
 			ImageViewer: "",
 			VideoPlayer: "",
+			AudioPlayer: "",
 		},
 	}
 }

@@ -14,18 +14,20 @@ In this guide we are going to log into an account on a private GoToSocial server
 
 Follow along to log into your own account.
 
-## Your configuration directory
+## Your configuration file
 
-You can use the `--config-dir` global flag to specify the path to your configuration directory.
-Alternatively Enbas tries to set the directory based on your home configuration directory using Go's [os.UserConfigDir()](https://pkg.go.dev/os#UserConfigDir) function.
+You can use the `--config` top-level flag to specify the path to your configuration file.
+If the `--config` flag is not set Enbas will attempt to calculate the default path to your configuratio file
+based on your home configuration directory using Go's [os.UserConfigDir()](https://pkg.go.dev/os#UserConfigDir) function.
 
-If you've set the `XDG_CONFIG_HOME` environment variable, the configuration directory will be set to `$XDG_CONFIG_HOME/enbas`.
+If you've set the `XDG_CONFIG_HOME` environment variable, the default path to your configuration file
+will be set to `$XDG_CONFIG_HOME/enbas/config.json`.
 
-If this is not set, then:
+If `XDG_CONFIG_HOME` is not set, then:
 
-- on Linux the configuration directory will be set to `$HOME/.config/enbas`.
-- on Darwin (MacOS) the configuration directory will be set to `$HOME/Library/Application Support/enbas`.
-- on Windows the configuration directory will be set within the `%AppData%` directory.
+- on Linux the path will be set to `$HOME/.config/enbas/config.json`.
+- on Darwin (MacOS) the path will be set to `$HOME/Library/Application Support/enbas/config.json`.
+- on Windows the path will be set within the `%AppData%` directory.
 
 ## Generate your configuration file
 
@@ -35,19 +37,18 @@ Run the following command to generate your configuration file.
 enbas create config
 ```
 
-Use the `--config-dir` flag if you want to generate it in a specific directory
+Use the `--config` flag to specify the path to save the configuration to.
 
 ```bash
-enbas --config-dir ./config create config
+enbas --config ./config/config.json create config
 ```
 
-You should now see a file called `config.json` in your configuration directory.
-Feel free to edit the file to your preferences. 
+Once the initial configuration is created you can edit the file to your preferences. 
 The [configuration reference page](@/projects/enbas/03_configuration.md) should help you with this.
 
 For this 'Getting Started' guide you may want to specify your preferred browser in the configuration to allow
 Enbas to open the link to your instance's authorisation page.
-If you prefer to open the link manually then you can leave it blank.
+If you prefer to open the link manually then you can leave it empty.
 
 ## Log into your GoToSocial account
 

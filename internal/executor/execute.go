@@ -10,8 +10,8 @@ import (
 )
 
 type topLevelOpts struct {
-	configDir string
-	noColor   bool
+	configPath string
+	noColor    bool
 }
 
 // targetFunc is a type of function that performs the relevant operation
@@ -26,7 +26,7 @@ func Execute() error {
 
 	errorPrintSettings := printer.NewSettings(opts.noColor, "", 0)
 
-	flagset := cli.NewTopLevelFlagset(&opts.configDir, &noColorFlag)
+	flagset := cli.NewTopLevelFlagset(&opts.configPath, &noColorFlag)
 	if err := flagset.Parse(os.Args[1:]); err != nil {
 		printer.PrintFailure(
 			errorPrintSettings,

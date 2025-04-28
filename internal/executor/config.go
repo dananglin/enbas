@@ -7,7 +7,6 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
 // configFunc is the function for the config target which interacts with the
@@ -21,7 +20,7 @@ func configFunc(
 
 	switch cmd.Action {
 	case cli.ActionCreate:
-		return configCreate(printSettings, opts.configDir)
+		return configCreate(printSettings, opts.configPath)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetConfig}
 	}
@@ -29,32 +28,32 @@ func configFunc(
 
 func configCreate(
 	printSettings printer.Settings,
-	configDir string,
+	configPath string,
 ) error {
-	if err := utilities.EnsureDirectory(configDir); err != nil {
+	if err := config.EnsureParentDir(configPath); err != nil {
 		return fmt.Errorf("error checking the existence of the configuration directory: %w", err)
 	}
 
 	printer.PrintSuccess(printSettings, "The configuration directory is present.")
 
-	fileExists, err := config.FileExists(configDir)
+	fileExists, err := config.FileExists(configPath)
 	if err != nil {
 		return fmt.Errorf("error checking the existence of the configuration file: %w", err)
 	}
 
 	if fileExists {
-		printer.PrintInfo("The configuration file is already present in " + configDir + "\n")
+		printer.PrintInfo("A file or directory is already present at '" + configPath + "'.\n")
 
 		return nil
 	}
 
-	if err := config.SaveInitialConfigToFile(configDir); err != nil {
+	if err := config.SaveInitialConfigToFile(configPath); err != nil {
 		return fmt.Errorf("error creating the new configuration file: %w", err)
 	}
 
 	printer.PrintSuccess(
 		printSettings,
-		"Successfully created a new configuration file in "+configDir,
+		"Successfully created a new configuration file at '"+configPath+"'.",
 	)
 
 	return nil

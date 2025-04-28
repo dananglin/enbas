@@ -8,16 +8,16 @@ package cli
 import "slices"
 
 const (
-	flagConfigDir string = "config-dir"
-	flagNoColor   string = "no-color"
+	flagConfig  string = "config"
+	flagNoColor string = "no-color"
 )
 
 // TopLevelFlagsUsageMap returns a map of the top-level flags
 // and their respective descriptions.
 func TopLevelFlagsUsageMap() map[string]string {
 	return map[string]string{
-		flagConfigDir: "the path to the configuration directory",
-		flagNoColor:   "disables the ANSI colour output when displaying the text on screen",
+		flagConfig:  "the path to your configuration file",
+		flagNoColor: "disables the ANSI colour output when displaying the text on screen",
 	}
 }
 

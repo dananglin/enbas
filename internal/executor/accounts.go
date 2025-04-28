@@ -21,7 +21,7 @@ func accountsFunc(
 	cmd command.Command,
 ) error {
 	// Load the configuration from file.
-	cfg, err := config.NewConfigFromFile(opts.configDir)
+	cfg, err := config.NewConfigFromFile(opts.configPath)
 	if err != nil {
 		return fmt.Errorf("unable to load configuration: %w", err)
 	}
@@ -34,7 +34,7 @@ func accountsFunc(
 	)
 
 	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, opts.configDir)
+	client, err := server.Connect(cfg.Server, opts.configPath)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}

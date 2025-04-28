@@ -24,11 +24,11 @@ func newFlagset() *flag.FlagSet {
 
 // NewTopLevelFlagset returns the FlagSet for the top-level flags
 func NewTopLevelFlagset(
-	configDir *string,
+	config *string,
 	noColor *internalFlag.BoolPtrValue,
 ) *flag.FlagSet {
 	flagset := newFlagset()
-	flagset.StringVar(configDir, flagConfigDir, "", "")
+	flagset.StringVar(config, flagConfig, "", "")
 	flagset.Var(noColor, flagNoColor, "")
 
 	return flagset

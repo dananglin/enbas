@@ -11,41 +11,40 @@ import (
 func TestConfigFile(t *testing.T) {
 	t.Log("Testing saving and loading the configuration")
 
-	configDir := filepath.Join("testdata", "config")
+	configFilepath := filepath.Join("testdata", "config", "config.json")
 
-	t.Run("Save the default configuration to file", testSaveDefaultConfigToFile(configDir))
-	t.Run("Load the configuration from file", testLoadConfigFromFile(configDir))
+	t.Run("Save the default configuration to file", testSaveDefaultConfigToFile(configFilepath))
+	t.Run("Load the configuration from file", testLoadConfigFromFile(configFilepath))
 
-	expectedConfigFile := filepath.Join(configDir, "config.json")
-	if err := os.Remove(expectedConfigFile); err != nil {
+	if err := os.Remove(configFilepath); err != nil {
 		t.Fatalf(
 			"received an error after trying to clean up the test configuration at %q: %v",
-			expectedConfigFile,
+			configFilepath,
 			err,
 		)
 	}
 }
 
-func testSaveDefaultConfigToFile(configDir string) func(t *testing.T) {
+func testSaveDefaultConfigToFile(configFilepath string) func(t *testing.T) {
 	return func(t *testing.T) {
-		if err := config.SaveInitialConfigToFile(configDir); err != nil {
-			t.Fatalf("Unable to save the default configuration within %q: %v", configDir, err)
+		if err := config.SaveInitialConfigToFile(configFilepath); err != nil {
+			t.Fatalf("Unable to save the default configuration within %q: %v", configFilepath, err)
 		}
 
-		fileExists, err := config.FileExists(configDir)
+		fileExists, err := config.FileExists(configFilepath)
 		if err != nil {
-			t.Fatalf("Unable to determine if the configuration exists within %q: %v", configDir, err)
+			t.Fatalf("Unable to determine if the configuration exists within %q: %v", configFilepath, err)
 		}
 
 		if !fileExists {
-			t.Fatalf("The configuration does not appear to exist within %q", configDir)
+			t.Fatalf("The configuration does not appear to exist within %q", configFilepath)
 		}
 	}
 }
 
-func testLoadConfigFromFile(configDir string) func(t *testing.T) {
+func testLoadConfigFromFile(configFilepath string) func(t *testing.T) {
 	return func(t *testing.T) {
-		config, err := config.NewConfigFromFile(configDir)
+		config, err := config.NewConfigFromFile(configFilepath)
 		if err != nil {
 			t.Fatalf("Unable to load the configuration from file: %v", err)
 		}

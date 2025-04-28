@@ -22,7 +22,7 @@ func accessFunc(
 	cmd command.Command,
 ) error {
 	// Load the configuration from file.
-	cfg, err := config.NewConfigFromFile(opts.configDir)
+	cfg, err := config.NewConfigFromFile(opts.configPath)
 	if err != nil {
 		return fmt.Errorf("unable to load configuration: %w", err)
 	}
@@ -39,14 +39,14 @@ func accessFunc(
 		return accessCreate(
 			cfg,
 			printSettings,
-			opts.configDir,
+			opts.configPath,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionSwitch:
 		return accessSwitch(
 			cfg,
 			printSettings,
-			opts.configDir,
+			opts.configPath,
 			cmd.RelatedTarget,
 			cmd.RelatedTargetFlags,
 		)
@@ -54,7 +54,7 @@ func accessFunc(
 		return accessVerify(
 			cfg,
 			printSettings,
-			opts.configDir,
+			opts.configPath,
 		)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetAccess}
