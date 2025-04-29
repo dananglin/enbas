@@ -1043,6 +1043,12 @@
               "type": "string",
               "default": "",
               "required": true
+            },
+            {
+              "name": "resolve",
+              "type": "bool",
+              "default": "false",
+              "required": false
             }
           ]
         },

@@ -706,12 +706,14 @@ func ParseStatusFindFlags(
 	query *string,
 	limit *int,
 	accountName *string,
+	resolve *bool,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(query, flagQuery, "", "")
 	flagset.IntVar(limit, flagLimit, 20, "")
 	flagset.StringVar(accountName, flagAccountName, "", "")
+	flagset.BoolVar(resolve, flagResolve, false, "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)

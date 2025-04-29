@@ -922,6 +922,7 @@ func statusFind(
 		query       string
 		limit       int
 		accountName string
+		resolve     bool
 	)
 
 	// Parse the remaining flags
@@ -929,6 +930,7 @@ func statusFind(
 		&query,
 		&limit,
 		&accountName,
+		&resolve,
 		flags,
 	); err != nil {
 		return err
@@ -957,6 +959,7 @@ func statusFind(
 			Limit:     limit,
 			Query:     query,
 			AccountID: accountID,
+			Resolve:   resolve,
 		},
 		&results,
 	); err != nil {

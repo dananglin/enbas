@@ -340,6 +340,7 @@ func targetActionFlagMap() map[string][]string {
 			flagQuery,
 			flagLimit,
 			flagAccountName,
+			flagResolve,
 		},
 		TargetStatus + "-" + ActionMute: {
 			flagStatusId,

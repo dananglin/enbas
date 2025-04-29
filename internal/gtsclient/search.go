@@ -98,13 +98,15 @@ type SearchStatusesArgs struct {
 	Limit     int
 	Query     string
 	AccountID string
+	Resolve   bool
 }
 
 func (g *GTSClient) SearchStatuses(args SearchStatusesArgs, list *model.StatusList) error {
 	query := fmt.Sprintf(
-		"?type=statuses&limit=%d&q=%s",
+		"?type=statuses&limit=%d&q=%s&resolve=%t",
 		args.Limit,
 		args.Query,
+		args.Resolve,
 	)
 
 	if args.AccountID != "" {
