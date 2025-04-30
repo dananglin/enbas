@@ -16,7 +16,7 @@ const (
 	defaultCredentialsFileName string = "credentials.json"
 )
 
-func ConfigPath(configFilepath string) (string, error) {
+func Path(configFilepath string) (string, error) {
 	return configPath(configFilepath)
 }
 

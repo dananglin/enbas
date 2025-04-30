@@ -58,7 +58,7 @@ Enbas uses the Oauth2 authentication flow to log into your account on GoToSocial
    Use the `--url` flag to specify the URL of the instance you want to log into.
    Use the `--scope` flag to specify the application scope(s) (e.g. read, write).
     ```bash
-    enbas create access --url gts.enbas-demo.private --scope read --scope write
+    enbas login --url gts.enbas-demo.private --scope read --scope write
     ```
 
 2. Enbas will send a registration request to your instance and receive a new client ID and secret that it

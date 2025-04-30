@@ -11,22 +11,22 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 )
 
-// helpFunc is the function for the help target for printing the
+// usageFunc is the function for the help target for printing the
 // help documentation to the screen for the user.
-func helpFunc(
+func usageFunc(
 	_ config.Config,
 	printSettings printer.Settings,
 	cmd command.Command,
 ) error {
 	switch cmd.Action {
 	case cli.ActionShow:
-		return helpShow(printSettings, cmd.FocusedTargetFlags)
+		return usageShow(printSettings, cmd.FocusedTargetFlags)
 	default:
-		return unsupportedActionError{action: cmd.Action, target: cli.TargetHelp}
+		return unsupportedActionError{action: cmd.Action, target: cli.TargetUsage}
 	}
 }
 
-func helpShow(
+func usageShow(
 	printSettings printer.Settings,
 	flags []string,
 ) error {
@@ -36,7 +36,7 @@ func helpShow(
 	)
 
 	// Parse the remaining flags.
-	if err := cli.ParseHelpShowFlags(
+	if err := cli.ParseUsageShowFlags(
 		&action,
 		&target,
 		flags,
@@ -46,17 +46,17 @@ func helpShow(
 
 	switch {
 	case (target == "") && (action == ""):
-		return helpShowApp(printSettings)
+		return usageShowApp(printSettings)
 	case (target != "") && (action == ""):
-		return helpShowTarget(printSettings, target)
+		return usageShowTarget(printSettings, target)
 	case (target == "") && (action != ""):
-		return helpShowAction(printSettings, action)
+		return usageShowAction(printSettings, action)
 	default:
-		return helpShowTargetAction(printSettings, target, action)
+		return usageShowTargetAction(printSettings, target, action)
 	}
 }
 
-func helpShowApp(printSettings printer.Settings) error {
+func usageShowApp(printSettings printer.Settings) error {
 	if err := printer.PrintHelpApp(
 		printSettings,
 		cli.TargetDescMap(),
@@ -68,7 +68,7 @@ func helpShowApp(printSettings printer.Settings) error {
 	return nil
 }
 
-func helpShowTarget(
+func usageShowTarget(
 	printSettings printer.Settings,
 	target string,
 ) error {
@@ -90,7 +90,7 @@ func helpShowTarget(
 	return nil
 }
 
-func helpShowAction(
+func usageShowAction(
 	printSettings printer.Settings,
 	action string,
 ) error {
@@ -114,7 +114,7 @@ func helpShowAction(
 	return nil
 }
 
-func helpShowTargetAction(
+func usageShowTargetAction(
 	printSettings printer.Settings,
 	target string,
 	action string,

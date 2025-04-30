@@ -17,13 +17,18 @@ const (
 
 type Config struct {
 	populated        bool
-	Path             string       `json:"-"`
-	CredentialsFile  string       `json:"credentialsFile"`
-	CacheDirectory   string       `json:"cacheDirectory"`
-	LineWrapMaxWidth int          `json:"lineWrapMaxWidth"`
-	GTSClient        GTSClient    `json:"gtsClient"`
-	Server           Server       `json:"server"`
-	Integrations     Integrations `json:"integrations"`
+	Path             string            `json:"-"`
+	Aliases          map[string]string `json:"aliases"`
+	CredentialsFile  string            `json:"credentialsFile"`
+	CacheDirectory   string            `json:"cacheDirectory"`
+	LineWrapMaxWidth int               `json:"lineWrapMaxWidth"`
+	GTSClient        GTSClient         `json:"gtsClient"`
+	Server           Server            `json:"server"`
+	Integrations     Integrations      `json:"integrations"`
+}
+
+func NewConfigFromFile(configFilepath string) (Config, error) {
+	return newConfigFromFile(configFilepath)
 }
 
 func (c Config) IsZero() bool {
@@ -49,7 +54,7 @@ type Integrations struct {
 	AudioPlayer string `json:"audioPlayer"`
 }
 
-func NewConfigFromFile(configFilepath string) (Config, error) {
+func newConfigFromFile(configFilepath string) (Config, error) {
 	path, err := configPath(configFilepath)
 	if err != nil {
 		return Config{}, fmt.Errorf("error calculating the path to your config file: %w", err)
@@ -61,25 +66,30 @@ func NewConfigFromFile(configFilepath string) (Config, error) {
 	}
 	defer file.Close()
 
-	var config Config
+	var cfg Config
 
-	if err := json.NewDecoder(file).Decode(&config); err != nil {
+	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
 		return Config{}, fmt.Errorf("error decoding the JSON data: %w", err)
 	}
 
-	config.Path = configFilepath
-	config.populated = true
+	cfg.Path = configFilepath
+	cfg.populated = true
 
-	return config, nil
+	return cfg, nil
 }
 
 func FileExists(configFilepath string) (bool, error) {
 	path, err := configPath(configFilepath)
 	if err != nil {
-		return false, fmt.Errorf("error calculating the path to your config file: %w", err)
+		return false, fmt.Errorf("error calculating the path to your configuration file: %w", err)
 	}
 
-	return utilities.FileExists(path)
+	exists, err := utilities.FileExists(path)
+	if err != nil {
+		return false, fmt.Errorf("error checking if the configuration file is present: %w", err)
+	}
+
+	return exists, nil
 }
 
 func EnsureParentDir(configFilepath string) error {
@@ -88,7 +98,11 @@ func EnsureParentDir(configFilepath string) error {
 		return fmt.Errorf("error calculating the path to your config file: %w", err)
 	}
 
-	return utilities.EnsureDirectory(filepath.Dir(path))
+	if err := utilities.EnsureDirectory(filepath.Dir(path)); err != nil {
+		return fmt.Errorf("error ensuring that the configuration file's parent directory is present: %w", err)
+	}
+
+	return nil
 }
 
 func SaveInitialConfigToFile(configFilepath string) error {
@@ -103,7 +117,7 @@ func SaveInitialConfigToFile(configFilepath string) error {
 	}
 	defer file.Close()
 
-	config := initialConfig()
+	cfg := initialConfig()
 
 	credentialsFilePath, err := defaultCredentialsFilepath()
 	if err != nil {
@@ -120,15 +134,32 @@ func SaveInitialConfigToFile(configFilepath string) error {
 		return fmt.Errorf("unable to calculate the path to the socket file: %w", err)
 	}
 
-	config.CredentialsFile = credentialsFilePath
-	config.CacheDirectory = cacheDirPath
-	config.Server.SocketPath = socketPath
+	cfg.CredentialsFile = credentialsFilePath
+	cfg.CacheDirectory = cacheDirPath
+	cfg.Server.SocketPath = socketPath
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "    ")
 
-	if err := encoder.Encode(config); err != nil {
-		return fmt.Errorf("unable to save the JSON data to the config file: %w", err)
+	if err := encoder.Encode(cfg); err != nil {
+		return fmt.Errorf("error writing the JSON data to the configuration file: %w", err)
+	}
+
+	return nil
+}
+
+func saveConfig(configFilepath string, cfg Config) error {
+	file, err := utilities.CreateFile(configFilepath)
+	if err != nil {
+		return fmt.Errorf("error opening the configuration file: %w", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "    ")
+
+	if err := encoder.Encode(cfg); err != nil {
+		return fmt.Errorf("error writing the JSON data to the configuration file: %w", err)
 	}
 
 	return nil
@@ -138,6 +169,7 @@ func initialConfig() Config {
 	return Config{
 		CredentialsFile: "",
 		CacheDirectory:  "",
+		Aliases:         make(map[string]string),
 		GTSClient: GTSClient{
 			Timeout:      defaultHTTPTimeout,
 			MediaTimeout: defaultHTTPMediaTimeout,

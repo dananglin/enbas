@@ -95,9 +95,9 @@ func TestParseCommand(t *testing.T) {
 		},
 	}
 
-	for ind, tc := range slices.All(cases) {
+	for idx, tc := range slices.All(cases) {
 		t.Run(
-			fmt.Sprintf("Test case: %d", ind+1),
+			fmt.Sprintf("Test case: %d", idx+1),
 			testParseCommand(tc.args, tc.want),
 		)
 	}
@@ -275,8 +275,8 @@ func testCommandValidationError(testName string, cmd command.Command, wantErr er
 	}
 }
 
-func TestHelpCommand(t *testing.T) {
-	help := command.HelpCommand()
+func TestUsageCommand(t *testing.T) {
+	help := command.UsageCommand()
 
 	if err := help.Validate(); err != nil {
 		t.Errorf("FAILED: Received an error after attempting to validate the help command: got %v", err)

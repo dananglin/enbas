@@ -11,7 +11,7 @@ import (
 func TestConfigFile(t *testing.T) {
 	t.Log("Testing saving and loading the configuration")
 
-	configFilepath := filepath.Join("testdata", "config", "config.json")
+	configFilepath := filepath.Join("testdata", "config", t.Name()+".json")
 
 	t.Run("Save the default configuration to file", testSaveDefaultConfigToFile(configFilepath))
 	t.Run("Load the configuration from file", testLoadConfigFromFile(configFilepath))

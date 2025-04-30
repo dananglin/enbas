@@ -101,3 +101,25 @@ func (e prepositionKeywordMissingError) Error() string {
 func NewPrepositionKeywordMissingError(preposition string) error {
 	return prepositionKeywordMissingError{preposition: preposition}
 }
+
+type invalidAliasError struct {
+	alias string
+}
+
+func (e invalidAliasError) Error() string {
+	return "'" + e.alias + "' is not a valid name for an alias"
+}
+
+func NewInvalidAliasError(alias string) error {
+	return invalidAliasError{alias: alias}
+}
+
+type aliasNoArgsError struct{}
+
+func (e aliasNoArgsError) Error() string {
+	return "received an empty list of arguments"
+}
+
+func NewAliasNoArgsError() error {
+	return aliasNoArgsError{}
+}

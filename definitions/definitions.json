@@ -12,6 +12,12 @@
       "required": false
     }
   },
+  "builtInAliases": {
+    "help": ["show", "usage"],
+    "login": ["create", "access"],
+    "whoami": ["verify", "access"],
+    "version": ["show", "version"]
+  },
   "flags": {
     "account-name": "the name of the account to {action}",
     "action": "the name of the action",
@@ -19,6 +25,7 @@
     "all-audio":  "play all audio files from the status",
     "all-images": "show all image files from the status",
     "all-videos": "play all video files from the status",
+    "arguments": "the arguments to add to the alias",
     "attachment-id": "the ID of the media attachment",
     "browser": "{action} the {target} in your favourite browser",
     "duration": "how long the effect should last for (set to 0s to last indefinitely)",
@@ -41,11 +48,14 @@
     "media-focus": "the focus of the media-attachment",
     "mute-notifications": "mute notifications as well as posts from the {target}",
     "my-account": "specify your account to {action}",
+    "name": "the name of the {target} you want to {action}",
+    "new-name": "the new {target} name",
     "notification-id": "the ID of the notification to {action}",
     "notify": "get notifications whenever the account you want to follow posts a status",
     "not-boostable": "viewers will not be allowed to reblog (boost) the created status",
     "not-likeable": "viewers will not be allowed to like (favourite) the created status",
     "not-replyable": "viewers will not be allowed to reply to the created status",
+    "old-name": "the old {target} name",
     "only-media": "only show the statuses with media attachments",
     "only-pinned": "only show the account's pinned statuses",
     "only-public": "only show the account's public posts",
@@ -72,7 +82,7 @@
     "target": "the name of the target to {action}",
     "timeline-category": "the category of the timeline to {action}",
     "title": "the title of the {target} to {action}",
-    "token-id": "the ID of the token",
+    "token-id": "the ID of the token to {action}",
     "url": "the URL of your GoToSocial instance",
     "vote": "the option in the poll to vote for",
     "visibility": "The visibility of the {target}",
@@ -94,6 +104,7 @@
     "reblog": "reblogs an existing {target}",
     "reject": "rejects an existing {target}",
     "remove": "removes the {target} from an existing {relatedTarget}",
+    "rename": "renames an existing {target}",
     "show": "prints the details of the {target} to screen",
     "start": "starts the {target}",
     "switch": "switches from one {target} to another",
@@ -382,6 +393,75 @@
         }
       }
     },
+    "alias": {
+      "description": "the shortname to a set of arguments",
+      "actions": {
+        "create": {
+          "flags": [
+            {
+              "name": "name",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "arguments",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "delete": {
+          "flags": [
+            {
+              "name": "name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "edit": {
+          "flags": [
+            {
+              "name": "name",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "arguments",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "rename": {
+          "flags": [
+            {
+              "name": "old-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "new-name",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "aliases": {
+      "description": "the list of your aliases",
+      "actions": {
+        "show": {}
+      }
+    },
     "blocked-accounts": {
       "description": "the accounts that are blocked by you",
       "actions": {
@@ -534,27 +614,6 @@
               ]
             }
           }
-        }
-      }
-    },
-    "help": {
-      "description": "usage documentation",
-      "actions": {
-        "show": {
-          "flags": [
-            {
-              "name": "action",
-              "type": "string",
-              "default": "",
-              "required": false
-            },
-            {
-              "name": "target",
-              "type": "string",
-              "default": "",
-              "required": false
-            }
-          ]
         }
       }
     },
@@ -1302,6 +1361,27 @@
               "type": "string",
               "default": "",
               "required": true
+            }
+          ]
+        }
+      }
+    },
+    "usage": {
+      "description": "the usage documentation",
+      "actions": {
+        "show": {
+          "flags": [
+            {
+              "name": "action",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "target",
+              "type": "string",
+              "default": "",
+              "required": false
             }
           ]
         }

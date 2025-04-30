@@ -28,6 +28,7 @@ const (
 	flagAllAudio                  string = "all-audio"
 	flagAllImages                 string = "all-images"
 	flagAllVideos                 string = "all-videos"
+	flagArguments                 string = "arguments"
 	flagAttachmentId              string = "attachment-id"
 	flagBrowser                   string = "browser"
 	flagContent                   string = "content"
@@ -50,11 +51,14 @@ const (
 	flagMediaFocus                string = "media-focus"
 	flagMuteNotifications         string = "mute-notifications"
 	flagMyAccount                 string = "my-account"
+	flagName                      string = "name"
+	flagNewName                   string = "new-name"
 	flagNotBoostable              string = "not-boostable"
 	flagNotLikeable               string = "not-likeable"
 	flagNotReplyable              string = "not-replyable"
 	flagNotificationId            string = "notification-id"
 	flagNotify                    string = "notify"
+	flagOldName                   string = "old-name"
 	flagOnlyMedia                 string = "only-media"
 	flagOnlyPinned                string = "only-pinned"
 	flagOnlyPublic                string = "only-public"
@@ -98,6 +102,7 @@ func flagUsageMap() map[string]string {
 		flagAllAudio:                  "play all audio files from the status",
 		flagAllImages:                 "show all image files from the status",
 		flagAllVideos:                 "play all video files from the status",
+		flagArguments:                 "the arguments to add to the alias",
 		flagAttachmentId:              "the ID of the media attachment",
 		flagBrowser:                   "{action} the {target} in your favourite browser",
 		flagContent:                   "the content of the {target}",
@@ -120,11 +125,14 @@ func flagUsageMap() map[string]string {
 		flagMediaFocus:                "the focus of the media-attachment",
 		flagMuteNotifications:         "mute notifications as well as posts from the {target}",
 		flagMyAccount:                 "specify your account to {action}",
+		flagName:                      "the name of the {target} you want to {action}",
+		flagNewName:                   "the new {target} name",
 		flagNotBoostable:              "viewers will not be allowed to reblog (boost) the created status",
 		flagNotLikeable:               "viewers will not be allowed to like (favourite) the created status",
 		flagNotReplyable:              "viewers will not be allowed to reply to the created status",
 		flagNotificationId:            "the ID of the notification to {action}",
 		flagNotify:                    "get notifications whenever the account you want to follow posts a status",
+		flagOldName:                   "the old {target} name",
 		flagOnlyMedia:                 "only show the statuses with media attachments",
 		flagOnlyPinned:                "only show the account's pinned statuses",
 		flagOnlyPublic:                "only show the account's public posts",
@@ -151,7 +159,7 @@ func flagUsageMap() map[string]string {
 		flagTarget:                    "the name of the target to {action}",
 		flagTimelineCategory:          "the category of the timeline to {action}",
 		flagTitle:                     "the title of the {target} to {action}",
-		flagTokenId:                   "the ID of the token",
+		flagTokenId:                   "the ID of the token to {action}",
 		flagUrl:                       "the URL of your GoToSocial instance",
 		flagVisibility:                "The visibility of the {target}",
 		flagVote:                      "the option in the poll to vote for",
@@ -232,6 +240,22 @@ func targetActionFlagMap() map[string][]string {
 		},
 		TargetAccounts + "-" + ActionAdd:    {},
 		TargetAccounts + "-" + ActionRemove: {},
+		TargetAlias + "-" + ActionCreate: {
+			flagName,
+			flagArguments,
+		},
+		TargetAlias + "-" + ActionDelete: {
+			flagName,
+		},
+		TargetAlias + "-" + ActionEdit: {
+			flagName,
+			flagArguments,
+		},
+		TargetAlias + "-" + ActionRename: {
+			flagOldName,
+			flagNewName,
+		},
+		TargetAliases + "-" + ActionShow: {},
 		TargetBlockedAccounts + "-" + ActionShow: {
 			flagLimit,
 		},
@@ -253,11 +277,7 @@ func targetActionFlagMap() map[string][]string {
 		},
 		TargetFollowers + "-" + ActionShow:  {},
 		TargetFollowings + "-" + ActionShow: {},
-		TargetHelp + "-" + ActionShow: {
-			flagAction,
-			flagTarget,
-		},
-		TargetInstance + "-" + ActionShow: {},
+		TargetInstance + "-" + ActionShow:   {},
 		TargetList + "-" + ActionCreate: {
 			flagExclusive,
 			flagRepliesPolicy,
@@ -395,6 +415,10 @@ func targetActionFlagMap() map[string][]string {
 		},
 		TargetTokens + "-" + ActionShow: {
 			flagLimit,
+		},
+		TargetUsage + "-" + ActionShow: {
+			flagAction,
+			flagTarget,
 		},
 		TargetVersion + "-" + ActionShow: {
 			flagFull,

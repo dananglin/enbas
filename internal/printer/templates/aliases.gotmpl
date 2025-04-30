@@ -1,0 +1,11 @@
+{{- define "aliases" -}}
+{{ print "" }}
+{{ headerFormat "Your aliases" }}
+{{ print "" }}
+{{- range $name, $args := . -}}
+{{ print "" }}
+{{ fieldFormat $name }} {{ $args }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ end -}}

@@ -8,10 +8,11 @@ import (
 )
 
 type definitions struct {
-	TopLevelFlags map[string]topLevelFlag `json:"topLevelFlags"`
-	Flags         map[string]string       `json:"flags"`
-	Actions       map[string]string       `json:"actions"`
-	Targets       map[string]target       `json:"targets"`
+	TopLevelFlags  map[string]topLevelFlag `json:"topLevelFlags"`
+	BuiltInAliases map[string][]string     `json:"builtInAliases"`
+	Flags          map[string]string       `json:"flags"`
+	Actions        map[string]string       `json:"actions"`
+	Targets        map[string]target       `json:"targets"`
 }
 
 type topLevelFlag struct {

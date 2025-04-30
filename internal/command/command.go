@@ -11,10 +11,10 @@ type Command struct {
 	RelatedTargetFlags []string
 }
 
-func HelpCommand() Command {
+func UsageCommand() Command {
 	return Command{
 		Action:             cli.ActionShow,
-		FocusedTarget:      cli.TargetHelp,
+		FocusedTarget:      cli.TargetUsage,
 		FocusedTargetFlags: []string{},
 		Preposition:        "",
 		RelatedTarget:      "",

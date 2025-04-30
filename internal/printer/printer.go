@@ -214,6 +214,11 @@ func PrintToken(settings Settings, token model.Token) error {
 	return renderTemplateToPager(settings, "tokenDoc", "", token)
 }
 
+// PrintAliases prints the user's list of aliases.
+func PrintAliases(settings Settings, aliases map[string]string) error {
+	return renderTemplateToPager(settings, "aliases", "", aliases)
+}
+
 func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
 	if settings.pager == "" {
 		return renderTemplateToStdout(

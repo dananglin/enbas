@@ -21,6 +21,7 @@ const (
 	ActionReblog      string = "reblog"
 	ActionReject      string = "reject"
 	ActionRemove      string = "remove"
+	ActionRename      string = "rename"
 	ActionShow        string = "show"
 	ActionStart       string = "start"
 	ActionSwitch      string = "switch"
@@ -58,6 +59,7 @@ func actionDescMap() map[string]string {
 		ActionReblog:      "reblogs an existing {target}",
 		ActionReject:      "rejects an existing {target}",
 		ActionRemove:      "removes the {target} from an existing {relatedTarget}",
+		ActionRename:      "renames an existing {target}",
 		ActionShow:        "prints the details of the {target} to screen",
 		ActionStart:       "starts the {target}",
 		ActionSwitch:      "switches from one {target} to another",
@@ -97,16 +99,19 @@ func actionTargetsMap() map[string][]string {
 		},
 		ActionCreate: {
 			TargetAccess,
+			TargetAlias,
 			TargetConfig,
 			TargetList,
 			TargetMediaAttachment,
 			TargetStatus,
 		},
 		ActionDelete: {
+			TargetAlias,
 			TargetList,
 			TargetStatus,
 		},
 		ActionEdit: {
+			TargetAlias,
 			TargetList,
 			TargetMediaAttachment,
 		},
@@ -140,15 +145,18 @@ func actionTargetsMap() map[string][]string {
 			TargetNote,
 			TargetStatus,
 		},
+		ActionRename: {
+			TargetAlias,
+		},
 		ActionShow: {
 			TargetAccount,
+			TargetAliases,
 			TargetBlockedAccounts,
 			TargetBookmarks,
 			TargetFavourites,
 			TargetFollowRequests,
 			TargetFollowers,
 			TargetFollowings,
-			TargetHelp,
 			TargetInstance,
 			TargetList,
 			TargetLists,
@@ -164,6 +172,7 @@ func actionTargetsMap() map[string][]string {
 			TargetTimeline,
 			TargetToken,
 			TargetTokens,
+			TargetUsage,
 			TargetVersion,
 		},
 		ActionStart: {

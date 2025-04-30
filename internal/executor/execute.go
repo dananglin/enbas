@@ -47,7 +47,7 @@ func Execute() error {
 	// Load the configuration if the configuration file
 	// is present.
 	var cfg config.Config
-	calculatedConfigPath, err := config.ConfigPath(configPath)
+	calculatedConfigPath, err := config.Path(configPath)
 	if err != nil {
 		printer.PrintFailure(
 			printSettings,
@@ -91,13 +91,27 @@ func Execute() error {
 		)
 	}
 
+	// Parse the command
 	var cmd command.Command
 
 	if flagset.NArg() == 0 {
-		cmd = command.HelpCommand()
+		cmd = command.UsageCommand()
 	} else {
 		var err error
-		cmd, err = command.Parse(flagset.Args())
+
+		// Parse the alias if it's used.
+		args, err := command.ExtractArgsFromAlias(flagset.Args(), cfg.Aliases)
+		if err != nil {
+			printer.PrintFailure(
+				printSettings,
+				"error parsing the alias from the command: "+err.Error()+".",
+			)
+
+			return err
+		}
+
+		// Parse the final command.
+		cmd, err = command.Parse(args)
 		if err != nil {
 			printer.PrintFailure(
 				printSettings,
@@ -113,6 +127,7 @@ func Execute() error {
 			printSettings,
 			"invalid command: "+err.Error()+".",
 		)
+
 		return err
 	}
 

@@ -40,14 +40,6 @@ func (e missingIDError) Error() string {
 	return "please provide the ID of the " + e.target + " you want to " + e.action
 }
 
-type noTargetProvidedError struct {
-	action string
-}
-
-func (e noTargetProvidedError) Error() string {
-	return "no target provided for '" + e.action + "'"
-}
-
 type emptyContentError struct {
 	action string
 	target string
@@ -213,4 +205,44 @@ type zeroConfigurationError struct {
 
 func (e zeroConfigurationError) Error() string {
 	return "configuration not set: please ensure that the configuration file is present at '" + e.path + "'"
+}
+
+type aliasNameUnsetError struct{}
+
+func (e aliasNameUnsetError) Error() string {
+	return "please set the name of the alias"
+}
+
+type aliasArgsUnsetError struct{}
+
+func (e aliasArgsUnsetError) Error() string {
+	return "please specify the arguments to set the alias to"
+}
+
+type aliasActionKeywordError struct {
+	alias string
+}
+
+func (e aliasActionKeywordError) Error() string {
+	return "'" + e.alias + "' is a built-in action keyword"
+}
+
+type aliasBuiltinAliasError struct {
+	alias string
+}
+
+func (e aliasBuiltinAliasError) Error() string {
+	return "'" + e.alias + "' is a built-in alias"
+}
+
+type aliasOldNameUnsetError struct{}
+
+func (e aliasOldNameUnsetError) Error() string {
+	return "please specify the name of the alias you want to rename"
+}
+
+type aliasNewNameUnsetError struct{}
+
+func (e aliasNewNameUnsetError) Error() string {
+	return "please specify the alias' new name"
 }

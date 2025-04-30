@@ -11,6 +11,8 @@ const (
 	TargetAccess          string = "access"
 	TargetAccount         string = "account"
 	TargetAccounts        string = "accounts"
+	TargetAlias           string = "alias"
+	TargetAliases         string = "aliases"
 	TargetBlockedAccounts string = "blocked-accounts"
 	TargetBookmarks       string = "bookmarks"
 	TargetConfig          string = "config"
@@ -19,7 +21,6 @@ const (
 	TargetFollowRequests  string = "follow-requests"
 	TargetFollowers       string = "followers"
 	TargetFollowings      string = "followings"
-	TargetHelp            string = "help"
 	TargetInstance        string = "instance"
 	TargetList            string = "list"
 	TargetLists           string = "lists"
@@ -37,6 +38,7 @@ const (
 	TargetTimeline        string = "timeline"
 	TargetToken           string = "token"
 	TargetTokens          string = "tokens"
+	TargetUsage           string = "usage"
 	TargetVersion         string = "version"
 	TargetVotes           string = "votes"
 )
@@ -59,6 +61,8 @@ func targetDescMap() map[string]string {
 		TargetAccess:          "your access to a GoToSocial instance",
 		TargetAccount:         "a local or remote account",
 		TargetAccounts:        "multiple accounts",
+		TargetAlias:           "the shortname to a set of arguments",
+		TargetAliases:         "the list of your aliases",
 		TargetBlockedAccounts: "the accounts that are blocked by you",
 		TargetBookmarks:       "the statuses that you've bookmarked",
 		TargetConfig:          "your configuration for enbas",
@@ -67,7 +71,6 @@ func targetDescMap() map[string]string {
 		TargetFollowRequests:  "the list of accounts that are currently requesting to follow you",
 		TargetFollowers:       "the accounts who are following the specified account",
 		TargetFollowings:      "the accounts who the specified account is following",
-		TargetHelp:            "usage documentation",
 		TargetInstance:        "the GoToSocial instance",
 		TargetList:            "a single list",
 		TargetLists:           "multiple lists",
@@ -85,6 +88,7 @@ func targetDescMap() map[string]string {
 		TargetTimeline:        "your timeline",
 		TargetToken:           "details of an application token",
 		TargetTokens:          "a list of your tokens",
+		TargetUsage:           "the usage documentation",
 		TargetVersion:         "the application's build information",
 		TargetVotes:           "the votes(s) to the poll in a status",
 	}
@@ -128,6 +132,15 @@ func targetActionsMap() map[string][]string {
 			ActionAdd,
 			ActionRemove,
 		},
+		TargetAlias: {
+			ActionCreate,
+			ActionDelete,
+			ActionEdit,
+			ActionRename,
+		},
+		TargetAliases: {
+			ActionShow,
+		},
 		TargetBlockedAccounts: {
 			ActionShow,
 		},
@@ -151,9 +164,6 @@ func targetActionsMap() map[string][]string {
 			ActionShow,
 		},
 		TargetFollowings: {
-			ActionShow,
-		},
-		TargetHelp: {
 			ActionShow,
 		},
 		TargetInstance: {
@@ -227,6 +237,9 @@ func targetActionsMap() map[string][]string {
 			ActionShow,
 		},
 		TargetTokens: {
+			ActionShow,
+		},
+		TargetUsage: {
 			ActionShow,
 		},
 		TargetVersion: {

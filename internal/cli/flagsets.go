@@ -244,6 +244,68 @@ func ParseAccountsRemoveFromListFlags(
 	return nil
 }
 
+func ParseAliasCreateFlags(
+	name *string,
+	arguments *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(name, flagName, "", "")
+	flagset.StringVar(arguments, flagArguments, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseAliasDeleteFlags(
+	name *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(name, flagName, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseAliasEditFlags(
+	name *string,
+	arguments *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(name, flagName, "", "")
+	flagset.StringVar(arguments, flagArguments, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseAliasRenameFlags(
+	oldName *string,
+	newName *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(oldName, flagOldName, "", "")
+	flagset.StringVar(newName, flagNewName, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
 func ParseBlockedAccountsShowFlags(
 	limit *int,
 	flags []string,
@@ -356,22 +418,6 @@ func ParseFollowingsShowFromAccountFlags(
 	flagset.StringVar(accountName, flagAccountName, "", "")
 	flagset.IntVar(limit, flagLimit, 20, "")
 	flagset.BoolVar(myAccount, flagMyAccount, false, "")
-
-	if err := flagset.Parse(flags); err != nil {
-		return fmt.Errorf("flag parsing error: %w", err)
-	}
-
-	return nil
-}
-
-func ParseHelpShowFlags(
-	action *string,
-	target *string,
-	flags []string,
-) error {
-	flagset := newFlagset()
-	flagset.StringVar(action, flagAction, "", "")
-	flagset.StringVar(target, flagTarget, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
@@ -966,6 +1012,22 @@ func ParseTokensShowFlags(
 ) error {
 	flagset := newFlagset()
 	flagset.IntVar(limit, flagLimit, 20, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseUsageShowFlags(
+	action *string,
+	target *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(action, flagAction, "", "")
+	flagset.StringVar(target, flagTarget, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
