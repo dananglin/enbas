@@ -10,7 +10,9 @@ type Status struct {
 	Bookmarked         bool              `json:"bookmarked"`
 	Card               Card              `json:"card"`
 	Content            string            `json:"content"`
+	ContentType        string            `json:"content_type"`
 	CreatedAt          time.Time         `json:"created_at"`
+	EditedAt           time.Time         `json:"edited_at"`
 	Emojis             []Emoji           `json:"emojis"`
 	Favourited         bool              `json:"favourited"`
 	FavouritesCount    int               `json:"favourites_count"`

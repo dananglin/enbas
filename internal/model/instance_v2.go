@@ -109,3 +109,7 @@ type InstanceV2Usage struct {
 type InstanceV2Users struct {
 	ActiveMonth int `json:"active_month"`
 }
+
+type InstanceV2ConfigurationVAPID struct {
+	PublicKey string `json:"public_key"`
+}

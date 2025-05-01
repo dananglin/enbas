@@ -16,11 +16,16 @@ type Account struct {
 	HeaderMediaID     string               `json:"header_media_id"`
 	HeaderStatic      string               `json:"header_static"`
 	ID                string               `json:"id"`
+	Note              string               `json:"note"`
 	LastStatusAt      string               `json:"last_status_at"`
 	DisplayName       string               `json:"display_name"`
+	Theme             string               `json:"theme"`
+	URL               string               `json:"url"`
+	Username          string               `json:"username"`
 	Emojis            []Emoji              `json:"emojis"`
 	EnableRSS         bool                 `json:"enable_rss"`
 	Bot               bool                 `json:"bot"`
+	Group             bool                 `json:"group"`
 	Locked            bool                 `json:"locked"`
 	Suspended         bool                 `json:"suspended"`
 	Discoverable      bool                 `json:"discoverable"`
@@ -30,14 +35,10 @@ type Account struct {
 	FollowingCount    int                  `json:"following_count"`
 	CreatedAt         time.Time            `json:"created_at"`
 	MuteExpiresAt     time.Time            `json:"mute_expires_at"`
-	Note              string               `json:"note"`
 	Role              AccountRole          `json:"role"`
 	Roles             []AccountDisplayRole `json:"roles"`
 	Source            Source               `json:"source"`
 	StatusCount       int                  `json:"statuses_count"`
-	Theme             string               `json:"theme"`
-	URL               string               `json:"url"`
-	Username          string               `json:"username"`
 }
 
 type AccountRole struct {
