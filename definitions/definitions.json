@@ -667,6 +667,12 @@
               "required": true
             },
             {
+              "name": "exclusive",
+              "type": "internalFlag.BoolPtrValue",
+              "default": "",
+              "required": false
+            },
+            {
               "name": "replies-policy",
               "type": "string",
               "default": "",

@@ -460,12 +460,14 @@ func ParseListDeleteFlags(
 
 func ParseListEditFlags(
 	listId *string,
+	exclusive *internalFlag.BoolPtrValue,
 	repliesPolicy *string,
 	title *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(listId, flagListId, "", "")
+	flagset.Var(exclusive, flagExclusive, "")
 	flagset.StringVar(repliesPolicy, flagRepliesPolicy, "", "")
 	flagset.StringVar(title, flagTitle, "", "")
 

@@ -288,6 +288,7 @@ func targetActionFlagMap() map[string][]string {
 		},
 		TargetList + "-" + ActionEdit: {
 			flagListId,
+			flagExclusive,
 			flagRepliesPolicy,
 			flagTitle,
 		},

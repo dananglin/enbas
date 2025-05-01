@@ -95,9 +95,11 @@ func (g *GTSClient) UpdateList(listToUpdate model.List, updatedList *model.List)
 	form := struct {
 		Title         string                  `json:"title"`
 		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
+		Exclusive     bool                    `json:"exclusive"`
 	}{
 		Title:         listToUpdate.Title,
 		RepliesPolicy: listToUpdate.RepliesPolicy,
+		Exclusive:     listToUpdate.Exclusive,
 	}
 
 	data, err := json.Marshal(form)

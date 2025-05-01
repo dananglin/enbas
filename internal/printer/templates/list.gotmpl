@@ -9,6 +9,9 @@
 {{ headerFormat "REPLIES POLICY:" }}
 {{ .RepliesPolicy }}
 {{ print "" }}
+{{ headerFormat "EXCLUSIVE:" }}
+{{ .Exclusive }}
+{{ print "" }}
 {{ headerFormat "ADDED ACCOUNTS:" }}
 {{- if gt (len .Accounts) 0 -}}
 {{- range $acct, $name := .Accounts -}}

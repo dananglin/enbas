@@ -7,6 +7,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
@@ -57,7 +58,7 @@ func listShow(
 		&listID,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if listID == "" {
@@ -107,7 +108,7 @@ func listCreate(
 		&title,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(repliesPolicy)
@@ -144,6 +145,7 @@ func listEdit(
 ) error {
 	var (
 		listID        string
+		exclusive     = internalFlag.NewBoolPtrValue()
 		repliesPolicy string
 		title         string
 	)
@@ -151,11 +153,12 @@ func listEdit(
 	// Parse the remaining flags.
 	if err := cli.ParseListEditFlags(
 		&listID,
+		&exclusive,
 		&repliesPolicy,
 		&title,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if listID == "" {
@@ -177,10 +180,14 @@ func listEdit(
 	if repliesPolicy != "" {
 		parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(repliesPolicy)
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
 
 		listToUpdate.RepliesPolicy = parsedListRepliesPolicy
+	}
+
+	if exclusive.Value != nil {
+		listToUpdate.Exclusive = *exclusive.Value
 	}
 
 	var updatedList model.List
@@ -218,7 +225,7 @@ func listDelete(
 		&listID,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if listID == "" {
