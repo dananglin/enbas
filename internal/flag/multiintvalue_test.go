@@ -14,7 +14,7 @@ func TestMultiIntValue(t *testing.T) {
 
 	if !flagValue.Empty() {
 		t.Fatalf(
-			"FAILED test %q: The initialised MultiIntValue is not empty",
+			"FAILED test %q: the initialised MultiIntValue is not empty",
 			t.Name(),
 		)
 	}
@@ -45,20 +45,20 @@ func TestMultiIntValue(t *testing.T) {
 			wantLength,
 			flagValue.Length(),
 		)
+	} else {
+		t.Logf(
+			"GOOD result from %q: expected number of values found in the parsed MultiIntValue\ngot: %d",
+			t.Name(),
+			flagValue.Length(),
+		)
 	}
-
-	t.Logf(
-		"GOOD result from %q: expected number of values found in the parsed MultiIntValue\ngot: %d",
-		t.Name(),
-		flagValue.Length(),
-	)
 
 	want := []int{0, 1, 2, 3, 4}
 	got := flagValue.Values()
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf(
-			"FAILED test %q: unexpected result found in parsed MultiIntValue\nwant: %v\n got %v",
+			"FAILED test %q: unexpected result found in parsed MultiIntValue\nwant: %v\n got: %v",
 			t.Name(),
 			want,
 			got,

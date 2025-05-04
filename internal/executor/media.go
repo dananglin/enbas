@@ -81,7 +81,7 @@ func mediaShowFromStatus(
 ) error {
 	var (
 		statusID      string
-		attachmentIDs internalFlag.StringSliceValue
+		attachmentIDs internalFlag.MultiStringValue
 		getAllAudio   bool
 		getAllImages  bool
 		getAllVideos  bool
@@ -142,7 +142,7 @@ func mediaShowFromStatus(
 		getAllAudio,
 		getAllImages,
 		getAllVideos,
-		attachmentIDs,
+		attachmentIDs.Values(),
 	)
 
 	if err := mediaBundle.Download(client); err != nil {

@@ -124,22 +124,22 @@ func statusCreate(
 ) error {
 	var (
 		addPoll                   bool
-		attachmentIDs             = internalFlag.NewStringSliceValue()
+		attachmentIDs             = internalFlag.NewMultiStringValue()
 		content                   string
 		contentType               internalFlag.EnumValue
 		inReplyTo                 string
 		language                  string
 		localOnly                 bool
-		mediaDescriptions         = internalFlag.NewStringSliceValue()
-		mediaFiles                = internalFlag.NewStringSliceValue()
-		mediaFocusValues          = internalFlag.NewStringSliceValue()
+		mediaDescriptions         = internalFlag.NewMultiStringValue()
+		mediaFiles                = internalFlag.NewMultiStringValue()
+		mediaFocusValues          = internalFlag.NewMultiStringValue()
 		notBoostable              bool
 		notLikeable               bool
 		notReplyable              bool
 		pollAllowsMultipleChoices bool
 		pollExpiresIn             = internalFlag.NewTimeDurationValue(24 * time.Hour)
 		pollHidesVoteCounts       bool
-		pollOptions               = internalFlag.NewStringSliceValue()
+		pollOptions               = internalFlag.NewMultiStringValue()
 		sensitive                 = internalFlag.NewBoolPtrValue()
 		summary                   string
 		visibility                internalFlag.EnumValue
@@ -173,16 +173,16 @@ func statusCreate(
 	}
 
 	// Return an error if there's no status body and no media attachments.
-	if content == "" && (len(attachmentIDs)+mediaFiles.Length() == 0) {
+	if content == "" && (attachmentIDs.Length()+mediaFiles.Length() == 0) {
 		return noContentOrMediaError{}
 	}
 
 	// Return an error if a poll is to be created with media attachments.
-	if addPoll && (len(attachmentIDs)+mediaFiles.Length() > 0) {
+	if addPoll && (attachmentIDs.Length()+mediaFiles.Length() > 0) {
 		return statusHasPollAndMediaError{}
 	}
 
-	allAttachmentIDs := []string(attachmentIDs)
+	allAttachmentIDs := attachmentIDs.Values()
 
 	if !mediaFiles.Empty() {
 		var (
@@ -223,21 +223,21 @@ func statusCreate(
 				err         error
 			)
 
-			mediaFile = mediaFiles[idx]
+			mediaFile = mediaFiles.Values()[idx]
 
 			if descriptionsPresent {
-				description, err = utilities.ReadContents(mediaDescriptions[idx])
+				description, err = utilities.ReadContents(mediaDescriptions.Values()[idx])
 				if err != nil {
 					return fmt.Errorf(
 						"error reading the contents from %s: %w",
-						mediaDescriptions[idx],
+						mediaDescriptions.Values()[idx],
 						err,
 					)
 				}
 			}
 
 			if focusValuesPresent {
-				focus = mediaFocusValues[idx]
+				focus = mediaFocusValues.Values()[idx]
 			}
 
 			if err = client.Call(
@@ -312,12 +312,12 @@ func statusCreate(
 	}
 
 	if addPoll {
-		if len(pollOptions) == 0 {
+		if pollOptions.Length() == 0 {
 			return noPollOptionsError{}
 		}
 
 		poll := gtsclient.CreateStatusPollForm{
-			Options:    pollOptions,
+			Options:    pollOptions.Values(),
 			Multiple:   pollAllowsMultipleChoices,
 			HideTotals: pollHidesVoteCounts,
 			ExpiresIn:  int(pollExpiresIn.Value().Seconds()),

@@ -82,7 +82,7 @@ func accountsAddToList(
 ) error {
 	var (
 		listID       string
-		accountNames = internalFlag.NewStringSliceValue()
+		accountNames = internalFlag.NewMultiStringValue()
 	)
 
 	// Parse the remaining flags
@@ -91,7 +91,7 @@ func accountsAddToList(
 		&accountNames,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if listID == "" {
@@ -110,13 +110,14 @@ func accountsAddToList(
 	var accounts []model.Account
 	if err := client.Call(
 		"GTSClient.GetMultipleAccounts",
-		accountNames,
+		accountNames.Values(),
 		&accounts,
 	); err != nil {
 		return fmt.Errorf("error retrieving the accounts: %w", err)
 	}
 
 	accountIDs := make([]string, len(accounts))
+
 	for idx := range accounts {
 		var relationship model.AccountRelationship
 		if err := client.Call(
@@ -180,7 +181,7 @@ func accountsRemoveFromList(
 ) error {
 	var (
 		listID       string
-		accountNames = internalFlag.NewStringSliceValue()
+		accountNames = internalFlag.NewMultiStringValue()
 	)
 
 	// Parse the remaining flags.
@@ -189,7 +190,7 @@ func accountsRemoveFromList(
 		&accountNames,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if listID == "" {
@@ -208,7 +209,7 @@ func accountsRemoveFromList(
 	var accountIDs []string
 	if err := client.Call(
 		"GTSClient.GetMultipleAccountIDs",
-		accountNames,
+		accountNames.Values(),
 		&accountIDs,
 	); err != nil {
 		return fmt.Errorf("error retrieving the account IDs: %w", err)

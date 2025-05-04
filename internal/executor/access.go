@@ -57,7 +57,7 @@ func accessCreate(
 ) error {
 	var (
 		url    string
-		scopes = internalFlag.NewStringSliceValue()
+		scopes = internalFlag.NewMultiStringValue()
 		err    error
 	)
 
@@ -106,7 +106,7 @@ func accessCreate(
 
 	if err := client.Call(
 		"GTSClient.RegisterApp",
-		scopes,
+		scopes.Values(),
 		nil,
 	); err != nil {
 		return fmt.Errorf("error registering the application: %w", err)
@@ -116,7 +116,7 @@ func accessCreate(
 
 	if err := client.Call(
 		"GTSClient.AuthCodeURL",
-		scopes,
+		scopes.Values(),
 		&consentPageURL,
 	); err != nil {
 		return fmt.Errorf("error retrieving the URL of the consent page: %w", err)

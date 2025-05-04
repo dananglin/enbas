@@ -35,7 +35,7 @@ func NewTopLevelFlagset(
 }
 
 func ParseAccessCreateFlags(
-	scope *internalFlag.StringSliceValue,
+	scope *internalFlag.MultiStringValue,
 	url *string,
 	flags []string,
 ) error {
@@ -214,7 +214,7 @@ func ParseAccountUnmuteFlags(
 
 func ParseAccountsAddToListFlags(
 	listId *string,
-	accountName *internalFlag.StringSliceValue,
+	accountName *internalFlag.MultiStringValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
@@ -230,7 +230,7 @@ func ParseAccountsAddToListFlags(
 
 func ParseAccountsRemoveFromListFlags(
 	listId *string,
-	accountName *internalFlag.StringSliceValue,
+	accountName *internalFlag.MultiStringValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
@@ -512,7 +512,7 @@ func ParseListShowFlags(
 
 func ParseMediaShowFromStatusFlags(
 	statusId *string,
-	attachmentId *internalFlag.StringSliceValue,
+	attachmentId *internalFlag.MultiStringValue,
 	allAudio *bool,
 	allImages *bool,
 	allVideos *bool,
@@ -712,22 +712,22 @@ func ParseStatusAddToBookmarksFlags(
 
 func ParseStatusCreateFlags(
 	addPoll *bool,
-	attachmentId *internalFlag.StringSliceValue,
+	attachmentId *internalFlag.MultiStringValue,
 	content *string,
 	contentType *internalFlag.EnumValue,
 	inReplyTo *string,
 	language *string,
 	localOnly *bool,
-	mediaDescription *internalFlag.StringSliceValue,
-	mediaFile *internalFlag.StringSliceValue,
-	mediaFocus *internalFlag.StringSliceValue,
+	mediaDescription *internalFlag.MultiStringValue,
+	mediaFile *internalFlag.MultiStringValue,
+	mediaFocus *internalFlag.MultiStringValue,
 	notBoostable *bool,
 	notLikeable *bool,
 	notReplyable *bool,
 	pollAllowsMultipleChoices *bool,
 	pollExpiresIn *internalFlag.TimeDurationValue,
 	pollHidesVoteCounts *bool,
-	pollOption *internalFlag.StringSliceValue,
+	pollOption *internalFlag.MultiStringValue,
 	sensitive *internalFlag.BoolPtrValue,
 	summary *string,
 	visibility *internalFlag.EnumValue,
