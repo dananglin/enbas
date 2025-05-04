@@ -97,7 +97,7 @@ func listCreate(
 ) error {
 	var (
 		exclusive     bool
-		repliesPolicy string
+		repliesPolicy internalFlag.EnumValue
 		title         string
 	)
 
@@ -111,17 +111,12 @@ func listCreate(
 		return err //nolint:wrapcheck
 	}
 
-	parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(repliesPolicy)
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
 	var list model.List
 	if err := client.Call(
 		"GTSClient.CreateList",
 		gtsclient.CreateListArgs{
 			Title:         title,
-			RepliesPolicy: parsedListRepliesPolicy,
+			RepliesPolicy: repliesPolicy.Value(),
 			Exclusive:     exclusive,
 		},
 		&list,
@@ -146,7 +141,7 @@ func listEdit(
 	var (
 		listID        string
 		exclusive     = internalFlag.NewBoolPtrValue()
-		repliesPolicy string
+		repliesPolicy internalFlag.EnumValue
 		title         string
 	)
 
@@ -177,13 +172,8 @@ func listEdit(
 		listToUpdate.Title = title
 	}
 
-	if repliesPolicy != "" {
-		parsedListRepliesPolicy, err := model.ParseListRepliesPolicy(repliesPolicy)
-		if err != nil {
-			return err //nolint:wrapcheck
-		}
-
-		listToUpdate.RepliesPolicy = parsedListRepliesPolicy
+	if repliesPolicy.Value() != "" {
+		listToUpdate.RepliesPolicy = repliesPolicy.Value()
 	}
 
 	if exclusive.Value != nil {

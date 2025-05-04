@@ -443,39 +443,39 @@ type notificationSummaryDetails struct {
 	Details string
 }
 
-func notificationSummary(notificationType model.NotificationType, fullDisplayName string) notificationSummaryDetails {
+func notificationSummary(notificationType string, fullDisplayName string) notificationSummaryDetails {
 	switch notificationType {
-	case model.NotificationTypeFollow:
+	case "follow":
 		return notificationSummaryDetails{
 			Header:  "SOMEONE FOLLOWED YOU:",
 			Details: fullDisplayName + " followed you.",
 		}
-	case model.NotificationTypeFollowRequest:
+	case "follow_request":
 		return notificationSummaryDetails{
 			Header:  "YOU'VE RECEIVED A FOLLOW REQUEST:",
 			Details: fullDisplayName + " sent you a follow request.",
 		}
-	case model.NotificationTypeMention:
+	case "mention":
 		return notificationSummaryDetails{
 			Header:  "SOMEONE MENTIONED YOU IN A STATUS:",
 			Details: fullDisplayName + " mentioned you in the below status.",
 		}
-	case model.NotificationTypeReblog:
+	case "reblog":
 		return notificationSummaryDetails{
 			Header:  "SOMEONE BOOSTED YOUR STATUS:",
 			Details: fullDisplayName + " boosted your status.",
 		}
-	case model.NotificationTypeFavourite:
+	case "favourite":
 		return notificationSummaryDetails{
 			Header:  "SOMEONE LIKED YOUR STATUS:",
 			Details: fullDisplayName + " liked your status.",
 		}
-	case model.NotificationTypePoll:
+	case "poll":
 		return notificationSummaryDetails{
 			Header:  "POLL CLOSED:",
 			Details: "The poll below has closed.",
 		}
-	case model.NotificationTypeStatus:
+	case "status":
 		return notificationSummaryDetails{
 			Header:  "SOMEONE POSTED A STATUS:",
 			Details: fullDisplayName + " posted the status below.",

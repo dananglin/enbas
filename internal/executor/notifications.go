@@ -3,7 +3,6 @@ package executor
 import (
 	"fmt"
 	"net/rpc"
-	"slices"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
@@ -67,8 +66,8 @@ func notificationsShow(
 ) error {
 	var (
 		limit                   int
-		excludeNotificationType internalFlag.StringSliceValue
-		includeNotificationType internalFlag.StringSliceValue
+		excludeNotificationType internalFlag.MultiEnumValue
+		includeNotificationType internalFlag.MultiEnumValue
 	)
 
 	// Parse the remaining flags.
@@ -81,18 +80,6 @@ func notificationsShow(
 		return err
 	}
 
-	for _, exclude := range slices.All(excludeNotificationType) {
-		if _, err := model.ParseNotificationType(exclude); err != nil {
-			return err
-		}
-	}
-
-	for _, include := range slices.All(includeNotificationType) {
-		if _, err := model.ParseNotificationType(include); err != nil {
-			return err
-		}
-	}
-
 	var myAccountID string
 	if err := client.Call("GTSClient.GetMyAccountID", gtsclient.NoRPCArgs{}, &myAccountID); err != nil {
 		return fmt.Errorf("unable to get your account ID: %w", err)
@@ -103,8 +90,8 @@ func notificationsShow(
 		"GTSClient.GetNotificationList",
 		gtsclient.GetNotificationListArgs{
 			Limit:        limit,
-			IncludeTypes: []string(includeNotificationType),
-			ExcludeTypes: []string(excludeNotificationType),
+			ExcludeTypes: excludeNotificationType.Values(),
+			IncludeTypes: includeNotificationType.Values(),
 		},
 		&notificationList,
 	); err != nil {

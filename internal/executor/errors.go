@@ -246,3 +246,11 @@ type aliasNewNameUnsetError struct{}
 func (e aliasNewNameUnsetError) Error() string {
 	return "please specify the alias' new name"
 }
+
+type invalidTimelineCategory struct {
+	category string
+}
+
+func (e invalidTimelineCategory) Error() string {
+	return "'" + e.category + "' is not a valid timeline category"
+}

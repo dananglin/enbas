@@ -215,7 +215,7 @@ func accountMute(
 		gtsclient.MuteAccountArgs{
 			AccountID:     accountID,
 			Notifications: muteNotifications,
-			Duration:      int(duration.Duration.Seconds()),
+			Duration:      int(duration.Value().Seconds()),
 		},
 		nil,
 	); err != nil {

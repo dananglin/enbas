@@ -38,10 +38,11 @@ type relatedTarget struct {
 }
 
 type targetActionFlag struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Default  string `json:"default"`
-	Required bool   `json:"required"`
+	Name     string   `json:"name"`
+	Type     string   `json:"type"`
+	Default  string   `json:"default"`
+	Enum     []string `json:"enum"`
+	Required bool     `json:"required"`
 }
 
 func loadDefinitionsFromFile(path string) (definitions, error) {

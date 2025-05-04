@@ -41,7 +41,7 @@ func TestTimeDurationValue(t *testing.T) {
 func testTimeDurationValueParsing(args []string, want string) func(t *testing.T) {
 	return func(t *testing.T) {
 		flagset := flag.NewFlagSet("test", flag.ExitOnError)
-		duration := internalFlag.NewTimeDurationValue()
+		duration := internalFlag.NewTimeDurationValue(0)
 
 		flagset.Var(&duration, "duration", "Duration value")
 

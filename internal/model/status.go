@@ -37,7 +37,7 @@ type Status struct {
 	Text               string            `json:"text"`
 	URI                string            `json:"uri"`
 	URL                string            `json:"url"`
-	Visibility         StatusVisibility  `json:"visibility"`
+	Visibility         string            `json:"visibility"`
 }
 
 type Card struct {
@@ -92,7 +92,7 @@ type StatusReblogged struct {
 	Text               string            `json:"text"`
 	URI                string            `json:"uri"`
 	URL                string            `json:"url"`
-	Visibility         StatusVisibility  `json:"visibility"`
+	Visibility         string            `json:"visibility"`
 }
 
 type StatusList struct {

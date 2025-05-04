@@ -26,7 +26,7 @@ func (b BoolPtrValue) String() string {
 func (b *BoolPtrValue) Set(value string) error {
 	boolVar, err := strconv.ParseBool(value)
 	if err != nil {
-		return fmt.Errorf("unable to parse %q as a boolean value: %w", value, err)
+		return fmt.Errorf("error parsing %q as a boolean value: %w", value, err)
 	}
 
 	b.Value = new(bool)

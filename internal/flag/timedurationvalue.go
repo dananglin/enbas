@@ -11,17 +11,17 @@ import (
 const timeDurationRegexPattern string = `[0-9]{1,4}\s+(days?|hours?|minutes?|seconds?)`
 
 type TimeDurationValue struct {
-	Duration time.Duration
+	duration time.Duration
 }
 
 func NewTimeDurationValue(defaultDuration time.Duration) TimeDurationValue {
 	return TimeDurationValue{
-		Duration: defaultDuration,
+		duration: defaultDuration,
 	}
 }
 
-func (v TimeDurationValue) String() string {
-	return v.Duration.String()
+func (v *TimeDurationValue) String() string {
+	return v.duration.String()
 }
 
 func (v *TimeDurationValue) Set(value string) error {
@@ -59,9 +59,13 @@ func (v *TimeDurationValue) Set(value string) error {
 
 	durationValue := (days * 86400) + (hours * 3600) + (minutes * 60) + seconds
 
-	v.Duration = time.Duration(durationValue) * time.Second
+	v.duration = time.Duration(durationValue) * time.Second
 
 	return nil
+}
+
+func (v *TimeDurationValue) Value() time.Duration {
+	return v.duration
 }
 
 func parseInt(text string) (int, error) {

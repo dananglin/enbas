@@ -636,8 +636,13 @@
             },
             {
               "name": "replies-policy",
-              "type": "string",
+              "type": "internalFlag.EnumValue",
               "default": "list",
+              "enum": [
+                "followed",
+                "list",
+                "none"
+              ],
               "required": false
             },
             {
@@ -674,8 +679,13 @@
             },
             {
               "name": "replies-policy",
-              "type": "string",
-              "default": "",
+              "type": "internalFlag.EnumValue",
+              "default": "list",
+              "enum": [
+                "followed",
+                "list",
+                "none"
+              ],
               "required": false
             },
             {
@@ -892,14 +902,30 @@
             },
             {
               "name": "exclude-notification-type",
-              "type": "internalFlag.StringSliceValue",
-              "default": "",
+              "type": "internalFlag.MultiEnumValue",
+              "enum": [
+                "follow",
+                "follow_request",
+                "mention",
+                "reblog",
+                "favourite",
+                "poll",
+                "status"
+              ],
               "required": false
             },
             {
               "name": "include-notification-type",
-              "type": "internalFlag.StringSliceValue",
-              "default": "",
+              "type": "internalFlag.MultiEnumValue",
+              "enum": [
+                "follow",
+                "follow_request",
+                "mention",
+                "reblog",
+                "favourite",
+                "poll",
+                "status"
+              ],
               "required": false
             }
           ]
@@ -961,8 +987,12 @@
             },
             {
               "name": "content-type",
-              "type": "string",
+              "type": "internalFlag.EnumValue",
               "default": "plain",
+              "enum": [
+                "plain",
+                "markdown"
+              ],
               "required": false
             },
             {
@@ -1057,8 +1087,15 @@
             },
             {
               "name": "visibility",
-              "type": "string",
+              "type": "internalFlag.EnumValue",
               "default": "",
+              "enum": [
+                "public",
+                "private",
+                "unlisted",
+                "mutuals_only",
+                "direct"
+              ],
               "required": false
             }
           ]
@@ -1324,8 +1361,14 @@
             },
             {
               "name": "timeline-category",
-              "type": "string",
+              "type": "internalFlag.EnumValue",
               "default": "home",
+              "enum": [
+                "home",
+                "list",
+                "public",
+                "tag"
+              ],
               "required": false
             }
           ]

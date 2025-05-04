@@ -428,13 +428,22 @@ func ParseFollowingsShowFromAccountFlags(
 
 func ParseListCreateFlags(
 	exclusive *bool,
-	repliesPolicy *string,
+	repliesPolicy *internalFlag.EnumValue,
 	title *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.BoolVar(exclusive, flagExclusive, false, "")
-	flagset.StringVar(repliesPolicy, flagRepliesPolicy, "list", "")
+	*repliesPolicy = internalFlag.NewEnumValue(
+		[]string{
+			"followed",
+			"list",
+			"none",
+		},
+		"list",
+	)
+
+	flagset.Var(repliesPolicy, flagRepliesPolicy, "")
 	flagset.StringVar(title, flagTitle, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
@@ -461,14 +470,23 @@ func ParseListDeleteFlags(
 func ParseListEditFlags(
 	listId *string,
 	exclusive *internalFlag.BoolPtrValue,
-	repliesPolicy *string,
+	repliesPolicy *internalFlag.EnumValue,
 	title *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(listId, flagListId, "", "")
 	flagset.Var(exclusive, flagExclusive, "")
-	flagset.StringVar(repliesPolicy, flagRepliesPolicy, "", "")
+	*repliesPolicy = internalFlag.NewEnumValue(
+		[]string{
+			"followed",
+			"list",
+			"none",
+		},
+		"list",
+	)
+
+	flagset.Var(repliesPolicy, flagRepliesPolicy, "")
 	flagset.StringVar(title, flagTitle, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
@@ -624,13 +642,37 @@ func ParseNotificationShowFlags(
 
 func ParseNotificationsShowFlags(
 	limit *int,
-	excludeNotificationType *internalFlag.StringSliceValue,
-	includeNotificationType *internalFlag.StringSliceValue,
+	excludeNotificationType *internalFlag.MultiEnumValue,
+	includeNotificationType *internalFlag.MultiEnumValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.IntVar(limit, flagLimit, 20, "")
+	*excludeNotificationType = internalFlag.NewMultiEnumValue(
+		[]string{
+			"follow",
+			"follow_request",
+			"mention",
+			"reblog",
+			"favourite",
+			"poll",
+			"status",
+		},
+	)
+
 	flagset.Var(excludeNotificationType, flagExcludeNotificationType, "")
+	*includeNotificationType = internalFlag.NewMultiEnumValue(
+		[]string{
+			"follow",
+			"follow_request",
+			"mention",
+			"reblog",
+			"favourite",
+			"poll",
+			"status",
+		},
+	)
+
 	flagset.Var(includeNotificationType, flagIncludeNotificationType, "")
 
 	if err := flagset.Parse(flags); err != nil {
@@ -672,7 +714,7 @@ func ParseStatusCreateFlags(
 	addPoll *bool,
 	attachmentId *internalFlag.StringSliceValue,
 	content *string,
-	contentType *string,
+	contentType *internalFlag.EnumValue,
 	inReplyTo *string,
 	language *string,
 	localOnly *bool,
@@ -688,14 +730,22 @@ func ParseStatusCreateFlags(
 	pollOption *internalFlag.StringSliceValue,
 	sensitive *internalFlag.BoolPtrValue,
 	summary *string,
-	visibility *string,
+	visibility *internalFlag.EnumValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.BoolVar(addPoll, flagAddPoll, false, "")
 	flagset.Var(attachmentId, flagAttachmentId, "")
 	flagset.StringVar(content, flagContent, "", "")
-	flagset.StringVar(contentType, flagContentType, "plain", "")
+	*contentType = internalFlag.NewEnumValue(
+		[]string{
+			"plain",
+			"markdown",
+		},
+		"plain",
+	)
+
+	flagset.Var(contentType, flagContentType, "")
 	flagset.StringVar(inReplyTo, flagInReplyTo, "", "")
 	flagset.StringVar(language, flagLanguage, "", "")
 	flagset.BoolVar(localOnly, flagLocalOnly, false, "")
@@ -711,7 +761,18 @@ func ParseStatusCreateFlags(
 	flagset.Var(pollOption, flagPollOption, "")
 	flagset.Var(sensitive, flagSensitive, "")
 	flagset.StringVar(summary, flagSummary, "", "")
-	flagset.StringVar(visibility, flagVisibility, "", "")
+	*visibility = internalFlag.NewEnumValue(
+		[]string{
+			"public",
+			"private",
+			"unlisted",
+			"mutuals_only",
+			"direct",
+		},
+		"",
+	)
+
+	flagset.Var(visibility, flagVisibility, "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
@@ -964,14 +1025,24 @@ func ParseTimelineShowFlags(
 	limit *int,
 	listId *string,
 	tagName *string,
-	timelineCategory *string,
+	timelineCategory *internalFlag.EnumValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.IntVar(limit, flagLimit, 20, "")
 	flagset.StringVar(listId, flagListId, "", "")
 	flagset.StringVar(tagName, flagTagName, "", "")
-	flagset.StringVar(timelineCategory, flagTimelineCategory, "home", "")
+	*timelineCategory = internalFlag.NewEnumValue(
+		[]string{
+			"home",
+			"list",
+			"public",
+			"tag",
+		},
+		"home",
+	)
+
+	flagset.Var(timelineCategory, flagTimelineCategory, "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)

@@ -31,19 +31,19 @@ func (g *GTSClient) GetStatus(statusID string, status *model.Status) error {
 }
 
 type CreateStatusForm struct {
-	Content       string                  `json:"status"`
-	InReplyTo     string                  `json:"in_reply_to_id"`
-	Language      string                  `json:"language"`
-	SpoilerText   string                  `json:"spoiler_text"`
-	Boostable     bool                    `json:"boostable"`
-	LocalOnly     bool                    `json:"local_only"`
-	Likeable      bool                    `json:"likeable"`
-	Replyable     bool                    `json:"replyable"`
-	Sensitive     bool                    `json:"sensitive"`
-	Poll          *CreateStatusPollForm   `json:"poll,omitempty"`
-	ContentType   model.StatusContentType `json:"content_type"`
-	Visibility    model.StatusVisibility  `json:"visibility"`
-	AttachmentIDs []string                `json:"media_ids,omitempty"`
+	Content       string                `json:"status"`
+	InReplyTo     string                `json:"in_reply_to_id"`
+	Language      string                `json:"language"`
+	SpoilerText   string                `json:"spoiler_text"`
+	Boostable     bool                  `json:"boostable"`
+	LocalOnly     bool                  `json:"local_only"`
+	Likeable      bool                  `json:"likeable"`
+	Replyable     bool                  `json:"replyable"`
+	Sensitive     bool                  `json:"sensitive"`
+	Poll          *CreateStatusPollForm `json:"poll,omitempty"`
+	ContentType   string                `json:"content_type"`
+	Visibility    string                `json:"visibility"`
+	AttachmentIDs []string              `json:"media_ids,omitempty"`
 }
 
 type CreateStatusPollForm struct {

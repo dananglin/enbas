@@ -65,6 +65,33 @@ func {{ printf "Parse%s%sFlags" (snakeToCamel $targetName true) (snakeToCamel $a
   {{- else if eq $flag.Type "int" -}}
   {{ print "" }}
   {{ printf "flagset.IntVar(%s, flag%s, %s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) $flag.Default }}
+  {{- else if eq $flag.Type "internalFlag.EnumValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewEnumValue(" (snakeToCamel $flag.Name false) }}
+  []string {
+    {{- range $flag.Enum -}}
+    {{ print "" }}
+    {{ printf "%q," . }}
+    {{- end -}}
+  {{ print "" }}
+  },
+  "{{ $flag.Default }}",
+  )
+  {{ print "" }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
+  {{- else if eq $flag.Type "internalFlag.MultiEnumValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewMultiEnumValue(" (snakeToCamel $flag.Name false) }}
+  []string {
+    {{- range $flag.Enum -}}
+    {{ print "" }}
+    {{ printf "%q," . }}
+    {{- end -}}
+  {{ print "" }}
+  },
+  )
+  {{ print "" }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
   {{- else -}}
   {{ print "" }}
   {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
@@ -103,6 +130,33 @@ func {{ printf "Parse%s%s%s%sFlags" (snakeToCamel $targetName true) (snakeToCame
   {{- else if eq $relatedTargetFlag.Type "int" -}}
   {{ print "" }}
   {{ printf "flagset.IntVar(%s, flag%s, %s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) $relatedTargetFlag.Default }}
+  {{- else if eq $relatedTargetFlag.Type "internalFlag.EnumValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewEnumValue(" (snakeToCamel $relatedTargetFlag.Name false) }}
+  []string {
+    {{- range $relatedTargetFlag.Enum -}}
+    {{ print "" }}
+    {{ printf "%q," . }}
+    {{- end -}}
+  {{ print "" }}
+  },
+  "{{ $relatedTargetFlag.Default }}",
+  )
+  {{ print "" }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) }}
+  {{- else if eq $relatedTargetFlag.Type "internalFlag.MultiEnumValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewMultiEnumValue(" (snakeToCamel $relatedTargetFlag.Name false) }}
+  []string {
+    {{- range $relatedTargetFlag.Enum -}}
+    {{ print "" }}
+    {{ printf "%q," . }}
+    {{- end -}}
+  {{ print "" }}
+  },
+  )
+  {{ print "" }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) }}
   {{- else -}}
   {{ print "" }}
   {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) }}

@@ -7,6 +7,7 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/command"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
@@ -43,12 +44,11 @@ func timelineShow(
 	flags []string,
 ) error {
 	var (
-		err              error
-		limit            int
-		listID           string
-		tagName          string
-		timeline         model.StatusList
-		timelineCategory string
+		err      error
+		limit    int
+		listID   string
+		tagName  string
+		category internalFlag.EnumValue
 	)
 
 	// Parse the remaining flags.
@@ -56,18 +56,20 @@ func timelineShow(
 		&limit,
 		&listID,
 		&tagName,
-		&timelineCategory,
+		&category,
 		flags,
 	); err != nil {
 		return err
 	}
 
-	switch timelineCategory {
-	case model.TimelineCategoryHome:
+	var timeline model.StatusList
+
+	switch category.Value() {
+	case "home":
 		err = client.Call("GTSClient.GetHomeTimeline", limit, &timeline)
-	case model.TimelineCategoryPublic:
+	case "public":
 		err = client.Call("GTSClient.GetPublicTimeline", limit, &timeline)
-	case model.TimelineCategoryList:
+	case "list":
 		if listID == "" {
 			return missingIDError{
 				target: cli.TargetList,
@@ -90,7 +92,7 @@ func timelineShow(
 			},
 			&timeline,
 		)
-	case model.TimelineCategoryTag:
+	case "tag":
 		if tagName == "" {
 			return missingTagNameError{
 				action: "view the timeline in",
@@ -106,7 +108,7 @@ func timelineShow(
 			&timeline,
 		)
 	default:
-		return model.InvalidTimelineCategoryError{Value: timelineCategory}
+		return invalidTimelineCategory{category: category.Value()}
 	}
 
 	if err != nil {

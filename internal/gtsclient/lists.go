@@ -51,15 +51,15 @@ func (g *GTSClient) GetList(listID string, list *model.List) error {
 
 type CreateListArgs struct {
 	Title         string
-	RepliesPolicy model.ListRepliesPolicy
+	RepliesPolicy string
 	Exclusive     bool
 }
 
 func (g *GTSClient) CreateList(args CreateListArgs, list *model.List) error {
 	form := struct {
-		Title         string                  `json:"title"`
-		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
-		Exclusive     bool                    `json:"exclusive"`
+		Title         string `json:"title"`
+		RepliesPolicy string `json:"replies_policy"`
+		Exclusive     bool   `json:"exclusive"`
 	}{
 		Title:         args.Title,
 		RepliesPolicy: args.RepliesPolicy,
@@ -93,9 +93,9 @@ func (g *GTSClient) CreateList(args CreateListArgs, list *model.List) error {
 
 func (g *GTSClient) UpdateList(listToUpdate model.List, updatedList *model.List) error {
 	form := struct {
-		Title         string                  `json:"title"`
-		RepliesPolicy model.ListRepliesPolicy `json:"replies_policy"`
-		Exclusive     bool                    `json:"exclusive"`
+		Title         string `json:"title"`
+		RepliesPolicy string `json:"replies_policy"`
+		Exclusive     bool   `json:"exclusive"`
 	}{
 		Title:         listToUpdate.Title,
 		RepliesPolicy: listToUpdate.RepliesPolicy,

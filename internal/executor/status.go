@@ -126,7 +126,7 @@ func statusCreate(
 		addPoll                   bool
 		attachmentIDs             = internalFlag.NewStringSliceValue()
 		content                   string
-		contentType               string
+		contentType               internalFlag.EnumValue
 		inReplyTo                 string
 		language                  string
 		localOnly                 bool
@@ -142,7 +142,7 @@ func statusCreate(
 		pollOptions               = internalFlag.NewStringSliceValue()
 		sensitive                 = internalFlag.NewBoolPtrValue()
 		summary                   string
-		visibility                string
+		visibility                internalFlag.EnumValue
 	)
 
 	// Parse the remaining flags.
@@ -169,7 +169,7 @@ func statusCreate(
 		&visibility,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	// Return an error if there's no status body and no media attachments.
@@ -279,8 +279,9 @@ func statusCreate(
 		language = preferences.PostingDefaultLanguage
 	}
 
-	if visibility == "" {
-		visibility = preferences.PostingDefaultVisibility
+	statusVisibility := visibility.Value()
+	if statusVisibility == "" {
+		statusVisibility = preferences.PostingDefaultVisibility
 	}
 
 	var statusSensitive bool
@@ -290,19 +291,9 @@ func statusCreate(
 		statusSensitive = preferences.PostingDefaultSensitive
 	}
 
-	parsedVisibility, err := model.ParseStatusVisibility(visibility)
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
-	parsedContentType, err := model.ParseStatusContentType(contentType)
-	if err != nil {
-		return err //nolint:wrapcheck
-	}
-
 	form := gtsclient.CreateStatusForm{
 		Content:       content,
-		ContentType:   parsedContentType,
+		ContentType:   "text/" + contentType.Value(),
 		Language:      language,
 		SpoilerText:   summary,
 		Boostable:     !notBoostable,
@@ -311,7 +302,7 @@ func statusCreate(
 		Likeable:      !notLikeable,
 		Replyable:     !notReplyable,
 		Sensitive:     statusSensitive,
-		Visibility:    parsedVisibility,
+		Visibility:    statusVisibility,
 		Poll:          nil,
 		AttachmentIDs: nil,
 	}
@@ -329,7 +320,7 @@ func statusCreate(
 			Options:    pollOptions,
 			Multiple:   pollAllowsMultipleChoices,
 			HideTotals: pollHidesVoteCounts,
-			ExpiresIn:  int(pollExpiresIn.Duration.Seconds()),
+			ExpiresIn:  int(pollExpiresIn.Value().Seconds()),
 		}
 
 		form.Poll = &poll
