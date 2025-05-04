@@ -1467,7 +1467,7 @@
                 },
                 {
                   "name": "vote",
-                  "type": "internalFlag.IntSliceValue",
+                  "type": "internalFlag.MultiIntValue",
                   "default": "",
                   "required": true
                 }

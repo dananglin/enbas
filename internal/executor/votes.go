@@ -73,7 +73,7 @@ func votesAddToStatus(
 ) error {
 	var (
 		statusID string
-		votes    = internalFlag.NewIntSliceValue()
+		votes    = internalFlag.NewMultiIntValue()
 	)
 
 	// Parse the remaining flags.
@@ -136,7 +136,7 @@ func votesAddToStatus(
 		"GTSClient.VoteInPoll",
 		gtsclient.VoteInPollArgs{
 			PollID:  pollID,
-			Choices: votes,
+			Choices: votes.Values(),
 		},
 		nil,
 	); err != nil {

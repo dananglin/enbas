@@ -1125,7 +1125,7 @@ func ParseVersionShowFlags(
 
 func ParseVotesAddToStatusFlags(
 	statusId *string,
-	vote *internalFlag.IntSliceValue,
+	vote *internalFlag.MultiIntValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
