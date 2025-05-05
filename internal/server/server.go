@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -18,11 +19,6 @@ import (
 
 const minIdleTimeout = 60
 
-var (
-	ErrSocketFileInUse        = errors.New("this socket file is used by another server")
-	ErrSocketFileNotSpecified = errors.New("the path to the socket file is not specified")
-)
-
 func Run(
 	printSettings printer.Settings,
 	client *gtsclient.GTSClient,
@@ -31,13 +27,13 @@ func Run(
 	idleTimeout int,
 ) error {
 	if socketPath == "" {
-		return ErrSocketFileNotSpecified
+		return SocketFileNotSpecifiedError{}
 	}
 
 	socketPath, err := utilities.AbsolutePath(socketPath)
 	if err != nil {
 		return fmt.Errorf(
-			"unable to calculate the absolute path to the socket file: %w",
+			"error calculating the absolute path to the socket file: %w",
 			err,
 		)
 	}
@@ -45,7 +41,7 @@ func Run(
 	// Ensure that the socket file's parent folder is present.
 	if err := utilities.EnsureDirectory(filepath.Dir(socketPath)); err != nil {
 		return fmt.Errorf(
-			"unable to ensure the presence of the socket's parent directory: %w",
+			"error ensuring the presence of the socket's parent directory: %w",
 			err,
 		)
 	}
@@ -61,17 +57,12 @@ func Run(
 		return fmt.Errorf("error registering the GTSClient methods to the server: %w", err)
 	}
 
-	// Create a channel for receiving the shutdown signal.
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
-
-	// Run the server without a timer.
 	if withoutIdleTimeout {
+		// Run the server without a timer.
 		return runWithoutIdleTimeout(
 			printSettings,
 			server,
 			socketPath,
-			shutdown,
 		)
 	}
 
@@ -81,7 +72,6 @@ func Run(
 		server,
 		socketPath,
 		idleTimeout,
-		shutdown,
 	)
 }
 
@@ -92,7 +82,6 @@ func runWithIdleTimeout(
 	server *rpc.Server,
 	socketPath string,
 	idleTimeout int,
-	shutdown <-chan os.Signal,
 ) error {
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
@@ -135,13 +124,22 @@ func runWithIdleTimeout(
 		}
 	}()
 
+	// Create a context for receiving the shutdown signal.
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
 	select {
 	case <-timer.C:
 		printer.PrintInfo("Server idle timeout.\n")
 
 		return nil
-	case <-shutdown:
-		printer.PrintInfo("Shutdown signal received.\n")
+	case <-ctx.Done():
+		stop()
+		printer.PrintInfo("\nShutdown signal received.\n")
 
 		return nil
 	}
@@ -152,7 +150,6 @@ func runWithoutIdleTimeout(
 	printSettings printer.Settings,
 	server *rpc.Server,
 	socketPath string,
-	shutdown <-chan os.Signal,
 ) error {
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
@@ -185,9 +182,18 @@ func runWithoutIdleTimeout(
 		}
 	}()
 
-	<-shutdown
+	// Create a context for receiving the shutdown signal.
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
+	defer stop()
 
-	printer.PrintInfo("Shutdown signal received.\n")
+	<-ctx.Done()
+	stop()
+
+	printer.PrintInfo("\nShutdown signal received.\n")
 
 	return nil
 }
@@ -198,7 +204,7 @@ func removeUnusedSocketFile(path string) error {
 	// Check for the existence of the socket path.
 	exists, err := utilities.FileExists(path)
 	if err != nil {
-		return fmt.Errorf("received an error checking for the socket file: %w", err)
+		return fmt.Errorf("error checking for the socket file: %w", err)
 	}
 
 	if !exists {
@@ -211,7 +217,7 @@ func removeUnusedSocketFile(path string) error {
 	// If the connection is successful, then the socket file is currently in
 	// use by another running server.
 	if err == nil {
-		return ErrSocketFileInUse
+		return SocketFileInUseError{}
 	}
 
 	// If no connection can be made then it should be safe to remove the file.
