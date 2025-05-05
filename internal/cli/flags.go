@@ -17,7 +17,7 @@ const (
 func TopLevelFlagsUsageMap() map[string]string {
 	return map[string]string{
 		flagConfig:  "the path to your configuration file",
-		flagNoColor: "disables the ANSI colour output when displaying the text on screen",
+		flagNoColor: "disable the ANSI colour output when displaying the text on screen",
 	}
 }
 

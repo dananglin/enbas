@@ -58,7 +58,7 @@ func TargetDescMap() map[string]string {
 
 func targetDescMap() map[string]string {
 	return map[string]string{
-		TargetAccess:          "your access to a GoToSocial instance",
+		TargetAccess:          "your access to your GoToSocial instance",
 		TargetAccount:         "a local or remote account",
 		TargetAccounts:        "multiple accounts",
 		TargetAlias:           "the shortname to a set of arguments",
