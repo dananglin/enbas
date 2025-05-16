@@ -7,7 +7,7 @@
       "required": false
     },
     "no-color": {
-      "description": "disables the ANSI colour output when displaying the text on screen",
+      "description": "disable the ANSI colour output when displaying the text on screen",
       "type": "internalFlag.BoolPtrValue",
       "required": false
     }
@@ -117,9 +117,15 @@
   },
   "targets": {
     "access": {
-      "description": "your access to a GoToSocial instance",
+      "description": "your access to your GoToSocial instance",
       "actions": {
         "create": {
+          "description": "creates a new access to your GoToSocial instance",
+          "extraDetails": [
+            "This is the command you'll use to log into your GoToSocial instance.",
+            "Enbas will use the Oauth2 authentication flow for the login process which is desribed in the 'Getting started guide'.",
+            "You can run this command multiple times to log into multiple accounts."
+          ],
           "flags": [
             {
               "name": "scope",
@@ -139,6 +145,7 @@
           "preposition": "to",
           "relatedTargets": {
             "account": {
+              "description": "switches between your logged in accounts",
               "flags": [
                 {
                   "name": "account-name",
@@ -150,13 +157,16 @@
             }
           }
         },
-        "verify": {}
+        "verify": {
+          "description": "verifies that you are authenticated into your GoToSocial instance and prints the name of the account that you are logged in to"
+        }
       }
     },
     "account": {
       "description": "a local or remote account",
       "actions": {
         "block": {
+          "description": "blocks a local or remote account",
           "flags": [
             {
               "name": "account-name",
@@ -167,6 +177,7 @@
           ]
         },
         "find": {
+          "description": "searches for an account (remotely)",
           "flags": [
             {
               "name": "query",
@@ -195,6 +206,7 @@
           ]
         },
         "follow": {
+          "description": "sends a follow request to the account you want to follow",
           "flags": [
             {
               "name": "account-name",
@@ -217,6 +229,7 @@
           ]
         },
         "mute": {
+          "description": "mutes an account",
           "flags": [
             {
               "name": "account-name",
@@ -239,6 +252,7 @@
           ]
         },
         "show": {
+          "description": "show a local or remote account",
           "flags": [
             {
               "name": "account-name",
@@ -315,6 +329,7 @@
           ]
         },
         "unblock": {
+          "description": "unblocks an account",
           "flags": [
             {
               "name": "account-name",
@@ -325,6 +340,7 @@
           ]
         },
         "unmute": {
+          "description": "unmutes an account",
           "flags": [
             {
               "name": "account-name",
@@ -335,6 +351,11 @@
           ]
         },
         "unfollow": {
+          "description": "unfollows the account that you are curently following",
+          "extraDetails": [
+            "If you have a follow request pending for the account in question,",
+            "unfollowing that account will remove said follow request."
+          ],
           "flags": [
             {
               "name": "account-name",
@@ -347,12 +368,16 @@
       }
     },
     "accounts": {
-      "description": "multiple accounts",
+      "description": "one or accounts",
       "actions": {
         "add": {
           "preposition": "to",
           "relatedTargets": {
             "list": {
+              "description": "adds one or more accounts to a list",
+              "extraDetails": [
+                "You must follow these accounts before adding them to a list."
+              ],
               "flags": [
                 {
                   "name": "list-id",
@@ -374,6 +399,7 @@
           "preposition": "from",
           "relatedTargets": {
             "list": {
+              "description": "removes one or more accounts from a list",
               "flags": [
                 {
                   "name": "list-id",
@@ -397,6 +423,11 @@
       "description": "the shortname to a set of arguments",
       "actions": {
         "create": {
+          "description": "creates a new alias",
+          "extraDetails": [
+            "The new alias will be stored in your configuration file.",
+            "You must not use a name from a built-in alias or an action keyword (e.g. show)."
+          ],
           "flags": [
             {
               "name": "name",
@@ -413,6 +444,10 @@
           ]
         },
         "delete": {
+          "description": "deletes an existing alias",
+          "extraDetails": [
+            "The alias will be deleted from your configuration file."
+          ],
           "flags": [
             {
               "name": "name",
@@ -423,6 +458,7 @@
           ]
         },
         "edit": {
+          "description": "edits an existing alias",
           "flags": [
             {
               "name": "name",
@@ -439,6 +475,10 @@
           ]
         },
         "rename": {
+          "description": "renames an existing alias",
+          "extraDetails": [
+            "You must not rename the alias to a built-in alias or an action keyword (e.g. show)."
+          ],
           "flags": [
             {
               "name": "old-name",
@@ -459,13 +499,16 @@
     "aliases": {
       "description": "the list of your aliases",
       "actions": {
-        "show": {}
+        "show": {
+          "description": "prints the list of your aliases"
+        }
       }
     },
     "blocked-accounts": {
       "description": "the accounts that are blocked by you",
       "actions": {
         "show": {
+          "description": "prints the list of the accounts that you are currently blocking",
           "flags": [
             {
               "name": "limit",
@@ -481,6 +524,7 @@
       "description": "the statuses that you've bookmarked",
       "actions": {
         "show": {
+          "description": "prints the list of the statuses that you have bookmarked",
           "flags": [
             {
               "name": "limit",
@@ -493,15 +537,22 @@
       }
     },
     "config": {
-      "description": "your configuration for enbas",
+      "description": "your configuration",
       "actions": {
-        "create": {}
+        "create": {
+          "description": "creates a new configuration file",
+          "extraDetails": [
+            "The configuration file will be created using the default path unless",
+            "the --config top-level flag is used"
+          ]
+        }
       }
     },
     "favourites": {
       "description": "the statuses that you've favourited (liked)",
       "actions": {
         "show": {
+          "description": "prints the list of statuses that you've favourited (liked)",
           "flags": [
             {
               "name": "limit",
@@ -514,9 +565,10 @@
       }
     },
     "follow-requests": {
-      "description": "the list of accounts that are currently requesting to follow you",
+      "description": "the list of accounts that are requesting to follow you",
       "actions": {
         "show": {
+          "description": "prints the list of accounts that are requesting to follow you",
           "flags": [
             {
               "name": "limit",
@@ -529,9 +581,10 @@
       }
     },
     "follow-request": {
-      "description": "the account that is currently requesting to follow you",
+      "description": "the account that is requesting to follow you",
       "actions": {
         "accept": {
+          "description": "accepts the request from the account that is requesting to follow you",
           "flags": [
             {
               "name": "account-name",
@@ -542,6 +595,7 @@
           ]
         },
         "reject": {
+          "description": "rejects the request from the account that is requesting to follow you",
           "flags": [
             {
               "name": "account-name",
@@ -560,6 +614,7 @@
           "preposition": "from",
           "relatedTargets": {
             "account": {
+              "description": "prints the names of the accounts that are following the specified account",
               "flags": [
                 {
                   "name": "account-name",
@@ -590,6 +645,7 @@
       "actions": {
         "show": {
           "preposition": "from",
+          "description": "prints the names of the accounts that the specified account is following",
           "relatedTargets": {
             "account": {
               "flags": [
@@ -620,13 +676,16 @@
     "instance": {
       "description": "the GoToSocial instance",
       "actions": {
-        "show": {}
+        "show": {
+          "description": "prints information aboutthe GoToSocial instance that you have logged into"
+        }
       }
     },
     "list": {
       "description": "a single list",
       "actions": {
         "create": {
+          "description": "creates a new list",
           "flags": [
             {
               "name": "exclusive",
@@ -654,6 +713,7 @@
           ]
         },
         "delete": {
+          "description": "deletes an existing list",
           "flags": [
             {
               "name": "list-id",
@@ -664,6 +724,7 @@
           ]
         },
         "edit": {
+          "description": "edits an existing list",
           "flags": [
             {
               "name": "list-id",
@@ -697,6 +758,7 @@
           ]
         },
         "show": {
+          "description": "prints the details of an existing list",
           "flags": [
             {
               "name": "list-id",
@@ -709,9 +771,11 @@
       }
     },
     "lists": {
-      "description": "multiple lists",
+      "description": "one or more lists",
       "actions": {
-        "show": {}
+        "show": {
+          "description": "prints the ID and the title of the lists that you've created"
+        }
       }
     },
     "media": {
@@ -721,6 +785,15 @@
           "preposition": "from",
           "relatedTargets": {
             "status": {
+              "description": "downloads and opens the media attachment(s) from a status",
+              "extraDetails": [
+                "The media is first downloaded to a directory within the cache directory that you've specified in your configuration file.",
+                "If this is not specified then the media is downloaded to the default cache directory.",
+                "Once downloaded, the media is then opened with the media player that you've specified in your configuration file.",
+                "You must specify your media player in your configuration in order to open and play/display the associated media file.",
+                "See enbas(5) on how to set up integration with your media players.",
+                "Enbas currently supports viewing images and videos and playing audio."
+              ],
               "flags": [
                 {
                   "name": "status-id",
@@ -762,6 +835,7 @@
       "description": "a media attachment that you own",
       "actions": {
         "create": {
+          "description": "uploads media from a file to the instance and creates a media attachment",
           "flags": [
             {
               "name": "media-description",
@@ -784,6 +858,7 @@
           ]
         },
         "edit": {
+          "description": "edits the description and/or the focus of the media that you have created",
           "flags": [
             {
               "name": "attachment-id",
@@ -806,6 +881,10 @@
           ]
         },
         "show": {
+          "description": "prints the details of a given media attachment",
+          "extraDetails": [
+            "Note that you can only see the details of the media attachment that you have created."
+          ],
           "flags": [
             {
               "name": "attachment-id",
@@ -821,6 +900,7 @@
       "description": "the accounts that are muted by you",
       "actions": {
         "show": {
+          "description": "prints the list of accounts that you have muted",
           "flags": [
             {
               "name": "limit",
@@ -839,6 +919,10 @@
           "preposition": "to",
           "relatedTargets": {
             "account": {
+              "description": "adds a private note to the specified account",
+              "extraDetails": [
+                "Private notes can only be viewed by you."
+              ],
               "flags": [
                 {
                   "name": "account-name",
@@ -860,6 +944,7 @@
           "preposition": "from",
           "relatedTargets": {
             "account": {
+              "description": "removes the private note from the specified account",
               "flags": [
                 {
                   "name": "account-name",
@@ -877,6 +962,7 @@
       "description": "a single notification",
       "actions": {
         "show": {
+          "description": "prints the details of the specified notification",
           "flags": [
             {
               "name": "notification-id",
@@ -891,8 +977,11 @@
     "notifications": {
       "description": "multiple notifications",
       "actions": {
-        "clear": {},
+        "clear": {
+          "description": "clears all your notifications"
+        },
         "show": {
+          "description": "prints the list of your notifications",
           "flags": [
             {
               "name": "limit",
@@ -936,6 +1025,7 @@
       "description": "the server mode",
       "actions": {
         "start": {
+          "description": "starts enbas in the server mode",
           "flags": [
             {
               "name": "without-idle-timeout",
@@ -954,6 +1044,7 @@
           "preposition": "to",
           "relatedTargets": {
             "bookmarks": {
+              "description": "adds the specified status to your bookmarks",
               "flags": [
                 {
                   "name": "status-id",
@@ -966,6 +1057,7 @@
           }
         },
         "create": {
+          "description": "creates a new status",
           "flags": [
             {
               "name": "add-poll",
@@ -1101,6 +1193,11 @@
           ]
         },
         "delete": {
+          "description": "deletes a status that belongs to you",
+          "extraDetails": [
+            "You can optionally save the text of the deleted status using the save-text flag if you wish to redraft it.",
+            "If this is specified, the text of the deleted status will be written to a file within your cache directory."
+          ],
           "flags": [
             {
               "name": "status-id",
@@ -1117,6 +1214,7 @@
           ]
         },
         "favourite": {
+          "description": "favourites (likes) the specified status",
           "flags": [
             {
               "name": "status-id",
@@ -1127,6 +1225,7 @@
           ]
         },
         "find": {
+          "description": "searches for a status (remotely)",
           "flags": [
             {
               "name": "query",
@@ -1155,6 +1254,7 @@
           ]
         },
         "mute": {
+          "description": "mutes the specified status to stop you from receiving future notifications for replies, favourites (likes), reblogs (boosts), etc from the status' thread",
           "flags": [
             {
               "name": "status-id",
@@ -1165,6 +1265,7 @@
           ]
         },
         "reblog": {
+          "description": "reblogs (boosts) the specified status",
           "flags": [
             {
               "name": "status-id",
@@ -1178,6 +1279,7 @@
           "preposition": "from",
           "relatedTargets": {
             "bookmarks": {
+              "description": "removes the specified status from your bookmarks",
               "flags": [
                 {
                   "name": "status-id",
@@ -1190,6 +1292,7 @@
           }
         },
         "show": {
+          "description": "prints the details of the specified status",
           "flags": [
             {
               "name": "status-id",
@@ -1218,6 +1321,7 @@
           ]
         },
         "unfavourite": {
+          "description": "unfavourites (unlikes) the status that you've previously favourited",
           "flags": [
             {
               "name": "status-id",
@@ -1228,6 +1332,7 @@
           ]
         },
         "unmute": {
+          "description": "unmutes the specified status so that you can start receiving future notifications for replies, favourites (likes), reblogs (boosts), etc from the status' thread",
           "flags": [
             {
               "name": "status-id",
@@ -1253,6 +1358,7 @@
       "description": "a single tag (hashtag)",
       "actions": {
         "find": {
+          "description": "searches for a tag",
           "flags": [
             {
               "name": "query",
@@ -1269,6 +1375,7 @@
           ]
         },
         "follow": {
+          "description": "follows the specified tag",
           "flags": [
             {
               "name": "tag-name",
@@ -1279,6 +1386,7 @@
           ]
         },
         "unfollow": {
+          "description": "unfollows the tag that you are currently following",
           "flags": [
             {
               "name": "tag-name",
@@ -1289,6 +1397,7 @@
           ]
         },
         "show": {
+          "description": "prints details of the specified tag",
           "flags": [
             {
               "name": "tag-name",
@@ -1304,6 +1413,7 @@
       "description": "multiple tags (hashtags)",
       "actions": {
         "show": {
+          "description": "prints the list of the tags that you are following",
           "flags": [
             {
               "name": "limit",
@@ -1319,10 +1429,10 @@
       "description": "a status thread",
       "actions": {
         "show": {
-          "flags": [],
           "preposition": "from",
           "relatedTargets": {
             "status": {
+              "description": "prints the context around the specified status",
               "flags": [
                 {
                   "name": "status-id",
@@ -1340,6 +1450,7 @@
       "description": "your timeline",
       "actions": {
         "show": {
+          "description": "prints the list of statuses from a timeline",
           "flags": [
             {
               "name": "limit",
@@ -1379,6 +1490,7 @@
       "description": "a list of your tokens",
       "actions": {
         "show": {
+          "description": "prints the list of the tokens that you have created",
           "flags": [
             {
               "name": "limit",
@@ -1394,6 +1506,11 @@
       "description": "details of an application token",
       "actions": {
         "invalidate": {
+          "description": "invalidates the specified token which will remove it from your instance's database",
+          "extraDetails": [
+            "Once this token is invalidated,",
+            "you will not be able to authenticate to your GoToSocial instancewith it."
+          ],
           "flags": [
             {
               "name": "token-id",
@@ -1404,6 +1521,7 @@
           ]
         },
         "show": {
+          "description": "prints the details of the specified token",
           "flags": [
             {
               "name": "token-id",
@@ -1419,6 +1537,7 @@
       "description": "the usage documentation",
       "actions": {
         "show": {
+          "description": "prints the usage documentation for a given action and/or target",
           "flags": [
             {
               "name": "action",
@@ -1440,6 +1559,7 @@
       "description": "the application's build information",
       "actions": {
         "show": {
+          "description": "prints the application's build information",
           "flags": [
             {
               "name": "full",
@@ -1458,6 +1578,12 @@
           "preposition": "to",
           "relatedTargets": {
             "status": {
+              "description": "adds your vote(s) to the poll in the specified status",
+              "extraDetails": [
+                "Note that you cannot vote in your own poll or in a poll that has already expired.",
+                "If the poll allows multiple choices,",
+                "you can use the vote flag multiple times to make multiple choices."
+              ],
               "flags": [
                 {
                   "name": "status-id",

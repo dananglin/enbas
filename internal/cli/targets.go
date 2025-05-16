@@ -65,7 +65,7 @@ func targetDescMap() map[string]string {
 		TargetAliases:         "the list of your aliases",
 		TargetBlockedAccounts: "the accounts that are blocked by you",
 		TargetBookmarks:       "the statuses that you've bookmarked",
-		TargetConfig:          "your configuration for enbas",
+		TargetConfig:          "your configuration",
 		TargetFavourites:      "the statuses that you've favourited (liked)",
 		TargetFollowRequest:   "the account that is currently requesting to follow you",
 		TargetFollowRequests:  "the list of accounts that are currently requesting to follow you",

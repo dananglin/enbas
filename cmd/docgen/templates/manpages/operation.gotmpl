@@ -1,0 +1,36 @@
+{{- /* vim: set ft=groff : */ -}}
+{{- define "enbas.operation" -}}
+{{ print "" }}
+.B {{ .OperationName }}
+.RS
+.B description
+.RS
+
+{{ .FullDescription }}
+
+.RE
+.B format
+.RS
+
+.B {{ .ApplicationName }} {{.OperationName }}
+[flags]
+
+.RE
+.B flags
+.RS
+{{- if eq (len .Flags) 0 -}}
+{{ print "" }}
+{{ print "" }}
+NONE
+{{- else -}}
+{{- range .Flags -}}
+{{ print "" }}
+.TP
+\-{{ .Name }}, \-\-{{ .Name }} ({{ if .Required }}required{{ else }}default: {{ printf "%q" .Default }}{{ end }})
+{{ .FullDescription }}
+{{- end -}}
+{{- end -}}
+{{ print "" }}
+.RE
+.RE
+{{- end -}}

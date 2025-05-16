@@ -1,0 +1,131 @@
+{{- /* vim: set ft=groff : */ -}}
+{{- define "enbas.1" -}}
+.\" Manpage for {{ .ApplicationName }}
+{{- $exampleStatusID := "01AV6D5YIKKEWDTLXTGVTTRW9dCHOLGJ" -}}
+{{ print "" }}
+.TH {{ allCaps .ApplicationName }} 1 "{{ dateNow }}" "{{ .ApplicationName}} {{ .BinaryVersion }}" "{{ titled .ApplicationName }} Manual"
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------
+.\" THE MAIN CONTENT
+.\" -----------------
+.SH NAME
+{{ .ApplicationName }} \- a CLI client for GoToSocial
+.SH SYNOPSIS
+.B {{ .ApplicationName }} help
+.br
+.B {{ .ApplicationName }} version
+.br
+.B {{ .ApplicationName }}
+[top level flags]
+.I action
+.I target
+[flags]
+.br
+.B {{ .ApplicationName }}
+[top level flags]
+.I action
+.I target
+.I preposition
+.I target
+[flags]
+.SH DESCRIPTION
+{{ titled .ApplicationName }} is a program that allows you to interact with your GoToSocial instance from your terminal. With {{ .ApplicationName }} you can perform operations such as:
+.RS
+.IP \(bu 3
+create and interact with statuses
+.IP \(bu
+view your timelines
+.IP \(bu
+view media from statuses using your favourite media player
+.IP \(bu
+interact with local and remote accounts
+.IP \(bu
+create and vote in polls
+.IP \(bu
+and much more\&.
+.RE
+.RE
+
+Throughout this manual (and as you interact with the program), you'll come across the terms \fBaction\fR and \fBtarget\fR\&. An \fBaction\fR is a built-in keyword that describes the operation to perform on a target\&. For example, the command \fB{{ .ApplicationName }} show status \-\-status\-id {{ $exampleStatusID }}\fR uses the action keyword \fBshow\fR to fetch and display the details of the \fBstatus\fR with ID \fB{{ $exampleStatusID }}\fR\&.
+
+A \fBtarget\fR is a resource that you can perform an action on\&. This can be a GoToSocial resource (e\&.g\&. an account, a status or a timeline) or a local resource (e\&.g\&. your configuration, your aliases or the usage documentation)\&. You can view the list of all the targets that you can interact with by running \fB{{ .ApplicationName }} help\fR\&.
+.SH TOP LEVEL FLAGS
+{{- range $name, $flag := .Definitions.TopLevelFlags -}}
+{{ print "" }}
+.TP
+-{{ $name }}, --{{ $name }} \fIpath\fR ({{ if $flag.Required }}required{{ else }}default: {{ printf "%q" $flag.Default }}{{ end }})
+{{ $flag.Description }}
+{{- end -}}
+{{ print "" }}
+.SH CONFIGURATION
+Your configuration settings are stored in a JSON file\&. The default path to the file is set to \fB$XDG_CONFIG_HOME/{{ .ApplicationName }}/config.json\fR\&. If the \fB$XDG_CONFIG_HOME\fR environment variable not set, then:
+.RS
+.IP \(bu 3
+on Linux the path is set to \fB$HOME/.config/{{ .ApplicationName }}/config.json\fR.
+.IP \(bu
+on Darwin (MacOS) the path will be set to \fB$HOME/Library/Application Support/{{ .ApplicationName }}/config.json\fR.
+.IP \(bu
+on Windows the path will be set within the \fB%AppData%\fR directory.
+.RE
+.RE
+
+Alternatively, you can use the top level \fB\-\-config\fR flag to specify the custom path to your configuration file\&.
+
+See {{ .ApplicationName }}(5) for more details about the configuration file\&.
+.SH TARGETS
+{{- range $targetName, $target := .Definitions.Targets -}}
+{{ print "" }}
+.SS {{ allCaps $targetName }}
+{{ titled $target.Description }}\&.
+
+.B AVAILABLE OPERATIONS
+.RS
+{{- range $actionName, $action := $target.Actions -}}
+{{- if eq (len $action.RelatedTargets) 0 -}}
+{{ template
+   "enbas.operation"
+   newOperation
+     $.ApplicationName
+     $actionName
+     $targetName
+     $action.Description
+     $action.ExtraDetails
+     $action.Flags
+     $.Definitions.Flags
+}}
+{{- else -}}
+{{- range $relatedTargetName, $relatedTarget := $action.RelatedTargets -}}
+{{ template
+   "enbas.operation"
+   newTargetToTargetOperation
+     $.ApplicationName
+     $actionName
+     $targetName
+     $action.Preposition
+     $relatedTargetName
+     $relatedTarget.Description
+     $relatedTarget.ExtraDetails
+     $relatedTarget.Flags
+     $.Definitions.Flags
+}}
+{{- /* End ranging related targets of a TargetAction */ -}}
+{{- end -}}
+{{- /* End if RelatedTargets == 0 */ -}}
+{{- end -}} 
+{{- /* End ranging TargetActions */ -}}
+{{- end -}}
+{{ print "" }}
+.RE
+{{- /* End ranging Targets */ -}}
+{{- end }}
+.SH ENVIRONMENT VARIABLES
+\fBNO_COLOR\fR
+.RS
+Set \fB$NO_COLOR\fR to any value to disable the ANSI colour output when displaying the text on screen.
+.br
+The value of the \fB\-\-no-color\fR flag takes precedence over \fB$NO_COLOR\fR if both are used.
+.RE
+.SH MAINTAINERS
+\fBDan Anglin\fR <d.n.i.anglin@gmail.com>
+{{- end }}

@@ -1,0 +1,28 @@
+{
+    "aliases": {
+        "aliases": "show aliases",
+        "boost": "reblog status --status-id",
+        "fave": "favourite status --status-id",
+        "my-followers": "show followers from account --my-account",
+        "toot": "create status --content-type plain --visibility public --content"
+    },
+    "credentialsFile": "/home/user/.local/config/enbas/credentials/credentials.json",
+    "cacheDirectory": "/home/user/.local/cache/enbas",
+    "lineWrapMaxWidth": 80,
+    "gtsClient": {
+        "timeout": 30,
+        "mediaTimeout": 60
+    },
+    "server": {
+        "socketPath": "/var/run/user/1000/enbas/server.psqm2yeo.socket",
+        "idleTimeout": 300
+    },
+    "integrations": {
+        "browser": "firefox --new-window",
+        "editor": "vim",
+        "pager": "less -FIRX",
+        "imageViewer": "feh --scale-down",
+        "videoPlayer": "mpv --loop-file=inf",
+        "audioPlayer": "mpv --force-window"
+    }
+}

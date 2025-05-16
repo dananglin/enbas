@@ -1,0 +1,143 @@
+{{- /* vim: set ft=groff : */ -}}
+{{- define "enbas.5" -}}
+{{ print "" }}
+.TH {{ allCaps .ApplicationName }} 5 "{{ dateNow }}" "{{ .ApplicationName}} {{ .BinaryVersion }}" "{{ titled .ApplicationName }} Configuration Manual"
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------
+.\" THE MAIN CONTENT
+.\" -----------------
+.SH NAME
+{{ .ApplicationName }} \- configuration file
+.SH DESCRIPTION
+A configuration file for {{ .ApplicationName }} is a JSON formatted document which specifies settings such as integrations, server mode, etc. 
+
+You can create a new configuration file by running \fB{{ .ApplicationName }} create config\fR\&. This will create the initial configuration at the default configuration path\&. Alternatively, you can run \fB{{ .ApplicationName }} \-\-config <path> create config\fR to specify a custom path to the configuration file\&.
+
+.SH EXAMPLES
+An example configuration file is optionally installed as part of the installation process\&.
+
+If you, or a package manager, installed {{ .ApplicationName }} system-wide then the example configuration should be installed to \fB/usr/local/share/doc/{{ .ApplicationName }}/examples/config.json\fR\&.
+
+If you installed {{ .ApplicationName }} locally within your home directory, you may have installed it to \fB$HOME/.local/share/doc/{{ .ApplicationName }}/examples/config.json\fR\&.
+
+You may also find the example configuration in the source repository at \fBdocs/examples/config.json\fR\&.
+.SH CONFIGURATION OPTIONS
+.TP
+.B aliases
+type: map[string]string
+
+A set of shortnames mapped to the {{ .ApplicationName }} command\&. This section is managed by {{ .ApplicationName }}\&.
+.TP
+.B credentialsFile
+type: string
+
+The absolute path to your credentials file\&.
+.TP
+.B cacheDirectory
+type: string
+
+The absolute path to the root cache directory\&.
+.TP
+.B lineWrapMaxWidth
+type: number(int)
+
+The maximum number of characters on a line before that line breaks\&. This setting is used when displaying a timeline, your notifications, your bookmarks, the list of statuses from an account, etc\&.
+.TP
+.B gtsClient
+type: object
+
+The settings for the GTS Client\&.
+
+See \fBGTS client settings\fR\&.
+.TP
+.B server
+.br
+type: object
+
+The settings for running {{ .ApplicationName }} in server mode\&.
+
+See \fBServer mode settings\&.
+.TP
+.B integrations
+type: object
+
+See \fBIntegration settings\fR\&.
+.SS GTS client settings
+.TP
+.B gtsClient.timeout
+type: number(int)
+
+The timeout (in seconds) for API requests made to your GoToSocial instance\&.
+.TP
+.B gtsClient.mediaTimeout
+type: number(int)
+
+The timeout (in seconds) for requests made for retrieving media from your GoToSocial instance\&.
+.SS Server mode settings
+.TP
+.B server.socketPath
+type: string
+
+The path to the socket file that the {{ .ApplicationName }} binds to\&. This file is used for the communication between the {{ .ApplicationName }} client and the {{ .ApplicationName }} server\&.
+.TP
+.B server.idleTimeout
+type: number(int)
+
+The time (in seconds) that the server can remain idle before shutting down\&. This setting is only used when running the server without the
+.B \-\-without-idle-timeout
+flag\&.
+.SS Integration settings
+.TP
+.B integrations.browser
+type: string
+
+The command to run for opening the browser for viewing URLs (e\&.g\&. the URL of a remote account)\&.
+.TP
+.B integrations.editor
+type: string
+
+The command to run for opening your favourite text editor for creating or editing statuses (THIS INTEGRATION IS NOT YET USED)\&.
+.TP
+.B integrations.pager
+type: string
+
+The command to run for piping long outputs into your favourite pager. To disable paging, leave this blank\&.
+.TP
+.B integrations.imageViewer
+type: string
+
+The command to run for opening your favourite image viewer for viewing image files from a status\&.
+.TP
+.B integrations.videoPlayer
+type: string
+
+The command to run for opening your favourite video player for playing video files from a status\&.
+.TP
+.B integrations.audioPlayer
+type: string
+
+The command to run for opening your favourite audio player for playing audio files from a status\&.
+.SH FILES
+If the \-\-config top level flag is specified the location to the configuration file will be set to this value\&.
+
+Alternatively the default location to the configuration file is set to \fB$XDG_CONFIG_HOME/{{ .ApplicationName }}/config.json\fR\&. If the \fB$XDG_CONFIG_HOME\fR environment variable not set, then:
+.RS
+.IP \(bu 3
+on Linux the default path is set to \fB$HOME/.config/{{ .ApplicationName }}/config.json\fR.
+.IP \(bu
+on Darwin (MacOS) the default path is set to \fB$HOME/Library/Application Support/{{ .ApplicationName }}/config.json\fR.
+.IP \(bu
+on Windows the default path will be set within the \fB%AppData%\fR directory.
+.RE
+.SH ENVIRONMENT VARIABLES
+.TP
+.B XDG_CONFIG_HOME
+The path to your home configuration directory\&.
+.SH MAINTAINERS
+\fBDan Anglin\fR <d.n.i.anglin@gmail.com>
+.SH SEE ALSO
+{{ .ApplicationName }}(1)
+{{ print "" }}
+{{- /* End template */ -}}
+{{- end }}

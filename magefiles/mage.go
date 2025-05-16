@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,12 +17,13 @@ import (
 )
 
 const (
-	projectName          = "enbas"
-	defaultAppName       = projectName
-	defaultInstallPrefix = "/usr/local"
-	toolsModFile         = "./tools/tools.mod"
+	projectName    = "enbas"
+	defaultAppName = projectName
+	toolsModFile   = "./tools/tools.mod"
+	buildDir       = "./__build"
+	binDir         = buildDir + "/bin"
+	manDir         = buildDir + "/share/man"
 
-	envInstallPrefix    = "ENBAS_INSTALL_PREFIX"
 	envTestVerbose      = "ENBAS_TEST_VERBOSE"
 	envTestCover        = "ENBAS_TEST_COVER"
 	envBuildRebuildAll  = "ENBAS_BUILD_REBUILD_ALL"
@@ -30,8 +32,6 @@ const (
 	envAppName          = "ENBAS_APP_NAME"
 	envAppVersion       = "ENBAS_APP_VERSION"
 )
-
-var Default = Build
 
 // Test run the go tests.
 // To enable verbose mode set ENBAS_TEST_VERBOSE=1.
@@ -113,16 +113,20 @@ func Govet() error {
 	return sh.RunV("go", "vet", "./...")
 }
 
-// Build build the executable.
+type Build mg.Namespace
+
+// Binary build the binary.
 // To rebuild packages that are already up-to-date set ENBAS_BUILD_REBUILD_ALL=1
 // To enable verbose mode set ENBAS_BUILD_VERBOSE=1
-func Build() error {
+func (Build) Binary() error {
 	fmt.Println("Building the binary...")
 
-	main := "./cmd/" + projectName
-	flags := ldflags()
+	if err := ensureDirectory(binDir); err != nil {
+		return fmt.Errorf("error ensuring the presence of %q: %w", binDir, err)
+	}
+
 	build := sh.RunCmd("go", "build")
-	args := []string{"-ldflags=" + flags, "-o", binary()}
+	args := []string{"-ldflags=" + ldflags(), "-o", binary()}
 
 	if os.Getenv(envBuildRebuildAll) == "1" {
 		args = append(args, "-a")
@@ -132,36 +136,52 @@ func Build() error {
 		args = append(args, "-v")
 	}
 
-	args = append(args, main)
+	args = append(args, "./cmd/"+projectName)
 
 	if err := build(args...); err != nil {
 		return fmt.Errorf("error building the binary: %w", err)
 	}
 
+	fmt.Println("Binary successfully built to ", binary())
+
 	return nil
 }
 
-// Install install the executable.
-func Install() error {
-	mg.Deps(Build)
+// Documentation builds the man pages and the example configuration.
+func (Build) Documentation() error {
+	fmt.Println("Generating the documentation...")
 
-	installPrefix := os.Getenv(envInstallPrefix)
-	app := appName()
-	binary := binary()
+	examplesDir := buildDir + "/share/doc/" + appName() + "/examples"
 
-	if installPrefix == "" {
-		installPrefix = defaultInstallPrefix
+	dirs := []string{
+		examplesDir,
+		manDir + "/man1",
+		manDir + "/man5",
 	}
 
-	dest := filepath.Join(installPrefix, "bin", app)
-
-	fmt.Println("Installing the binary to", dest)
-
-	if err := sh.Copy(dest, binary); err != nil {
-		return fmt.Errorf("unable to install %s; %w", dest, err)
+	for _, dir := range dirs {
+		if err := ensureDirectory(dir); err != nil {
+			return fmt.Errorf(
+				"error ensuring the presence of %q: %w",
+				dir,
+				err,
+			)
+		}
 	}
 
-	fmt.Printf("Successfully installed %s to %s\n", projectName, dest)
+	if err := sh.Run(
+		"go",
+		"run",
+		"./cmd/docgen",
+		"--application-name="+appName(),
+		"--binary-version="+binaryVersion(),
+		"--man-dir="+manDir,
+		"--examples-dir="+examplesDir,
+	); err != nil {
+		return fmt.Errorf("error generating the documentation: %w", err)
+	}
+
+	fmt.Println("Documentation successfully generated.")
 
 	return nil
 }
@@ -183,6 +203,7 @@ func Clean() error {
 	return nil
 }
 
+// Codegen generates the CLI code from the CLI definitions file.
 func Codegen() error {
 	for _, pkg := range slices.All([]string{"executor", "cli"}) {
 		internalPkg := "./internal/" + pkg
@@ -265,7 +286,7 @@ func appName() string {
 }
 
 func binary() string {
-	return filepath.Join("./__build", appName())
+	return filepath.Join(binDir, appName())
 }
 
 func appTitledName() string {
@@ -273,4 +294,23 @@ func appTitledName() string {
 	runes[0] = unicode.ToUpper(runes[0])
 
 	return string(runes)
+}
+
+// ensureDirectory checks to see if the specified directory is present.
+// If it is not present then an attempt is made to create it.
+func ensureDirectory(dir string) error {
+	if _, err := os.Stat(dir); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if err := os.MkdirAll(dir, 0o750); err != nil {
+				return fmt.Errorf("unable to create %s: %w", dir, err)
+			}
+		} else {
+			return fmt.Errorf(
+				"received an unknown error after getting the directory information: %w",
+				err,
+			)
+		}
+	}
+
+	return nil
 }
