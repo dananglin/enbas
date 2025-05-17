@@ -31,6 +31,7 @@ const (
 	envFailOnFormatting = "ENBAS_FAIL_ON_FORMATTING"
 	envAppName          = "ENBAS_APP_NAME"
 	envAppVersion       = "ENBAS_APP_VERSION"
+	envAppCommitRef     = "ENBAS_APP_COMMIT_REF"
 )
 
 // Test run the go tests.
@@ -263,7 +264,14 @@ func binaryVersion() string {
 }
 
 // gitCommit returns the current git commit
+// If ENBAS_APP_COMMIT_REF is set, the value of that is returned, otherwise
+// the latest git commit is returned.
 func gitCommit() string {
+	commit := os.Getenv(envAppCommitRef)
+	if commit != "" {
+		return commit
+	}
+
 	commit, err := sh.Output("git", "rev-parse", "--short", "HEAD")
 	if err != nil {
 		commit = "N/A"
