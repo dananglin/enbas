@@ -1,4 +1,6 @@
 {{ define "account" }}
+{{ fullDisplayNameFormat .Account.DisplayName .Account.Acct }}
+{{ print "" }}
 {{ headerFormat "ACCOUNT ID:" }}
 {{ .Account.ID }}
 {{ print "" }}
@@ -34,7 +36,7 @@
 {{- if gt (len .StatusList.Statuses) 0 -}}
 {{ print "" }}
 {{ template "statusList" .StatusList }}
-{{- end }}
+{{- end -}}
 {{ end }}
 
 {{ define "accountRelationship" }}
@@ -50,11 +52,12 @@
 {{ fieldFormat "Blocking" }} {{ .Blocking }}
 {{ fieldFormat "Is blocking you" }} {{ .BlockedBy }}
 {{ fieldFormat "Blocking account's domain" }} {{ .DomainBlocking }}
-{{- if ne .PrivateNote "" -}}
 {{ print "" }}
+{{- if ne .PrivateNote "" -}}
 {{ print "" }}
 {{ headerFormat "YOUR PRIVATE NOTE ABOUT THIS ACCOUNT:" }}
 {{ .PrivateNote }}
+{{ print "" }}
 {{- end -}}
 {{ end }}
 
