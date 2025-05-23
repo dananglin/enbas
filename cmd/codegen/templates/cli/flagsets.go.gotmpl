@@ -92,6 +92,10 @@ func {{ printf "Parse%s%sFlags" (snakeToCamel $targetName true) (snakeToCamel $a
   )
   {{ print "" }}
   {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
+  {{- else if eq $flag.Type "internalFlag.BoolValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewBoolValue(%s)" (snakeToCamel $flag.Name false) $flag.Default }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
   {{- else -}}
   {{ print "" }}
   {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $flag.Name false) (snakeToCamel $flag.Name true) }}
@@ -156,6 +160,10 @@ func {{ printf "Parse%s%s%s%sFlags" (snakeToCamel $targetName true) (snakeToCame
   },
   )
   {{ print "" }}
+  {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) }}
+  {{- else if eq $relatedTargetFlag.Type "internalFlag.BoolValue" -}}
+  {{ print "" }}
+  {{ printf "*%s = internalFlag.NewBoolValue(%s)" (snakeToCamel $relatedTargetFlag.Name false) $relatedTargetFlag.Default }}
   {{ printf "flagset.Var(%s, flag%s, \"\")" (snakeToCamel $relatedTargetFlag.Name false) (snakeToCamel $relatedTargetFlag.Name true) }}
   {{- else -}}
   {{ print "" }}

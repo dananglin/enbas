@@ -25,7 +25,7 @@ func newFlagset() *flag.FlagSet {
 // NewTopLevelFlagset returns the FlagSet for the top-level flags
 func NewTopLevelFlagset(
 	config *string,
-	noColor *internalFlag.BoolPtrValue,
+	noColor *internalFlag.BoolValue,
 ) *flag.FlagSet {
 	flagset := newFlagset()
 	flagset.StringVar(config, flagConfig, "", "")
@@ -489,12 +489,13 @@ func ParseFilterKeywordDeleteFlags(
 func ParseFilterKeywordEditFlags(
 	filterKeywordId *string,
 	keyword *string,
-	wholeWord *internalFlag.BoolPtrValue,
+	wholeWord *internalFlag.BoolValue,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(filterKeywordId, flagFilterKeywordId, "", "")
 	flagset.StringVar(keyword, flagKeyword, "", "")
+	*wholeWord = internalFlag.NewBoolValue(false)
 	flagset.Var(wholeWord, flagWholeWord, "")
 
 	if err := flagset.Parse(flags); err != nil {
@@ -683,13 +684,14 @@ func ParseListDeleteFlags(
 
 func ParseListEditFlags(
 	listId *string,
-	exclusive *internalFlag.BoolPtrValue,
+	exclusive *internalFlag.BoolValue,
 	repliesPolicy *internalFlag.EnumValue,
 	title *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(listId, flagListId, "", "")
+	*exclusive = internalFlag.NewBoolValue(false)
 	flagset.Var(exclusive, flagExclusive, "")
 	*repliesPolicy = internalFlag.NewEnumValue(
 		[]string{
@@ -942,7 +944,7 @@ func ParseStatusCreateFlags(
 	pollExpiresIn *internalFlag.TimeDurationValue,
 	pollHidesVoteCounts *bool,
 	pollOption *internalFlag.MultiStringValue,
-	sensitive *internalFlag.BoolPtrValue,
+	sensitive *internalFlag.BoolValue,
 	summary *string,
 	visibility *internalFlag.EnumValue,
 	flags []string,
@@ -973,6 +975,7 @@ func ParseStatusCreateFlags(
 	flagset.Var(pollExpiresIn, flagPollExpiresIn, "")
 	flagset.BoolVar(pollHidesVoteCounts, flagPollHidesVoteCounts, false, "")
 	flagset.Var(pollOption, flagPollOption, "")
+	*sensitive = internalFlag.NewBoolValue(false)
 	flagset.Var(sensitive, flagSensitive, "")
 	flagset.StringVar(summary, flagSummary, "", "")
 	*visibility = internalFlag.NewEnumValue(

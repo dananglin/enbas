@@ -8,34 +8,34 @@ import (
 	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 )
 
-func TestBoolPtrValue(t *testing.T) {
+func TestBoolValue(t *testing.T) {
 	tests := []struct {
 		input string
-		want  string
+		want  bool
 	}{
 		{
 			input: "True",
-			want:  "true",
+			want:  true,
 		},
 		{
 			input: "true",
-			want:  "true",
+			want:  true,
 		},
 		{
 			input: "1",
-			want:  "true",
+			want:  true,
 		},
 		{
 			input: "False",
-			want:  "false",
+			want:  false,
 		},
 		{
 			input: "false",
-			want:  "false",
+			want:  false,
 		},
 		{
 			input: "0",
-			want:  "false",
+			want:  false,
 		},
 	}
 
@@ -46,10 +46,10 @@ func TestBoolPtrValue(t *testing.T) {
 	}
 }
 
-func testBoolPtrValueParsing(args []string, want string) func(t *testing.T) {
+func testBoolPtrValueParsing(args []string, want bool) func(t *testing.T) {
 	return func(t *testing.T) {
-		flagset := flag.NewFlagSet("test", flag.ExitOnError)
-		boolVal := internalFlag.NewBoolPtrValue()
+		flagset := flag.NewFlagSet("", flag.ExitOnError)
+		boolVal := internalFlag.NewBoolValue(false)
 
 		flagset.Var(&boolVal, "boolean-value", "Boolean value")
 
@@ -57,26 +57,32 @@ func testBoolPtrValueParsing(args []string, want string) func(t *testing.T) {
 			t.Fatalf("Received an error parsing the flag: %v", err)
 		}
 
-		got := boolVal.String()
+		if !boolVal.IsSet() {
+			t.Errorf("Unexpected result received from IsSet() method.\nwant: true\n got: %t", boolVal.IsSet())
+		}
+
+		got := boolVal.Value()
 
 		if got != want {
 			t.Errorf(
-				"Unexpected boolean value found after parsing BoolPtrValue: want %s, got %s",
+				"Unexpected boolean value found after parsing BoolPtrValue: want %t, got %t",
 				want,
 				got,
 			)
-		} else {
-			t.Logf(
-				"Expected boolean value found after parsing BoolPtrValue: got %s",
-				got,
-			)
+
+			return
 		}
+
+		t.Logf(
+			"Expected boolean value found after parsing BoolPtrValue: got %t",
+			got,
+		)
 	}
 }
 
 func TestNotSetBoolPtrValue(t *testing.T) {
-	flagset := flag.NewFlagSet("test", flag.ExitOnError)
-	boolVal := internalFlag.NewBoolPtrValue()
+	flagset := flag.NewFlagSet("", flag.ExitOnError)
+	boolVal := internalFlag.NewBoolValue(false)
 
 	var otherVal string
 
@@ -89,12 +95,9 @@ func TestNotSetBoolPtrValue(t *testing.T) {
 		t.Fatalf("Received an error parsing the flag: %v", err)
 	}
 
-	want := "NOT SET"
-	got := boolVal.String()
-
-	if got != want {
-		t.Errorf("Unexpected string returned from the nil value; want %s, got %s", want, got)
-	} else {
-		t.Logf("Expected string returned from the nil value; got %s", got)
+	if boolVal.IsSet() {
+		t.Errorf("Unexpected result received from IsSet() method.\nwant: false\n got: %t", boolVal.IsSet())
 	}
+
+	t.Logf("Expected result received from IsSet() method.\ngot: %t", boolVal.IsSet())
 }

@@ -140,7 +140,7 @@ func statusCreate(
 		pollExpiresIn             = internalFlag.NewTimeDurationValue(24 * time.Hour)
 		pollHidesVoteCounts       bool
 		pollOptions               = internalFlag.NewMultiStringValue()
-		sensitive                 = internalFlag.NewBoolPtrValue()
+		sensitive                 internalFlag.BoolValue
 		summary                   string
 		visibility                internalFlag.EnumValue
 	)
@@ -285,8 +285,8 @@ func statusCreate(
 	}
 
 	var statusSensitive bool
-	if sensitive.Value != nil {
-		statusSensitive = *sensitive.Value
+	if sensitive.IsSet() {
+		statusSensitive = sensitive.Value()
 	} else {
 		statusSensitive = preferences.PostingDefaultSensitive
 	}

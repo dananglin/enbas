@@ -188,7 +188,7 @@ func filterKeywordEdit(
 	var (
 		filterKeywordID string
 		keyword         string
-		wholeWord       = internalFlag.NewBoolPtrValue()
+		wholeWord       internalFlag.BoolValue
 	)
 
 	// Parse the remaining flags.
@@ -226,8 +226,8 @@ func filterKeywordEdit(
 		editArgs.Keyword = filterKeyword.Keyword
 	}
 
-	if wholeWord.Value != nil {
-		editArgs.WholeWord = *wholeWord.Value
+	if wholeWord.IsSet() {
+		editArgs.WholeWord = wholeWord.Value()
 	} else {
 		editArgs.WholeWord = filterKeyword.WholeWord
 	}

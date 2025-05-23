@@ -16,7 +16,7 @@ type targetFunc func(cfg config.Config, printSettings printer.Settings, cmd comm
 
 func Execute() error {
 	var (
-		noColorFlag internalFlag.BoolPtrValue
+		noColorFlag internalFlag.BoolValue
 		noColor     bool
 		configPath  string
 	)
@@ -38,8 +38,8 @@ func Execute() error {
 		return err
 	}
 
-	if noColorFlag.Value != nil {
-		noColor = *noColorFlag.Value
+	if noColorFlag.IsSet() {
+		noColor = noColorFlag.Value()
 	} else if os.Getenv("NO_COLOR") != "" {
 		noColor = true
 	}

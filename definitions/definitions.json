@@ -8,7 +8,8 @@
     },
     "no-color": {
       "description": "disable the ANSI colour output when displaying the text on screen",
-      "type": "internalFlag.BoolPtrValue",
+      "type": "internalFlag.BoolValue",
+      "default": "false",
       "required": false
     }
   },
@@ -750,7 +751,7 @@
             },
             {
               "name": "whole-word",
-              "type": "internalFlag.BoolPtrValue",
+              "type": "internalFlag.BoolValue",
               "default": "false",
               "required": false
             }
@@ -988,8 +989,8 @@
             },
             {
               "name": "exclusive",
-              "type": "internalFlag.BoolPtrValue",
-              "default": "",
+              "type": "internalFlag.BoolValue",
+              "default": "false",
               "required": false
             },
             {
@@ -1421,8 +1422,8 @@
             },
             {
               "name": "sensitive",
-              "type": "internalFlag.BoolPtrValue",
-              "default": "",
+              "type": "internalFlag.BoolValue",
+              "default": "false",
               "required": false
             },
             {

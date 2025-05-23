@@ -140,7 +140,7 @@ func listEdit(
 ) error {
 	var (
 		listID        string
-		exclusive     = internalFlag.NewBoolPtrValue()
+		exclusive     internalFlag.BoolValue
 		repliesPolicy internalFlag.EnumValue
 		title         string
 	)
@@ -176,8 +176,8 @@ func listEdit(
 		listToUpdate.RepliesPolicy = repliesPolicy.Value()
 	}
 
-	if exclusive.Value != nil {
-		listToUpdate.Exclusive = *exclusive.Value
+	if exclusive.IsSet() {
+		listToUpdate.Exclusive = exclusive.Value()
 	}
 
 	var updatedList model.List
