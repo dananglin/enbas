@@ -108,6 +108,10 @@ func (v *MultiEnumValue) Values() []string {
 	return v.values
 }
 
+func (v *MultiEnumValue) Empty() bool {
+	return len(v.values) == 0
+}
+
 func listOpts(validOpts map[string]struct{}) string {
 	opts := []string{}
 

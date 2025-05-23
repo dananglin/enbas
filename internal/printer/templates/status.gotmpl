@@ -70,30 +70,65 @@
 {{ headerFormat .Name }}
 {{ print "" }}
 {{- range .Statuses -}}
+{{- $filterAction := statusFilterAction .Filtered -}}
+{{- if eq $filterAction "" -}}
+{{- /* No filtering applied, display the status card in full */ -}}
 {{ template "statusCard" . }}
+{{- else if eq $filterAction "warn" -}}
+{{- /* Minimize the status */ -}}
+{{ template "statusCardMinimized" . }}
+{{- /* End comparing the filter action */ -}}
+{{- end -}}
+{{- /* End ranging statuses*/ -}}
 {{- end -}}
 {{- end -}}
 
 {{ define "statusCard" }}
+{{ template "statusCardAction" . }}
 {{- if ne .Reblog.ID "" -}}
-{{ print "" }}
-{{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" .Reblog }}
+{{ template "statusCardMetadata" .Reblog }}
 {{- fieldFormat "Boosted at" }} {{ formatDateTime .CreatedAt }}
 {{ print "" }}
 {{- else if ne .InReplyToID "" -}}
-{{ print "" }}
-{{ with printf "%s posted in reply to %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (.InReplyToID) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
+{{ template "statusCardMetadata" . }}
 {{- else -}}
-{{ print "" }}
-{{ with printf "%s posted:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
 {{ template "statusCardBody" . }}
+{{ template "statusCardMetadata" . }}
 {{- end -}}
 {{ print "" }}
 {{- drawCardSeparator -}}
 {{ print "" }}
 {{ end }}
+
+{{ define "statusCardMinimized" }}
+{{ template "statusCardAction" . }}
+{{ print "" }}
+{{ statusFilteredTitle }}
+
+This status has been minimized by the following filters:
+{{ print "" }}
+{{- range .Filtered -}}
+{{ print "" }}
+{{ "\u2022" }} {{ .Filter.Title }} ({{ .Filter.ID }})
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ template "statusCardMetadata" . }}
+{{- drawCardSeparator -}}
+{{ print "" }}
+{{ end }}
+
+{{- define "statusCardAction" -}}
+{{- if ne .Reblog.ID "" -}}
+{{ with printf "%s boosted this status from %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (fullDisplayNameFormat .Reblog.Account.DisplayName .Reblog.Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
+{{- else if ne .InReplyToID "" -}}
+{{ with printf "%s posted in reply to %s:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) (.InReplyToID) }}{{ wrapLines . "" 0 }}{{ end -}}
+{{- else -}}
+{{ with printf "%s posted:" (fullDisplayNameFormat .Account.DisplayName .Account.Acct) }}{{ wrapLines . "" 0 }}{{ end -}}
+{{- end -}}
+{{- end -}}
 
 {{- define "statusCardBody" -}}
 {{- if ne .SpoilerText "" -}}
@@ -125,6 +160,9 @@
 {{ drawLikeSymbol .Favourited }} {{ fieldFormat "Liked" }}      {{ printf "%5t" .Favourited }}          {{ fieldFormat "Likes" }}   {{ printf "%d" .FavouritesCount }}
 {{ drawBookmarkSymbol .Bookmarked }} {{ fieldFormat "Bookmarked" }} {{ printf "%5t" .Bookmarked }}          {{ fieldFormat "Replies" }} {{ printf "%d" .RepliesCount }}
 {{ print "" }}
+{{- end -}}
+
+{{- define "statusCardMetadata" -}}
 {{ fieldFormat "Status ID" }}  {{ .ID }}
 {{ fieldFormat "Created at" }} {{ formatDateTime .CreatedAt }}
 {{ print "" }}

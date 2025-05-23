@@ -57,7 +57,7 @@ func usageShow(
 }
 
 func usageShowApp(printSettings printer.Settings) error {
-	if err := printer.PrintHelpApp(
+	if err := printer.PrintUsageApp(
 		printSettings,
 		cli.TargetDescMap(),
 		cli.TopLevelFlagsUsageMap(),
@@ -77,7 +77,7 @@ func usageShowTarget(
 		return unrecognisedTargetError{target: target}
 	}
 
-	if err := printer.PrintHelpTarget(
+	if err := printer.PrintUsageTarget(
 		printSettings,
 		target,
 		desc,
@@ -101,7 +101,7 @@ func usageShowAction(
 
 	availableTargets := cli.ActionTargets(action)
 
-	if err := printer.PrintHelpAction(
+	if err := printer.PrintUsageAction(
 		printSettings,
 		action,
 		renderTargetTemplate(desc, "target"),
@@ -136,7 +136,7 @@ func usageShowTargetAction(
 		}
 	}
 
-	if err := printer.PrintHelpTargetAction(
+	if err := printer.PrintUsageTargetAction(
 		printSettings,
 		target,
 		action,

@@ -2,7 +2,7 @@ package printer
 
 import "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 
-func PrintHelpApp(
+func PrintUsageApp(
 	settings Settings,
 	targets map[string]string,
 	flags map[string]string,
@@ -27,7 +27,7 @@ func PrintHelpApp(
 	)
 }
 
-func PrintHelpTarget(
+func PrintUsageTarget(
 	settings Settings,
 	target string,
 	description string,
@@ -56,7 +56,7 @@ func PrintHelpTarget(
 	)
 }
 
-func PrintHelpAction(
+func PrintUsageAction(
 	settings Settings,
 	action string,
 	description string,
@@ -85,7 +85,7 @@ func PrintHelpAction(
 	)
 }
 
-func PrintHelpTargetAction(
+func PrintUsageTargetAction(
 	settings Settings,
 	target string,
 	action string,

@@ -16,6 +16,7 @@ type Status struct {
 	Emojis             []Emoji           `json:"emojis"`
 	Favourited         bool              `json:"favourited"`
 	FavouritesCount    int               `json:"favourites_count"`
+	Filtered           []FilterResult    `json:"filtered"`
 	ID                 string            `json:"id"`
 	InReplyToAccountID string            `json:"in_reply_to_account_id"`
 	InReplyToID        string            `json:"in_reply_to_id"`
@@ -74,6 +75,7 @@ type StatusReblogged struct {
 	Emojis             []Emoji           `json:"emojis"`
 	Favourited         bool              `json:"favourited"`
 	FavouritesCount    int               `json:"favourites_count"`
+	Filtered           []FilterResult    `json:"filtered"`
 	ID                 string            `json:"id"`
 	InReplyToAccountID string            `json:"in_reply_to_account_id"`
 	InReplyToID        string            `json:"in_reply_to_id"`

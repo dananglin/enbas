@@ -58,11 +58,15 @@ func tagFollow(
 		&tagName,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if tagName == "" {
-		return missingTagNameError{action: cli.ActionFollow}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetTag,
+			action:    cli.ActionFollow,
+		}
 	}
 
 	tagName = strings.TrimLeft(tagName, "#")
@@ -88,11 +92,15 @@ func tagUnfollow(
 		&tagName,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if tagName == "" {
-		return missingTagNameError{action: cli.ActionUnfollow}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetTag,
+			action:    cli.ActionUnfollow,
+		}
 	}
 
 	tagName = strings.TrimLeft(tagName, "#")
@@ -118,11 +126,15 @@ func tagShow(
 		&tagName,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if tagName == "" {
-		return missingTagNameError{action: cli.ActionShow}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetTag,
+			action:    cli.ActionShow,
+		}
 	}
 
 	tagName = strings.TrimLeft(tagName, "#")
@@ -155,7 +167,7 @@ func tagFind(
 		&limit,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if query == "" {

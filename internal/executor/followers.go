@@ -98,7 +98,11 @@ func followersShowFromAccount(
 		}
 	} else {
 		if accountName == "" {
-			return missingAccountNameError{action: "show the list of followers from"}
+			return missingValueError{
+				valueType: "name",
+				target:    cli.TargetAccount,
+				action:    "show the list of followers from",
+			}
 		}
 
 		if err := client.Call(

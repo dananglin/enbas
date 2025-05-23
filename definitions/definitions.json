@@ -35,9 +35,16 @@
     "exclude-replies": "exclude statuses that are replies to other statuses",
     "exclude-notification-type": "the type of notifications to exclude from the list",
     "exclusive": "hide posts from members of this list from your home timeline",
+    "filter-action": "the action to take when a status matches this filter",
+    "filter-context": "the context in which the filter should be applied",
+    "filter-expires-in": "the time from when the filter is created that it should expire",
+    "filter-id": "the ID of the filter",
+    "filter-keyword-id": "the ID of the filter-keyword",
+    "filter-status-id": "the ID of the filter-status",
     "full": "print the application's full build information",
     "in-reply-to": "the ID of the status that you want to reply to",
     "include-notification-type": "the type of notifications to include in the list",
+    "keyword": "the text to be filtered",
     "language": "the ISO 639 language code for this {target}",
     "limit": "the limit of items to display",
     "list-id": "the ID of the list",
@@ -60,7 +67,7 @@
     "only-pinned": "only show the account's pinned statuses",
     "only-public": "only show the account's public posts",
     "poll-allows-multiple-choices": "allow viewers to make multiple choices in the poll",
-    "poll-expires-in": "the duration in which the poll is open for",
+    "poll-expires-in": "the time from when the poll is created that it should expire",
     "poll-hides-vote-counts": "hide the vote count until the poll is closed",
     "poll-option": "a poll option (use this flag multiple times to set multiple poll options)",
     "query": "the search query string",
@@ -86,6 +93,7 @@
     "url": "the URL of your GoToSocial instance",
     "vote": "the option in the poll to vote for",
     "visibility": "The visibility of the {target}",
+    "whole-word": "the filter should consider word boundaries",
     "without-idle-timeout": "{action} the {target} without an idle timeout"
   },
   "actions": {
@@ -564,6 +572,252 @@
         }
       }
     },
+    "filter": {
+      "description": "a single filter",
+      "actions": {
+        "create": {
+          "description": "creates a new filter",
+          "flags": [
+            {
+              "name": "title",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "filter-context",
+              "type": "internalFlag.MultiEnumValue",
+              "enum": [
+                "home",
+                "notifications",
+                "public",
+                "thread",
+                "account"
+              ],
+              "required": true
+            },
+            {
+              "name": "filter-expires-in",
+              "type": "internalFlag.TimeDurationValue",
+              "default": "0 seconds (filter does not expire)",
+              "required": false
+            },
+            {
+              "name": "filter-action",
+              "type": "internalFlag.EnumValue",
+              "default": "warn",
+              "enum": [
+                "hide",
+                "warn"
+              ],
+              "required": false
+            }
+          ]
+        },
+        "delete": {
+          "description": "deletes the specified filter",
+          "flags": [
+            {
+              "name": "filter-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "edit": {
+          "description": "edits the specified filter",
+          "flags": [
+            {
+              "name": "filter-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "filter-context",
+              "type": "internalFlag.MultiEnumValue",
+              "enum": [
+                "home",
+                "notifications",
+                "public",
+                "thread",
+                "account"
+              ],
+              "required": false
+            },
+            {
+              "name": "filter-expires-in",
+              "type": "internalFlag.TimeDurationValue",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "filter-action",
+              "type": "internalFlag.EnumValue",
+              "default": "",
+              "enum": [
+                "hide",
+                "warn"
+              ],
+              "required": false
+            }
+          ]
+        },
+        "show": {
+          "description": "prints the details of the specified filter",
+          "flags": [
+            {
+              "name": "filter-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "filters": {
+      "description": "the list of your filters",
+      "actions": {
+        "show": {
+          "description": "prints the list of all your filters"
+        }
+      }
+    },
+    "filter-keyword": {
+      "description": "the text to filter within a filter",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "filter": {
+              "description": "creates and adds a filter keyword to the specified filter",
+              "flags": [
+                {
+                  "name": "filter-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "keyword",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "whole-word",
+                  "type": "bool",
+                  "default": "false",
+                  "required": false
+                }
+              ]
+            }
+          }
+        },
+        "delete": {
+          "description": "deletes an existing filter-keyword",
+          "flags": [
+            {
+              "name": "filter-keyword-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "edit": {
+          "description": "edits the specified filter-keyword",
+          "flags": [
+            {
+              "name": "filter-keyword-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            },
+            {
+              "name": "keyword",
+              "type": "string",
+              "default": "",
+              "required": false
+            },
+            {
+              "name": "whole-word",
+              "type": "internalFlag.BoolPtrValue",
+              "default": "false",
+              "required": false
+            }
+          ]
+        },
+        "show": {
+          "description": "prints the details of the specified filter-keyword",
+          "flags": [
+            {
+              "name": "filter-keyword-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
+    "filter-status": {
+      "description": "the status to filter within a filter",
+      "actions": {
+        "add": {
+          "preposition": "to",
+          "relatedTargets": {
+            "filter": {
+              "description": "creates and adds a filter status to the specified filter",
+              "flags": [
+                {
+                  "name": "filter-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                },
+                {
+                  "name": "status-id",
+                  "type": "string",
+                  "default": "",
+                  "required": true
+                }
+              ]
+            }
+          }
+        },
+        "delete": {
+          "description": "deletes an existing filter-status",
+          "flags": [
+            {
+              "name": "filter-status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        },
+        "show": {
+          "description": "prints the details of the specified filter-status",
+          "flags": [
+            {
+              "name": "filter-status-id",
+              "type": "string",
+              "default": "",
+              "required": true
+            }
+          ]
+        }
+      }
+    },
     "follow-requests": {
       "description": "the list of accounts that are requesting to follow you",
       "actions": {
@@ -677,7 +931,7 @@
       "description": "the GoToSocial instance",
       "actions": {
         "show": {
-          "description": "prints information aboutthe GoToSocial instance that you have logged into"
+          "description": "prints information about the GoToSocial instance that you have logged into"
         }
       }
     },
@@ -724,7 +978,7 @@
           ]
         },
         "edit": {
-          "description": "edits an existing list",
+          "description": "edits the specified list",
           "flags": [
             {
               "name": "list-id",
@@ -758,7 +1012,7 @@
           ]
         },
         "show": {
-          "description": "prints the details of an existing list",
+          "description": "prints the details of the specified list",
           "flags": [
             {
               "name": "list-id",

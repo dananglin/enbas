@@ -348,6 +348,220 @@ func ParseFavouritesShowFlags(
 	return nil
 }
 
+func ParseFilterCreateFlags(
+	title *string,
+	filterContext *internalFlag.MultiEnumValue,
+	filterExpiresIn *internalFlag.TimeDurationValue,
+	filterAction *internalFlag.EnumValue,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(title, flagTitle, "", "")
+	*filterContext = internalFlag.NewMultiEnumValue(
+		[]string{
+			"home",
+			"notifications",
+			"public",
+			"thread",
+			"account",
+		},
+	)
+
+	flagset.Var(filterContext, flagFilterContext, "")
+	flagset.Var(filterExpiresIn, flagFilterExpiresIn, "")
+	*filterAction = internalFlag.NewEnumValue(
+		[]string{
+			"hide",
+			"warn",
+		},
+		"warn",
+	)
+
+	flagset.Var(filterAction, flagFilterAction, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterDeleteFlags(
+	filterId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterId, flagFilterId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterEditFlags(
+	filterId *string,
+	title *string,
+	filterContext *internalFlag.MultiEnumValue,
+	filterExpiresIn *internalFlag.TimeDurationValue,
+	filterAction *internalFlag.EnumValue,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterId, flagFilterId, "", "")
+	flagset.StringVar(title, flagTitle, "", "")
+	*filterContext = internalFlag.NewMultiEnumValue(
+		[]string{
+			"home",
+			"notifications",
+			"public",
+			"thread",
+			"account",
+		},
+	)
+
+	flagset.Var(filterContext, flagFilterContext, "")
+	flagset.Var(filterExpiresIn, flagFilterExpiresIn, "")
+	*filterAction = internalFlag.NewEnumValue(
+		[]string{
+			"hide",
+			"warn",
+		},
+		"",
+	)
+
+	flagset.Var(filterAction, flagFilterAction, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterShowFlags(
+	filterId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterId, flagFilterId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterKeywordAddToFilterFlags(
+	filterId *string,
+	keyword *string,
+	wholeWord *bool,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterId, flagFilterId, "", "")
+	flagset.StringVar(keyword, flagKeyword, "", "")
+	flagset.BoolVar(wholeWord, flagWholeWord, false, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterKeywordDeleteFlags(
+	filterKeywordId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterKeywordId, flagFilterKeywordId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterKeywordEditFlags(
+	filterKeywordId *string,
+	keyword *string,
+	wholeWord *internalFlag.BoolPtrValue,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterKeywordId, flagFilterKeywordId, "", "")
+	flagset.StringVar(keyword, flagKeyword, "", "")
+	flagset.Var(wholeWord, flagWholeWord, "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterKeywordShowFlags(
+	filterKeywordId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterKeywordId, flagFilterKeywordId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterStatusAddToFilterFlags(
+	filterId *string,
+	statusId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterId, flagFilterId, "", "")
+	flagset.StringVar(statusId, flagStatusId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterStatusDeleteFlags(
+	filterStatusId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterStatusId, flagFilterStatusId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
+func ParseFilterStatusShowFlags(
+	filterStatusId *string,
+	flags []string,
+) error {
+	flagset := newFlagset()
+	flagset.StringVar(filterStatusId, flagFilterStatusId, "", "")
+
+	if err := flagset.Parse(flags); err != nil {
+		return fmt.Errorf("flag parsing error: %w", err)
+	}
+
+	return nil
+}
+
 func ParseFollowRequestAcceptFlags(
 	accountName *string,
 	flags []string,

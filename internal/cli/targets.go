@@ -17,6 +17,10 @@ const (
 	TargetBookmarks       string = "bookmarks"
 	TargetConfig          string = "config"
 	TargetFavourites      string = "favourites"
+	TargetFilter          string = "filter"
+	TargetFilterKeyword   string = "filter-keyword"
+	TargetFilterStatus    string = "filter-status"
+	TargetFilters         string = "filters"
 	TargetFollowRequest   string = "follow-request"
 	TargetFollowRequests  string = "follow-requests"
 	TargetFollowers       string = "followers"
@@ -67,6 +71,10 @@ func targetDescMap() map[string]string {
 		TargetBookmarks:       "the statuses that you've bookmarked",
 		TargetConfig:          "your configuration",
 		TargetFavourites:      "the statuses that you've favourited (liked)",
+		TargetFilter:          "a single filter",
+		TargetFilterKeyword:   "the text to filter within a filter",
+		TargetFilterStatus:    "the status to filter within a filter",
+		TargetFilters:         "the list of your filters",
 		TargetFollowRequest:   "the account that is requesting to follow you",
 		TargetFollowRequests:  "the list of accounts that are requesting to follow you",
 		TargetFollowers:       "the accounts who are following the specified account",
@@ -151,6 +159,26 @@ func targetActionsMap() map[string][]string {
 			ActionCreate,
 		},
 		TargetFavourites: {
+			ActionShow,
+		},
+		TargetFilter: {
+			ActionCreate,
+			ActionDelete,
+			ActionEdit,
+			ActionShow,
+		},
+		TargetFilterKeyword: {
+			ActionAdd,
+			ActionDelete,
+			ActionEdit,
+			ActionShow,
+		},
+		TargetFilterStatus: {
+			ActionAdd,
+			ActionDelete,
+			ActionShow,
+		},
+		TargetFilters: {
 			ActionShow,
 		},
 		TargetFollowRequest: {
@@ -259,17 +287,19 @@ func TargetActionPreposition(target, action string) string {
 
 func targetActionPrepositionMap() map[string]string {
 	return map[string]string{
-		TargetAccess + "-" + ActionSwitch:   "to",
-		TargetAccounts + "-" + ActionAdd:    "to",
-		TargetAccounts + "-" + ActionRemove: "from",
-		TargetFollowers + "-" + ActionShow:  "from",
-		TargetFollowings + "-" + ActionShow: "from",
-		TargetMedia + "-" + ActionShow:      "from",
-		TargetNote + "-" + ActionAdd:        "to",
-		TargetNote + "-" + ActionRemove:     "from",
-		TargetStatus + "-" + ActionAdd:      "to",
-		TargetStatus + "-" + ActionRemove:   "from",
-		TargetThread + "-" + ActionShow:     "from",
-		TargetVotes + "-" + ActionAdd:       "to",
+		TargetAccess + "-" + ActionSwitch:     "to",
+		TargetAccounts + "-" + ActionAdd:      "to",
+		TargetAccounts + "-" + ActionRemove:   "from",
+		TargetFilterKeyword + "-" + ActionAdd: "to",
+		TargetFilterStatus + "-" + ActionAdd:  "to",
+		TargetFollowers + "-" + ActionShow:    "from",
+		TargetFollowings + "-" + ActionShow:   "from",
+		TargetMedia + "-" + ActionShow:        "from",
+		TargetNote + "-" + ActionAdd:          "to",
+		TargetNote + "-" + ActionRemove:       "from",
+		TargetStatus + "-" + ActionAdd:        "to",
+		TargetStatus + "-" + ActionRemove:     "from",
+		TargetThread + "-" + ActionShow:       "from",
+		TargetVotes + "-" + ActionAdd:         "to",
 	}
 }

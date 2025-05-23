@@ -1,0 +1,95 @@
+{{- define "filterList" -}}
+{{ print "" }}
+{{ headerFormat "Filters:" }}
+{{- range . -}}
+{{ print "" }}
+{{ "\u2022" }} {{ .Title }} ({{ .ID }})
+{{- end }}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+
+{{- define "filter" -}}
+{{ print "" }}
+{{ headerFormat "FILTER ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "TITLE:" }}
+{{ .Title }}
+{{ print "" }}
+{{ headerFormat "ACTION:" }}
+{{ .Action }}
+{{ print "" }}
+{{ headerFormat "FILTER KEYWORDS:" }}
+{{- if eq (len .Keywords) 0 -}}
+{{ print "" }}
+None
+{{- else -}}
+{{- range .Keywords -}}
+{{ print "" }}
+{{ "\u2022" }} {{ .Keyword }} ({{ .ID }})
+{{- /* End ranging over keywords */ -}}
+{{- end -}}
+{{- /* End if number of keywords == 0 */ -}}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "FILTERED STATUSES:" }}
+{{- if eq (len .Statuses) 0 -}}
+{{ print "" }}
+None
+{{- else -}}
+{{- range .Statuses -}}
+{{ print "" }}
+{{ "\u2022" }} filter-status ID: {{ .ID }}
+  ID of the filtered status: {{ .StatusID }}
+{{- /* End ranging over filtered statuses */ -}}
+{{- end -}}
+{{- /* End if number of filtered statuses == 0 */ -}}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "CONTEXT:" }}
+{{- range .Context -}}
+{{ print "" }}
+{{ "\u2022" }} {{ . }}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{ headerFormat "EXPIRES AT:" }}
+{{- if .ExpiresAt.IsZero -}}
+{{ print "" }}
+This filter does not expire.
+{{ print "" }}
+{{- else -}}
+{{ print "" }}
+{{ formatDateTime .ExpiresAt }}
+{{ print "" }}
+{{- /* End if filter has an expiration date/time */ -}}
+{{- end -}}
+{{ print "" }}
+{{ print "" }}
+{{- end -}}
+
+{{- define "filter-keyword" -}}
+{{ print "" }}
+{{ headerFormat "FILTER KEYWORD ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "KEYWORD:" }}
+{{ .Keyword }}
+{{ print "" }}
+{{ headerFormat "WHOLE WORD:" }}
+{{ .WholeWord }}
+{{ print "" }}
+{{ end -}}
+
+{{- define "filter-status" -}}
+{{ print "" }}
+{{ headerFormat "FILTER STATUS ID:" }}
+{{ .ID }}
+{{ print "" }}
+{{ headerFormat "STATUS ID OF THE FILTERED STATUS:" }}
+{{ .StatusID }}
+{{ print "" }}
+{{ end -}}

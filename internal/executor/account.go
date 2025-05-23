@@ -104,7 +104,11 @@ func accountShow(
 		}
 	} else {
 		if accountName == "" {
-			return missingAccountNameError{action: cli.ActionShow}
+			return missingValueError{
+				valueType: "name",
+				target:    cli.TargetAccount,
+				action:    cli.ActionShow,
+			}
 		}
 
 		if err := client.Call("GTSClient.GetAccount", accountName, &account); err != nil {
@@ -202,7 +206,11 @@ func accountMute(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionMute}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionMute,
+		}
 	}
 
 	var accountID string
@@ -249,7 +257,11 @@ func accountFollow(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionFollow}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionFollow,
+		}
 	}
 
 	var accountID string
@@ -290,7 +302,11 @@ func accountUnfollow(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionUnfollow}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionUnfollow,
+		}
 	}
 
 	var accountID string
@@ -323,7 +339,11 @@ func accountUnmute(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionUnmute}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionUnmute,
+		}
 	}
 
 	var accountID string
@@ -356,7 +376,11 @@ func accountBlock(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionBlock}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionBlock,
+		}
 	}
 
 	var accountID string
@@ -397,7 +421,11 @@ func accountUnblock(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionUnblock}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionUnblock,
+		}
 	}
 
 	var accountID string

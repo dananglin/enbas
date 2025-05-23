@@ -242,7 +242,11 @@ func accessSwitchToAccount(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: "switch the access to"}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    "switch the access to",
+		}
 	}
 
 	// Create the client to the backend enbas server

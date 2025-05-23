@@ -12,11 +12,13 @@ const timeDurationRegexPattern string = `[0-9]{1,4}\s+(days?|hours?|minutes?|sec
 
 type TimeDurationValue struct {
 	duration time.Duration
+	isSet    bool
 }
 
 func NewTimeDurationValue(defaultDuration time.Duration) TimeDurationValue {
 	return TimeDurationValue{
 		duration: defaultDuration,
+		isSet:    false,
 	}
 }
 
@@ -32,27 +34,43 @@ func (v *TimeDurationValue) Set(value string) error {
 
 	var err error
 
-	for ind := range len(matches) {
+	for idx := range matches {
 		switch {
-		case strings.Contains(matches[ind], "day"):
-			days, err = parseInt(matches[ind])
+		case strings.Contains(matches[idx], "day"):
+			days, err = parseInt(matches[idx])
 			if err != nil {
-				return fmt.Errorf("unable to parse the number of days from %s: %w", matches[ind], err)
+				return fmt.Errorf(
+					"unable to parse the number of days from %s: %w",
+					matches[idx],
+					err,
+				)
 			}
-		case strings.Contains(matches[ind], "hour"):
-			hours, err = parseInt(matches[ind])
+		case strings.Contains(matches[idx], "hour"):
+			hours, err = parseInt(matches[idx])
 			if err != nil {
-				return fmt.Errorf("unable to parse the number of hours from %s: %w", matches[ind], err)
+				return fmt.Errorf(
+					"unable to parse the number of hours from %s: %w",
+					matches[idx],
+					err,
+				)
 			}
-		case strings.Contains(matches[ind], "minute"):
-			minutes, err = parseInt(matches[ind])
+		case strings.Contains(matches[idx], "minute"):
+			minutes, err = parseInt(matches[idx])
 			if err != nil {
-				return fmt.Errorf("unable to parse the number of minutes from %s: %w", matches[ind], err)
+				return fmt.Errorf(
+					"unable to parse the number of minutes from %s: %w",
+					matches[idx],
+					err,
+				)
 			}
-		case strings.Contains(matches[ind], "second"):
-			seconds, err = parseInt(matches[ind])
+		case strings.Contains(matches[idx], "second"):
+			seconds, err = parseInt(matches[idx])
 			if err != nil {
-				return fmt.Errorf("unable to parse the number of seconds from %s: %w", matches[ind], err)
+				return fmt.Errorf(
+					"unable to parse the number of seconds from %s: %w",
+					matches[idx],
+					err,
+				)
 			}
 		}
 	}
@@ -60,8 +78,13 @@ func (v *TimeDurationValue) Set(value string) error {
 	durationValue := (days * 86400) + (hours * 3600) + (minutes * 60) + seconds
 
 	v.duration = time.Duration(durationValue) * time.Second
+	v.isSet = true
 
 	return nil
+}
+
+func (v *TimeDurationValue) IsSet() bool {
+	return v.isSet
 }
 
 func (v *TimeDurationValue) Value() time.Duration {

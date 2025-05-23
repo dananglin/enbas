@@ -6,11 +6,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strings"
 	"text/template"
-	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/model"
@@ -219,6 +217,26 @@ func PrintAliases(settings Settings, aliases map[string]string) error {
 	return renderTemplateToPager(settings, "aliases", "", aliases)
 }
 
+// PrintFilters prints the user's list of filters.
+func PrintFilters(settings Settings, filters []model.FilterV2) error {
+	return renderTemplateToPager(settings, "filterList", "", filters)
+}
+
+// PrintFilter prints the details of a filter.
+func PrintFilter(settings Settings, filter model.FilterV2) error {
+	return renderTemplateToPager(settings, "filter", "", filter)
+}
+
+// PrintFilterKeyword prints the details of a filter-keyword.
+func PrintFilterKeyword(settings Settings, filterKeyword model.FilterKeyword) error {
+	return renderTemplateToPager(settings, "filter-keyword", "", filterKeyword)
+}
+
+// PrintFilterStatus prints the details of a filter-status.
+func PrintFilterStatus(settings Settings, filterStatus model.FilterStatus) error {
+	return renderTemplateToPager(settings, "filter-status", "", filterStatus)
+}
+
 func renderTemplateToPager(settings Settings, templateName, myAccountID string, data any) error {
 	if settings.pager == "" {
 		return renderTemplateToStdout(
@@ -295,25 +313,9 @@ func renderTemplate(
 	myAccountID string,
 	data any,
 ) error {
-	funcMap := template.FuncMap{
-		"convertHTMLToText":     convertHTMLToText,
-		"formatDate":            formatDate,
-		"formatDateTime":        formatDateTime,
-		"headerFormat":          headerFormat(settings.noColor),
-		"fieldFormat":           fieldFormat(settings.noColor),
-		"fullDisplayNameFormat": fullDisplayNameFormat(settings.noColor),
-		"boldFormat":            boldFormat(settings.noColor),
-		"drawCardSeparator":     drawCardSeparator(settings.lineWrapCharacterLimit),
-		"drawBoostSymbol":       drawBoostSymbol(settings.noColor),
-		"drawLikeSymbol":        drawLikeSymbol(settings.noColor),
-		"drawBookmarkSymbol":    drawBookmarkSymbol(settings.noColor),
-		"wrapLines":             wrapLines(settings.lineWrapCharacterLimit),
-		"showPollResults":       showPollResults(myAccountID),
-		"getPollOptionDetails":  getPollOptionDetails(settings.noColor, settings.lineWrapCharacterLimit),
-		"notificationSummary":   notificationSummary,
-	}
-
-	tmpl, err := template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*")
+	tmpl, err := template.New("").
+		Funcs(funcMap(settings, myAccountID)).
+		ParseFS(templatesFS, "templates/*")
 	if err != nil {
 		return fmt.Errorf("error parsing the templates: %w", err)
 	}
@@ -331,159 +333,4 @@ func printToStdout(text string) {
 
 func printToStderr(text string) {
 	_, _ = os.Stderr.WriteString(text)
-}
-
-func formatDate(date time.Time) string {
-	return date.Local().Format("02 Jan 2006") //nolint:gosmopolitan
-}
-
-func formatDateTime(date time.Time) string {
-	return date.Local().Format("02 Jan 2006, 15:04 (MST)") //nolint:gosmopolitan
-}
-
-func showPollResults(myAccountID string) func(string, bool, bool) bool {
-	return func(statusOwnerID string, expired, voted bool) bool {
-		return (myAccountID == statusOwnerID) || expired || voted
-	}
-}
-
-func headerFormat(noColor bool) func(string) string {
-	return func(text string) string {
-		if noColor {
-			return text
-		}
-
-		return boldblue + text + reset
-	}
-}
-
-func fieldFormat(noColor bool) func(string) string {
-	return func(text string) string {
-		if noColor {
-			return text + ":"
-		}
-
-		return green + text + reset + ":"
-	}
-}
-
-func boldFormat(noColor bool) func(string) string {
-	return func(text string) string {
-		if noColor {
-			return text
-		}
-
-		return bold + text + reset
-	}
-}
-
-func fullDisplayNameFormat(noColor bool) func(string, string) string {
-	return func(displayName, acct string) string {
-		// use this pattern to remove all emoji strings
-		pattern := regexp.MustCompile(`\s:[A-Za-z0-9_]*:`)
-
-		var builder strings.Builder
-
-		if noColor {
-			builder.WriteString(pattern.ReplaceAllString(displayName, ""))
-		} else {
-			builder.WriteString(boldmagenta + pattern.ReplaceAllString(displayName, "") + reset)
-		}
-
-		builder.WriteString(" (@" + acct + ")")
-
-		return builder.String()
-	}
-}
-
-func drawCardSeparator(charLimit int) func() string {
-	separator := strings.Repeat("\u2501", charLimit)
-
-	return func() string {
-		return separator
-	}
-}
-
-func drawBoostSymbol(noColor bool) func(bool) string {
-	return func(boosted bool) string {
-		if boosted && !noColor {
-			return boldyellow + "\u2BAD" + reset
-		}
-
-		return "\u2BAD"
-	}
-}
-
-func drawLikeSymbol(noColor bool) func(bool) string {
-	return func(liked bool) string {
-		if liked && !noColor {
-			return boldyellow + "\uF51F" + reset
-		} else if liked && noColor {
-			return "\uF51F"
-		}
-
-		return "\uF41E"
-	}
-}
-
-func drawBookmarkSymbol(noColor bool) func(bool) string {
-	return func(bookmarked bool) string {
-		if bookmarked && !noColor {
-			return boldyellow + "\uF47A" + reset
-		} else if bookmarked && noColor {
-			return "\uF47A"
-		}
-
-		return "\uF461"
-	}
-}
-
-type notificationSummaryDetails struct {
-	Header  string
-	Details string
-}
-
-func notificationSummary(notificationType string, fullDisplayName string) notificationSummaryDetails {
-	switch notificationType {
-	case "follow":
-		return notificationSummaryDetails{
-			Header:  "SOMEONE FOLLOWED YOU:",
-			Details: fullDisplayName + " followed you.",
-		}
-	case "follow_request":
-		return notificationSummaryDetails{
-			Header:  "YOU'VE RECEIVED A FOLLOW REQUEST:",
-			Details: fullDisplayName + " sent you a follow request.",
-		}
-	case "mention":
-		return notificationSummaryDetails{
-			Header:  "SOMEONE MENTIONED YOU IN A STATUS:",
-			Details: fullDisplayName + " mentioned you in the below status.",
-		}
-	case "reblog":
-		return notificationSummaryDetails{
-			Header:  "SOMEONE BOOSTED YOUR STATUS:",
-			Details: fullDisplayName + " boosted your status.",
-		}
-	case "favourite":
-		return notificationSummaryDetails{
-			Header:  "SOMEONE LIKED YOUR STATUS:",
-			Details: fullDisplayName + " liked your status.",
-		}
-	case "poll":
-		return notificationSummaryDetails{
-			Header:  "POLL CLOSED:",
-			Details: "The poll below has closed.",
-		}
-	case "status":
-		return notificationSummaryDetails{
-			Header:  "SOMEONE POSTED A STATUS:",
-			Details: fullDisplayName + " posted the status below.",
-		}
-	default:
-		return notificationSummaryDetails{
-			Header:  "UNKNOWN NOTIFICATION TYPE:",
-			Details: "Received a notification of an unknown type.",
-		}
-	}
 }

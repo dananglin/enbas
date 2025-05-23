@@ -91,11 +91,19 @@ func noteAddToAccount(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: "add the private note to"}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    "add the " + cli.TargetNote + " to",
+		}
 	}
 
 	if content == "" {
-		return emptyContentError{action: cli.ActionAdd, target: cli.TargetNote}
+		return missingValueError{
+			valueType: "content",
+			target:    cli.TargetNote,
+			action:    "add to the " + cli.TargetAccount,
+		}
 	}
 
 	var accountID string
@@ -154,7 +162,11 @@ func noteRemoveFromAccount(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: "remove the private note from"}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    "remove the " + cli.TargetNote + " from",
+		}
 	}
 
 	var accountID string

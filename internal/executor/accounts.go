@@ -102,8 +102,9 @@ func accountsAddToList(
 	}
 
 	if accountNames.Empty() {
-		return zeroAccountNamesError{
-			action: "add to the list",
+		return zeroValuesError{
+			valueType: "account",
+			action:    "add to the list",
 		}
 	}
 
@@ -201,8 +202,9 @@ func accountsRemoveFromList(
 	}
 
 	if accountNames.Empty() {
-		return zeroAccountNamesError{
-			action: "add to the list",
+		return zeroValuesError{
+			valueType: "account",
+			action:    "remove from the list",
 		}
 	}
 

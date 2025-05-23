@@ -49,6 +49,10 @@ func testTimeDurationValueParsing(args []string, want string) func(t *testing.T)
 			t.Fatalf("Received an error parsing the flag: %v", err)
 		}
 
+		if !duration.IsSet() {
+			t.Errorf("Unexpected result received from IsSet() method.\nwant: true\n got: %t", duration.IsSet())
+		}
+
 		got := duration.String()
 
 		if got != want {

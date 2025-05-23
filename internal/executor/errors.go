@@ -40,13 +40,16 @@ func (e missingIDError) Error() string {
 	return "please provide the ID of the " + e.target + " you want to " + e.action
 }
 
-type emptyContentError struct {
-	action string
-	target string
+type missingValueError struct {
+	valueType string
+	target    string
+	action    string
 }
 
-func (e emptyContentError) Error() string {
-	return "please specify the content of the " + e.target + " you want to " + e.action
+func (e missingValueError) Error() string {
+	return "please specify the " + e.valueType +
+		" of the " + e.target +
+		" you want to " + e.action
 }
 
 type unsupportedTargetToTargetError struct {
@@ -65,14 +68,6 @@ func (e unsupportedTargetToTargetError) Error() string {
 		"' is not a supported operation"
 }
 
-type missingTagNameError struct {
-	action string
-}
-
-func (e missingTagNameError) Error() string {
-	return "please specify the name of the tag you want to " + e.action
-}
-
 type forbiddenActionOnStatusError struct {
 	action              string
 	includeNotMentioned bool
@@ -88,26 +83,25 @@ func (e forbiddenActionOnStatusError) Error() string {
 	return msg
 }
 
-type missingAccountNameError struct {
-	action string
-}
-
-func (e missingAccountNameError) Error() string {
-	return "please specify the name of the account you want to " + e.action
-}
-
 type missingAccountInCredentialsError struct{}
 
 func (e missingAccountInCredentialsError) Error() string {
 	return "this account is not present in the credentials file"
 }
 
-type zeroAccountNamesError struct {
-	action string
+type zeroValuesError struct {
+	valueType string
+	action    string
 }
 
-func (e zeroAccountNamesError) Error() string {
-	return "please specify one or more account(s) you want to " + e.action
+func (e zeroValuesError) Error() string {
+	msg := "please specify one or more " + e.valueType + "(s)"
+
+	if e.action != "" {
+		msg += " to " + e.action
+	}
+
+	return msg
 }
 
 type notFollowingError struct {
@@ -116,12 +110,6 @@ type notFollowingError struct {
 
 func (e notFollowingError) Error() string {
 	return "you are not following " + e.account
-}
-
-type zeroVotesError struct{}
-
-func (e zeroVotesError) Error() string {
-	return "please select one or more options in the poll to vote for"
 }
 
 type loginNoInstanceError struct{}

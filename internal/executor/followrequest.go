@@ -55,7 +55,11 @@ func followRequestAccept(
 	}
 
 	if accountName == "" {
-		return missingAccountNameError{action: cli.ActionAccept}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionAccept,
+		}
 	}
 
 	var accountID string
@@ -96,6 +100,14 @@ func followRequestReject(
 		flags,
 	); err != nil {
 		return err
+	}
+
+	if accountName == "" {
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAccount,
+			action:    cli.ActionReject,
+		}
 	}
 
 	if err := client.Call("GTSClient.GetAccountID", accountName, &accountID); err != nil {

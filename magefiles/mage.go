@@ -143,7 +143,7 @@ func (Build) Binary() error {
 		return fmt.Errorf("error building the binary: %w", err)
 	}
 
-	fmt.Println("Binary successfully built to ", binary())
+	fmt.Printf("Binary successfully built to %q.\n", binary())
 
 	return nil
 }

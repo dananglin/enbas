@@ -38,9 +38,16 @@ const (
 	flagExcludeReblogs            string = "exclude-reblogs"
 	flagExcludeReplies            string = "exclude-replies"
 	flagExclusive                 string = "exclusive"
+	flagFilterAction              string = "filter-action"
+	flagFilterContext             string = "filter-context"
+	flagFilterExpiresIn           string = "filter-expires-in"
+	flagFilterId                  string = "filter-id"
+	flagFilterKeywordId           string = "filter-keyword-id"
+	flagFilterStatusId            string = "filter-status-id"
 	flagFull                      string = "full"
 	flagInReplyTo                 string = "in-reply-to"
 	flagIncludeNotificationType   string = "include-notification-type"
+	flagKeyword                   string = "keyword"
 	flagLanguage                  string = "language"
 	flagLimit                     string = "limit"
 	flagListId                    string = "list-id"
@@ -89,6 +96,7 @@ const (
 	flagUrl                       string = "url"
 	flagVisibility                string = "visibility"
 	flagVote                      string = "vote"
+	flagWholeWord                 string = "whole-word"
 	flagWithoutIdleTimeout        string = "without-idle-timeout"
 )
 
@@ -112,9 +120,16 @@ func flagUsageMap() map[string]string {
 		flagExcludeReblogs:            "exclude statuses that are reblogs (boosts) of other statuses",
 		flagExcludeReplies:            "exclude statuses that are replies to other statuses",
 		flagExclusive:                 "hide posts from members of this list from your home timeline",
+		flagFilterAction:              "the action to take when a status matches this filter",
+		flagFilterContext:             "the context in which the filter should be applied",
+		flagFilterExpiresIn:           "the time from when the filter is created that it should expire",
+		flagFilterId:                  "the ID of the filter",
+		flagFilterKeywordId:           "the ID of the filter-keyword",
+		flagFilterStatusId:            "the ID of the filter-status",
 		flagFull:                      "print the application's full build information",
 		flagInReplyTo:                 "the ID of the status that you want to reply to",
 		flagIncludeNotificationType:   "the type of notifications to include in the list",
+		flagKeyword:                   "the text to be filtered",
 		flagLanguage:                  "the ISO 639 language code for this {target}",
 		flagLimit:                     "the limit of items to display",
 		flagListId:                    "the ID of the list",
@@ -137,7 +152,7 @@ func flagUsageMap() map[string]string {
 		flagOnlyPinned:                "only show the account's pinned statuses",
 		flagOnlyPublic:                "only show the account's public posts",
 		flagPollAllowsMultipleChoices: "allow viewers to make multiple choices in the poll",
-		flagPollExpiresIn:             "the duration in which the poll is open for",
+		flagPollExpiresIn:             "the time from when the poll is created that it should expire",
 		flagPollHidesVoteCounts:       "hide the vote count until the poll is closed",
 		flagPollOption:                "a poll option (use this flag multiple times to set multiple poll options)",
 		flagQuery:                     "the search query string",
@@ -163,6 +178,7 @@ func flagUsageMap() map[string]string {
 		flagUrl:                       "the URL of your GoToSocial instance",
 		flagVisibility:                "The visibility of the {target}",
 		flagVote:                      "the option in the poll to vote for",
+		flagWholeWord:                 "the filter should consider word boundaries",
 		flagWithoutIdleTimeout:        "{action} the {target} without an idle timeout",
 	}
 }
@@ -266,6 +282,45 @@ func targetActionFlagMap() map[string][]string {
 		TargetFavourites + "-" + ActionShow: {
 			flagLimit,
 		},
+		TargetFilter + "-" + ActionCreate: {
+			flagTitle,
+			flagFilterContext,
+			flagFilterExpiresIn,
+			flagFilterAction,
+		},
+		TargetFilter + "-" + ActionDelete: {
+			flagFilterId,
+		},
+		TargetFilter + "-" + ActionEdit: {
+			flagFilterId,
+			flagTitle,
+			flagFilterContext,
+			flagFilterExpiresIn,
+			flagFilterAction,
+		},
+		TargetFilter + "-" + ActionShow: {
+			flagFilterId,
+		},
+		TargetFilterKeyword + "-" + ActionAdd: {},
+		TargetFilterKeyword + "-" + ActionDelete: {
+			flagFilterKeywordId,
+		},
+		TargetFilterKeyword + "-" + ActionEdit: {
+			flagFilterKeywordId,
+			flagKeyword,
+			flagWholeWord,
+		},
+		TargetFilterKeyword + "-" + ActionShow: {
+			flagFilterKeywordId,
+		},
+		TargetFilterStatus + "-" + ActionAdd: {},
+		TargetFilterStatus + "-" + ActionDelete: {
+			flagFilterStatusId,
+		},
+		TargetFilterStatus + "-" + ActionShow: {
+			flagFilterStatusId,
+		},
+		TargetFilters + "-" + ActionShow: {},
 		TargetFollowRequest + "-" + ActionAccept: {
 			flagAccountName,
 		},

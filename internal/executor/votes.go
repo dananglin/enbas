@@ -93,7 +93,10 @@ func votesAddToStatus(
 	}
 
 	if votes.Empty() {
-		return zeroVotesError{}
+		return zeroValuesError{
+			valueType: "poll options",
+			action:    "vote for",
+		}
 	}
 
 	var status model.Status

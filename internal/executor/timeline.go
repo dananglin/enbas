@@ -94,8 +94,10 @@ func timelineShow(
 		)
 	case "tag":
 		if tagName == "" {
-			return missingTagNameError{
-				action: "view the timeline in",
+			return missingValueError{
+				valueType: "name",
+				target:    cli.TargetTag,
+				action:    "view the timeline in",
 			}
 		}
 
