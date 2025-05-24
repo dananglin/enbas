@@ -1,6 +1,6 @@
 module codeflow.dananglin.me.uk/apollo/enbas/tools
 
-go 1.24.1
+go 1.24.3
 
 tool (
 	github.com/securego/gosec/v2/cmd/gosec

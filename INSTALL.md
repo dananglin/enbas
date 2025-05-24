@@ -22,7 +22,7 @@ step-by-step instructions to help you out.
 ## Build requirements
 
 - **go:**
-A minimum version of Go 1.24.1 is required for installing `enbas`.
+A minimum version of Go 1.24.3 is required for installing `enbas`.
 Visit https://go.dev/dl/ to download the latest version.
 - **mage:**
 Mage is a build tool similar to `make`.
