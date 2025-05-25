@@ -2,8 +2,6 @@
 {{- define "enbas.5" -}}
 {{ print "" }}
 .TH {{ allCaps .ApplicationName }} 5 "{{ dateNow }}" "{{ .ApplicationName}} {{ .BinaryVersion }}" "{{ titled .ApplicationName }} Configuration Manual"
-.\" disable justification (adjust text to left margin only)
-.ad l
 .\" -----------------
 .\" THE MAIN CONTENT
 .\" -----------------
@@ -134,10 +132,9 @@ on Windows the default path will be set within the \fB%AppData%\fR directory.
 .TP
 .B XDG_CONFIG_HOME
 The path to your home configuration directory\&.
+{{ seeAlso "enbas.5" }}
 .SH MAINTAINERS
 \fBDan Anglin\fR <d.n.i.anglin@gmail.com>
-.SH SEE ALSO
-{{ .ApplicationName }}(1)
 {{ print "" }}
 {{- /* End template */ -}}
 {{- end }}

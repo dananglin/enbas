@@ -119,10 +119,12 @@ __build/
     └── man
         ├── man1
         │   └── enbas.1
-        └── man5
-            └── enbas.5
+        ├── man5
+        │   └── enbas.5
+        └── man7
+            └── enbas-topics.7
 
-9 directories, 4 files
+10 directories, 5 files
 ```
 
 ## Install
@@ -141,6 +143,7 @@ install --mode 0755 __build/bin/enbas /usr/local/bin
 # install the man pages
 install -D --mode 0644 __build/share/man/man1/enbas.1 /usr/local/share/man/man1/enbas.1
 install -D --mode 0644 __build/share/man/man5/enbas.5 /usr/local/share/man/man5/enbas.5
+install -D --mode 0644 __build/share/man/man7/enbas-topics.7 /usr/local/share/man/man5/enbas-topics.7
 
 # install the example configuration file
 install -D --mode 0644 __build/share/doc/enbas/examples/config.json /usr/local/share/doc/enbas/examples/config.json
@@ -157,6 +160,7 @@ install --mode 0755 __build/bin/enbas ${HOME}/.local/bin
 # install the man pages
 install -D --mode 0644 __build/share/man/man1/enbas.1 ${HOME}/.local/share/man/man1/enbas.1
 install -D --mode 0644 __build/share/man/man5/enbas.5 ${HOME}/.local/share/man/man5/enbas.5
+install -D --mode 0644 __build/share/man/man7/enbas-topics.7 ${HOME}/share/man/man5/enbas-topics.7
 
 # install the example configuration file
 install -D --mode 0644 __build/share/doc/enbas/examples/config.json ${HOME}/.local/share/doc/enbas/examples/config.json

@@ -9,7 +9,7 @@ import (
 
 type Definitions struct {
 	TopLevelFlags  map[string]TopLevelFlag `json:"topLevelFlags"`
-	BuiltInAliases map[string][]string     `json:"builtInAliases"`
+	BuiltInAliases map[string]BuiltInAlias `json:"builtInAliases"`
 	Flags          map[string]string       `json:"flags"`
 	Actions        map[string]string       `json:"actions"`
 	Targets        map[string]Target       `json:"targets"`
@@ -20,6 +20,11 @@ type TopLevelFlag struct {
 	Type        string `json:"type"`
 	Default     string `json:"default"`
 	Required    bool   `json:"bool"`
+}
+
+type BuiltInAlias struct {
+	Description string   `json:"description"`
+	Operation   []string `json:"operation"`
 }
 
 type Target struct {

@@ -1,11 +1,8 @@
 {{- /* vim: set ft=groff : */ -}}
 {{- define "enbas.1" -}}
 .\" Manpage for {{ .ApplicationName }}
-{{- $exampleStatusID := "01AV6D5YIKKEWDTLXTGVTTRW9dCHOLGJ" -}}
 {{ print "" }}
 .TH {{ allCaps .ApplicationName }} 1 "{{ dateNow }}" "{{ .ApplicationName}} {{ .BinaryVersion }}" "{{ titled .ApplicationName }} Manual"
-.\" disable justification (adjust text to left margin only)
-.ad l
 .\" -----------------
 .\" THE MAIN CONTENT
 .\" -----------------
@@ -47,9 +44,13 @@ and much more\&.
 .RE
 .RE
 
-Throughout this manual (and as you interact with the program), you'll come across the terms \fBaction\fR and \fBtarget\fR\&. An \fBaction\fR is a built-in keyword that describes the operation to perform on a target\&. For example, the command \fB{{ .ApplicationName }} show status \-\-status\-id {{ $exampleStatusID }}\fR uses the action keyword \fBshow\fR to fetch and display the details of the \fBstatus\fR with ID \fB{{ $exampleStatusID }}\fR\&.
+Throughout this manual (and as you interact with the program), you'll come across the terms \fBaction\fR, \fBtarget\fR, and \fBoperation\fR\&.
+
+An \fBaction\fR is a built-in keyword that describes the operation to perform on a target\&. For example, the command \fB{{ .ApplicationName }} show status \-\-status\-id {{ template "status-id" }}\fR uses the action keyword \fBshow\fR to fetch and display the details of the \fBstatus\fR with ID \fB{{ template "status-id" }}\fR\&.
 
 A \fBtarget\fR is a resource that you can perform an action on\&. This can be a GoToSocial resource (e\&.g\&. an account, a status or a timeline) or a local resource (e\&.g\&. your configuration, your aliases or the usage documentation)\&. You can view the list of all the targets that you can interact with by running \fB{{ .ApplicationName }} help\fR\&.
+
+An \fBoperation\fR is an action performed on a target, or an action performed on a target in relation to another target (e\f&.g\f&. create list or add account to list)\f&. You can find the available operations for each target in this manual\f&.
 .SH TOP LEVEL FLAGS
 {{- range $name, $flag := .Definitions.TopLevelFlags -}}
 {{ print "" }}
@@ -126,6 +127,9 @@ Set \fB$NO_COLOR\fR to any value to disable the ANSI colour output when displayi
 .br
 The value of the \fB\-\-no-color\fR flag takes precedence over \fB$NO_COLOR\fR if both are used.
 .RE
+{{ seeAlso "enbas.1" }}
 .SH MAINTAINERS
 \fBDan Anglin\fR <d.n.i.anglin@gmail.com>
+{{ print "" }}
+{{- /* End template */ -}}
 {{- end }}

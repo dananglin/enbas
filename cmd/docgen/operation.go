@@ -58,6 +58,10 @@ func newOperation(
 			desc += " This flag can be used multiple times to specify multiple values."
 		}
 
+		if flags[idx].Type == "internalFlag.TimeDurationValue" {
+			desc += " This is a time duration flag.\n\nSee \\fBTHE TIME DURATION FLAG TYPE\\fR section of " + application + "-topics(7) for more details."
+		}
+
 		operationFlags[idx] = operationFlag{
 			Name:            flags[idx].Name,
 			Required:        flags[idx].Required,
@@ -111,6 +115,10 @@ func newTargetToTargetOperation(
 
 		if strings.HasPrefix(flags[idx].Type, "internalFlag.Multi") {
 			desc += " This flag can be used multiple times to specify multiple values."
+		}
+
+		if flags[idx].Type == "internalFlag.TimeDurationValue" {
+			desc += " This is a time duration flag.\n\nSee \\fBTHE TIME DURATION FLAG TYPE\\fR section of " + application + "-topics(7) for more details."
 		}
 
 		operationFlags[idx] = operationFlag{

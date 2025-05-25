@@ -16,10 +16,10 @@ func BuiltInAlias(alias string) ([]string, bool) {
 // builtInAliasMap returns a map of the built-in aliases.
 func builtInAliasMap() map[string][]string{
   return map[string][]string{
-    {{- range $name, $commandWords :=  .BuiltInAliases -}}
+    {{- range $name, $alias :=  .BuiltInAliases -}}
     {{ print "" }}
     {{ printf "%q" $name }}: {
-    {{- range $commandWords -}}
+    {{- range $alias.Operation -}}
     {{ print "" }}
     {{ printf "%q," . }}
     {{- end -}}

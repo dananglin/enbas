@@ -14,10 +14,22 @@
     }
   },
   "builtInAliases": {
-    "help": ["show", "usage"],
-    "login": ["create", "access"],
-    "whoami": ["verify", "access"],
-    "version": ["show", "version"]
+    "help": {
+      "description": "prints the usage documentation",
+      "operation": ["show", "usage"]
+    },
+    "login": {
+      "description": "performs the login process for you to log into your GoToSocial instance",
+      "operation": ["create", "access"]
+    },
+    "whoami": {
+      "description": "prints the name of the account that you are signed into",
+      "operation": ["verify", "access"]
+    },
+    "version": {
+      "description": "prints the application's build information",
+      "operation": ["show", "version"]
+    }
   },
   "flags": {
     "account-name": "the name of the account to {action}",
@@ -167,7 +179,7 @@
           }
         },
         "verify": {
-          "description": "verifies that you are authenticated into your GoToSocial instance and prints the name of the account that you are logged in to"
+          "description": "verifies that you are authenticated into your GoToSocial instance and prints the name of the account that you are signed into"
         }
       }
     },
@@ -429,7 +441,7 @@
       }
     },
     "alias": {
-      "description": "the shortname to a set of arguments",
+      "description": "a custom command mapped to an operation",
       "actions": {
         "create": {
           "description": "creates a new alias",
@@ -552,7 +564,7 @@
           "description": "creates a new configuration file",
           "extraDetails": [
             "The configuration file will be created using the default path unless",
-            "the --config top-level flag is used"
+            "the --config top-level flag is used."
           ]
         }
       }

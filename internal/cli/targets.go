@@ -65,7 +65,7 @@ func targetDescMap() map[string]string {
 		TargetAccess:          "your access to your GoToSocial instance",
 		TargetAccount:         "a local or remote account",
 		TargetAccounts:        "one or accounts",
-		TargetAlias:           "the shortname to a set of arguments",
+		TargetAlias:           "a custom command mapped to an operation",
 		TargetAliases:         "the list of your aliases",
 		TargetBlockedAccounts: "the accounts that are blocked by you",
 		TargetBookmarks:       "the statuses that you've bookmarked",

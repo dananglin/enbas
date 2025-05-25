@@ -1,0 +1,121 @@
+{{- /* vim: set ft=groff : */ -}}
+{{- define "enbas-topics.7" -}}
+.\" Manpage for {{ .ApplicationName }} topics
+.TH {{ allCaps .ApplicationName }}-TOPICS 7 "{{ dateNow }}" "{{ .ApplicationName }} {{ .BinaryVersion }}" "{{ titled .ApplicationName }} Manual"
+.\" -----------------
+.\" THE MAIN CONTENT
+.\" -----------------
+.SH NAME
+{{ .ApplicationName }} \- topics
+.SH SYNOPSIS
+.B {{ .ApplicationName }} *
+.SH DESCRIPTION
+This section discusses various features in {{ .ApplicationName }}.
+.SH THE TIME DURATION FLAG TYPE
+.SS Overview
+The time duration flag type is a custom type that is used for setting a time duration on a target (for example specifying the expiry time on a newly created poll). The time duration flag type takes a string value and converts it into a duration of time. An example string input can be something like \fB"3 days, 12 hours and 39 minutes"\fR which the flag will convert it into a time duration of \fB304,740 seconds\fR. The time duration flag type can convert units in days, hours, minutes and seconds.
+
+To ensure that your string value is converted correctly there are a few simple rules to follow.
+.IP \(bu 3
+The string value must be wrapped in quotes.
+.IP \(bu
+Use \fBday\fR or \fBdays\fR to convert the number of days.
+.IP \(bu
+Use \fBhour\fR or \fBhours\fR to convert the number of hours.
+.IP \(bu
+Use \fBminute\fR or \fBminutes\fR to convert the number of minutes.
+.IP \(bu
+Use \fBsecond\fR or \fBseconds\fR to convert the number of seconds.
+.IP \(bu
+There must be at least one space between the quantity and the unit of time.
+.br
+For example, "7 days" is a valid input, but "7days" is invalid.
+.SS Examples of valid string inputs
+.IP \(bu 3
+"3 days"
+.IP \(bu
+"6 hours, 45 minutes and 1 second"
+.IP \(bu
+"1 day, 15 hours 31 minutes and 12 seconds"
+.IP \(bu
+"(7 days) (1 hour) (21 minutes) (35 seconds)"
+.SS Example operations
+.IP \(bu 3
+Mute an account for 30 minutes.
+.br
+.B {{ .ApplicationName }} mute account --account-name @bob@gts.social.example --duration \&"30 minutes\&"
+.IP \(bu
+Create a poll that will expire in 12 and a half days.
+.br
+.B {{ .ApplicationName }} create status --content-type plain --visibility public --content \&"Vim or Emacs\&" --add-poll --poll-option vim --poll-option emacs -poll-expires-in \&"12 days and 12 hours\&"
+.IP \(bu
+Expire an existing filter in 1 hour.
+.br
+.B {{ .ApplicationName }} edit filter --filter-id {{ template "filter-id" }} --filter-expires-in \&"1 hour\&"
+.SH ALIASES
+.SS Overview
+Aliases allows you to shorten and customise {{ .ApplicationName }} commands to make the experience of using {{ .ApplicationName }} more easier and familiar to you.
+
+An alias is a custom command that is mapped to an operation. For example you can create an alias called \fB"my-followers"\fR mapped to \fB"show followers from account --my-account"\fR to get the list of your followers.
+
+You can create, edit, rename and delete an alias using the \fBalias\fR target. Search for \fBALIAS\fR in {{ .ApplicationName }}(1) for more details about the available operations available to the \fBalias\fR target.
+
+Your aliases are stored in your configuration file. It is possible to edit your configuration file to create and update aliases but it is encouraged to manage your aliases via {{ .ApplicationName }} as it validates your aliases before saving the changes to your configuration file.
+
+See {{.ApplicationName }}(5) for more information about the configuration file.
+.SS Built-in aliases
+{{- range $alias, $operation := .Definitions.BuiltInAliases -}}
+{{ print "" }}
+{{ builtInAlias $alias $operation }}
+{{- end -}}
+{{ print "" }}
+.SS Validation
+When creating or renaming an alias, {{ .ApplicationName }} validates the name against the below validation rules before saving the alias to the configuration file\&.
+.IP \(bu 3
+The alias name must be a single word with no spaces\&.
+.IP \(bu
+The name must only contain alpha-humeric characters and hyphens\&.
+.IP \(bu
+The name must be at least 3 characters long\&.
+.IP \(bu
+The name must start and end with an alpha-numeric character\&.
+.IP \(bu
+The name must not be a built-in action word (e\&.g\&. create)\&.
+.IP \(bu
+The name must not be a built-in alias\&.
+.RE
+
+If you create an invalid alias directly in your configuration file and attempt to use it, {{ .ApplicationName }} will detect it and fail to perform the operation\&.
+
+You can use the name of an existing target as an alias\&. For example you can create an alias called \fB"lists"\fR mapped to \fB"show lists"\fR\&.
+.SS Examples
+.IP \(bu 3
+Create and use an alias to show my aliases.
+.br
+.B {{ .ApplicationName }} create alias --name aliases --operation \&"show aliases\&"
+.br
+.B {{ .ApplicationName }} aliases
+.IP \(bu
+Create and use an alias called "boost" to boost a status.
+.br
+.B {{ .ApplicationName }} create alias --name boost --operation \&"reblog status --status-id\&"
+.br
+.B {{ .ApplicationName }} boost {{ template "status-id" }}
+.IP \(bu
+Create and use an alias called "fave" to like a status.
+.br
+.B {{ .ApplicationName }} create alias --name fave --operation \&"favourite status --status-id\&"
+.br
+.B {{ .ApplicationName }} fave {{ template "status-id" }}
+.IP \(bu
+Create and use an alias to make a quick public toot.
+.br
+.B {{ .ApplicationName }} create alias --name toot --operation \&"create status --content-type plain --visibility public --content\&"
+.br
+.B {{ .ApplicationName }} toot \&"Hello, Fediverse 👋\&"
+{{ seeAlso "enbas-topics.7" }}
+.SH MAINTAINERS
+\fBDan Anglin\fR <d.n.i.anglin@gmail.com>
+{{ print "" }}
+{{- /* End template */ -}}
+{{- end -}}
