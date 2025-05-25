@@ -57,20 +57,24 @@ func aliasCreate(
 ) error {
 	var (
 		name      string
-		arguments string
+		operation string
 	)
 
 	// Parse the remaining flags.
 	if err := cli.ParseAliasCreateFlags(
 		&name,
-		&arguments,
+		&operation,
 		flags,
 	); err != nil {
 		return err //nolint:wrapcheck
 	}
 
 	if name == "" {
-		return aliasNameUnsetError{}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAlias,
+			action:    cli.ActionCreate,
+		}
 	}
 
 	if !command.ValidAlias(name) {
@@ -80,8 +84,12 @@ func aliasCreate(
 		)
 	}
 
-	if arguments == "" {
-		return aliasArgsUnsetError{}
+	if operation == "" {
+		return missingValueError{
+			valueType: "operation",
+			target:    cli.TargetAlias,
+			action:    cli.ActionCreate,
+		}
 	}
 
 	if _, exists := cli.ActionDesc(name); exists {
@@ -95,7 +103,7 @@ func aliasCreate(
 	if err := config.CreateAlias(
 		configFilepath,
 		name,
-		arguments,
+		operation,
 	); err != nil {
 		return fmt.Errorf("error creating the alias: %w", err)
 	}
@@ -112,24 +120,32 @@ func aliasEdit(
 ) error {
 	var (
 		name      string
-		arguments string
+		operation string
 	)
 
 	// Parse the remaining flags.
 	if err := cli.ParseAliasEditFlags(
 		&name,
-		&arguments,
+		&operation,
 		flags,
 	); err != nil {
 		return err //nolint:wrapcheck
 	}
 
 	if name == "" {
-		return aliasNameUnsetError{}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAlias,
+			action:    cli.ActionEdit,
+		}
 	}
 
-	if arguments == "" {
-		return aliasArgsUnsetError{}
+	if operation == "" {
+		return missingValueError{
+			valueType: "operation",
+			target:    cli.TargetAlias,
+			action:    cli.ActionEdit,
+		}
 	}
 
 	if !command.ValidAlias(name) {
@@ -150,7 +166,7 @@ func aliasEdit(
 	if err := config.EditAlias(
 		configFilepath,
 		name,
-		arguments,
+		operation,
 	); err != nil {
 		return fmt.Errorf("error editing the alias: %w", err)
 	}
@@ -176,7 +192,11 @@ func aliasDelete(
 	}
 
 	if name == "" {
-		return aliasNameUnsetError{}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAlias,
+			action:    cli.ActionDelete,
+		}
 	}
 
 	if err := config.DeleteAlias(
@@ -211,7 +231,11 @@ func aliasRename(
 	}
 
 	if oldName == "" {
-		return aliasOldNameUnsetError{}
+		return missingValueError{
+			valueType: "name",
+			target:    cli.TargetAlias,
+			action:    cli.ActionRename,
+		}
 	}
 
 	if newName == "" {

@@ -110,7 +110,7 @@ func timelineShow(
 			&timeline,
 		)
 	default:
-		return invalidTimelineCategory{category: category.Value()}
+		return invalidTimelineCategoryError{category: category.Value()}
 	}
 
 	if err != nil {

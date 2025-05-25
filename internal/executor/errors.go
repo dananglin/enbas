@@ -195,18 +195,6 @@ func (e zeroConfigurationError) Error() string {
 	return "configuration not set: please ensure that the configuration file is present at '" + e.path + "'"
 }
 
-type aliasNameUnsetError struct{}
-
-func (e aliasNameUnsetError) Error() string {
-	return "please set the name of the alias"
-}
-
-type aliasArgsUnsetError struct{}
-
-func (e aliasArgsUnsetError) Error() string {
-	return "please specify the arguments to set the alias to"
-}
-
 type aliasActionKeywordError struct {
 	alias string
 }
@@ -223,22 +211,16 @@ func (e aliasBuiltinAliasError) Error() string {
 	return "'" + e.alias + "' is a built-in alias"
 }
 
-type aliasOldNameUnsetError struct{}
-
-func (e aliasOldNameUnsetError) Error() string {
-	return "please specify the name of the alias you want to rename"
-}
-
 type aliasNewNameUnsetError struct{}
 
 func (e aliasNewNameUnsetError) Error() string {
 	return "please specify the alias' new name"
 }
 
-type invalidTimelineCategory struct {
+type invalidTimelineCategoryError struct {
 	category string
 }
 
-func (e invalidTimelineCategory) Error() string {
+func (e invalidTimelineCategoryError) Error() string {
 	return "'" + e.category + "' is not a valid timeline category"
 }

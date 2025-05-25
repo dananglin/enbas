@@ -26,7 +26,7 @@
     "all-audio":  "play all audio files from the status",
     "all-images": "show all image files from the status",
     "all-videos": "play all video files from the status",
-    "arguments": "the arguments to add to the alias",
+    "operation": "the operation to map the alias to",
     "attachment-id": "the ID of the media attachment",
     "browser": "{action} the {target} in your favourite browser",
     "duration": "how long the effect should last for (set to 0s to last indefinitely)",
@@ -445,7 +445,7 @@
               "required": true
             },
             {
-              "name": "arguments",
+              "name": "operation",
               "type": "string",
               "default": "",
               "required": true
@@ -476,7 +476,7 @@
               "required": true
             },
             {
-              "name": "arguments",
+              "name": "operation",
               "type": "string",
               "default": "",
               "required": true

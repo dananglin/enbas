@@ -28,7 +28,6 @@ const (
 	flagAllAudio                  string = "all-audio"
 	flagAllImages                 string = "all-images"
 	flagAllVideos                 string = "all-videos"
-	flagArguments                 string = "arguments"
 	flagAttachmentId              string = "attachment-id"
 	flagBrowser                   string = "browser"
 	flagContent                   string = "content"
@@ -69,6 +68,7 @@ const (
 	flagOnlyMedia                 string = "only-media"
 	flagOnlyPinned                string = "only-pinned"
 	flagOnlyPublic                string = "only-public"
+	flagOperation                 string = "operation"
 	flagPollAllowsMultipleChoices string = "poll-allows-multiple-choices"
 	flagPollExpiresIn             string = "poll-expires-in"
 	flagPollHidesVoteCounts       string = "poll-hides-vote-counts"
@@ -110,7 +110,6 @@ func flagUsageMap() map[string]string {
 		flagAllAudio:                  "play all audio files from the status",
 		flagAllImages:                 "show all image files from the status",
 		flagAllVideos:                 "play all video files from the status",
-		flagArguments:                 "the arguments to add to the alias",
 		flagAttachmentId:              "the ID of the media attachment",
 		flagBrowser:                   "{action} the {target} in your favourite browser",
 		flagContent:                   "the content of the {target}",
@@ -151,6 +150,7 @@ func flagUsageMap() map[string]string {
 		flagOnlyMedia:                 "only show the statuses with media attachments",
 		flagOnlyPinned:                "only show the account's pinned statuses",
 		flagOnlyPublic:                "only show the account's public posts",
+		flagOperation:                 "the operation to map the alias to",
 		flagPollAllowsMultipleChoices: "allow viewers to make multiple choices in the poll",
 		flagPollExpiresIn:             "the time from when the poll is created that it should expire",
 		flagPollHidesVoteCounts:       "hide the vote count until the poll is closed",
@@ -258,14 +258,14 @@ func targetActionFlagMap() map[string][]string {
 		TargetAccounts + "-" + ActionRemove: {},
 		TargetAlias + "-" + ActionCreate: {
 			flagName,
-			flagArguments,
+			flagOperation,
 		},
 		TargetAlias + "-" + ActionDelete: {
 			flagName,
 		},
 		TargetAlias + "-" + ActionEdit: {
 			flagName,
-			flagArguments,
+			flagOperation,
 		},
 		TargetAlias + "-" + ActionRename: {
 			flagOldName,

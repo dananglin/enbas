@@ -246,12 +246,12 @@ func ParseAccountsRemoveFromListFlags(
 
 func ParseAliasCreateFlags(
 	name *string,
-	arguments *string,
+	operation *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(name, flagName, "", "")
-	flagset.StringVar(arguments, flagArguments, "", "")
+	flagset.StringVar(operation, flagOperation, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
@@ -276,12 +276,12 @@ func ParseAliasDeleteFlags(
 
 func ParseAliasEditFlags(
 	name *string,
-	arguments *string,
+	operation *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
 	flagset.StringVar(name, flagName, "", "")
-	flagset.StringVar(arguments, flagArguments, "", "")
+	flagset.StringVar(operation, flagOperation, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
