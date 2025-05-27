@@ -28,87 +28,87 @@ func statusFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionCreate:
 		return statusCreate(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionAdd:
 		return statusAdd(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.RelatedTarget,
 			cmd.RelatedTargetFlags,
 		)
 	case cli.ActionRemove:
 		return statusRemove(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.RelatedTarget,
 			cmd.RelatedTargetFlags,
 		)
 	case cli.ActionMute:
 		return statusMute(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionUnmute:
 		return statusUnmute(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionFavourite:
 		return statusFavourite(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionUnfavourite:
 		return statusUnfavourite(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionReblog:
 		return statusReblog(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionUnreblog:
 		return statusUnreblog(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionShow:
 		return statusShow(
-			client,
+			session.Client(),
 			printSettings,
 			cfg.Integrations.Browser,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionDelete:
 		return statusDelete(
-			client,
+			session.Client(),
 			printSettings,
 			cfg.CacheDirectory,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionFind:
 		return statusFind(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)

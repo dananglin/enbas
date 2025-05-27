@@ -9,15 +9,17 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/sessions"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
-const minIdleTimeout = 60
+const minIdleTimeout = 10
 
 func Run(
 	printSettings printer.Settings,
@@ -57,6 +59,19 @@ func Run(
 		return fmt.Errorf("error registering the GTSClient methods to the server: %w", err)
 	}
 
+	// Create the session store and register its methods to the RPC server
+	var sessionStore *sessions.SessionStore
+
+	if withoutIdleTimeout {
+		sessionStore = sessions.NewSessionStore(false)
+	} else {
+		sessionStore = sessions.NewSessionStore(true)
+	}
+
+	if err := server.Register(sessionStore); err != nil {
+		return fmt.Errorf("error registering the session store to the server: %w", err)
+	}
+
 	if withoutIdleTimeout {
 		// Run the server without a timer.
 		return runWithoutIdleTimeout(
@@ -72,6 +87,7 @@ func Run(
 		server,
 		socketPath,
 		idleTimeout,
+		sessionStore,
 	)
 }
 
@@ -82,6 +98,7 @@ func runWithIdleTimeout(
 	server *rpc.Server,
 	socketPath string,
 	idleTimeout int,
+	sessionStore *sessions.SessionStore,
 ) error {
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
@@ -97,7 +114,7 @@ func runWithIdleTimeout(
 	}
 
 	timeout := time.Duration(idleTimeout) * time.Second
-	timer := time.NewTimer(timeout)
+	ticker := time.NewTicker(timeout)
 
 	// Listen and serve connections from the client in a separate goroutine.
 	go func() {
@@ -118,7 +135,7 @@ func runWithIdleTimeout(
 				os.Exit(1)
 			}
 
-			timer.Reset(timeout)
+			ticker.Reset(timeout)
 
 			go server.ServeConn(conn)
 		}
@@ -132,17 +149,25 @@ func runWithIdleTimeout(
 	)
 	defer stop()
 
-	select {
-	case <-timer.C:
-		printer.PrintInfo("Server idle timeout.\n")
+Outer:
+	for {
+		select {
+		case <-ticker.C:
+			if sessionStore.IsEmpty() {
+				printer.PrintInfo("Server idle timeout.\n")
 
-		return nil
-	case <-ctx.Done():
-		stop()
-		printer.PrintInfo("\nShutdown signal received.\n")
+				break Outer
+			}
+			printer.PrintInfo(strconv.Itoa(sessionStore.NumSessionIDs()) + " client session(s) still in progress.\n")
+		case <-ctx.Done():
+			stop()
+			printer.PrintInfo("\nShutdown signal received.\n")
 
-		return nil
+			break Outer
+		}
 	}
+
+	return nil
 }
 
 // runWithoutIdleTimeout runs the RPC server. The server closes when the shutdown signal is received.

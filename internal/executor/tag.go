@@ -25,22 +25,22 @@ func tagFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionFollow:
-		return tagFollow(client, printSettings, cmd.FocusedTargetFlags)
+		return tagFollow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionUnfollow:
-		return tagUnfollow(client, printSettings, cmd.FocusedTargetFlags)
+		return tagUnfollow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionShow:
-		return tagShow(client, printSettings, cmd.FocusedTargetFlags)
+		return tagShow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionFind:
-		return tagFind(client, printSettings, cmd.FocusedTargetFlags)
+		return tagFind(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetTag}
 	}

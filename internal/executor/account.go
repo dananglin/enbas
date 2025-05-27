@@ -27,30 +27,30 @@ func accountFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionShow:
-		return accountShow(client, printSettings, cfg.Integrations.Browser, cmd.FocusedTargetFlags)
+		return accountShow(session.Client(), printSettings, cfg.Integrations.Browser, cmd.FocusedTargetFlags)
 	case cli.ActionMute:
-		return accountMute(client, printSettings, cmd.FocusedTargetFlags)
+		return accountMute(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionUnmute:
-		return accountUnmute(client, printSettings, cmd.FocusedTargetFlags)
+		return accountUnmute(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionFollow:
-		return accountFollow(client, printSettings, cmd.FocusedTargetFlags)
+		return accountFollow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionUnfollow:
-		return accountUnfollow(client, printSettings, cmd.FocusedTargetFlags)
+		return accountUnfollow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionBlock:
-		return accountBlock(client, printSettings, cmd.FocusedTargetFlags)
+		return accountBlock(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionUnblock:
-		return accountUnblock(client, printSettings, cmd.FocusedTargetFlags)
+		return accountUnblock(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionFind:
-		return accountFind(client, printSettings, cmd.FocusedTargetFlags)
+		return accountFind(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetAccount}
 	}

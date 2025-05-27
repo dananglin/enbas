@@ -82,11 +82,11 @@ func accessCreate(
 		url = url[:len(url)-1]
 	}
 
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	// Update the GTSClient's auth details for the registration process.
 	auth := config.Credentials{
@@ -96,7 +96,7 @@ func accessCreate(
 		AccessToken:  "",
 	}
 
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.UpdateAuthentication",
 		auth,
 		nil,
@@ -104,7 +104,7 @@ func accessCreate(
 		return fmt.Errorf("error updating the GTSClient's authentication details: %w", err)
 	}
 
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.RegisterApp",
 		scopes.Values(),
 		nil,
@@ -114,7 +114,7 @@ func accessCreate(
 
 	var consentPageURL string
 
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.AuthCodeURL",
 		scopes.Values(),
 		&consentPageURL,
@@ -141,7 +141,7 @@ Out-of-band token: `
 		return fmt.Errorf("failed to read access code: %w", err)
 	}
 
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.UpdateAccessToken",
 		code,
 		&auth,
@@ -150,7 +150,7 @@ Out-of-band token: `
 	}
 
 	var account model.Account
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.GetMyAccount",
 		gtsclient.NoRPCArgs{},
 		&account,
@@ -176,19 +176,19 @@ func accessVerify(
 	cfg config.Config,
 	printSettings printer.Settings,
 ) error {
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	var account model.Account
-	if err := client.Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
+	if err := session.Client().Call("GTSClient.GetMyAccount", gtsclient.NoRPCArgs{}, &account); err != nil {
 		return fmt.Errorf("error getting your account information: %w", err)
 	}
 
 	var instanceURL string
-	if err := client.Call("GTSClient.GetInstanceURL", gtsclient.NoRPCArgs{}, &instanceURL); err != nil {
+	if err := session.Client().Call("GTSClient.GetInstanceURL", gtsclient.NoRPCArgs{}, &instanceURL); err != nil {
 		return fmt.Errorf("error getting the instance URL: %w", err)
 	}
 
@@ -249,12 +249,12 @@ func accessSwitchToAccount(
 		}
 	}
 
-	// Create the client to the backend enbas server
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	creds, err := config.NewCredentialsConfigFromFile(cfg.CredentialsFile)
 	if err != nil {
@@ -266,7 +266,7 @@ func accessSwitchToAccount(
 		return missingAccountInCredentialsError{}
 	}
 
-	if err := client.Call(
+	if err := session.Client().Call(
 		"GTSClient.UpdateAuthentication",
 		auth,
 		nil,

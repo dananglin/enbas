@@ -25,20 +25,20 @@ func mediaAttachmentFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionCreate:
-		return mediaAttachmentCreate(client, printSettings, cmd.FocusedTargetFlags)
+		return mediaAttachmentCreate(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionEdit:
-		return mediaAttachmentEdit(client, printSettings, cmd.FocusedTargetFlags)
+		return mediaAttachmentEdit(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionShow:
-		return mediaAttachmentShow(client, printSettings, cmd.FocusedTargetFlags)
+		return mediaAttachmentShow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetMediaAttachment}
 	}

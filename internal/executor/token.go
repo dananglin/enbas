@@ -21,23 +21,23 @@ func tokenFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionShow:
 		return tokenShow(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)
 	case cli.ActionInvalidate:
 		return tokenInvalidate(
-			client,
+			session.Client(),
 			printSettings,
 			cmd.FocusedTargetFlags,
 		)

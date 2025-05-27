@@ -25,22 +25,22 @@ func listFunc(
 		return zeroConfigurationError{path: cfg.Path}
 	}
 
-	// Create the client to interact with the GoToSocial instance.
-	client, err := server.Connect(cfg.Server, cfg.Path)
+	// Create the session to interact with the GoToSocial instance.
+	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error creating the client for the daemon process: %w", err)
 	}
-	defer client.Close()
+	defer server.EndSession(session)
 
 	switch cmd.Action {
 	case cli.ActionCreate:
-		return listCreate(client, printSettings, cmd.FocusedTargetFlags)
+		return listCreate(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionDelete:
-		return listDelete(client, printSettings, cmd.FocusedTargetFlags)
+		return listDelete(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionEdit:
-		return listEdit(client, printSettings, cmd.FocusedTargetFlags)
+		return listEdit(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	case cli.ActionShow:
-		return listShow(client, printSettings, cmd.FocusedTargetFlags)
+		return listShow(session.Client(), printSettings, cmd.FocusedTargetFlags)
 	default:
 		return unsupportedActionError{action: cmd.Action, target: cli.TargetList}
 	}
