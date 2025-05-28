@@ -114,7 +114,9 @@ func runWithIdleTimeout(
 	}
 
 	timeout := time.Duration(idleTimeout) * time.Second
+
 	ticker := time.NewTicker(timeout)
+	defer ticker.Stop()
 
 	// Listen and serve connections from the client in a separate goroutine.
 	go func() {
