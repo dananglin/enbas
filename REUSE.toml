@@ -11,33 +11,37 @@ SPDX-PackageDownloadLocation = "https://codeflow.dananglin.me.uk/apollo/enbas"
 path = [
     "**.go",
     "go.mod",
-    "magefiles/go.mod",
-    "cmd/enbas-codegen/templates/**/*.go.gotmpl",
-    "schema/enbas_cli_schema.json",
+    "tools/tools.mod",
+    "cmd/codegen/templates/**/*.gotmpl",
+    "cmd/docgen/templates/**/*.gotmpl",
+    "definitions/definitions.json",
     ".forgejo/workflows/*.yaml",
     ".forgejo/actions/**/action.yaml",
     ".forgejo/actions/**/Dockerfile",
     "internal/utilities/testdata/statuses/*.txt",
+    "internal/printer/templates/*.gotmpl"
 ]
 precedence              = "override"
-SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"
+SPDX-FileCopyrightText  = "2025 Dan Anglin <d.n.i.anglin@gmail.com>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
 path = [
     "README.md",
-    "docs/*.md",
-    "docs/assets/*.png",
+    "INSTALL.md",
+    "doc/assets/*.png",
+    "doc/examples/config.json",
 ]
 precedence              = "override"
-SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"
+SPDX-FileCopyrightText  = "2025 Dan Anglin <d.n.i.anglin@gmail.com>"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
 path = [
     "go.sum",
-    "magefiles/go.sum",
+    "tools/tools.sum",
+    "dev.nix",
 ]
 precedence              = "override"
-SPDX-FileCopyrightText  = "2024 Dan Anglin <d.n.i.anglin@gmail.com>"
+SPDX-FileCopyrightText  = "2025 Dan Anglin <d.n.i.anglin@gmail.com>"
 SPDX-License-Identifier = "CC0-1.0"

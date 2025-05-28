@@ -17,6 +17,7 @@ pkgs.mkShellNoCC {
     golangci-lint
     gopls
     mage
+    reuse
     tmux
   ];
 
