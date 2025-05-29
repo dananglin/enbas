@@ -9,7 +9,7 @@ type (
 	NoRPCResults struct{}
 
 	SessionStore struct {
-		mu          *sync.Mutex
+		mu          sync.Mutex
 		sessionIDs  map[string]struct{}
 		initialised bool
 	}
@@ -22,7 +22,7 @@ func NewSessionStore(initialise bool) *SessionStore {
 		// for a server process launched without an idle
 		// timeout.
 		return &SessionStore{
-			mu:          nil,
+			mu:          sync.Mutex{},
 			sessionIDs:  nil,
 			initialised: false,
 		}
@@ -31,7 +31,7 @@ func NewSessionStore(initialise bool) *SessionStore {
 	// return an initialised SessionStore for a server
 	// launched with an idle timeout.
 	return &SessionStore{
-		mu:          &sync.Mutex{},
+		mu:          sync.Mutex{},
 		sessionIDs:  make(map[string]struct{}),
 		initialised: true,
 	}
