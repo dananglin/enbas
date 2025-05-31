@@ -8,16 +8,20 @@ package cli
 import (
 	"flag"
 	"fmt"
+	"io"
 
 	internalFlag "codeflow.dananglin.me.uk/apollo/enbas/internal/flag"
 )
 
+// newFlagset creates a new flagset and sets the error handling to flag.ContinueOnError so
+// that any parsing errors are returned back to the executor so that it can handle the error
+// and close any active sessions to the server before terminating the program. The flagset's
+// usage function is disabled as a dedicated usage system is used instead, and the flagset's
+// output is set to io.Discard to ensure that it does not duplicate error messages to the user.
 func newFlagset() *flag.FlagSet {
-	flagset := flag.NewFlagSet("", flag.ExitOnError)
-
-	// Disable the --help flag because a dedicated help system
-	// will be used instead
+	flagset := flag.NewFlagSet("", flag.ContinueOnError)
 	flagset.Usage = func() {}
+	flagset.SetOutput(io.Discard)
 
 	return flagset
 }
