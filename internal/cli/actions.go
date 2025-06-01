@@ -33,185 +33,40 @@ const (
 	ActionVerify      string = "verify"
 )
 
-// ActionDesc returns the action's description.
-func ActionDesc(action string) (string, bool) {
-	desc, ok := actionDescMap()[action]
+// IsAction returns true if the parameter is an existing action.
+func IsAction(action string) bool {
+	_, result := actionSet()[action]
 
-	return desc, ok
+	return result
 }
 
-// actionDescMap returns a map of the actions and their
-// respective descriptions.
-func actionDescMap() map[string]string {
-	return map[string]string{
-		ActionAccept:      "accepts an existing {target}",
-		ActionAdd:         "adds the {target} to an existing {relatedTarget}",
-		ActionBlock:       "blocks an existing {target}",
-		ActionClear:       "deletes all your {target}",
-		ActionCreate:      "creates a new {target}",
-		ActionDelete:      "deletes an existing {target}",
-		ActionEdit:        "edits an existing {target}",
-		ActionFavourite:   "marks the {target} as a favourite {target}",
-		ActionFind:        "searches for {target}",
-		ActionFollow:      "follows an existing {target}",
-		ActionInvalidate:  "invalidates an existing {target}",
-		ActionMute:        "mutes an existing {target}",
-		ActionReblog:      "reblogs an existing {target}",
-		ActionReject:      "rejects an existing {target}",
-		ActionRemove:      "removes the {target} from an existing {relatedTarget}",
-		ActionRename:      "renames an existing {target}",
-		ActionShow:        "prints the details of the {target} to screen",
-		ActionStart:       "starts the {target}",
-		ActionSwitch:      "switches from one {target} to another",
-		ActionUnblock:     "unblocks the {target} you've previously blocked",
-		ActionUnfavourite: "unmarks the {target} as a favourite {target}",
-		ActionUnfollow:    "unfollows the {target} that you are following",
-		ActionUnmute:      "unmutes the {target} that you've muted",
-		ActionUnreblog:    "unreblogs the {target} that you've previously reblogged",
-		ActionVerify:      "verifies the {target}",
-	}
-}
-
-// ActionTargets returns a list of targets associated
-// with the action.
-func ActionTargets(action string) []string {
-	return actionTargetsMap()[action]
-}
-
-// actionTargetsMap returns a map of the actions and the lists
-// of all targets associated to those actions.
-func actionTargetsMap() map[string][]string {
-	return map[string][]string{
-		ActionAccept: {
-			TargetFollowRequest,
-		},
-		ActionAdd: {
-			TargetAccounts,
-			TargetFilterKeyword,
-			TargetFilterStatus,
-			TargetNote,
-			TargetStatus,
-			TargetVotes,
-		},
-		ActionBlock: {
-			TargetAccount,
-		},
-		ActionClear: {
-			TargetNotifications,
-		},
-		ActionCreate: {
-			TargetAccess,
-			TargetAlias,
-			TargetConfig,
-			TargetFilter,
-			TargetList,
-			TargetMediaAttachment,
-			TargetStatus,
-		},
-		ActionDelete: {
-			TargetAlias,
-			TargetFilter,
-			TargetFilterKeyword,
-			TargetFilterStatus,
-			TargetList,
-			TargetStatus,
-		},
-		ActionEdit: {
-			TargetAlias,
-			TargetFilter,
-			TargetFilterKeyword,
-			TargetList,
-			TargetMediaAttachment,
-		},
-		ActionFavourite: {
-			TargetStatus,
-		},
-		ActionFind: {
-			TargetAccount,
-			TargetStatus,
-			TargetTag,
-		},
-		ActionFollow: {
-			TargetAccount,
-			TargetTag,
-		},
-		ActionInvalidate: {
-			TargetToken,
-		},
-		ActionMute: {
-			TargetAccount,
-			TargetStatus,
-		},
-		ActionReblog: {
-			TargetStatus,
-		},
-		ActionReject: {
-			TargetFollowRequest,
-		},
-		ActionRemove: {
-			TargetAccounts,
-			TargetNote,
-			TargetStatus,
-		},
-		ActionRename: {
-			TargetAlias,
-		},
-		ActionShow: {
-			TargetAccount,
-			TargetAliases,
-			TargetBlockedAccounts,
-			TargetBookmarks,
-			TargetFavourites,
-			TargetFilter,
-			TargetFilterKeyword,
-			TargetFilterStatus,
-			TargetFilters,
-			TargetFollowRequests,
-			TargetFollowers,
-			TargetFollowings,
-			TargetInstance,
-			TargetList,
-			TargetLists,
-			TargetMedia,
-			TargetMediaAttachment,
-			TargetMutedAccounts,
-			TargetNotification,
-			TargetNotifications,
-			TargetStatus,
-			TargetTag,
-			TargetTags,
-			TargetThread,
-			TargetTimeline,
-			TargetToken,
-			TargetTokens,
-			TargetUsage,
-			TargetVersion,
-		},
-		ActionStart: {
-			TargetServer,
-		},
-		ActionSwitch: {
-			TargetAccess,
-		},
-		ActionUnblock: {
-			TargetAccount,
-		},
-		ActionUnfavourite: {
-			TargetStatus,
-		},
-		ActionUnfollow: {
-			TargetAccount,
-			TargetTag,
-		},
-		ActionUnmute: {
-			TargetAccount,
-			TargetStatus,
-		},
-		ActionUnreblog: {
-			TargetStatus,
-		},
-		ActionVerify: {
-			TargetAccess,
-		},
+// actionSet returns a set of existing actions.
+func actionSet() map[string]struct{} {
+	return map[string]struct{}{
+		ActionAccept:      {},
+		ActionAdd:         {},
+		ActionBlock:       {},
+		ActionClear:       {},
+		ActionCreate:      {},
+		ActionDelete:      {},
+		ActionEdit:        {},
+		ActionFavourite:   {},
+		ActionFind:        {},
+		ActionFollow:      {},
+		ActionInvalidate:  {},
+		ActionMute:        {},
+		ActionReblog:      {},
+		ActionReject:      {},
+		ActionRemove:      {},
+		ActionRename:      {},
+		ActionShow:        {},
+		ActionStart:       {},
+		ActionSwitch:      {},
+		ActionUnblock:     {},
+		ActionUnfavourite: {},
+		ActionUnfollow:    {},
+		ActionUnmute:      {},
+		ActionUnreblog:    {},
+		ActionVerify:      {},
 	}
 }

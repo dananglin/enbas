@@ -19,8 +19,7 @@ func ExtractArgsFromAlias(
 
 	// Check to see if the potential alias is actually built-in action word.
 	// If it is, it is not an alias so return the original command.
-	_, isAction := cli.ActionDesc(alias)
-	if isAction {
+	if cli.IsAction(alias) {
 		return command, nil
 	}
 

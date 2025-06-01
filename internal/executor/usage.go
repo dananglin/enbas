@@ -2,7 +2,6 @@ package executor
 
 import (
 	"fmt"
-	"maps"
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
@@ -31,38 +30,37 @@ func usageShow(
 	flags []string,
 ) error {
 	var (
-		action string
-		target string
+		target    string
+		operation string
 	)
 
 	// Parse the remaining flags.
 	if err := cli.ParseUsageShowFlags(
-		&action,
 		&target,
+		&operation,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	switch {
-	case (target == "") && (action == ""):
-		return usageShowApp(printSettings)
-	case (target != "") && (action == ""):
+	case target != "":
 		return usageShowTarget(printSettings, target)
-	case (target == "") && (action != ""):
-		return usageShowAction(printSettings, action)
+	case operation != "":
+		return usageShowOperation(printSettings, operation)
 	default:
-		return usageShowTargetAction(printSettings, target, action)
+		return usageShowRoot(printSettings)
 	}
 }
 
-func usageShowApp(printSettings printer.Settings) error {
-	if err := printer.PrintUsageApp(
+func usageShowRoot(printSettings printer.Settings) error {
+	if err := printer.PrintUsageRoot(
 		printSettings,
 		cli.TargetDescMap(),
 		cli.TopLevelFlagsUsageMap(),
+		cli.TargetStatus,
 	); err != nil {
-		return fmt.Errorf("error printing the help documentation: %w", err)
+		return fmt.Errorf("error printing the usage documentation: %w", err)
 	}
 
 	return nil
@@ -74,112 +72,73 @@ func usageShowTarget(
 ) error {
 	desc, ok := cli.TargetDesc(target)
 	if !ok {
-		return unrecognisedTargetError{target: target}
+		return fmt.Errorf("usage error: %w", unrecognisedTargetError{target: target})
+	}
+
+	operations, ok := cli.GetUsageOperations(target)
+	if !ok {
+		return usageNoOpFoundError{target: target}
 	}
 
 	if err := printer.PrintUsageTarget(
 		printSettings,
 		target,
 		desc,
-		renderTemplatesinMap(cli.TargetActions(target), target, ""),
 		cli.TopLevelFlagsUsageMap(),
+		operations,
 	); err != nil {
-		return fmt.Errorf("error printing the help documentation: %w", err)
+		return fmt.Errorf("error printing the usage documentation: %w", err)
 	}
 
 	return nil
 }
 
-func usageShowAction(
+func usageShowOperation(
 	printSettings printer.Settings,
-	action string,
+	operation string,
 ) error {
-	desc, ok := cli.ActionDesc(action)
+	// Parse the operation parameter to get the name of the focused target.
+	parsedOperation, err := command.Parse(strings.Split(operation, " "))
+	if err != nil {
+		return fmt.Errorf("unable to parse the operation: %w", err)
+	}
+
+	usageOperation, ok := cli.GetUsageOperation(
+		parsedOperation.FocusedTarget,
+		operation,
+	)
 	if !ok {
-		return unrecognisedActionError{action: action}
-	}
-
-	availableTargets := cli.ActionTargets(action)
-
-	if err := printer.PrintUsageAction(
-		printSettings,
-		action,
-		renderTargetTemplate(desc, "target"),
-		availableTargets,
-		cli.TopLevelFlagsUsageMap(),
-	); err != nil {
-		return fmt.Errorf("error printing the help documentation: %w", err)
-	}
-
-	return nil
-}
-
-func usageShowTargetAction(
-	printSettings printer.Settings,
-	target string,
-	action string,
-) error {
-	if _, ok := cli.TargetDesc(target); !ok {
-		return unrecognisedTargetError{target: target}
-	}
-
-	desc, ok := cli.ActionDesc(action)
-	if !ok {
-		return unrecognisedActionError{action: action}
-	}
-
-	flags, ok := cli.TargetActionFlags(target, action)
-	if !ok {
-		return unsupportedActionError{
-			action: action,
-			target: target,
+		return usageNoOpForTargetError{
+			operation: operation,
+			target:    parsedOperation.FocusedTarget,
 		}
 	}
 
-	if err := printer.PrintUsageTargetAction(
+	flagUsageMap := cli.FlagUsageMap()
+
+	flagDescriptions := make([]string, len(usageOperation.Flags))
+
+	for idx := range usageOperation.Flags {
+		flagDescriptions[idx] = strings.ReplaceAll(
+			strings.ReplaceAll(
+				flagUsageMap[usageOperation.Flags[idx]],
+				"{target}",
+				parsedOperation.FocusedTarget,
+			),
+			"{action}",
+			parsedOperation.Action,
+		)
+	}
+
+	if err := printer.PrintUsageOperation(
 		printSettings,
-		target,
-		action,
-		renderTargetTemplate(desc, target),
-		renderTemplatesinMap(flags, target, action),
 		cli.TopLevelFlagsUsageMap(),
+		operation,
+		usageOperation,
+		flagDescriptions,
 	); err != nil {
-		return fmt.Errorf("error printing the help documentation: %w", err)
+		return fmt.Errorf("error printing the usage documentation: %w", err)
 	}
 
 	return nil
-}
-
-func renderTemplatesinMap(
-	input map[string]string,
-	target string,
-	action string,
-) map[string]string {
-	output := make(map[string]string)
-
-	for key := range maps.All(input) {
-		output[key] = renderTemplate(input[key], target, action)
-	}
-
-	return output
-}
-
-func renderTemplate(text, target, action string) string {
-	return renderTargetTemplate(renderActionTemplate(text, action), target)
-}
-
-func renderTargetTemplate(text, target string) string {
-	if target == "" {
-		return text
-	}
-
-	return strings.ReplaceAll(text, "{target}", target)
-}
-
-func renderActionTemplate(text, action string) string {
-	if action == "" {
-		return text
-	}
-
-	return strings.ReplaceAll(text, "{action}", action)
 }

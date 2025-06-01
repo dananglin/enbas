@@ -244,3 +244,154 @@ All documentation for `enbas` can be viewed using the `man` command.
 
 - To view the general operation manual, run `man 1 enbas`.
 - To view the configuration manual for more details about the configuration options, run `man 5 enbas`.
+
+You can also use the `help` subcommand to view the usage documentation.
+Use the `target` flag to view more details about a target or use the `operation` flag to view more details about the operation that can be performed on a target.
+
+For example to view all available operations you can perform on a status run `enbas help --target status`.
+
+```
+$ enbas help --target status
+
+SUMMARY:
+  status - a single status.
+
+USAGE:
+  enbas [top level flags] <operation> [flags]
+
+TOP LEVEL FLAGS:
+  --config
+    the path to your configuration file
+
+  --no-color
+    disable the ANSI colour output when displaying the text on screen
+
+AVAILABLE OPERATIONS:
+  add status to bookmarks
+    adds the specified status to your bookmarks
+
+  create status
+    creates a new status
+
+  delete status
+    deletes a status that belongs to you
+
+  favourite status
+    favourites (likes) the specified status
+
+  find status
+    searches for a status (remotely)
+
+  mute status
+    mutes the specified status to stop you from receiving future notifications
+    for replies, favourites (likes), reblogs (boosts), etc from the status'
+    thread
+
+  reblog status
+    reblogs (boosts) the specified status
+
+  remove status from bookmarks
+    removes the specified status from your bookmarks
+
+  show status
+    prints the details of the specified status
+
+  unfavourite status
+    unfavourites (unlikes) the status that you've previously favourited
+
+  unmute status
+    unmutes the specified status so that you can start receiving future
+    notifications for replies, favourites (likes), reblogs (boosts), etc from
+    the status' thread
+
+  unreblog status
+    unreblogs (unboosts) the specified status
+
+MORE DETAILS:
+  Use enbas help --operation "<operation>" for more details about a specific operation
+  that can be performed on the status and the available flags for that operation.
+```
+
+For more information about creating a new status including the flags you can set, run `enbas help --operation "create status"` (don't forget to enclose the operation in quotes).
+
+```
+$ enbas help --operation "create status"
+
+OPERATION:
+  create status
+
+SUMMARY:
+  creates a new status
+
+USAGE:
+  enbas [top level flags] create status [flags]
+
+TOP LEVEL FLAGS:
+  --config
+    the path to your configuration file
+
+  --no-color
+    disable the ANSI colour output when displaying the text on screen
+
+FLAGS:
+  --add-poll
+    add a poll to the new status
+
+  --attachment-id
+    the ID of the media attachment
+
+  --content
+    the content of the status
+
+  --content-type
+    the type that the contents should be parsed from
+
+  --in-reply-to
+    the ID of the status that you want to reply to
+
+  --language
+    the ISO 639 language code for this status
+
+  --local-only
+    do not federate the status beyond the local timeline(s)
+
+  --media-description
+    the description of the media attachment
+
+  --media-file
+    the path to the file of the media-attachment
+
+  --media-focus
+    the focus of the media-attachment
+
+  --not-boostable
+    viewers will not be allowed to reblog (boost) the created status
+
+  --not-likeable
+    viewers will not be allowed to like (favourite) the created status
+
+  --not-replyable
+    viewers will not be allowed to reply to the created status
+
+  --poll-allows-multiple-choices
+    allow viewers to make multiple choices in the poll
+
+  --poll-expires-in
+    the time from when the poll is created that it should expire
+
+  --poll-hides-vote-counts
+    hide the vote count until the poll is closed
+
+  --poll-option
+    a poll option (use this flag multiple times to set multiple poll options)
+
+  --sensitive
+    mark the status as sensitive
+
+  --summary
+    the summary of the status (a.k.a the subject, spoiler text or content
+    warning)
+
+  --visibility
+    The visibility of the status
+```

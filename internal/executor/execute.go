@@ -23,11 +23,12 @@ func Execute() error {
 
 	// Initialise the print settings.
 	printSettings := printer.NewSettings(
-		false,
+		true,
 		"",
 		0,
 	)
 
+	// Parse the top level flags.
 	flagset := cli.NewTopLevelFlagset(&configPath, &noColorFlag)
 	if err := flagset.Parse(os.Args[1:]); err != nil {
 		printer.PrintFailure(
@@ -35,9 +36,10 @@ func Execute() error {
 			"error parsing the top-level flags: "+err.Error()+".",
 		)
 
-		return err
+		return err //nolint:wrapcheck
 	}
 
+	// Get the user's 'no color' settings.
 	if noColorFlag.IsSet() {
 		noColor = noColorFlag.Value()
 	} else if os.Getenv("NO_COLOR") != "" {
@@ -47,6 +49,7 @@ func Execute() error {
 	// Load the configuration if the configuration file
 	// is present.
 	var cfg config.Config
+
 	calculatedConfigPath, err := config.Path(configPath)
 	if err != nil {
 		printer.PrintFailure(
@@ -54,7 +57,7 @@ func Execute() error {
 			"error calculating the path to the configuration file: "+err.Error()+".",
 		)
 
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	cfgFileExists, err := config.FileExists(calculatedConfigPath)
@@ -64,7 +67,7 @@ func Execute() error {
 			"error checking if the configuration file is present: "+err.Error()+".",
 		)
 
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if cfgFileExists {
@@ -75,19 +78,27 @@ func Execute() error {
 				"error loading the configuration: "+err.Error()+".",
 			)
 
-			return err
+			return err //nolint:wrapcheck
 		}
 	} else {
 		cfg.Path = calculatedConfigPath
 	}
 
-	// Update the print settings if the configuration was
-	// successfully loaded from file.
 	if !cfg.IsZero() {
+		// Update the print settings if the configuration was
+		// successfully loaded from file.
 		printSettings = printer.NewSettings(
 			noColor,
 			cfg.Integrations.Pager,
 			cfg.LineWrapMaxWidth,
+		)
+	} else {
+		// Otherwise update the print settings by only adjusting the
+		// 'no color' setting.
+		printSettings = printer.NewSettings(
+			noColor,
+			"",
+			0,
 		)
 	}
 
@@ -107,7 +118,7 @@ func Execute() error {
 				"error parsing the alias from the command: "+err.Error()+".",
 			)
 
-			return err
+			return err //nolint:wrapcheck
 		}
 
 		// Parse the final command.
@@ -118,7 +129,7 @@ func Execute() error {
 				"error parsing the action and its arguments: "+err.Error()+".",
 			)
 
-			return err
+			return err //nolint:wrapcheck
 		}
 	}
 
@@ -128,7 +139,7 @@ func Execute() error {
 			"invalid command: "+err.Error()+".",
 		)
 
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	funcMap := targetFuncMap()

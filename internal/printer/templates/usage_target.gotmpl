@@ -1,0 +1,22 @@
+{{- define "usageTarget" }}
+{{ headerFormat "SUMMARY:" }}
+  {{ .Target }} - {{ .Description }}.
+
+{{ headerFormat "USAGE:" }}
+  {{ .AppName }} [top level flags] <operation> [flags]
+{{ print "" }}
+{{- template "topLevelFlags" .TopLevelFlags -}}
+{{ print "" }}
+{{ headerFormat "AVAILABLE OPERATIONS:" }}
+{{- range $opName, $operation := .Operations -}}
+{{ print "" }}
+  {{ boldFormat $opName }}
+    {{ wrapLines $operation.Description "" 4 }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ headerFormat "MORE DETAILS:" }}
+  Use {{ printf "%s help --operation \"<operation>\"" .AppName | boldFormat }} for more details about a specific operation
+  that can be performed on the {{ .Target }} and the available flags for that operation.
+{{ print "" }}
+{{ end -}}

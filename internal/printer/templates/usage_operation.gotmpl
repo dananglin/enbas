@@ -1,0 +1,28 @@
+{{- define "usageOperation" }}
+{{ headerFormat "OPERATION:" }}
+  {{ .Name }}
+
+{{ headerFormat "SUMMARY:" }}
+  {{ wrapLines .Operation.Description "" 2 }}
+
+{{ headerFormat "USAGE:" }}
+  {{ .AppName }} [top level flags] {{ .Name }} [flags]
+{{ print "" }}
+{{- template "topLevelFlags" .TopLevelFlags -}}
+{{ print "" }}
+{{ headerFormat "FLAGS:" }}
+{{- if eq (len .Flags) 0 -}}
+{{ print "" }}
+  NONE
+{{ print "" }}
+{{- else -}}
+{{- range .Flags -}}
+{{ print "" }}
+  {{ printf "--%s" .Name | boldFormat }}
+    {{ wrapLines .Usage "" 4 }}
+{{ print "" }}
+{{- /* End ranging flags */ -}}
+{{- end -}}
+{{- /* End checking if Flags is empty or populated */ -}}
+{{- end }}
+{{ end -}}

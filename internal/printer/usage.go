@@ -1,27 +1,33 @@
 package printer
 
-import "codeflow.dananglin.me.uk/apollo/enbas/internal/info"
+import (
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
+)
 
-func PrintUsageApp(
+func PrintUsageRoot(
 	settings Settings,
 	targets map[string]string,
 	flags map[string]string,
+	exampleTarget string,
 ) error {
 	data := struct {
 		BinaryVersion string
 		Name          string
 		Targets       map[string]string
 		Flags         map[string]string
+		ExampleTarget string
 	}{
 		BinaryVersion: info.BinaryVersion,
 		Name:          info.ApplicationName,
 		Targets:       targets,
 		Flags:         flags,
+		ExampleTarget: exampleTarget,
 	}
 
-	return renderTemplateToStdout(
+	return renderTemplateToPager(
 		settings,
-		"helpApp",
+		"usageRoot",
 		"",
 		data,
 	)
@@ -31,87 +37,79 @@ func PrintUsageTarget(
 	settings Settings,
 	target string,
 	description string,
-	actions map[string]string,
 	topLevelFlags map[string]string,
+	operations map[string]cli.UsageOperation,
 ) error {
 	data := struct {
 		AppName       string
 		Target        string
 		Description   string
-		Actions       map[string]string
 		TopLevelFlags map[string]string
+		Operations    map[string]cli.UsageOperation
 	}{
 		AppName:       info.ApplicationName,
 		Target:        target,
 		Description:   description,
-		Actions:       actions,
 		TopLevelFlags: topLevelFlags,
+		Operations:    operations,
 	}
 
-	return renderTemplateToStdout(
+	return renderTemplateToPager(
 		settings,
-		"helpTarget",
+		"usageTarget",
 		"",
 		data,
 	)
 }
 
-func PrintUsageAction(
+func PrintUsageOperation(
 	settings Settings,
-	action string,
-	description string,
-	availableTargets []string,
 	topLevelFlags map[string]string,
+	name string,
+	operation cli.UsageOperation,
+	flagDescriptions []string,
 ) error {
-	data := struct {
-		AppName           string
-		Action            string
-		ActionDescription string
-		AvailableTargets  []string
-		TopLevelFlags     map[string]string
-	}{
-		AppName:           info.ApplicationName,
-		Action:            action,
-		ActionDescription: description,
-		AvailableTargets:  availableTargets,
-		TopLevelFlags:     topLevelFlags,
+	if len(operation.Flags) != len(flagDescriptions) {
+		return NumFlagDescriptionsError{
+			NumFlags:            len(operation.Flags),
+			NumFlagDescriptions: len(flagDescriptions),
+		}
 	}
 
-	return renderTemplateToStdout(
-		settings,
-		"helpAction",
-		"",
-		data,
-	)
-}
+	type flag struct {
+		Name  string
+		Usage string
+	}
 
-func PrintUsageTargetAction(
-	settings Settings,
-	target string,
-	action string,
-	description string,
-	flags map[string]string,
-	topLevelFlags map[string]string,
-) error {
+	flags := make([]flag, 0)
+
+	for idx := range operation.Flags {
+		flags = append(
+			flags,
+			flag{
+				Name:  operation.Flags[idx],
+				Usage: flagDescriptions[idx],
+			},
+		)
+	}
+
 	data := struct {
 		AppName       string
-		Target        string
-		Action        string
-		Description   string
-		Flags         map[string]string
 		TopLevelFlags map[string]string
+		Name          string
+		Operation     cli.UsageOperation
+		Flags         []flag
 	}{
 		AppName:       info.ApplicationName,
-		Target:        target,
-		Action:        action,
-		Description:   description,
+		TopLevelFlags: topLevelFlags,
+		Name:          name,
+		Operation:     operation,
 		Flags:         flags,
-		TopLevelFlags: topLevelFlags,
 	}
 
-	return renderTemplateToStdout(
+	return renderTemplateToPager(
 		settings,
-		"helpTargetAction",
+		"usageOperation",
 		"",
 		data,
 	)

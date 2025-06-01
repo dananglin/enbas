@@ -33,12 +33,10 @@
   },
   "flags": {
     "account-name": "the name of the account to {action}",
-    "action": "the name of the action",
     "add-poll": "add a poll to the new status",
     "all-audio":  "play all audio files from the status",
     "all-images": "show all image files from the status",
     "all-videos": "play all video files from the status",
-    "operation": "the operation to map the alias to",
     "attachment-id": "the ID of the media attachment",
     "browser": "{action} the {target} in your favourite browser",
     "duration": "how long the effect should last for (set to 0s to last indefinitely)",
@@ -59,7 +57,7 @@
     "include-notification-type": "the type of notifications to include in the list",
     "keyword": "the text to be filtered",
     "language": "the ISO 639 language code for this {target}",
-    "limit": "the limit of items to display",
+    "limit": "the maximum number of items to display",
     "list-id": "the ID of the list",
     "local-only": "do not federate the status beyond the local timeline(s)",
     "max-statuses": "the maximum number of statuses to display",
@@ -79,6 +77,7 @@
     "only-media": "only show the statuses with media attachments",
     "only-pinned": "only show the account's pinned statuses",
     "only-public": "only show the account's public posts",
+    "operation": "the name of the operation",
     "poll-allows-multiple-choices": "allow viewers to make multiple choices in the poll",
     "poll-expires-in": "the time from when the poll is created that it should expire",
     "poll-hides-vote-counts": "hide the vote count until the poll is closed",
@@ -395,7 +394,7 @@
           "preposition": "to",
           "relatedTargets": {
             "list": {
-              "description": "adds one or more accounts to a list",
+              "description": "adds one or more accounts to a specified list",
               "extraDetails": [
                 "You must follow these accounts before adding them to a list."
               ],
@@ -420,7 +419,7 @@
           "preposition": "from",
           "relatedTargets": {
             "list": {
-              "description": "removes one or more accounts from a list",
+              "description": "removes one or more accounts from a specified list",
               "flags": [
                 {
                   "name": "list-id",
@@ -912,9 +911,9 @@
       "actions": {
         "show": {
           "preposition": "from",
-          "description": "prints the names of the accounts that the specified account is following",
           "relatedTargets": {
             "account": {
+              "description": "prints the names of the accounts that the specified account is following",
               "flags": [
                 {
                   "name": "account-name",
@@ -1610,6 +1609,7 @@
           ]
         },
         "unreblog": {
+          "description": "unreblogs (unboosts) the specified status",
           "flags": [
             {
               "name": "status-id",
@@ -1807,13 +1807,13 @@
           "description": "prints the usage documentation for a given action and/or target",
           "flags": [
             {
-              "name": "action",
+              "name": "target",
               "type": "string",
               "default": "",
               "required": false
             },
             {
-              "name": "target",
+              "name": "operation",
               "type": "string",
               "default": "",
               "required": false

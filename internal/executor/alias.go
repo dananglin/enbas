@@ -92,7 +92,7 @@ func aliasCreate(
 		}
 	}
 
-	if _, exists := cli.ActionDesc(name); exists {
+	if cli.IsAction(name) {
 		return aliasActionKeywordError{alias: name}
 	}
 
@@ -155,7 +155,7 @@ func aliasEdit(
 		)
 	}
 
-	if _, exists := cli.ActionDesc(name); exists {
+	if cli.IsAction(name) {
 		return aliasActionKeywordError{alias: name}
 	}
 
@@ -253,7 +253,7 @@ func aliasRename(
 		)
 	}
 
-	if _, exists := cli.ActionDesc(newName); exists {
+	if cli.IsAction(newName) {
 		return aliasActionKeywordError{alias: newName}
 	}
 

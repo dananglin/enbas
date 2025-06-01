@@ -1,0 +1,27 @@
+{{- define "usageRoot" }}
+{{ headerFormat "SUMMARY:" }}
+  {{ .Name }} - A CLI client for GoToSocial.
+
+{{ headerFormat "VERSION:" }}
+  {{ .BinaryVersion }}
+{{ print "" }}
+{{ headerFormat "USAGE:" }}
+  {{ .Name }} [top level flags] <operation> [flags]
+{{ print "" }}
+{{- template "topLevelFlags" .Flags -}}
+{{ print "" }}
+{{ headerFormat "AVAILABLE TARGETS:" }}
+{{- range $name, $desc := .Targets -}}
+{{ print "" }}
+  {{ boldFormat $name }}
+    {{ wrapLines $desc "" 4 }}
+{{ print "" }}
+{{- end -}}
+{{ print "" }}
+{{ headerFormat "MORE DETAILS:" }}
+  Use {{ printf "%s help --target <target>" .Name | boldFormat }} for more details about a specific
+  target and the operations that can be performed on that target.
+
+  e.g. {{ printf "%s help --target %s" .Name .ExampleTarget | boldFormat }}
+{{ print "" }}
+{{ end -}}

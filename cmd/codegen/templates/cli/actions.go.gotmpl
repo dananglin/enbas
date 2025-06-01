@@ -15,45 +15,20 @@ const (
 {{ print "" }}
 )
 
-// ActionDesc returns the action's description.
-func ActionDesc(action string) (string, bool) {
-  desc, ok := actionDescMap()[action]
+// IsAction returns true if the parameter is an existing action.
+func IsAction(action string) bool {
+  _, result := actionSet()[action]
 
-  return desc, ok
+  return result
 }
 
-// actionDescMap returns a map of the actions and their
-// respective descriptions.
-func actionDescMap() map[string]string {
-  return map[string]string{
+// actionSet returns a set of existing actions.
+func actionSet() map[string]struct{} {
+  return map[string]struct{}{
     {{- range $action, $desc := .Actions -}}
     {{- $var_name_part := capitalise $action -}}
     {{ print "" }}
-    {{ printf "Action%s" $var_name_part }}: {{ printf "%q" $desc }},
-    {{- end -}}
-  {{ print "" }}
-  }
-}
-
-// ActionTargets returns a list of targets associated
-// with the action.
-func ActionTargets(action string) []string{
-  return actionTargetsMap()[action]
-}
-
-// actionTargetsMap returns a map of the actions and the lists
-// of all targets associated to those actions.
-func actionTargetsMap() map[string][]string{
-  return map[string][]string{
-    {{- range $action, $desc := .Actions -}}
-    {{ print "" }}
-    {{ printf "Action%s" (capitalise $action) }}: {
-      {{- range (getTargetsForAction $.Targets $action) -}}
-      {{ print "" }}
-      {{ printf "Target%s," (snakeToCamel . true) }}
-      {{- end -}}
-    {{ print "" }}
-    },
+    {{ printf "Action%s" $var_name_part }}: {},
     {{- end -}}
   {{ print "" }}
   }

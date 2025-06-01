@@ -1,0 +1,9 @@
+{{- define "topLevelFlags" }}
+{{ headerFormat "TOP LEVEL FLAGS:" }}
+{{- range $name, $usage := . -}}
+{{ print "" }}
+  {{ printf "--%s" $name | boldFormat }}
+    {{ wrapLines $usage "" 4 }}
+{{ print "" }}
+{{- end -}}
+{{- end -}}

@@ -23,14 +23,6 @@ func (e unrecognisedTargetError) Error() string {
 	return "unrecognised target: " + e.target
 }
 
-type unrecognisedActionError struct {
-	action string
-}
-
-func (e unrecognisedActionError) Error() string {
-	return "unrecognised action: " + e.action
-}
-
 type missingIDError struct {
 	target string
 	action string
@@ -223,4 +215,25 @@ type invalidTimelineCategoryError struct {
 
 func (e invalidTimelineCategoryError) Error() string {
 	return "'" + e.category + "' is not a valid timeline category"
+}
+
+type usageNoOpFoundError struct {
+	target string
+}
+
+func (e usageNoOpFoundError) Error() string {
+	return "no operations found for '" + e.target + "'"
+}
+
+type usageNoOpForTargetError struct {
+	operation string
+	target    string
+}
+
+func (e usageNoOpForTargetError) Error() string {
+	return "unable to find the operation '" +
+		e.operation +
+		"' for the target '" +
+		e.target +
+		"'"
 }

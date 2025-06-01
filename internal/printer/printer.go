@@ -55,9 +55,9 @@ func PrintSuccess(settings Settings, text string) {
 func PrintFailure(settings Settings, text string) {
 	const icon = "\u2717"
 
-	failure := boldred + icon + reset
+	failure := boldred + icon + " " + reset
 	if settings.noColor {
-		failure = icon
+		failure = icon + " "
 	}
 
 	printToStderr(failure + " " + text + "\n")

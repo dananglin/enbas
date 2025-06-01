@@ -1315,13 +1315,13 @@ func ParseTokensShowFlags(
 }
 
 func ParseUsageShowFlags(
-	action *string,
 	target *string,
+	operation *string,
 	flags []string,
 ) error {
 	flagset := newFlagset()
-	flagset.StringVar(action, flagAction, "", "")
 	flagset.StringVar(target, flagTarget, "", "")
+	flagset.StringVar(operation, flagOperation, "", "")
 
 	if err := flagset.Parse(flags); err != nil {
 		return fmt.Errorf("flag parsing error: %w", err)
