@@ -19,7 +19,7 @@ const (
 func (g *GTSClient) GetAllFilters(_ NoRPCArgs, filters *[]model.FilterV2) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseFiltersV2Path,
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path,
 		requestBody: nil,
 		contentType: "",
 		output:      filters,
@@ -38,7 +38,7 @@ func (g *GTSClient) GetAllFilters(_ NoRPCArgs, filters *[]model.FilterV2) error 
 func (g *GTSClient) GetFilter(filterID string, filter *model.FilterV2) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseFiltersV2Path + "/" + filterID,
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path + "/" + filterID,
 		requestBody: nil,
 		contentType: "",
 		output:      filter,
@@ -83,7 +83,7 @@ func (g *GTSClient) CreateFilter(args CreateFilterArgs, filter *model.FilterV2) 
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseFiltersV2Path,
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      filter,
@@ -129,7 +129,7 @@ func (g *GTSClient) EditFilter(args EditFilterArgs, _ *NoRPCResults) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         g.authentication.Instance + baseFiltersV2Path + "/" + args.FilterID,
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path + "/" + args.FilterID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -148,7 +148,7 @@ func (g *GTSClient) EditFilter(args EditFilterArgs, _ *NoRPCResults) error {
 func (g *GTSClient) DeleteFilter(filterID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseFiltersV2Path + "/" + filterID,
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path + "/" + filterID,
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -188,7 +188,7 @@ func (g *GTSClient) AddFilterKeywordToFilter(args AddFilterKeywordToFilterArgs, 
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseFiltersV2Path + "/" + args.FilterID + "/keywords",
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path + "/" + args.FilterID + "/keywords",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      filterKeyword,
@@ -207,7 +207,7 @@ func (g *GTSClient) AddFilterKeywordToFilter(args AddFilterKeywordToFilterArgs, 
 func (g *GTSClient) DeleteFilterKeyword(filterKeywordID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseFilterKeywordsPath + "/" + filterKeywordID,
+		url:         g.auth.GetInstanceURL() + baseFilterKeywordsPath + "/" + filterKeywordID,
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -226,7 +226,7 @@ func (g *GTSClient) DeleteFilterKeyword(filterKeywordID string, _ *NoRPCResults)
 func (g *GTSClient) GetFilterKeyword(filterKeywordID string, filterKeyword *model.FilterKeyword) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseFilterKeywordsPath + "/" + filterKeywordID,
+		url:         g.auth.GetInstanceURL() + baseFilterKeywordsPath + "/" + filterKeywordID,
 		requestBody: nil,
 		contentType: "",
 		output:      filterKeyword,
@@ -266,7 +266,7 @@ func (g *GTSClient) UpdateFilterKeyword(args UpdateFilterKeywordArgs, filterKeyw
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         g.authentication.Instance + baseFilterKeywordsPath + "/" + args.FilterKeywordID,
+		url:         g.auth.GetInstanceURL() + baseFilterKeywordsPath + "/" + args.FilterKeywordID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      filterKeyword,
@@ -303,7 +303,7 @@ func (g *GTSClient) AddFilterStatusToFilter(args AddFilterStatusToFilterArgs, fi
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseFiltersV2Path + "/" + args.FilterID + "/statuses",
+		url:         g.auth.GetInstanceURL() + baseFiltersV2Path + "/" + args.FilterID + "/statuses",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      filterStatus,
@@ -322,7 +322,7 @@ func (g *GTSClient) AddFilterStatusToFilter(args AddFilterStatusToFilterArgs, fi
 func (g *GTSClient) DeleteFilterStatus(filterStatusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseFilterStatusesPath + "/" + filterStatusID,
+		url:         g.auth.GetInstanceURL() + baseFilterStatusesPath + "/" + filterStatusID,
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -341,7 +341,7 @@ func (g *GTSClient) DeleteFilterStatus(filterStatusID string, _ *NoRPCResults) e
 func (g *GTSClient) GetFilterStatus(filterStatusID string, filterStatus *model.FilterStatus) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseFilterStatusesPath + "/" + filterStatusID,
+		url:         g.auth.GetInstanceURL() + baseFilterStatusesPath + "/" + filterStatusID,
 		requestBody: nil,
 		contentType: "",
 		output:      filterStatus,

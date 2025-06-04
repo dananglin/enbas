@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
 )
 
 type accessTokenRequest struct {
@@ -24,22 +22,32 @@ type accessTokenResponse struct {
 	TokenType   string `json:"token_type"`
 }
 
-func (g *GTSClient) UpdateAccessToken(code string, auth *config.Credentials) error {
+type GetAccessTokenArgs struct {
+	ClientID     string
+	ClientSecret string
+	Code         string
+	RedirectURI  string
+}
+
+func (g *GTSClient) GetAccessToken(args GetAccessTokenArgs, token *string) error {
 	tokenReq := accessTokenRequest{
-		RedirectURI:  redirectURI,
-		ClientID:     g.authentication.ClientID,
-		ClientSecret: g.authentication.ClientSecret,
+		RedirectURI:  args.RedirectURI,
+		ClientID:     args.ClientID,
+		ClientSecret: args.ClientSecret,
 		GrantType:    "authorization_code",
-		Code:         code,
+		Code:         args.Code,
 	}
 
 	data, err := json.Marshal(tokenReq)
 	if err != nil {
-		return fmt.Errorf("unable to marshal the request body: %w", err)
+		return fmt.Errorf(
+			"error marshalling the request body: %w",
+			err,
+		)
 	}
 
 	requestBody := bytes.NewBuffer(data)
-	url := g.authentication.Instance + "/oauth/token"
+	url := g.auth.GetInstanceURL() + "/oauth/token"
 
 	var response accessTokenResponse
 
@@ -52,16 +60,17 @@ func (g *GTSClient) UpdateAccessToken(code string, auth *config.Credentials) err
 	}
 
 	if err := g.sendRequest(params); err != nil {
-		return fmt.Errorf("received an error after sending the token request: %w", err)
+		return fmt.Errorf(
+			"received an error after sending the request to get the access token: %w",
+			err,
+		)
 	}
 
 	if response.AccessToken == "" {
-		return Error{"received an empty access token"}
+		return EmptyAccessTokenError{}
 	}
 
-	g.authentication.AccessToken = response.AccessToken
-
-	*auth = g.authentication
+	*token = response.AccessToken
 
 	return nil
 }

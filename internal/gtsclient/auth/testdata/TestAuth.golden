@@ -1,0 +1,17 @@
+{
+    "currentAccount": "bob@gts-01.social.example",
+    "credentials": {
+        "bob@gts-01.social.example": {
+            "instance": "https://gts-01.social.example",
+            "clientId": "013K1YVRQSPG6QEBDBRYVG7ECTS5ESVQ",
+            "clientSecret": "6cb1d42b-8acc-457f-8475-c77a435c95b2",
+            "accessToken": "WGEUCBJXDUSQULCX6CT7244EVFUQQT3SVLDQKCFAGWII01MY"
+        },
+        "alice@gts-02.social.example": {
+            "instance": "https://gts-02.social.example",
+            "clientId": "01C2EQSV6L5WKERBFUS2YVWTQTR5XG98",
+            "clientSecret": "c3bc33e7-8e47-401f-a2be-7768d4340599",
+            "accessToken": "AG74LAOZXOIWGHNVBHJULVFWRU6XUNZ3EFHYKLZXU6RASYEB"
+        }
+    }
+}

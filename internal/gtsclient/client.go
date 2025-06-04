@@ -6,26 +6,23 @@ import (
 	"time"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/config"
+	"codeflow.dananglin.me.uk/apollo/enbas/internal/gtsclient/auth"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
 )
 
-const (
-	applicationJSON   string = "application/json; charset=utf-8"
-	redirectURI       string = "urn:ietf:wg:oauth:2.0:oob"
-	authCodeURLFormat string = "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=%s"
-)
+const applicationJSON string = "application/json; charset=utf-8"
 
 type (
 	NoRPCArgs    struct{}
 	NoRPCResults struct{}
 
 	GTSClient struct {
-		authentication config.Credentials
-		httpClient     http.Client
-		timeout        time.Duration
-		mediaTimeout   time.Duration
-		userAgent      string
+		auth         *auth.Auth
+		httpClient   http.Client
+		timeout      time.Duration
+		mediaTimeout time.Duration
+		userAgent    string
 	}
 )
 
@@ -33,7 +30,7 @@ type (
 // file is present then the authentication details is retrieved for the current account in use.
 // If the file is not present then a zero-valued authentication value is used which must be updated later.
 func NewGTSClient(cfg config.Config) (*GTSClient, error) {
-	var auth config.Credentials
+	var newAuth *auth.Auth
 
 	exists, err := utilities.FileExists(cfg.CredentialsFile)
 	if err != nil {
@@ -41,52 +38,31 @@ func NewGTSClient(cfg config.Config) (*GTSClient, error) {
 	}
 
 	if exists {
-		auth, err = authFromFile(cfg.CredentialsFile)
+		newAuth, err = auth.NewAuthFromConfig(cfg.CredentialsFile)
 		if err != nil {
-			return nil, fmt.Errorf("error getting the authentication details from the credentials file: %w", err)
+			return nil, fmt.Errorf(
+				"error getting the authentication details from the credentials file: %w",
+				err,
+			)
 		}
 	} else {
-		auth = config.Credentials{
-			Instance:     "",
-			ClientID:     "",
-			ClientSecret: "",
-			AccessToken:  "",
-		}
+		newAuth = auth.NewAuthZero()
 	}
 
 	gtsClient := GTSClient{
-		authentication: auth,
-		httpClient:     http.Client{},
-		timeout:        time.Duration(cfg.GTSClient.Timeout) * time.Second,
-		mediaTimeout:   time.Duration(cfg.GTSClient.MediaTimeout) * time.Second,
-		userAgent:      info.ApplicationTitledName + "/" + info.BinaryVersion,
+		auth:         newAuth,
+		httpClient:   http.Client{},
+		timeout:      time.Duration(cfg.GTSClient.Timeout) * time.Second,
+		mediaTimeout: time.Duration(cfg.GTSClient.MediaTimeout) * time.Second,
+		userAgent:    info.ApplicationTitledName + "/" + info.BinaryVersion,
 	}
 
 	return &gtsClient, nil
 }
 
-func authFromFile(path string) (config.Credentials, error) {
-	creds, err := config.NewCredentialsConfigFromFile(path)
-	if err != nil {
-		return config.Credentials{}, fmt.Errorf("error getting the credentials from the credentials file: %w", err)
-	}
-
-	// If the current account is not set, return a config with zero-valued fields.
-	if creds.CurrentAccount == "" {
-		return config.Credentials{}, nil
-	}
-
-	auth, ok := creds.Credentials[creds.CurrentAccount]
-	if !ok {
-		return config.Credentials{}, Error{"the authentication details seems to be missing for the current account (" + creds.CurrentAccount + ")"}
-	}
-
-	return auth, nil
-}
-
 // UpdateAuthentication updates the authentication details for the GTSClient.
-func (g *GTSClient) UpdateAuthentication(auth config.Credentials, _ *NoRPCResults) error {
-	g.authentication = auth
+func (g *GTSClient) UpdateAuthentication(authCfg config.Credentials, _ *NoRPCResults) error {
+	g.auth.UpdateAuth(authCfg)
 
 	return nil
 }

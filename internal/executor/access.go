@@ -2,6 +2,7 @@ package executor
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/cli"
@@ -13,6 +14,11 @@ import (
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/printer"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/server"
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/utilities"
+)
+
+const (
+	authCodeURLFormat string = "%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=%s"
+	redirectURI       string = "urn:ietf:wg:oauth:2.0:oob"
 )
 
 // accessFunc is the function for the access target for
@@ -56,41 +62,41 @@ func accessCreate(
 	flags []string,
 ) error {
 	var (
-		url    string
-		scopes = internalFlag.NewMultiStringValue()
-		err    error
+		instanceURL string
+		scopes      = internalFlag.NewMultiStringValue()
+		err         error
 	)
 
 	// Parse the remaining flags.
 	if err := cli.ParseAccessCreateFlags(
 		&scopes,
-		&url,
+		&instanceURL,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
-	if url == "" {
+	if instanceURL == "" {
 		return loginNoInstanceError{}
 	}
 
-	if !strings.HasPrefix(url, "https") || !strings.HasPrefix(url, "http") {
-		url = "https://" + url
+	if !strings.HasPrefix(instanceURL, "https") || !strings.HasPrefix(instanceURL, "http") {
+		instanceURL = "https://" + instanceURL
 	}
 
-	for strings.HasSuffix(url, "/") {
-		url = url[:len(url)-1]
+	for strings.HasSuffix(instanceURL, "/") {
+		instanceURL = instanceURL[:len(instanceURL)-1]
 	}
 
 	session, err := server.StartSession(cfg.Server, cfg.Path)
 	if err != nil {
-		return fmt.Errorf("error creating the client for the daemon process: %w", err)
+		return fmt.Errorf("error creating the session with the server: %w", err)
 	}
 	defer server.EndSession(session)
 
-	// Update the GTSClient's auth details for the registration process.
-	auth := config.Credentials{
-		Instance:     url,
+	// Update the GTSClient's authentication details for the registration process.
+	authCfg := config.Credentials{
+		Instance:     instanceURL,
 		ClientID:     "",
 		ClientSecret: "",
 		AccessToken:  "",
@@ -98,29 +104,35 @@ func accessCreate(
 
 	if err := session.Client().Call(
 		"GTSClient.UpdateAuthentication",
-		auth,
+		authCfg,
 		nil,
 	); err != nil {
 		return fmt.Errorf("error updating the GTSClient's authentication details: %w", err)
 	}
 
+	var registeredApp gtsclient.RegisteredApp
+
 	if err := session.Client().Call(
 		"GTSClient.RegisterApp",
-		scopes.Values(),
-		nil,
+		gtsclient.RegisterAppArgs{
+			RedirectURI: redirectURI,
+			Scopes:      scopes.Values(),
+		},
+		&registeredApp,
 	); err != nil {
 		return fmt.Errorf("error registering the application: %w", err)
 	}
 
-	var consentPageURL string
+	authCfg.ClientID = registeredApp.ClientID
+	authCfg.ClientSecret = registeredApp.ClientSecret
 
-	if err := session.Client().Call(
-		"GTSClient.AuthCodeURL",
-		scopes.Values(),
-		&consentPageURL,
-	); err != nil {
-		return fmt.Errorf("error retrieving the URL of the consent page: %w", err)
-	}
+	consentPageURL := fmt.Sprintf(
+		authCodeURLFormat,
+		instanceURL,
+		registeredApp.ClientID,
+		url.QueryEscape(redirectURI),
+		strings.Join(scopes.Values(), "+"),
+	)
 
 	_ = utilities.OpenLink(cfg.Integrations.Browser, consentPageURL)
 
@@ -138,17 +150,35 @@ Out-of-band token: `
 	var code string
 
 	if _, err := fmt.Scanln(&code); err != nil {
-		return fmt.Errorf("failed to read access code: %w", err)
+		return fmt.Errorf("error reading the out-of-band token: %w", err)
 	}
 
+	var token string
 	if err := session.Client().Call(
-		"GTSClient.UpdateAccessToken",
-		code,
-		&auth,
+		"GTSClient.GetAccessToken",
+		gtsclient.GetAccessTokenArgs{
+			ClientID:     registeredApp.ClientID,
+			ClientSecret: registeredApp.ClientSecret,
+			Code:         code,
+			RedirectURI:  redirectURI,
+		},
+		&token,
 	); err != nil {
-		return fmt.Errorf("error updating the client's access token: %w", err)
+		return fmt.Errorf("error retrieving the access token: %w", err)
 	}
 
+	authCfg.AccessToken = token
+
+	// Update the GTSClient's authentication details once again to ensure that it has the access token.
+	if err := session.Client().Call(
+		"GTSClient.UpdateAuthentication",
+		authCfg,
+		nil,
+	); err != nil {
+		return fmt.Errorf("error updating the GTSClient's authentication details: %w", err)
+	}
+
+	// Verify that the user has signed in successfully by getting the account details.
 	var account model.Account
 	if err := session.Client().Call(
 		"GTSClient.GetMyAccount",
@@ -161,13 +191,13 @@ Out-of-band token: `
 	loginName, err := config.SaveCredentials(
 		cfg.CredentialsFile,
 		account.Username,
-		auth,
+		authCfg,
 	)
 	if err != nil {
 		return fmt.Errorf("error saving the authentication details: %w", err)
 	}
 
-	printer.PrintSuccess(printSettings, "You have successfully logged in as "+loginName+".")
+	printer.PrintSuccess(printSettings, "You have successfully signed in as "+loginName+".")
 
 	return nil
 }
@@ -238,7 +268,7 @@ func accessSwitchToAccount(
 		&accountName,
 		flags,
 	); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if accountName == "" {

@@ -12,7 +12,7 @@ const baseNotificationsPath string = "/api/v1/notifications"
 func (g *GTSClient) GetNotification(notificationID string, notification *model.Notification) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseNotificationsPath + "/" + notificationID,
+		url:         g.auth.GetInstanceURL() + baseNotificationsPath + "/" + notificationID,
 		requestBody: nil,
 		contentType: "",
 		output:      notification,
@@ -47,7 +47,7 @@ func (g *GTSClient) GetNotificationList(args GetNotificationListArgs, notificati
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseNotificationsPath + query,
+		url:         g.auth.GetInstanceURL() + baseNotificationsPath + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &notifications,
@@ -66,7 +66,7 @@ func (g *GTSClient) GetNotificationList(args GetNotificationListArgs, notificati
 func (g *GTSClient) DeleteNotifications(_ NoRPCArgs, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseNotificationsPath + "/clear",
+		url:         g.auth.GetInstanceURL() + baseNotificationsPath + "/clear",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,

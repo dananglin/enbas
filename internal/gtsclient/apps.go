@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"codeflow.dananglin.me.uk/apollo/enbas/internal/info"
@@ -14,7 +13,17 @@ import (
 
 const baseAppsPath = "/api/v1/apps"
 
-func (g *GTSClient) RegisterApp(scopes []string, _ *NoRPCResults) error {
+type RegisterAppArgs struct {
+	RedirectURI string
+	Scopes      []string
+}
+
+type RegisteredApp struct {
+	ClientID     string
+	ClientSecret string
+}
+
+func (g *GTSClient) RegisterApp(args RegisterAppArgs, registeredApp *RegisteredApp) error {
 	form := struct {
 		ClientName   string `json:"client_name"`
 		RedirectUris string `json:"redirect_uris"`
@@ -22,8 +31,8 @@ func (g *GTSClient) RegisterApp(scopes []string, _ *NoRPCResults) error {
 		Website      string `json:"website"`
 	}{
 		ClientName:   info.ApplicationName,
-		RedirectUris: redirectURI,
-		Scopes:       strings.Join(scopes, " "),
+		RedirectUris: args.RedirectURI,
+		Scopes:       strings.Join(args.Scopes, " "),
 		Website:      info.ApplicationWebsite,
 	}
 
@@ -38,7 +47,7 @@ func (g *GTSClient) RegisterApp(scopes []string, _ *NoRPCResults) error {
 
 	requestParams := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAppsPath,
+		url:         g.auth.GetInstanceURL() + baseAppsPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      &app,
@@ -48,22 +57,10 @@ func (g *GTSClient) RegisterApp(scopes []string, _ *NoRPCResults) error {
 		return fmt.Errorf("received an error after sending the registration request: %w", err)
 	}
 
-	g.authentication.ClientID = app.ClientID
-	g.authentication.ClientSecret = app.ClientSecret
-
-	return nil
-}
-
-func (g *GTSClient) AuthCodeURL(scopes []string, authCodeURL *string) error {
-	escapedRedirectURI := url.QueryEscape(redirectURI)
-
-	*authCodeURL = fmt.Sprintf(
-		authCodeURLFormat,
-		g.authentication.Instance,
-		g.authentication.ClientID,
-		escapedRedirectURI,
-		strings.Join(scopes, "+"),
-	)
+	*registeredApp = RegisteredApp{
+		ClientID:     app.ClientID,
+		ClientSecret: app.ClientSecret,
+	}
 
 	return nil
 }

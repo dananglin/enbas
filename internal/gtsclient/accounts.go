@@ -23,16 +23,28 @@ func (g *GTSClient) GetMyAccount(_ NoRPCArgs, account *model.Account) error {
 		return fmt.Errorf("error getting the account information: %w", err)
 	}
 
+	g.auth.UpdateCurrentAccountID(account.ID)
+
 	return nil
 }
 
 func (g *GTSClient) GetMyAccountID(_ NoRPCArgs, accountID *string) error {
+	currentAccountID := g.auth.GetCurrentAccountID()
+	if currentAccountID != "" {
+		*accountID = currentAccountID
+
+		return nil
+	}
+
 	account, err := g.verifyCredentials()
 	if err != nil {
 		return fmt.Errorf("error getting the account information: %w", err)
 	}
 
 	*accountID = account.ID
+
+	// Store the account ID in the GTSClient value before returning.
+	g.auth.UpdateCurrentAccountID(account.ID)
 
 	return nil
 }
@@ -42,7 +54,7 @@ func (g *GTSClient) verifyCredentials() (model.Account, error) {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseAccountsPath + "/verify_credentials",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/verify_credentials",
 		requestBody: nil,
 		contentType: "",
 		output:      &account,
@@ -119,7 +131,7 @@ func (g *GTSClient) getAccount(accountURI string) (model.Account, error) {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseAccountsPath + "/lookup?acct=" + accountURI,
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/lookup?acct=" + accountURI,
 		requestBody: nil,
 		contentType: "",
 		output:      &account,
@@ -140,7 +152,7 @@ func (g *GTSClient) GetAccountRelationship(accountID string, relationship *model
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseAccountsPath + "/relationships?id=" + accountID,
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/relationships?id=" + accountID,
 		requestBody: nil,
 		contentType: "",
 		output:      &relationships,
@@ -191,7 +203,7 @@ func (g *GTSClient) FollowAccount(args FollowAccountArgs, _ *NoRPCResults) error
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + form.AccountID + "/follow",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + form.AccountID + "/follow",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -207,7 +219,7 @@ func (g *GTSClient) FollowAccount(args FollowAccountArgs, _ *NoRPCResults) error
 func (g *GTSClient) UnfollowAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + accountID + "/unfollow",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + accountID + "/unfollow",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -230,7 +242,7 @@ func (g *GTSClient) GetFollowers(args GetFollowersArgs, followers *model.Account
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("%s/%s/followers?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("%s/%s/followers?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -262,7 +274,7 @@ func (g *GTSClient) GetFollowing(args GetFollowingsArgs, following *model.Accoun
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("%s/%s/following?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("%s/%s/following?limit=%d", baseAccountsPath, args.AccountID, args.Limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -287,7 +299,7 @@ func (g *GTSClient) GetFollowing(args GetFollowingsArgs, following *model.Accoun
 func (g *GTSClient) BlockAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + accountID + "/block",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + accountID + "/block",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -303,7 +315,7 @@ func (g *GTSClient) BlockAccount(accountID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnblockAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + accountID + "/unblock",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + accountID + "/unblock",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -321,7 +333,7 @@ func (g *GTSClient) GetBlockedAccounts(limit int, blocked *model.AccountList) er
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/blocks?limit=%d", limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("/api/v1/blocks?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -364,7 +376,7 @@ func (g *GTSClient) SetPrivateNote(args SetPrivateNoteArgs, _ *NoRPCResults) err
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + args.AccountID + "/note",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + args.AccountID + "/note",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -382,7 +394,7 @@ func (g *GTSClient) GetFollowRequests(limit int, requests *model.AccountList) er
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("%s?limit=%d", baseFollowRequestsPath, limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("%s?limit=%d", baseFollowRequestsPath, limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -407,7 +419,7 @@ func (g *GTSClient) GetFollowRequests(limit int, requests *model.AccountList) er
 func (g *GTSClient) AcceptFollowRequest(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/authorize",
+		url:         g.auth.GetInstanceURL() + baseFollowRequestsPath + "/" + accountID + "/authorize",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -423,7 +435,7 @@ func (g *GTSClient) AcceptFollowRequest(accountID string, _ *NoRPCResults) error
 func (g *GTSClient) RejectFollowRequest(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseFollowRequestsPath + "/" + accountID + "/reject",
+		url:         g.auth.GetInstanceURL() + baseFollowRequestsPath + "/" + accountID + "/reject",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -441,7 +453,7 @@ func (g *GTSClient) GetMutedAccounts(limit int, muted *model.AccountList) error 
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/mutes?limit=%d", limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("/api/v1/mutes?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -487,7 +499,7 @@ func (g *GTSClient) MuteAccount(args MuteAccountArgs, _ *NoRPCResults) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + args.AccountID + "/mute",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + args.AccountID + "/mute",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -503,7 +515,7 @@ func (g *GTSClient) MuteAccount(args MuteAccountArgs, _ *NoRPCResults) error {
 func (g *GTSClient) UnmuteAccount(accountID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseAccountsPath + "/" + accountID + "/unmute",
+		url:         g.auth.GetInstanceURL() + baseAccountsPath + "/" + accountID + "/unmute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -542,7 +554,7 @@ func (g *GTSClient) GetAccountStatuses(args GetAccountStatusesArgs, statusList *
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + path + query,
+		url:         g.auth.GetInstanceURL() + path + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,

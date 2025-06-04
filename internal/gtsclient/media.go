@@ -21,7 +21,7 @@ const (
 func (g *GTSClient) GetMediaAttachment(mediaAttachmentID string, attachment *model.MediaAttachment) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseMediaPath + "/" + mediaAttachmentID,
+		url:         g.auth.GetInstanceURL() + baseMediaPath + "/" + mediaAttachmentID,
 		requestBody: nil,
 		contentType: "",
 		output:      attachment,
@@ -102,7 +102,7 @@ func (g *GTSClient) CreateMediaAttachment(args CreateMediaAttachmentArgs, attach
 		return fmt.Errorf("unable to close the writer: %w", err)
 	}
 
-	url := g.authentication.Instance + baseMediaPath
+	url := g.auth.GetInstanceURL() + baseMediaPath
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
@@ -146,7 +146,7 @@ func (g *GTSClient) UpdateMediaAttachment(args UpdateMediaAttachmentArgs, update
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         g.authentication.Instance + baseMediaPath + "/" + args.MediaAttachmentID,
+		url:         g.auth.GetInstanceURL() + baseMediaPath + "/" + args.MediaAttachmentID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      updated,
@@ -204,7 +204,7 @@ func (g *GTSClient) DownloadMedia(args DownloadMediaArgs, _ *NoRPCResults) error
 }
 
 func (g *GTSClient) GetInstanceURL(_ NoRPCArgs, url *string) error {
-	*url = g.authentication.Instance
+	*url = g.auth.GetInstanceURL()
 
 	return nil
 }

@@ -43,9 +43,9 @@ func NewSettings(
 func PrintSuccess(settings Settings, text string) {
 	const icon = "\u2714"
 
-	success := boldgreen + icon + reset
+	success := boldgreen + icon + " " + reset
 	if settings.noColor {
-		success = icon
+		success = icon + " "
 	}
 
 	printToStdout(success + " " + text + "\n")

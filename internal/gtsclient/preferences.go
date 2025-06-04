@@ -12,7 +12,7 @@ const preferencesPath = "/api/v1/preferences"
 func (g *GTSClient) GetUserPreferences(_ NoRPCArgs, preferences *model.Preferences) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + preferencesPath,
+		url:         g.auth.GetInstanceURL() + preferencesPath,
 		requestBody: nil,
 		contentType: "",
 		output:      preferences,

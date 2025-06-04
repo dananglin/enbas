@@ -30,7 +30,7 @@ func (g *GTSClient) VoteInPoll(args VoteInPollArgs, _ *NoRPCResults) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + pollPath + "/" + args.PollID + "/votes",
+		url:         g.auth.GetInstanceURL() + pollPath + "/" + args.PollID + "/votes",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,

@@ -14,7 +14,7 @@ const baseListPath string = "/api/v1/lists"
 func (g *GTSClient) GetAllLists(_ NoRPCArgs, lists *[]model.List) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseListPath,
+		url:         g.auth.GetInstanceURL() + baseListPath,
 		requestBody: nil,
 		contentType: "",
 		output:      lists,
@@ -33,7 +33,7 @@ func (g *GTSClient) GetAllLists(_ NoRPCArgs, lists *[]model.List) error {
 func (g *GTSClient) GetList(listID string, list *model.List) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseListPath + "/" + listID,
+		url:         g.auth.GetInstanceURL() + baseListPath + "/" + listID,
 		requestBody: nil,
 		contentType: "",
 		output:      list,
@@ -75,7 +75,7 @@ func (g *GTSClient) CreateList(args CreateListArgs, list *model.List) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseListPath,
+		url:         g.auth.GetInstanceURL() + baseListPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      list,
@@ -111,7 +111,7 @@ func (g *GTSClient) UpdateList(listToUpdate model.List, updatedList *model.List)
 
 	params := requestParameters{
 		httpMethod:  http.MethodPut,
-		url:         g.authentication.Instance + baseListPath + "/" + listToUpdate.ID,
+		url:         g.auth.GetInstanceURL() + baseListPath + "/" + listToUpdate.ID,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      updatedList,
@@ -130,7 +130,7 @@ func (g *GTSClient) UpdateList(listToUpdate model.List, updatedList *model.List)
 func (g *GTSClient) DeleteList(listID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseListPath + "/" + listID,
+		url:         g.auth.GetInstanceURL() + baseListPath + "/" + listID,
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -167,7 +167,7 @@ func (g *GTSClient) AddAccountsToList(args AddAccountsToListArgs, _ *NoRPCResult
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseListPath + "/" + args.ListID + "/accounts",
+		url:         g.auth.GetInstanceURL() + baseListPath + "/" + args.ListID + "/accounts",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -204,7 +204,7 @@ func (g *GTSClient) RemoveAccountsFromList(args RemoveAccountsFromListArgs, _ *N
 
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseListPath + "/" + args.ListID + "/accounts",
+		url:         g.auth.GetInstanceURL() + baseListPath + "/" + args.ListID + "/accounts",
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      nil,
@@ -232,7 +232,7 @@ func (g *GTSClient) GetAccountsFromList(args GetAccountsFromListArgs, list *mode
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + path,
+		url:         g.auth.GetInstanceURL() + path,
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,

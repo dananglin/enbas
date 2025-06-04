@@ -42,10 +42,8 @@ func (e BadStatusCodeError) Error() string {
 	)
 }
 
-type Error struct {
-	message string
-}
+type EmptyAccessTokenError struct{}
 
-func (e Error) Error() string {
-	return e.message
+func (e EmptyAccessTokenError) Error() string {
+	return "received an empty access token"
 }

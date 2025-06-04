@@ -14,7 +14,7 @@ const baseStatusesPath string = "/api/v1/statuses"
 func (g *GTSClient) GetStatus(statusID string, status *model.Status) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID,
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
 		output:      status,
@@ -63,7 +63,7 @@ func (g *GTSClient) CreateStatus(form CreateStatusForm, status *model.Status) er
 
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath,
+		url:         g.auth.GetInstanceURL() + baseStatusesPath,
 		requestBody: requestBody,
 		contentType: applicationJSON,
 		output:      status,
@@ -86,7 +86,7 @@ func (g *GTSClient) GetBookmarks(limit int, bookmarks *model.StatusList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + path,
+		url:         g.auth.GetInstanceURL() + path,
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
@@ -110,7 +110,7 @@ func (g *GTSClient) GetBookmarks(limit int, bookmarks *model.StatusList) error {
 func (g *GTSClient) AddStatusToBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("/api/v1/statuses/%s/bookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -129,7 +129,7 @@ func (g *GTSClient) AddStatusToBookmarks(statusID string, _ *NoRPCResults) error
 func (g *GTSClient) RemoveStatusFromBookmarks(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("/api/v1/statuses/%s/unbookmark", statusID),
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -148,7 +148,7 @@ func (g *GTSClient) RemoveStatusFromBookmarks(statusID string, _ *NoRPCResults) 
 func (g *GTSClient) LikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/favourite",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/favourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -167,7 +167,7 @@ func (g *GTSClient) LikeStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnlikeStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unfavourite",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/unfavourite",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -188,7 +188,7 @@ func (g *GTSClient) GetFavourites(limit int, favourites *model.StatusList) error
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("/api/v1/favourites?limit=%d", limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("/api/v1/favourites?limit=%d", limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &statuses,
@@ -212,7 +212,7 @@ func (g *GTSClient) GetFavourites(limit int, favourites *model.StatusList) error
 func (g *GTSClient) ReblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/reblog",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/reblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -231,7 +231,7 @@ func (g *GTSClient) ReblogStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnreblogStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unreblog",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/unreblog",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -250,7 +250,7 @@ func (g *GTSClient) UnreblogStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) MuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/mute",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/mute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -269,7 +269,7 @@ func (g *GTSClient) MuteStatus(statusID string, _ *NoRPCResults) error {
 func (g *GTSClient) UnmuteStatus(statusID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/unmute",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/unmute",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,
@@ -290,7 +290,7 @@ func (g *GTSClient) DeleteStatus(statusID string, text *string) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodDelete,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID,
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID,
 		requestBody: nil,
 		contentType: "",
 		output:      &status,
@@ -313,7 +313,7 @@ func (g *GTSClient) GetAccountsWhoLikedStatus(statusID string, list *model.Accou
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/favourited_by",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/favourited_by",
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -340,7 +340,7 @@ func (g *GTSClient) GetAccountsWhoRebloggedStatus(statusID string, list *model.A
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/reblogged_by",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/reblogged_by",
 		requestBody: nil,
 		contentType: "",
 		output:      &accounts,
@@ -373,7 +373,7 @@ func (g *GTSClient) GetThread(statusID string, thread *model.Thread) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseStatusesPath + "/" + statusID + "/context",
+		url:         g.auth.GetInstanceURL() + baseStatusesPath + "/" + statusID + "/context",
 		requestBody: nil,
 		contentType: "",
 		output:      &obj,

@@ -32,8 +32,9 @@ func (g *GTSClient) sendRequest(params requestParameters) error {
 	request.Header.Set("Accept", applicationJSON)
 	request.Header.Set("User-Agent", g.userAgent)
 
-	if len(g.authentication.AccessToken) > 0 {
-		request.Header.Set("Authorization", "Bearer "+g.authentication.AccessToken)
+	token := g.auth.GetToken()
+	if len(token) > 0 {
+		request.Header.Set("Authorization", "Bearer "+token)
 	}
 
 	response, err := g.httpClient.Do(request)

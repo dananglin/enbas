@@ -14,7 +14,7 @@ func (g *GTSClient) GetTokens(limit int, tokenList *model.TokenList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + fmt.Sprintf("%s?limit=%d", baseTokenPath, limit),
+		url:         g.auth.GetInstanceURL() + fmt.Sprintf("%s?limit=%d", baseTokenPath, limit),
 		requestBody: nil,
 		contentType: "",
 		output:      &tokens,
@@ -38,7 +38,7 @@ func (g *GTSClient) GetTokens(limit int, tokenList *model.TokenList) error {
 func (g *GTSClient) GetToken(tokenID string, token *model.Token) error {
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseTokenPath + "/" + tokenID,
+		url:         g.auth.GetInstanceURL() + baseTokenPath + "/" + tokenID,
 		requestBody: nil,
 		contentType: "",
 		output:      token,
@@ -57,7 +57,7 @@ func (g *GTSClient) GetToken(tokenID string, token *model.Token) error {
 func (g *GTSClient) InvalidateToken(tokenID string, _ *NoRPCResults) error {
 	params := requestParameters{
 		httpMethod:  http.MethodPost,
-		url:         g.authentication.Instance + baseTokenPath + "/" + tokenID + "/invalidate",
+		url:         g.auth.GetInstanceURL() + baseTokenPath + "/" + tokenID + "/invalidate",
 		requestBody: nil,
 		contentType: "",
 		output:      nil,

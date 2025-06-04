@@ -31,7 +31,7 @@ func (g *GTSClient) SearchTags(args SearchTagsArgs, list *model.TagList) error {
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseSearchPath + query,
+		url:         g.auth.GetInstanceURL() + baseSearchPath + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &results,
@@ -72,7 +72,7 @@ func (g *GTSClient) SearchAccounts(args SearchAccountsArgs, list *model.AccountL
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseSearchPath + query,
+		url:         g.auth.GetInstanceURL() + baseSearchPath + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &results,
@@ -117,7 +117,7 @@ func (g *GTSClient) SearchStatuses(args SearchStatusesArgs, list *model.StatusLi
 
 	params := requestParameters{
 		httpMethod:  http.MethodGet,
-		url:         g.authentication.Instance + baseSearchPath + query,
+		url:         g.auth.GetInstanceURL() + baseSearchPath + query,
 		requestBody: nil,
 		contentType: "",
 		output:      &results,
